@@ -1,0 +1,9 @@
+{
+    "name": "vuepress-theme-maoosi",
+    "version": "1.0.0",
+    "main": "index.js",
+    "license": "MIT",
+    "dependencies": {
+        "@vuepress/theme-default": "^1.5.3"
+    }
+}

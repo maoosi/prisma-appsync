@@ -1,0 +1,27 @@
+.DS_Store
+node_modules/
+*/**/node_modules/
+
+# Test files
+test/generated/
+
+# Docs
+docs/.vuepress/dist/
+
+# Boilerplate files
+Boilerplate/cdk/*.lock
+Boilerplate/cdk/cdk.out
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw*

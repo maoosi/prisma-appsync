@@ -1,0 +1,25 @@
+{$themeContainerClass}
+    {$contentClass}
+        .custom-block
+            &.tip, &.warning, &.danger
+                border: 0
+                border-radius: 6px
+            &.tip
+                background-color #f3f5f7
+                border-color #42b983
+            &.warning
+                background-color lighten(#d9931e, 90%)
+                border-color darken(#d9931e, 35%)
+                color darken(#d9931e, 70%)
+                .custom-block-title
+                    color darken(#d9931e, 50%)
+                a
+                    color $textColor
+            &.danger
+                background-color lighten(#ff0078, 90%)
+                border-color darken(#ff0078, 20%)
+                color darken(#ff0078, 70%)
+                .custom-block-title
+                    color darken(#ff0078, 40%)
+                a
+                    color $textColor

@@ -1,0 +1,21 @@
+{
+    "API_KEY": null,
+    "AWS_IAM": {
+        "accountId" : "string",
+        "cognitoIdentityPoolId" : "string",
+        "cognitoIdentityId" : "string",
+        "sourceIp" : ["string"],
+        "username" : "string",
+        "userArn" : "string",
+        "cognitoIdentityAuthType" : "string",
+        "cognitoIdentityAuthProvider" : "string"
+    },
+    "AMAZON_COGNITO_USER_POOLS": {
+        "sub" : "uuid",
+        "issuer" : "string",
+        "username" : "string",
+        "claims" : {},
+        "sourceIp" : ["x.x.x.x"],
+        "defaultAuthStrategy" : "string"
+    }
+}

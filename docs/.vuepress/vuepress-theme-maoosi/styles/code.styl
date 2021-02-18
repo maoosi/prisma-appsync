@@ -1,0 +1,32 @@
+{$themeContainerClass}
+    {$contentClass}
+        code
+            color #ca2f52
+            .token
+                &.keyword
+                    color #ff0078
+                    font-weight: bold
+                &.comment
+                    color #999
+                    font-style: italic
+                &.string, &.url, &.attr-value, &.variable
+                    color #028265
+                &.builtin, &.char, &.constant
+                    color: #000
+                &.attr-name
+                    color: #d9931e
+                    font-style: normal
+                &.punctuation, &.operator
+                    color: #333
+                &.number, &.function, &.tag, &.class-name
+                    color: #0076ff
+                &.boolean, &.regex
+                    color: #d9931e
+        pre, pre[class*="language-"]
+            code
+                color #000
+        div[class*="language-"]
+            background-color $codeBgColor
+            .highlight-lines
+                .highlighted
+                    background-color rgba(255, 237, 151, 45%)

@@ -1,0 +1,65 @@
+{$themeContainerClass}
+    .sidebar
+        padding: 0 .8rem
+        .nav-links
+            border-bottom 1px solid $borderColor
+            a
+                font-weight 500
+        & > .sidebar-links
+            & > li > a.sidebar-link
+                font-weight: 500
+                border-radius: 6px
+                line-height: 1.7
+                border: 0
+                &.active
+                    font-weight: bold
+                    background-color: #edf2f7
+                &:hover
+                    color $accentColor
+                    background-color: lighten(#edf2f7, 30%)
+    .sidebar-group
+        &:not(.collapsable)
+            .sidebar-heading:not(.clickable)
+                color inherit
+            & > .sidebar-group-items
+                & > li > .sidebar-link
+                    line-height: 1.7
+                    border: 0
+                    border-radius: 6px
+                    &.active
+                        font-weight: bold
+                        background-color: #edf2f7
+                    &:hover
+                        color $accentColor
+                        background-color: lighten(#edf2f7, 30%)
+        &.is-sub-group
+            & > .sidebar-heading
+                font-weight 500
+            & > .sidebar-group-items
+                & > li > .sidebar-link
+                    line-height: 1.7
+                    border-radius: 6px
+                    border: 0
+                    &.active
+                        font-weight: bold
+                        background-color: #edf2f7
+                    &:hover
+                        color $accentColor
+                        background-color: lighten(#edf2f7, 30%)
+    .sidebar-heading
+        color $textColor
+        font-weight 500
+        border: 0
+        &.open, &:hover
+            color inherit
+        &.clickable
+            border-radius: 6px
+            border: 0
+            line-height: 1.7
+            &.active
+                font-weight bold
+                color $accentColor
+                background-color: #edf2f7
+            &:hover
+                color $accentColor
+                background-color: lighten(#edf2f7, 30%)

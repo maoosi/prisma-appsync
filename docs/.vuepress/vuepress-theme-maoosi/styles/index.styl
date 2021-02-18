@@ -1,0 +1,48 @@
+@import url('https://rsms.me/inter/inter.css')
+
+$themeContainerClass = '.theme-container-maoosi'
+
+body
+    font-family: 'Inter', sans-serif
+    font-feature-settings: 'rlig' 1, 'calt' 1, 'ss01' 1
+
+@supports (font-variation-settings: normal) {
+    body {
+        font-family: 'Inter var', sans-serif
+    }
+}
+
+{$themeContainerClass}
+    .navbar
+        .site-name
+            text-transform: uppercase
+            font-size: 1em
+            font-weight: 800
+    .search-box input
+        font-weight: 600
+        &::placeholder
+            color: lighten($textColor, 70%)
+    .page a
+        color: #3182ce
+        text-decoration: underline
+    .page-nav
+        @media (max-width: $MQMobile)
+            max-width: none
+    {$contentClass}
+        @media (max-width: $MQMobile)
+            max-width: none
+        h1
+            font-weight: 700
+        h2, h3, h4, h5, h6
+            font-weight: 600
+        blockquote
+            background-color: lighten(#eeff00, 90%);
+            border: 0
+            color: $textColor
+            padding 1.25rem 1.5rem
+            border-radius 6px
+
+@require './code'
+@require './wrapper'
+@require './custom-blocks'
+@require './sidebar'

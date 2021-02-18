@@ -1,0 +1,102 @@
+{
+    "default": {
+        "select": {
+            "id": true,
+            "title": true,
+            "published": true,
+            "author": {
+                "select": {
+                    "username": true,
+                    "email": true,
+                    "posts": {
+                        "select": {
+                            "title": true
+                        }
+                    }
+                }
+            }
+        },
+        "data": {
+            "id": 2,
+            "content": "<IMG SRC=\"javascript:alert('XSS');\">",
+            "author": {
+                "connectOrCreate": {
+                    "where": {
+                        "username": "johndoe",
+                        "bio": "😀 My name is \"doe\", john doe!"
+                    },
+                    "create": {
+                        "username": "johndoe",
+                        "bio": "😀 My name is \"doe\", john doe!"
+                    }
+                }
+            }
+        },
+        "orderBy": [
+            { "title": "asc" }
+        ],
+        "where": {
+            "published": {
+                "equals": "true"
+            },
+            "title": {
+                "startsWith": "<IMG SRC=\"javascript:alert('XSS');\">"
+            },
+            "author": {
+                "username": {
+                    "equals": "maoosi"
+                }
+            }
+        }
+    },
+    "sanitized": {
+        "select": {
+            "id": true,
+            "title": true,
+            "published": true,
+            "author": {
+                "select": {
+                    "username": true,
+                    "email": true,
+                    "posts": {
+                        "select": {
+                            "title": true
+                        }
+                    }
+                }
+            }
+        },
+        "data": {
+            "id": 2,
+            "content": "&lt;img src&gt;",
+            "author": {
+                "connectOrCreate": {
+                    "where": {
+                        "username": "johndoe",
+                        "bio": "😀 My name is &quot;doe&quot;, john doe!"
+                    },
+                    "create": {
+                        "username": "johndoe",
+                        "bio": "😀 My name is &quot;doe&quot;, john doe!"
+                    }
+                }
+            }
+        },
+        "orderBy": [
+            { "title": "asc" }
+        ],
+        "where": {
+            "published": {
+                "equals": "true"
+            },
+            "title": {
+                "startsWith": "&lt;img src&gt;"
+            },
+            "author": {
+                "username": {
+                    "equals": "maoosi"
+                }
+            }
+        }
+    }
+}
