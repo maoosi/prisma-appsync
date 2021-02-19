@@ -2,9 +2,9 @@
     <img width="250" height="250" src="prisma-appsync-logo.png" alt="Prisma-AppSync" />
 </p>
 
-# Prisma-AppSync &middot; [![Generic badge](https://img.shields.io/badge/Generator%20for-Prisma%202-9F7AEA.svg)](https://www.prisma.io) [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/maoosi/prisma-appsync/graphs/commit-activity)
+# Prisma-AppSync &middot; [![Generic badge](https://img.shields.io/badge/Generator%20for-◭%20Prisma%202-9F7AEA.svg)](https://www.prisma.io) [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/maoosi/prisma-appsync/graphs/commit-activity)
 
-**Prisma-AppSync** is a custom [Prisma 2.0](https://www.prisma.io) generator that automatically spawns code of a fully working GraphQL CRUD API, designed for AWS AppSync.
+**Prisma-AppSync** is a custom Generator for [Prisma 2](https://www.prisma.io), that automatically generates a fully working AWS AppSync ⚡ GraphQL CRUD API.
 
 > ⚠️ ⚠️ Prisma-AppSync is highly experimental and it is not recommended to use in Production at this stage. Feedback, suggestions and PRs welcomed.
 

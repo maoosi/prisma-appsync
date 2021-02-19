@@ -4,8 +4,6 @@ sidebarDepth: 0
 
 # Extending the API
 
-- 👉 [Hook beforeResolve()](#👉-bonus-beforeresolve-hook)
-
 In some cases, it might be useful to extend the GraphQL CRUD API that is being generated, using custom types and resolvers.
 
 > **To illustrate this**, let's assume we have an existing model "Post" with a field "views". We want to add a custom mutation `incrementPostsViews` and build a custom resolver to increment post views on every call.
@@ -74,21 +72,4 @@ generator appsync {
 }
 ```
 
-🚀 **Done!** Next time you deploy your API on AWS AppSync, you should be able to use the newly created `incrementPostsViews` mutation.
-
-## 👉 Bonus: `beforeResolve()` hook
-
-In addition to creating custom resolvers, it is also possible to use a `beforeResolve` hook to write custom business logic. The hook exposes a certain number of properties that you can inspect via the `BeforeResolveProps` type.
-
-For example, we can use it to only authorize queries using the AppSync API_KEY authorization mode. Returning `false` from the hook would cancel the query operation:
-
-```typescript
-import { BeforeResolveProps, AuthModes } from './generated/prisma-appsync/client'
-
-app.beforeResolve(async ({ authIdentity }: BeforeResolveProps) => {
-    // only authorize queries using the AppSync API_KEY authorization
-    return authIdentity.authorization === AuthModes.API_KEY
-})
-```
-
-See full list of options, methods and types in the [Reference](/reference) section.
+🚀🚀🚀 **Done! Next time you deploy your API on AWS AppSync, you should be able to use the newly created `incrementPostsViews` mutation.**

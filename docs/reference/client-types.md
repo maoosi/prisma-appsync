@@ -25,13 +25,13 @@ export type Options = {
 
 ```typescript
 export type BeforeResolveProps = {
-    authIdentity: AuthIdentityProps
     action: AuthAction
-    subject: string
+    args: RequestProps
+    authIdentity: AuthIdentityProps
     fields: string[]
     prisma: PrismaClient
     requestSetPaths: any
-    args: RequestProps
+    subject: string
 }
 ```
 
@@ -39,14 +39,14 @@ export type BeforeResolveProps = {
 
 ```typescript
 export type AfterResolveProps = {
-    authIdentity: AuthIdentityProps
     action: AuthAction
-    subject: string
+    args: RequestProps
+    authIdentity: AuthIdentityProps
     fields: string[]
     prisma: PrismaClient
     requestSetPaths: any
-    args: RequestProps
     result: any
+    subject: string
 }
 ```
 

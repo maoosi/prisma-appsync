@@ -13,7 +13,7 @@ Prisma-AppSync is highly experimental and it is not recommended to use in Produc
 
 The goal of **Prisma-AppSync** is to make the process of creating GraphQL API's easier and quicker, while still keeping scalability, security and extensibility at the center.
 
-[diagram coming soon]
+![Architecture diagram](/prisma-appsync-diagram.png)
 
 Even though it is provided as a single Prisma Generator package, **Prisma-AppSync** could be broken down to 3 core elements:
 
@@ -39,3 +39,11 @@ Even though it is provided as a single Prisma Generator package, **Prisma-AppSyn
 - Highly available and scalable by nature, while also really cost effective to run.
 - Real-time subscriptions, offline capabilities and caching out-of-the-box.
 - Secure data-access and advanced multi-authorization patterns.
+
+## 🗺️ Roadmap
+
+- Support more Prisma features (relation queries, createMany, ...)
+- Refactor and expand testing coverage
+- Work on security (refactor access-control system, protect n+1 queries, ...)
+
+[See full list here](https://github.com/maoosi/prisma-appsync/projects/1)

@@ -47,6 +47,7 @@ module.exports = {
                     '/guides/installation',
                     '/guides/extending-api',
                     '/guides/securing-api',
+                    '/guides/hooks',
                     '/guides/debugging',
                 ]
             },

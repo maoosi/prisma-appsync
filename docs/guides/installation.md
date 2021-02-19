@@ -13,7 +13,7 @@ sidebarDepth: 0
 
 ## 🎬 Getting started video
 
-[![Getting started with Prisma-AppSync](/prisma-appsync-video.png)](http://www.youtube.com/watch?v=v9wIJ02lLG0 "Getting started with Prisma-AppSync")
+[![Getting started video thumbnail](/prisma-appsync-video.png)](http://www.youtube.com/watch?v=v9wIJ02lLG0 "Getting started video")
 
 ## Adding Prisma-Appsync into an existing project
 

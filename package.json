@@ -1,7 +1,7 @@
 {
     "name": "prisma-appsync",
-    "description": "AppSync GraphQL API Generator for Prisma 2.0",
-    "version": "1.0.0-beta.46",
+    "description": "⚡ AppSync GraphQL API Generator for ◭ Prisma 2, the next-gen ORM.",
+    "version": "1.0.0-beta.47",
     "bin": "./dist/generator.js",
     "repository": "git@github.com:maoosi/prisma-appsync.git",
     "author": "maoosi <hello@sylvainsimao.fr>",
