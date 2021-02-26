@@ -15,40 +15,11 @@ Reminder that Prisma-AppSync still is experimental and security must never be ta
 
 ## 👉 AppSync Authorization modes
 
-AWS AppSync provides [directives](https://docs.aws.amazon.com/appsync/latest/devguide/security.html) for configuring security and data protection on GraphQL API's. Using these directives with Prisma-AppSync can be done using AST comments, directly inside the `Prisma.schema` file.
-
-### Protecting fields
-
-To apply `@aws_cognito_user_pools(cognito_groups: ["admins"])` directive to the **Post title field**, add the below in the `Prisma.schema` file:
-
-```graphql{3}
-model Post {
-    id         Int
-    /// @PrismaAppSync.field: '@aws_cognito_user_pools(cognito_groups: ["admins"])'
-    title      String
-}
-```
-
-`@PrismaAppSync.[scope]` is a string of [AppSync directives](https://docs.aws.amazon.com/appsync/latest/devguide/security.html). With `[scope]` being one of the following values: `field` / `mutation` / `create` / `update`.
-
-### Protecting types
-
-To apply `@aws_cognito_user_pools(cognito_groups: ["admins"])` directive to the **Post mutation and subscription types**, add the below in the `Prisma.schema` file:
-
-```graphql{1,2}
-/// @PrismaAppSync.mutation: '@aws_cognito_user_pools(cognito_groups: ["admins"])'
-/// @PrismaAppSync.subscription: '@aws_cognito_user_pools(cognito_groups: ["admins"])'
-model Post {
-    id         Int      @id @default(autoincrement())
-    title      String
-}
-```
-
-`@PrismaAppSync.[scope]` is a string of [AppSync directives](https://docs.aws.amazon.com/appsync/latest/devguide/security.html). With `[scope]` being one of the following values: `type` / `query` / `mutation` / `subscription` / `get` / `list` / `create` / `update` / `upsert` / `delete` / `deleteMany`.
+AWS AppSync provides [authz directives](https://docs.aws.amazon.com/appsync/latest/devguide/security-authz.html) for configuring security and data protection on GraphQL API's. Using these directives with Prisma-AppSync can be done using AST comments, directly inside the `Prisma.schema` file.
 
 ### Directive aliases
 
-To make it easier to use and read, it's possible to configure directive aliases from the generator config:
+For better Schema readability, the recommended approach is to start by creating directive aliases, directly from the generator config:
 
 ```typescript
 generator appsync {
@@ -65,7 +36,7 @@ generator appsync {
 
 The above will create x3 aliases:
 
-- `default`: Applied by default for all Types in your `Prisma.schema` file (overwritten by scoped directive).
+- `default`: Applied by default for all generated Types (overwritten by scoped directives).
 - `adminsOnly`: Can be used in your `Prisma.schema` using `@@adminsOnly`.
 - `superUserOnly`: Can be used in your `Prisma.schema` using `@@superUserOnly`.
 
@@ -73,6 +44,7 @@ Example usage:
 
 ```typescript
 /// @PrismaAppSync.mutation: '@@adminsOnly'
+/// @PrismaAppSync.subscription: '@@adminsOnly'
 model Post {
     id              Int         @id @default(autoincrement())
     title           String
@@ -84,9 +56,64 @@ model Post {
 }
 ```
 
+### Protecting fields
+
+To apply `@@superUserOnly` directive to the **Post secret field**, we add the below in the `Prisma.schema` file:
+
+```graphql{7}
+model Post {
+    id              Int         @id @default(autoincrement())
+    title           String
+    published       Boolean     @default(false)
+    lastSavedAt     DateTime    @default(now())
+
+    /// @PrismaAppSync.field: '@@superUserOnly'
+    secret
+}
+```
+
+`@PrismaAppSync.[scope]` must refer to an existing alias from the generator config. With `[scope]` being one of the following:
+
+- `field`: Applies to all operations (`mutation` + `create` + `update`).
+- `mutation`: Applies to any mutation (`create` + `update`). Overrides `field`.
+- `create`: Applies only to create operation. Overrides `field` and `mutation`.
+- `update`: Applies only to update operation. Overrides `field` and `mutation`.
+
+### Protecting types
+
+To apply `@@adminsOnly` directive to the **Post mutation and subscription types**, we add the below in the `Prisma.schema` file:
+
+```graphql{1,2}
+/// @PrismaAppSync.mutation: '@@adminsOnly'
+/// @PrismaAppSync.subscription: '@@adminsOnly'
+model Post {
+    id              Int         @id @default(autoincrement())
+    title           String
+    published       Boolean     @default(false)
+    lastSavedAt     DateTime    @default(now())
+
+    /// @PrismaAppSync.field: '@@superUserOnly'
+    secret
+}
+```
+
+`@PrismaAppSync.[scope]` must refer to an existing alias from the generator config. With `[scope]` being one of the following:
+
+- `type`: Applies to all operations (`query` + `mutation` + `subscription`).
+- `query`: Applies to any query (`get` + `list`). Overrides `type`.
+- `mutation`: Applies to any mutation (`create` + `update` + `upsert` + `delete` + `deleteMany`). Overrides `type`.
+- `subscription`: Applies to any subscription. Overrides `type`.
+- `get`: Applies only to get operation. Overrides `type` and `query`.
+- `list`: Applies only to list operation. Overrides `type` and `query`.
+- `create`: Applies only to creation operation. Overrides `type` and `mutation`.
+- `update`: Applies only to update operation. Overrides `type` and `mutation`.
+- `upsert`: Applies only to upsert operation. Overrides `type` and `mutation`.
+- `delete`: Applies only to update operation. Overrides `type` and `mutation`.
+- `deleteMany`: Applies only to deleteMany operation. Overrides `type` and `mutation`.
+
 ## 👉 Fine-Grained Access Control
 
-Prisma-AppSync makes it easier to implement fine-grained access control around data. For example, we might want to only allow the owner of a given Post to update it. To do so, we can use the below methods, directly from the Lambda function handler.
+Prisma-AppSync makes it simple to implement fine-grained access control around data. For example, we might want to only allow the owner of a given Post to update it. To do so, we can use the below methods, directly from the Lambda function handler.
 
 Under the hood, Prisma AppSync uses [CASL](https://casl.js.org), an isomorphic authorization library. The API provided is very close to [CASL rules](https://casl.js.org/v4/en/guide/define-rules), except that Prisma AppSync automate data fetching for conditions.
 
