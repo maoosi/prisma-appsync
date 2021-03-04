@@ -1,8 +1,8 @@
 import { PrismaAppSyncAdapter } from './_adapter';
 import { PrismaAppSyncResolver } from './_resolver';
-import { Options, AdapterOptions, RequestProps, AuthType, AuthIdentityProps, AuthRule, CustomResolverProps, BeforeResolveProps } from './_types';
+import { Options, AdapterOptions, RequestProps, AuthType, AuthIdentityProps, AuthRule, CustomResolverProps, AfterResolveProps, BeforeResolveProps } from './_types';
 import { AuthModes, AuthActions } from './_constants';
-export { PrismaAppSyncAdapter, PrismaAppSyncResolver, Options, AdapterOptions, RequestProps, AuthType, AuthIdentityProps, AuthRule, CustomResolverProps, BeforeResolveProps, AuthModes, AuthActions };
+export { PrismaAppSyncAdapter, PrismaAppSyncResolver, Options, AdapterOptions, RequestProps, AuthType, AuthIdentityProps, AuthRule, CustomResolverProps, AfterResolveProps, BeforeResolveProps, AuthModes, AuthActions };
 export declare class PrismaAppSync {
     adapter: PrismaAppSyncAdapter;
     resolver: PrismaAppSyncResolver;

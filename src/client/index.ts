@@ -9,6 +9,7 @@ import {
     AuthIdentityProps,
     AuthRule,
     CustomResolverProps,
+    AfterResolveProps,
     BeforeResolveProps
 } from './_types'
 import { AuthModes, AuthActions } from './_constants'
@@ -27,6 +28,7 @@ export {
     AuthIdentityProps,
     AuthRule,
     CustomResolverProps,
+    AfterResolveProps,
     BeforeResolveProps,
     AuthModes,
     AuthActions
