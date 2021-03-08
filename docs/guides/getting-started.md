@@ -4,11 +4,6 @@ sidebarDepth: 0
 
 # Getting started
 
-::: danger
-
-Prisma-AppSync is highly experimental and it is not recommended to use in Production at this stage. Feedback, suggestions and PRs welcomed.
-:::
-
 ## 🧐 Introduction
 
 The goal of **Prisma-AppSync** is to make the process of creating GraphQL API's easier and quicker, while still keeping scalability, security and extensibility at the center.

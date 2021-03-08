@@ -25,7 +25,7 @@ export type Options = {
 
 ```typescript
 export type BeforeResolveProps = {
-    action: AuthAction
+    operation: Operation
     args: RequestProps
     authIdentity: AuthIdentityProps
     fields: string[]
@@ -39,7 +39,7 @@ export type BeforeResolveProps = {
 
 ```typescript
 export type AfterResolveProps = {
-    action: AuthAction
+    operation: Operation
     args: RequestProps
     authIdentity: AuthIdentityProps
     fields: string[]

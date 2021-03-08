@@ -10,9 +10,9 @@ import {
     AuthRule,
     CustomResolverProps,
     AfterResolveProps,
-    BeforeResolveProps
+    BeforeResolveProps,
 } from './_types'
-import { AuthModes, AuthActions } from './_constants'
+import { AuthModes, Operations, AuthActions } from './_constants'
 import escape from 'validator/lib/escape'
 import xss from 'xss'
 import { clone } from 'lodash'
@@ -31,6 +31,7 @@ export {
     AfterResolveProps,
     BeforeResolveProps,
     AuthModes,
+    Operations,
     AuthActions
 }
 

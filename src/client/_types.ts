@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { AuthModes, AuthActions } from './_constants'
+import { AuthModes, Operations, AuthActions } from './_constants'
 
 export type ExperimentalOptions = {
     dateTimeFieldsRegex?: RegExp|boolean
@@ -44,7 +44,7 @@ export type RequestProps = {
 
 export type BeforeResolveProps = {
     authIdentity: AuthIdentityProps
-    action: AuthAction
+    operation: Operation
     subject: string
     fields: string[]
     prisma: PrismaClient
@@ -54,7 +54,7 @@ export type BeforeResolveProps = {
 
 export type AfterResolveProps = {
     authIdentity: AuthIdentityProps
-    action: AuthAction
+    operation: Operation
     subject: string
     fields: string[]
     prisma: PrismaClient
@@ -64,6 +64,7 @@ export type AfterResolveProps = {
 }
 
 export type AuthType = typeof AuthModes[keyof typeof AuthModes]
+export type Operation = typeof Operations[keyof typeof Operations]
 export type AuthAction = typeof AuthActions[keyof typeof AuthActions]
 
 export type AuthIdentityProps = {

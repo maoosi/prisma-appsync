@@ -8,9 +8,10 @@ import {
     AuthAction,
     BeforeResolveProps,
     AfterResolveProps,
+    Operation,
     CaslAbilityResult
 } from './_types'
-import { prismaExclWords, AuthActions } from './_constants'
+import { PrismaExclWords, AuthActions, Operations } from './_constants'
 import { dot } from 'dot-object'
 import { createAliasResolver, defineAbility, subject } from '@casl/ability'
 import { difference, merge, keys, every, upperFirst, pick } from 'lodash'
@@ -62,7 +63,7 @@ export class PrismaAppSyncResolver {
 
     private getRequestSetPaths(
         { operation, model, args }:
-        { operation:string, model:string, args:RequestProps }
+        { operation:Operation, model:string, args:RequestProps }
     ) {
         const requestSetPaths:string[] = []
         const dotPaths = merge(
@@ -71,7 +72,7 @@ export class PrismaAppSyncResolver {
 
         for (const key in dotPaths) {
             if (Object.prototype.hasOwnProperty.call(dotPaths, key)) {
-                const fieldsPath = difference(key.split('.'), prismaExclWords).join('/')
+                const fieldsPath = difference(key.split('.'), PrismaExclWords).join('/')
                 const requestPath:string = `${operation}/${model}/${fieldsPath}`
 
                 if (!requestSetPaths.includes(requestPath)) {
@@ -275,17 +276,16 @@ export class PrismaAppSyncResolver {
 
     private async runBeforeResolveHook(
         { operation, model, args }:
-        { operation:AuthAction, model:string, args:RequestProps }
+        { operation:Operation, model:string, args:RequestProps }
     ) {
         const requestSetPaths = this.getRequestSetPaths({ operation, model, args })
         const fieldsObj = merge({}, args.data || {}, args.select || {}, args.include || {})
-        const action = operation
         const fields = keys(fieldsObj)
         const subject = operation !== 'custom' ? upperFirst(model) : model
 
         this.beforeResolveHookProps = {
             authIdentity: this.authIdentity,
-            action: action,
+            operation: operation,
             subject: subject,
             fields: fields,
             prisma: this.prisma,
@@ -298,7 +298,7 @@ export class PrismaAppSyncResolver {
                 `Running beforeResolve hook on "${operation}/${model}" with params:`, 
                 JSON.stringify({
                     authIdentity: this.authIdentity,
-                    action: action,
+                    operation: operation,
                     subject: subject,
                     fields: fields,
                     requestSetPaths: requestSetPaths,
@@ -316,7 +316,7 @@ export class PrismaAppSyncResolver {
         const abilityResult:CaslAbilityResult = await this.isAuthorizedQuery({
             args: args,
             model: model,
-            action: action,
+            action: operation,
             subjectName: subject,
             fields: fields,
         })
@@ -335,10 +335,10 @@ export class PrismaAppSyncResolver {
 
         if (this.debug) {
             console.log(
-                `Running afterResolve hook on "${afterResolveHookProps.action}/${afterResolveHookProps.subject}" with params:`, 
+                `Running afterResolve hook on "${afterResolveHookProps.operation}/${afterResolveHookProps.subject}" with params:`, 
                 JSON.stringify({
                     authIdentity: this.authIdentity,
-                    action: afterResolveHookProps.action,
+                    operation: afterResolveHookProps.operation,
                     subject: afterResolveHookProps.subject,
                     fields: afterResolveHookProps.fields,
                     requestSetPaths: afterResolveHookProps.requestSetPaths,
@@ -389,7 +389,7 @@ export class PrismaAppSyncResolver {
     }
 
     public async custom(model:string, args:RequestProps, callback:Function) {
-        await this.runBeforeResolveHook({ operation: 'custom', model, args })
+        await this.runBeforeResolveHook({ operation: Operations.custom, model, args })
 
         const callbackProps:CustomResolverProps = {
             prisma: this.prisma,
@@ -405,7 +405,7 @@ export class PrismaAppSyncResolver {
     }
     
     public async get(model:string, args:RequestProps) {
-        await this.runBeforeResolveHook({ operation: 'get', model, args })
+        await this.runBeforeResolveHook({ operation: Operations.get, model, args })
 
         if (process.env.JEST_WORKER_ID) return args
 
@@ -420,7 +420,7 @@ export class PrismaAppSyncResolver {
     }
 
     public async list(model:string, args:RequestProps) {
-        await this.runBeforeResolveHook({ operation: 'list', model, args })
+        await this.runBeforeResolveHook({ operation: Operations.list, model, args })
 
         if (process.env.JEST_WORKER_ID) return args
 
@@ -436,7 +436,7 @@ export class PrismaAppSyncResolver {
     }
 
     public async create(model:string, args:RequestProps) {
-        await this.runBeforeResolveHook({ operation: 'create', model, args })
+        await this.runBeforeResolveHook({ operation: Operations.create, model, args })
 
         if (process.env.JEST_WORKER_ID) return args
 
@@ -451,7 +451,7 @@ export class PrismaAppSyncResolver {
     }
 
     public async update(model:string, args:RequestProps) {
-        await this.runBeforeResolveHook({ operation: 'update', model, args })
+        await this.runBeforeResolveHook({ operation: Operations.update, model, args })
 
         if (process.env.JEST_WORKER_ID) return args
 
@@ -467,7 +467,7 @@ export class PrismaAppSyncResolver {
     }
 
     public async upsert(model:string, args:RequestProps) {
-        await this.runBeforeResolveHook({ operation: 'upsert', model, args })
+        await this.runBeforeResolveHook({ operation: Operations.upsert, model, args })
 
         if (process.env.JEST_WORKER_ID) return args
 
@@ -484,7 +484,7 @@ export class PrismaAppSyncResolver {
     }
 
     public async delete(model:string, args:RequestProps) {
-        await this.runBeforeResolveHook({ operation: 'delete', model, args })
+        await this.runBeforeResolveHook({ operation: Operations.delete, model, args })
 
         if (process.env.JEST_WORKER_ID) return args
 
@@ -499,7 +499,7 @@ export class PrismaAppSyncResolver {
     }
 
     public async deleteMany(model:string, args:RequestProps) {
-        await this.runBeforeResolveHook({ operation: 'deleteMany', model, args })
+        await this.runBeforeResolveHook({ operation: Operations.deleteMany, model, args })
 
         if (process.env.JEST_WORKER_ID) return args
 

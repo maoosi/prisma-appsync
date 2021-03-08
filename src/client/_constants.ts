@@ -1,4 +1,4 @@
-export const prismaAppSyncOperations = [
+export const PrismaAppSyncOperations = [
     'get',
     'list',
     'create',
@@ -8,19 +8,19 @@ export const prismaAppSyncOperations = [
     'delete'
 ]
 
-export const prismaCombinators = [
+export const PrismaCombinators = [
     'AND', 'NOT', 'OR'
 ]
 
-export const prismaOperators = [
+export const PrismaOperators = [
     'equals', 'not', 'lt', 'lte', 'gt', 'gte', 'contains', 'startsWith', 'endsWith'
 ]
 
-export const prismaOrderByArgs = [
+export const PrismaOrderByArgs = [
     'asc', 'desc'
 ]
 
-export const prismaExclWords = [
+export const PrismaExclWords = [
     'data', 'where', 'orderBy', 'create', 'connect', 'connectOrCreate', 'update', 'upsert', 'delete', 'disconnect', 'set', 'updateMany', 'deleteMany', 'select', 'include'
 ]
 
@@ -28,6 +28,17 @@ export const AuthModes = {
     API_KEY: 'API_KEY',
     AWS_IAM: 'AWS_IAM',
     AMAZON_COGNITO_USER_POOLS: 'AMAZON_COGNITO_USER_POOLS'
+} as const
+
+export const Operations = {
+    custom: 'custom',
+    get: 'get',
+    list: 'list',
+    create: 'create',
+    upsert: 'upsert',
+    update: 'update',
+    delete: 'delete',
+    deleteMany: 'deleteMany',
 } as const
 
 export const AuthActions = {

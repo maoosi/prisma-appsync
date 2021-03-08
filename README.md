@@ -6,7 +6,7 @@
 
 **Prisma-AppSync** is a custom Generator for [Prisma 2](https://www.prisma.io), that automatically generates a fully working AWS AppSync ⚡ GraphQL CRUD API.
 
-> ⚠️ ⚠️ Prisma-AppSync is highly experimental and it is not recommended to use in Production at this stage. Feedback, suggestions and PRs welcomed.
+> ⚠️ ⚠️ Prisma-AppSync is highly experimental and it is not recommended to use in Production at this stage. Breaking changes might be introduced at anytime between beta versions. Feedback, suggestions and PRs welcomed.
 
 ## ✨ Automatically generated
 
@@ -26,7 +26,7 @@
 
 ## ⚓ Compatibility
 
-- Prisma 2.16.1
+- Prisma 2.18.0
 
 ## 📓 Documentation
 

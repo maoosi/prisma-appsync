@@ -23,7 +23,7 @@ The hook function exposes a certain number of properties that you can inspect vi
 
 ```typescript
 export type BeforeResolveProps = { 
-    action: AuthAction
+    operation: Operation
     args: RequestProps
     authIdentity: AuthIdentityProps
     fields: string[]
@@ -39,7 +39,7 @@ Here is an example of what the various parameters (excl. `prisma`) might contain
 
 ```json
 {
-    "action": "list",
+    "operation": "list",
     "args": {
         "select": {
             "title": true,
@@ -104,7 +104,7 @@ The hook function exposes the same properties as the `beforeResolve` function, w
 
 ```typescript{8}
 export type AfterResolveProps = {
-    action: AuthAction
+    operation: Operation
     args: RequestProps
     authIdentity: AuthIdentityProps
     fields: string[]

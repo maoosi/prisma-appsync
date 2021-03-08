@@ -4,20 +4,22 @@ import {
     RequestProps,
     PrivateOptions,
     AuthType,
+    Operation
 } from './_types'
 import {
-    prismaCombinators,
-    prismaOperators,
-    prismaAppSyncOperations,
-    prismaOrderByArgs,
+    PrismaCombinators,
+    PrismaOperators,
+    PrismaAppSyncOperations,
+    PrismaOrderByArgs,
     AuthModes,
+    Operations,
 } from './_constants'
 import { BadRequestError, InternalError } from './_errors'
 
 export class PrismaAppSyncAdapter {
     private customResolvers:any
     private debug:boolean
-    public operation:string
+    public operation:Operation
     public model:string
     public args:RequestProps
     public requestSetPaths:string[]
@@ -25,8 +27,8 @@ export class PrismaAppSyncAdapter {
     public authIdentityObj:any
 
     constructor(event:any, options?:PrivateOptions) {
-        this.operation = ``
-        this.model = ``
+        this.operation = null
+        this.model = String()
         this.requestSetPaths = []
         this.args = {}
         this.authIdentityType = null
@@ -89,12 +91,12 @@ export class PrismaAppSyncAdapter {
         const isCustomResolver:boolean = typeof this.customResolvers[fieldName] !== 'undefined'
 
         if (isCustomResolver) {
-            this.operation = 'custom'
+            this.operation = Operations.custom
             this.model = fieldName
         } else {
 
             // find CRUD operation from list
-            const operation:any = prismaAppSyncOperations.find((op:string) => {
+            const operation:any = PrismaAppSyncOperations.find((op:string) => {
                 return fieldName.toLowerCase().startsWith(op.toLowerCase())
             })
 
@@ -121,18 +123,20 @@ export class PrismaAppSyncAdapter {
     private parseArgs(event:any) {
         this.args = merge(this.args, this.parseSelectionList(event.info.selectionSetList))
 
-        if (this.operation !== 'custom') {
+        if (this.operation !== Operations.custom) {
             if (event.arguments.data) {
                 this.args.data = this.parseData(event.arguments.data)
             }
     
             if (event.arguments.where) {
-                this.args.where = ['list'].includes(this.operation)
+                const _list:Operation[] = [Operations.list]
+                this.args.where = _list.includes(this.operation)
                     ? this.parseWhere(event.arguments.where)
                     : event.arguments.where
             }
     
-            if (event.arguments.orderBy && ['get', 'list'].includes(this.operation)) {
+            const _getOrList:Operation[] = [Operations.get, Operations.list]
+            if (event.arguments.orderBy && _getOrList.includes(this.operation)) {
                 this.args.orderBy = this.parseOrderBy(event.arguments.orderBy)
             }
         } else {
@@ -211,7 +215,7 @@ export class PrismaAppSyncAdapter {
             const field = condition[0]
             const filter = condition[1]
 
-            if (prismaCombinators.includes(field)) {
+            if (PrismaCombinators.includes(field)) {
                 if (Array.isArray(whereInput[input])) {
                     whereOutput[field] = []
                     whereInput[input].forEach((group:any) => {
@@ -222,7 +226,7 @@ export class PrismaAppSyncAdapter {
                 } else {
                     whereOutput[field] = this.parseWhere(whereInput[input])
                 }
-            } else if (prismaOperators.includes(filter)) {
+            } else if (PrismaOperators.includes(filter)) {
                 whereOutput[field] = {
                     [filter]: whereInput[
                         input
@@ -247,7 +251,7 @@ export class PrismaAppSyncAdapter {
 
         for (const input in orderByInput) {
             const orderByArg = orderByInput[input].toLowerCase()
-            if (prismaOrderByArgs.includes(orderByArg)) {
+            if (PrismaOrderByArgs.includes(orderByArg)) {
                 orderByOutput.push({
                     [input]: orderByArg
                 })

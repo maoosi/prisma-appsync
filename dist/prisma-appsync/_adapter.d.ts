@@ -1,8 +1,8 @@
-import { RequestProps, PrivateOptions, AuthType } from './_types';
+import { RequestProps, PrivateOptions, AuthType, Operation } from './_types';
 export declare class PrismaAppSyncAdapter {
     private customResolvers;
     private debug;
-    operation: string;
+    operation: Operation;
     model: string;
     args: RequestProps;
     requestSetPaths: string[];

@@ -50,7 +50,7 @@ Hook called before resolving via the `resolve` method.
 
 ```typescript
 app.beforeResolve(async ({
-    action,
+    operation,
     args,
     authIdentity,
     fields,
@@ -66,12 +66,12 @@ app.beforeResolve(async ({
 
 | Parameter | Description |
 |--|--|--|
-| `action` | Action performed by the API request (e.g. `get`, `list`, `create`, `update`, `delete`). |
+| `operation` | Operation performed by the API request (e.g. `get`, `list`, `create`, `update`, `delete`). |
 | `args` | Object of arguments that are part of the API request (e.g. `{ where: { id: 2 } }`). |
 | `authIdentity` | Contains informations about the caller and the detected AppSync authorization mode (e.g. `API_KEY`, `AWS_IAM`, `AMAZON_COGNITO_USER_POOLS`). |
 | `fields` | Array of fields that are part of the API request (e.g. `['title', 'authorId', 'publishedAt']`). |
 | `prisma` | Reference to the Prisma Client. |
-| `requestSetPaths` | Array of paths (`action/subject/field`) that are part of the API request (e.g. `['get/post/title']`). |
+| `requestSetPaths` | Array of paths (`operation/subject/field`) that are part of the API request (e.g. `['get/post/title']`). |
 | `subject` | Subject (or model) name (e.g. `Post`, `User`, `Comment`). |
 
 #### [Relevant types](/reference/client-types.html#hooks)
@@ -88,7 +88,7 @@ Hook called after resolving via the `resolve` method.
 
 ```typescript
 app.afterResolve(async ({
-    action,
+    operation,
     args,
     authIdentity,
     fields,
@@ -105,12 +105,12 @@ app.afterResolve(async ({
 
 | Parameter | Description |
 |--|--|--|
-| `action` | Action performed by the API request (e.g. `get`, `list`, `create`, `update`, `delete`). |
+| `operation` | Operation performed by the API request (e.g. `get`, `list`, `create`, `update`, `delete`). |
 | `args` | Object of arguments that are part of the API request (e.g. `{ where: { id: 2 } }`). |
 | `authIdentity` | Contains informations about the caller and the detected AppSync authorization mode (e.g. `API_KEY`, `AWS_IAM`, `AMAZON_COGNITO_USER_POOLS`). |
 | `fields` | Array of fields that are part of the API request (e.g. `['title', 'authorId', 'publishedAt']`). |
 | `prisma` | Reference to the Prisma Client. |
-| `requestSetPaths` | Array of paths (`action/subject/field`) that are part of the API request (e.g. `['get/post/title']`). |
+| `requestSetPaths` | Array of paths (`operation/subject/field`) that are part of the API request (e.g. `['get/post/title']`). |
 | `result` | Prisma Client query result. |
 | `subject` | Subject (or model) name (e.g. `Post`, `User`, `Comment`). |
 
