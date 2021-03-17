@@ -4,7 +4,7 @@ sidebarDepth: 0
 
 # Demo
 
-## 👉 `Prisma.schema` input
+## 👉 `schema.prisma` input
 
 ```graphql
 datasource db {

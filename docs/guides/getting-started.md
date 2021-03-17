@@ -14,7 +14,7 @@ Even though it is provided as a single Prisma Generator package, **Prisma-AppSyn
 
 - **Prisma-AppSync Client**, a TypeScript client (think of it as Prisma Client on steroids) ready to use within the API resolver function. Capable to handle CRUD operations with a single line of code, it also give access to advanced features for securing, extending and customising the API.
 
-- **Prisma-AppSync Generator**, who's role is to parse the `prisma.schema` file, generate the Client, generate files for AWS AppSync (Schema + Resolver mapping settings), and generate the API documentation.
+- **Prisma-AppSync Generator**, who's role is to parse the `schema.prisma` file, generate the Client, generate files for AWS AppSync (Schema + Resolver mapping settings), and generate the API documentation.
 
 - **Prisma-AppSync Boilerplate**, made of an AWS CDK template and a sample Lambda Function (Direct Lambda Resolver for AppSync), both designed to help get started with integration and deployement.
 
@@ -26,7 +26,7 @@ Even though it is provided as a single Prisma Generator package, **Prisma-AppSyn
 - Best-in-class developers' experience to interact with and manage data.
 - Growing ecosystem with Prisma Client (ORM), Prisma Migrate (migration system) and Prisma Studio (GUI).
 - Work with multiple data sources (MySQL, PostgreSQL, SQLite, SQL Server).
-- Single source of truth for modeling data using a `Prisma.schema` file.
+- Single source of truth for modeling data using a `schema.prisma` file.
 
 **Why AWS AppSync?**
 

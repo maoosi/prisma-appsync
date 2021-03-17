@@ -15,7 +15,7 @@ Reminder that Prisma-AppSync still is experimental and security must never be ta
 
 ## 👉 AppSync Authorization modes
 
-AWS AppSync provides [authz directives](https://docs.aws.amazon.com/appsync/latest/devguide/security-authz.html) for configuring security and data protection on GraphQL API's. Using these directives with Prisma-AppSync can be done using AST comments, directly inside the `Prisma.schema` file.
+AWS AppSync provides [authz directives](https://docs.aws.amazon.com/appsync/latest/devguide/security-authz.html) for configuring security and data protection on GraphQL API's. Using these directives with Prisma-AppSync can be done using AST comments, directly inside the `schema.prisma` file.
 
 ### Directive aliases
 
@@ -37,8 +37,8 @@ generator appsync {
 The above will create x3 aliases:
 
 - `default`: Applied by default for all generated Types (overwritten by scoped directives).
-- `adminsOnly`: Can be used in your `Prisma.schema` using `@@adminsOnly`.
-- `superUserOnly`: Can be used in your `Prisma.schema` using `@@superUserOnly`.
+- `adminsOnly`: Can be used in your `schema.prisma` using `@@adminsOnly`.
+- `superUserOnly`: Can be used in your `schema.prisma` using `@@superUserOnly`.
 
 Example usage:
 
@@ -58,7 +58,7 @@ model Post {
 
 ### Protecting fields
 
-To apply `@@superUserOnly` directive to the **Post secret field**, we add the below in the `Prisma.schema` file:
+To apply `@@superUserOnly` directive to the **Post secret field**, we add the below in the `schema.prisma` file:
 
 ```graphql{7}
 model Post {
@@ -81,7 +81,7 @@ model Post {
 
 ### Protecting types
 
-To apply `@@adminsOnly` directive to the **Post mutation and subscription types**, we add the below in the `Prisma.schema` file:
+To apply `@@adminsOnly` directive to the **Post mutation and subscription types**, we add the below in the `schema.prisma` file:
 
 ```graphql{1,2}
 /// @PrismaAppSync.mutation: '@@adminsOnly'
