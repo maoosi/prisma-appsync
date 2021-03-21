@@ -12,7 +12,7 @@
 
 - **GraphQL Schema:** Designed to work with AWS AppSync scalar types and directives.
 - **Client:** Prisma Client on steroids, that can handle CRUD operations out-of-the-box.
-- **API Docs:** Documentation for the GraphQL CRUD API ([see example](/demo/post.html)).
+- **API Docs:** Documentation for the GraphQL CRUD API ([see example](https://prisma-appsync.vercel.app/demo/post.html)).
 
 ## ✔️ Features
 
