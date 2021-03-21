@@ -72,4 +72,41 @@ generator appsync {
 }
 ```
 
+## 👉 4. NodeJS function bundler
+
+> This step applies if using the AWS CDK boilerplate provided with Prisma-AppSync.
+
+We want to make sure both `custom-schema.gql` and `custom-resolvers.yaml` files are copied in the build folder, so that Prisma generate works properly.
+
+To do so, we update the `cdk/index.ts` file with highlighted code:
+
+```typescript{7-15}
+const lambdaFunction = new NodejsFunction(this, `${process.env.SERVICES_PREFIX}_Function`, {
+    // ...
+    bundling: {
+        minify: true,
+        commandHooks: {
+            beforeBundling(inputDir: string, outputDir: string): string[] {
+                const prismaSchema = path.join(inputDir, process.env.PRISMA_SCHEMA_ROOT_PATH || 'schema.prisma')
+                const customSchema = path.join(path.dirname(prismaSchema), 'custom-schema.gql')
+                const customResolvers = path.join(path.dirname(prismaSchema), 'custom-resolvers.yaml')
+
+                return [
+                    `cp ${prismaSchema} ${outputDir}`,
+                    `cp ${customSchema} ${outputDir}`,
+                    `cp ${customResolvers} ${outputDir}`,
+                ]
+            },
+            beforeInstall() {
+                return []
+            },
+            afterBundling() {
+                return [`npx prisma generate`]
+            }
+        },
+        nodeModules: ['prisma', '@prisma/client', 'prisma-appsync'],
+    }
+})
+```
+
 🚀🚀🚀 **Done! Next time you deploy your API on AWS AppSync, you should be able to use the newly created `incrementPostsViews` mutation.**
