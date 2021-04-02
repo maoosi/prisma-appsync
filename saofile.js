@@ -1,5 +1,3 @@
-const { pathExists } = require("fs-extra")
-
 module.exports = {
     description: 'Scaffolding out Prisma-AppSync boilerplate.',
     templateDir: 'boilerplate',
