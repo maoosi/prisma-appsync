@@ -1,6 +1,7 @@
 // Dependencies
 import { PrismaAppSyncCompiler } from './compiler'
 import { generatorHandler } from '@prisma/generator-helper'
+import { parseEnvValue } from '@prisma/sdk'
 
 // Read Prisma AppSync version
 const generatorVersion = require('../../package.json').version
@@ -41,10 +42,16 @@ generatorHandler({
                         directiveAliases[aliasKey] = directive
                     })
 
+                // Read output dir (ensures previous version of prisma are still supported)
+                const outputDir =
+                    typeof options.generator.output === 'string'
+                      ? (options.generator.output! as string)
+                      : parseEnvValue(options.generator.output!)
+
                 // Init compiler with user options
                 const compiler = new PrismaAppSyncCompiler(options.dmmf, {
                     schemaPath: options.schemaPath,
-                    outputDir: options.generator.output,
+                    outputDir: outputDir,
                     directiveAliases: directiveAliases,
                     debug: debug
                 })
