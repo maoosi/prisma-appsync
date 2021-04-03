@@ -187,42 +187,44 @@ export class PrismaAppSyncCompiler {
             const modelDirectives:DMMFPAS_Directives = this.getModelDirectives(model)
             const fields:DMMFPAS_Field[] = []
 
-            model.fields.forEach((field:DMMF.Field) => {
-                const fieldDirectives:DMMFPAS_Directives = this.getFieldDirectives(field, model)
+            if (!this.isIgnored(model)) {
+                model.fields.forEach((field:DMMF.Field) => {
+                    const fieldDirectives:DMMFPAS_Directives = this.getFieldDirectives(field, model)
 
-                if (!field.isGenerated) {
-                    fields.push({
-                        name: field.name,
-                        scalar: this.getFieldScalar(field),
-                        isRequired: this.isFieldRequired(field),
-                        isEditable: !this.isFieldGeneratedRelation(field, model) 
-                            && !this.isFieldImmutableDate(field),
-                        isUnique: this.isFieldUnique(field, model),
-                        ...(field.relationName && {
-                            relation: {
-                                name: this.getFieldRelationName(field, model),
-                                kind: this.getFieldRelationKind(field),
-                                type: this.getFieldType(field),
-                            }
-                        }),
-                        ...(Object.keys(fieldDirectives).length > 0 && {
-                            directives: fieldDirectives
-                        }),
-                        sample: this.getFieldSample(field)
-                    })
-                }
-            })
-
-            this.data.models.push({
-                name: model.name,
-                pluralizedName: plural(model.name),
-                ...(Object.keys(modelDirectives).length > 0 && {
-                    directives: modelDirectives
-                }),
-                idFields: model.idFields,
-                fields: fields,
-                subscriptionFields: this.filterSubscriptionFields(fields, model.idFields)
-            })
+                    if (!field.isGenerated && !this.isIgnored(field)) {
+                        fields.push({
+                            name: field.name,
+                            scalar: this.getFieldScalar(field),
+                            isRequired: this.isFieldRequired(field),
+                            isEditable: !this.isFieldGeneratedRelation(field, model) 
+                                && !this.isFieldImmutableDate(field),
+                            isUnique: this.isFieldUnique(field, model),
+                            ...(field.relationName && {
+                                relation: {
+                                    name: this.getFieldRelationName(field, model),
+                                    kind: this.getFieldRelationKind(field),
+                                    type: this.getFieldType(field),
+                                }
+                            }),
+                            ...(Object.keys(fieldDirectives).length > 0 && {
+                                directives: fieldDirectives
+                            }),
+                            sample: this.getFieldSample(field)
+                        })
+                    }
+                })
+            
+                this.data.models.push({
+                    name: model.name,
+                    pluralizedName: plural(model.name),
+                    ...(Object.keys(modelDirectives).length > 0 && {
+                        directives: modelDirectives
+                    }),
+                    idFields: model.idFields,
+                    fields: fields,
+                    subscriptionFields: this.filterSubscriptionFields(fields, model.idFields)
+                })
+            }
         })
 
         // enums
@@ -456,6 +458,19 @@ export class PrismaAppSyncCompiler {
         return this.getDirectives(model, this.options.directivesPriorityScheme['model'])
     }
 
+    // Return true if field or model is ignored /// @PrismaAppSync.ignore
+    private isIgnored(node:DMMF.Field|DMMF.Model):boolean {
+        let isIgnored = false
+
+        // search .ignore annotations in Prisma doc node (AST)
+        if (typeof node['documentation'] !== 'undefined'
+            && node['documentation'].includes('@PrismaAppSync.ignore')) {
+            isIgnored = true
+        }
+
+        return isIgnored
+    }
+
     // Read AppSync field directives from AST comments
     private getFieldDirectives(field:DMMF.Field, model:DMMF.Model):DMMFPAS_Directives {
         if (field.relationName) {
@@ -493,9 +508,9 @@ export class PrismaAppSyncCompiler {
         return modelIndex > -1 ? this.dmmf.datamodel.models[modelIndex] : false
     }
 
-    // Return directives strings based on priorityScheme
+    // Return directives strings
     private getDirectives(
-        node:DMMF.Field|DMMF.Model, priorityScheme:any
+        node:DMMF.Field|DMMF.Model, priorityScheme?:any
     ):DMMFPAS_Directives {
         let directives:DMMFPAS_Directives = {}
         let annotations:any

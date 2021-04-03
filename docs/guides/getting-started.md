@@ -4,19 +4,21 @@ sidebarDepth: 0
 
 # Getting started
 
-## 🧐 Introduction
+## 🏃 Want to jump right in?
 
-The goal of **Prisma-AppSync** is to make the process of creating GraphQL API's easier and quicker, while still keeping scalability, security and extensibility at the center.
+[Follow the Installation guide](/guides/installation.html)
 
-![Architecture diagram](/prisma-appsync-diagram.png)
+## 🧐 Under the hood
 
 Even though it is provided as a single Prisma Generator package, **Prisma-AppSync** could be broken down to 3 core elements:
 
-- **Prisma-AppSync Client**, a TypeScript client (think of it as Prisma Client on steroids) ready to use within the API resolver function. Capable to handle CRUD operations with a single line of code, it also give access to advanced features for securing, extending and customising the API.
+![Architecture diagram](/prisma-appsync-diagram.png)
 
-- **Prisma-AppSync Generator**, who's role is to parse the `schema.prisma` file, generate the Client, generate files for AWS AppSync (Schema + Resolver mapping settings), and generate the API documentation.
+- <span style="color:#f59837;">**Prisma-AppSync Client**</span>, a TypeScript client (think of it as Prisma Client on steroids) ready to use within the API resolver function. Capable to handle CRUD operations with a single line of code, it also give access to advanced features for securing, extending and customising the API.
 
-- **Prisma-AppSync Boilerplate**, made of an AWS CDK template and a sample Lambda Function (Direct Lambda Resolver for AppSync), both designed to help get started with integration and deployement.
+- <span style="color:#557af4;">**Prisma-AppSync Generator**</span>, who's role is to parse the `schema.prisma` file, generate the Client, generate files for AWS AppSync (Schema + Resolver mapping settings), and generate the API documentation.
+
+- <span style="color:#02b414;">**Prisma-AppSync Boilerplate**</span>, made of an AWS CDK template and a sample Lambda Function (Direct Lambda Resolver for AppSync), both designed to help get started with integration and deployement.
 
 ## ❓ Why?
 
