@@ -1,3 +1,5 @@
+const path = require('path')
+
 module.exports = {
     description: 'Scaffolding out Prisma-AppSync boilerplate.',
     templateDir: 'boilerplate',
@@ -36,16 +38,18 @@ module.exports = {
     },
     async completed() {
 
+        const installDir = path.relative(process.cwd(), this.outDir)
+
         // install cdk dependencies
         await this.npmInstall({
-            cwd: `${this.outFolder}/cdk`,
+            cwd: path.join(this.outDir, 'cdk'),
             npmClient: this.npmClient
         })
 
         // if createSchema, add depdencies
         if (this.answers.createSchema) {
             const hasPkg = await this.fs.pathExists(
-                `${this.outFolder}/package.json`
+                path.join(this.outDir, 'package.json')
             )
 
             if (!hasPkg) {
@@ -55,20 +59,20 @@ module.exports = {
                 }
 
                 await this.fs.writeFile(
-                    `${this.outFolder}/package.json`,
+                    path.join(this.outDir, 'package.json'),
                     JSON.stringify(package)
                 )
             }
 
             await this.npmInstall({
-                cwd: `${this.outFolder}`,
+                cwd: this.outDir,
                 npmClient: this.npmClient,
                 packages: ['prisma', 'prisma-appsync'],
                 saveDev: true
             })
 
             await this.npmInstall({
-                cwd: `${this.outFolder}`,
+                cwd: this.outDir,
                 npmClient: this.npmClient,
                 packages: ['@prisma/client']
             })
@@ -78,8 +82,8 @@ module.exports = {
 
         console.log("\n⚡ READY!\n")
 
-        const c1 = this.outFolder !== '.'
-            ? `cd ${this.outFolder} && `
+        const c1 = installDir !== ''
+            ? `cd ${installDir} && `
             : String()
 
         this.logger.info(
@@ -87,8 +91,8 @@ module.exports = {
             this.chalk.blue.underline.bold(`${c1}npx prisma generate`)
         )
 
-        const c2 = this.outFolder !== '.'
-            ? `code ${this.outFolder}/cdk/.env`
+        const c2 = installDir !== ''
+            ? `code ${path.join(installDir, 'cdk', '.env')}`
             : `code cdk/.env`
 
         this.logger.info(
@@ -96,8 +100,8 @@ module.exports = {
             this.chalk.blue.underline.bold(`${c2}`)
         )
 
-        const c3 = this.outFolder !== '.'
-            ? `cd ${this.outFolder}/cdk && `
+        const c3 = installDir !== ''
+            ? `cd ${path.join(installDir, 'cdk')} && `
             : `cd cdk && `
 
         this.logger.info(
