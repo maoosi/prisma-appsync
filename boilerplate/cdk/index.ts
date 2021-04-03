@@ -49,7 +49,7 @@ export class AppSyncCdkStack extends cdk.Stack {
         const apiKey = new CfnApiKey(this, `${process.env.SERVICES_PREFIX}ApiKey`, {
             apiId: graphqlApi.apiId,
             description: `${process.env.SERVICES_PREFIX}_api-key`,
-            expires: Math.floor( today.setDate(today.getDate() + 365) / 1000.0 )
+            expires: Math.floor( today.setDate(today.getDate() + 364) / 1000.0 )
         })
         new cdk.CfnOutput(this, `${process.env.SERVICES_PREFIX}CfnApiKey`, {
             value: apiKey.attrApiKey,
@@ -109,7 +109,11 @@ export class AppSyncCdkStack extends cdk.Stack {
                         return []
                     },
                     afterBundling() {
-                        return [`npx prisma generate`]
+                        return [
+                            'npx prisma generate', 
+                            'rm -rf node_modules/prisma/query-engine-darwin', 
+                            'rm -rf node_modules/prisma/query-engine-rhel-openssl-1.0.x'
+                        ]
                     }
                 },
                 nodeModules: ['prisma', '@prisma/client', 'prisma-appsync'],
