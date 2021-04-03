@@ -101,7 +101,11 @@ const lambdaFunction = new NodejsFunction(this, `${process.env.SERVICES_PREFIX}_
                 return []
             },
             afterBundling() {
-                return [`npx prisma generate`]
+                return [
+                    'npx prisma generate', 
+                    'rm -rf node_modules/prisma/query-engine-darwin', 
+                    'rm -rf node_modules/prisma/query-engine-rhel-openssl-1.0.x'
+                ]
             }
         },
         nodeModules: ['prisma', '@prisma/client', 'prisma-appsync'],
