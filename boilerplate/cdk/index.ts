@@ -111,12 +111,15 @@ export class AppSyncCdkStack extends cdk.Stack {
                     afterBundling() {
                         return [
                             'npx prisma generate', 
-                            'rm -rf node_modules/prisma/query-engine-darwin', 
-                            'rm -rf node_modules/prisma/query-engine-rhel-openssl-1.0.x'
+                            'rm -rf node_modules/@prisma/engines', 
+                            'rm -rf node_modules/@prisma/client/node_modules', 
+                            'rm -rf node_modules/.bin', 
+                            'rm -rf node_modules/prisma'
                         ]
                     }
                 },
                 nodeModules: ['prisma', '@prisma/client', 'prisma-appsync'],
+                forceDockerBundling: true
             },
             environment: {
                 CONNECTION_URL: process.env.PRISMA_CONNECTION_URL || ``
