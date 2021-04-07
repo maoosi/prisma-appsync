@@ -160,7 +160,7 @@ export class PrismaAppSyncResolver {
         let conditionsKeys = []
 
         // define casl ability
-        const ability = defineAbility({ resolveAction }, (allow:any, deny:any) => {
+        const ability = defineAbility((allow:any, deny:any) => {
             this.authorizationRules.forEach((rule:CaslRule) => {
                 const caslRule:any = [rule.action, rule.subject.toLocaleLowerCase()]
 
@@ -210,7 +210,7 @@ export class PrismaAppSyncResolver {
                     else deny(...caslRule)
                 }
             })
-        })
+        }, { resolveAction })
 
         if (this.debug) {
             console.log(

@@ -1,13 +1,13 @@
 lockfileVersion: 5.3
 
 specifiers:
-  '@casl/ability': ^4.1.6
+  '@casl/ability': ^5.2.2
   '@maoosi/appsync-schema-converter': ^1.0.2
   '@prisma/client': ^2.20.1
   '@prisma/generator-helper': ^2.20.1
   '@prisma/sdk': ^2.20.1
   '@types/dot-object': ^2.1.2
-  '@types/fs-extra': ^8.1.1
+  '@types/fs-extra': ^9.0.10
   '@types/jest': ^26.0.22
   '@types/js-yaml': ^4.0.0
   '@types/lodash': ^4.14.168
@@ -19,13 +19,13 @@ specifiers:
   '@vuepress/plugin-medium-zoom': ^1.8.2
   babel-jest: ^26.6.3
   dot-object: ^2.1.4
-  esbuild: ^0.8.57
+  esbuild: ^0.11.6
   fs-extra: ^9.1.0
   graphql: ^15.5.0
   graphql-annotations: ^0.0.3
   jest: ^26.6.3
   jest-transform-graphql: ^2.1.0
-  js-yaml: ^3.14.1
+  js-yaml: ^4.0.0
   nunjucks: ^3.2.3
   pluralize: ^8.0.0
   prettier: ^2.2.1
@@ -38,13 +38,13 @@ specifiers:
   xss: ^1.0.8
 
 devDependencies:
-  '@casl/ability': 4.1.6
+  '@casl/ability': 5.2.2
   '@maoosi/appsync-schema-converter': 1.0.2
   '@prisma/client': 2.20.1_prisma@2.20.1
   '@prisma/generator-helper': 2.20.1
   '@prisma/sdk': 2.20.1
   '@types/dot-object': 2.1.2
-  '@types/fs-extra': 8.1.1
+  '@types/fs-extra': 9.0.10
   '@types/jest': 26.0.22
   '@types/js-yaml': 4.0.0
   '@types/lodash': 4.14.168
@@ -56,13 +56,13 @@ devDependencies:
   '@vuepress/plugin-medium-zoom': 1.8.2
   babel-jest: 26.6.3
   dot-object: 2.1.4
-  esbuild: 0.8.57
+  esbuild: 0.11.6
   fs-extra: 9.1.0
   graphql: 15.5.0
   graphql-annotations: 0.0.3
   jest: 26.6.3
   jest-transform-graphql: 2.1.0
-  js-yaml: 3.14.1
+  js-yaml: 4.0.0
   nunjucks: 3.2.3
   pluralize: 8.0.0
   prettier: 2.2.1
@@ -1214,11 +1214,10 @@ packages:
     resolution: {integrity: sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==}
     dev: true
 
-  /@casl/ability/4.1.6:
-    resolution: {integrity: sha512-ZI30fRacHKCCrWJn1pmxx/+IKUkoycVNz+Mge9EeIH+esDT7nydgWbitVPnlBAbxQXz5eybPAvfPSg3WOa2izw==}
-    engines: {npm: ^6.0.0}
+  /@casl/ability/5.2.2:
+    resolution: {integrity: sha512-A0GTDWojP72Z4HSgS0pfbtGnhQWbquhn9luAr4Uc/HnqWWib0NvmpXC4//7gsiMUiVYCoFozQ+nG1oeZuhT7Jg==}
     dependencies:
-      sift: 13.5.0
+      '@ucast/mongo2js': 1.3.2
     dev: true
 
   /@cnakazawa/watch/1.0.4:
@@ -1692,8 +1691,8 @@ packages:
     resolution: {integrity: sha512-mARrpJofLNe6yhlukeBcznBe8ssZo5ZJ/CJWc3JKmG9L9151s0OHK+mealnkqSgO6cSn1219vND2wgL67Cuqiw==}
     dev: true
 
-  /@types/fs-extra/8.1.1:
-    resolution: {integrity: sha512-TcUlBem321DFQzBNuz8p0CLLKp0VvF/XH9E4KHNmgwyp4E3AfgI5cjiIVZWlbfThBop2qxFIh4+LeY6hVWWZ2w==}
+  /@types/fs-extra/9.0.10:
+    resolution: {integrity: sha512-O9T2LLkRDiTlalOBdjEkcnT0MRdT2+wglCl7pJUJ3mkWkR8hX4K+5bg2raQNJcLv4V8zGuTXe7Ud3wSqkTyuyQ==}
     dependencies:
       '@types/node': 14.14.37
     dev: true
@@ -1794,6 +1793,30 @@ packages:
     resolution: {integrity: sha512-kQ5JNTrbDv3Rp5X2n/iUu37IJBDU2gsZ5R/g1/KHOOEc5IKfUFjXT6DENPGduh08I/pamwtEq4oul7gUqKTQDQ==}
     dependencies:
       '@types/yargs-parser': 20.2.0
+    dev: true
+
+  /@ucast/core/1.10.0:
+    resolution: {integrity: sha512-utMIzLxgsj1VkPTN9Yzt9EaCPWYdF33Pe6fxhsK/jEiMf8M0w/cM4K3Ywc3tZSBn/Cc2YQsx7pVYe8I2NWrBRg==}
+    dev: true
+
+  /@ucast/js/3.0.1:
+    resolution: {integrity: sha512-sabiuYsM5VUg4EaCwlDxnqcrHPFvbZcXvBu+P/o4pqK2q046RLTdo0bM7iVCn5Ro4HpCiRv3QzxtW8epcluY1g==}
+    dependencies:
+      '@ucast/core': 1.10.0
+    dev: true
+
+  /@ucast/mongo/2.4.1:
+    resolution: {integrity: sha512-l/hc3TxjWO9inBrgM5iMCAcsIeV2DToppRlabQa5xB/6uHYtCXfm3TPaJgr8TU1OFxqPlaXEnNQhaV0sVHGsoQ==}
+    dependencies:
+      '@ucast/core': 1.10.0
+    dev: true
+
+  /@ucast/mongo2js/1.3.2:
+    resolution: {integrity: sha512-KNOEs61wxo4VJkVGqwP2a03TKuLx9fLMQgW5HD8Th/mrcuP1SspS4W+kUQD+wB1AA5pOn65hzlHUw5wZBwme0Q==}
+    dependencies:
+      '@ucast/core': 1.10.0
+      '@ucast/js': 3.0.1
+      '@ucast/mongo': 2.4.1
     dev: true
 
   /@vue/babel-helper-vue-jsx-merge-props/1.2.1:
@@ -2465,6 +2488,10 @@ packages:
     resolution: {integrity: sha512-o5Roy6tNG4SL/FOkCAN6RzjiakZS25RLYFrcMttJqbdd8BWrnA+fGz57iN5Pb06pvBGvl5gQ0B48dJlslXvoTg==}
     dependencies:
       sprintf-js: 1.0.3
+    dev: true
+
+  /argparse/2.0.1:
+    resolution: {integrity: sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==}
     dev: true
 
   /arr-diff/4.0.0:
@@ -4465,8 +4492,8 @@ packages:
     resolution: {integrity: sha512-HJDGx5daxeIvxdBxvG2cb9g4tEvwIk3i8+nhX0yGrYmZUzbkdg8QbDevheDB8gd0//uPj4c1EQua8Q+MViT0/w==}
     dev: true
 
-  /esbuild/0.8.57:
-    resolution: {integrity: sha512-j02SFrUwFTRUqiY0Kjplwjm1psuzO1d6AjaXKuOR9hrY0HuPsT6sV42B6myW34h1q4CRy+Y3g4RU/cGJeI/nNA==}
+  /esbuild/0.11.6:
+    resolution: {integrity: sha512-L+nKW9ftVS/N2CVJMR9YmXHbkm+vHzlNYuo09rzipQhF7dYNvRLfWoEPSDRTl10and4owFBV9rJ2CTFNtLIOiw==}
     hasBin: true
     requiresBuild: true
     dev: true
@@ -6585,6 +6612,13 @@ packages:
     dependencies:
       argparse: 1.0.10
       esprima: 4.0.1
+    dev: true
+
+  /js-yaml/4.0.0:
+    resolution: {integrity: sha512-pqon0s+4ScYUvX30wxQi3PogGFAlUyH0awepWvwkj4jD4v+ova3RiYw8bmA6x2rDrEaj8i/oWKoRxpVNW+Re8Q==}
+    hasBin: true
+    dependencies:
+      argparse: 2.0.1
     dev: true
 
   /jsbn/0.1.1:
@@ -9129,10 +9163,6 @@ packages:
     resolution: {integrity: sha512-vFwSUfQvqybiICwZY5+DAWIPLKsWO31Q91JSKl3UYv+K5c2QRPzn0qzec6QPu1Qc9eHYItiP3NdJqNVqetYAww==}
     dev: true
     optional: true
-
-  /sift/13.5.0:
-    resolution: {integrity: sha512-YoS8hmXbmJcf1Gde5bR7+pq69+Nvfv5eHTyv4B00YxJAejTEfzvamG8LHzb0jAFFciMkY05K7GG3P7n/gm0+gg==}
-    dev: true
 
   /signal-exit/3.0.3:
     resolution: {integrity: sha512-VUJ49FC8U1OxwZLxIbTTrDvLnf/6TDgxZcK8wxR8zs13xpx7xbG60ndBlhNrFi2EMuFRoeDoJO7wthSLq42EjA==}

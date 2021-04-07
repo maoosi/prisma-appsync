@@ -167,7 +167,7 @@ export class AppSyncCdkStack extends cdk.Stack {
         )
 
         // read resolvers from yaml
-        const resolvers = yaml.safeLoad(
+        const resolvers = yaml.load(
             fs.readFileSync(
                 path.join(__dirname, process.env.APPSYNC_RESOLVERS_PATH || ``),
                 'utf8'
