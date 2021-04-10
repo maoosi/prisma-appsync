@@ -9,7 +9,7 @@ generator client {
 }
 
 generator appsync {
-    provider = "prisma-appsync"
+    <% if (testingMode) { %>provider = "./node_modules/prisma-appsync/dist/generator.js"<% } else { %>provider = "prisma-appsync"<% } %>
 }
 
 model User {
