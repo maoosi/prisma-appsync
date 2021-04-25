@@ -8,7 +8,6 @@ export declare type CustomPrismaClientOptions = {
     debug?: boolean;
 };
 export declare type Options = {
-    customResolvers?: any;
     connectionUrl: string;
     debug?: boolean;
     sanitize?: boolean;

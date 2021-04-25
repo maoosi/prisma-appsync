@@ -15,7 +15,6 @@ Prisma-AppSync client constructor Class.
 ```typescript
 const app = new PrismaAppSync({
     connectionUrl: process.env.DB_CONNECTION_URL,
-    customResolvers: { incrementPostsViews },
     sanitize: true,
     debug: true,
 }: Options)
@@ -26,11 +25,20 @@ const app = new PrismaAppSync({
 | Property | Description |
 |--|--|--|
 | `connectionUrl` | Database [Connection URL](https://www.prisma.io/docs/reference/database-reference/connection-urls). |
-| `customResolvers` | Custom resolvers to extend the generated CRUD API. |
 | `debug` | Enable or disable detailed logs for Prisma-AppSync. Default to `false`. |
 | `sanitize` | Enable or disable xss sanitization. Default to `true`. |
 
 #### [Relevant types](/reference/client-types.html#constructor)
+
+## registerCustomResolvers
+
+Custom resolvers to extend the generated CRUD API.
+
+### Example
+
+```typescript
+app.registerCustomResolvers({ incrementPostsViews })
+```
 
 ## parseEvent
 
@@ -69,7 +77,6 @@ app.beforeResolve(async ({
 | `args` | Object of arguments that are part of the API request (e.g. `{ where: { id: 2 } }`). |
 | `authIdentity` | Contains informations about the caller and the detected AppSync authorization mode (e.g. `API_KEY`, `AWS_IAM`, `AMAZON_COGNITO_USER_POOLS`). |
 | `fields` | Array of fields that are part of the API request (e.g. `['title', 'authorId', 'publishedAt']`). |
-| `prisma` | Reference to the Prisma Client. |
 | `requestSetPaths` | Array of paths (`operation/subject/field`) that are part of the API request (e.g. `['get/post/title']`). |
 | `subject` | Subject (or model) name (e.g. `Post`, `User`, `Comment`). |
 
@@ -91,7 +98,6 @@ app.afterResolve(async ({
     args,
     authIdentity,
     fields,
-    prisma,
     requestSetPaths,
     result,
     subject  
@@ -108,7 +114,6 @@ app.afterResolve(async ({
 | `args` | Object of arguments that are part of the API request (e.g. `{ where: { id: 2 } }`). |
 | `authIdentity` | Contains informations about the caller and the detected AppSync authorization mode (e.g. `API_KEY`, `AWS_IAM`, `AMAZON_COGNITO_USER_POOLS`). |
 | `fields` | Array of fields that are part of the API request (e.g. `['title', 'authorId', 'publishedAt']`). |
-| `prisma` | Reference to the Prisma Client. |
 | `requestSetPaths` | Array of paths (`operation/subject/field`) that are part of the API request (e.g. `['get/post/title']`). |
 | `result` | Prisma Client query result. |
 | `subject` | Subject (or model) name (e.g. `Post`, `User`, `Comment`). |

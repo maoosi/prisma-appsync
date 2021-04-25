@@ -12,7 +12,6 @@ The Prisma-AppSync Client Types reference:
 
 ```typescript
 export type Options = {
-    customResolvers?: any
     connectionUrl: string
     debug?: boolean
     sanitize?: boolean

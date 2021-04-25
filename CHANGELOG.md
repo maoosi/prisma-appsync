@@ -1,5 +1,25 @@
 # Changelog
 
+## Version 1.0.0-beta.53
+
+### ⚠️ Breaking
+
+Version `1.0.0-beta.52` introduced an issue with accessing Prisma client from inside a custom resolver. To address this, the `customResolvers` parameter has been removed from the PrismaAppSync constructor. Instead, PrismaAppSync now exposes a new `registerCustomResolvers` method:
+
+```typescript
+// before
+const app = new PrismaAppSync({
+    connectionUrl: String(process.env.CONNECTION_URL),
+    customResolvers: { incrementPostsViews }
+})
+
+// after (1.0.0-beta.53+)
+const app = new PrismaAppSync({
+    connectionUrl: String(process.env.CONNECTION_URL)
+})
+app.registerCustomResolvers({ incrementPostsViews })
+```
+
 ## Version 1.0.0-beta.52
 
 ### ⚠️ Breaking

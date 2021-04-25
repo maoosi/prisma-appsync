@@ -9,7 +9,8 @@ import {
     BeforeResolveProps,
     AfterResolveProps,
     Operation,
-    CaslAbilityResult
+    CaslAbilityResult,
+    ResolverOptions
 } from './_types'
 import { PrismaExclWords, AuthActions, Operations } from './_constants'
 import { dot } from 'dot-object'
@@ -27,7 +28,7 @@ export class PrismaAppSyncResolver {
     private prisma:PrismaClient
     private authorizationRules:CaslRule[]
 
-    constructor(options:PrivateOptions) {
+    constructor(options:ResolverOptions) {
         this.prisma = options.prisma
         this.debug = options.debug
         this.authIdentity = { authorization: null }

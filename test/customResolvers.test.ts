@@ -9,10 +9,10 @@ const merge = (objA, objB) => Object.assign({}, objA, objB)
 describe('Custom resolvers', () => {
     test('Should allow executing custom business logic', async () => {
         let postViews = 0
-        const customResolvers = {
+        const app = new PrismaAppSync({ connectionUrl: String() })
+        app.registerCustomResolvers({
             incrementPostsViews: async () => { postViews++ }
-        }
-        const app = new PrismaAppSync({ connectionUrl: String(), customResolvers })
+        })
         app.parseEvent({
             "arguments" : {},
             "info": {
@@ -26,10 +26,10 @@ describe('Custom resolvers', () => {
 
     test('Should pass `args` parameters', async () => {
         let argsParam = null
-        const customResolvers = {
+        const app = new PrismaAppSync({ connectionUrl: String() })
+        app.registerCustomResolvers({
             incrementPostsViews: async ({ args }) => { argsParam = args.data }
-        }
-        const app = new PrismaAppSync({ connectionUrl: String(), customResolvers })
+        })
         app.parseEvent({
             "arguments" : payload.arguments,
             "info": {
@@ -43,12 +43,12 @@ describe('Custom resolvers', () => {
 
     test('Should pass authIdentity object', async () => {
         let authIdentityParam = null
-        const customResolvers = {
+        const app = new PrismaAppSync({ connectionUrl: String() })
+        app.registerCustomResolvers({
             incrementPostsViews: async ({ authIdentity }) => {
                 authIdentityParam = authIdentity
             }
-        }
-        const app = new PrismaAppSync({ connectionUrl: String(), customResolvers })
+        })
         app.parseEvent({
             "arguments" : payload.arguments,
             "info": {
@@ -80,10 +80,11 @@ describe('Custom resolvers', () => {
 
     test('Should work with n+1 queries', async () => {
         let argsParam = null
-        const customResolvers = {
+        const app = new PrismaAppSync({ connectionUrl: String() })
+        app.registerCustomResolvers({
             listPosts: async ({ args }) => { argsParam = args }
-        }
-        const app = new PrismaAppSync({ connectionUrl: String(), customResolvers }).parseEvent({
+        })
+        app.parseEvent({
             "arguments" : payload.arguments,
             "info": {
                 "fieldName": "listPosts",
