@@ -22,8 +22,7 @@ app.prisma.$use(async (params, next) => {
 **Migration guide:**
 
 - `app.$disconnect` replaced with `app.prisma.$disconnect`.
-- `prisma` parameter removed from the before and after hooks functions. To access prisma from within hooks, directly use `app.prisma`.
-- `prisma` parameter removed from the CustomResolverProps. To access prisma from within hooks, directly use `app.prisma`.
+- `prisma` parameter removed from the before and after hooks functions, as well as from the customResolvers parameters. To access prisma from within hooks, directly use `app.prisma`.
 
 ### Non-breaking
 
