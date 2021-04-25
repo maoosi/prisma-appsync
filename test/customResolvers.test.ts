@@ -1,9 +1,10 @@
 import { PrismaAppSync } from './generated/prisma-appsync/client'
-import { merge } from 'lodash'
 
 const payload = require('./data/event.json')
 const args = require('./data/args.json')
 const contextIdentities = require('./data/identities.json')
+
+const merge = (objA, objB) => Object.assign({}, objA, objB)
 
 describe('Custom resolvers', () => {
     test('Should allow executing custom business logic', async () => {

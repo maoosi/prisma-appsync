@@ -5,6 +5,11 @@ export type ExperimentalOptions = {
     dateTimeFieldsRegex?: RegExp|boolean
 }
 
+export type CustomPrismaClientOptions = {
+    connectionUrl: string
+    debug?: boolean
+}
+
 export type Options = {
     customResolvers?: any
     connectionUrl: string
@@ -18,6 +23,7 @@ export type PrivateOptions = {
     connectionUrl: string
     debug: boolean
     sanitize: boolean
+    prisma: PrismaClient
     experimental?: ExperimentalOptions
 }
 
@@ -28,7 +34,6 @@ export type AdapterOptions = {
 }
 
 export type CustomResolverProps = {
-    prisma?: PrismaClient
     args?: RequestProps
     authIdentity?: AuthIdentityProps
 }
@@ -47,7 +52,6 @@ export type BeforeResolveProps = {
     operation: Operation
     subject: string
     fields: string[]
-    prisma: PrismaClient
     requestSetPaths: any
     args: RequestProps
 }
@@ -57,7 +61,6 @@ export type AfterResolveProps = {
     operation: Operation
     subject: string
     fields: string[]
-    prisma: PrismaClient
     requestSetPaths: any
     args: RequestProps
     result: any

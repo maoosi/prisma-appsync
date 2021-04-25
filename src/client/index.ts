@@ -1,3 +1,4 @@
+import { PrismaClient, } from '@prisma/client'
 import { PrismaAppSyncAdapter } from './_adapter'
 import { PrismaAppSyncResolver } from './_resolver'
 import {
@@ -15,8 +16,9 @@ import {
 import { AuthModes, Operations, AuthActions } from './_constants'
 import escape from 'validator/lib/escape'
 import xss from 'xss'
-import { clone } from 'lodash'
+import { clone } from 'lodash-es'
 import { BadRequestError } from './_errors'
+import { CustomPrismaClient } from './_prisma'
 
 export {
     PrismaAppSyncAdapter,
@@ -38,6 +40,7 @@ export {
 export class PrismaAppSync {
     public adapter:PrismaAppSyncAdapter
     public resolver:PrismaAppSyncResolver
+    public prisma:PrismaClient
     private options:PrivateOptions
 
     constructor(options:Options) {
@@ -54,14 +57,21 @@ export class PrismaAppSync {
                     typeof options.experimental !== 'undefined'
                     && typeof options.experimental.dateTimeFieldsRegex !== 'undefined'
                         ? options.experimental.dateTimeFieldsRegex : false,
-            }
+            },
+            prisma: null
         }
+
+        this.prisma = new CustomPrismaClient({
+            connectionUrl: this.options.connectionUrl,
+            debug: this.options.debug,
+        })
 
         return this
     }
 
     public parseEvent(event:any) {
         this.adapter = new PrismaAppSyncAdapter(event, {
+            prisma: this.prisma,
             connectionUrl: this.options.connectionUrl,
             debug: this.options.debug,
             sanitize: this.options.sanitize,
@@ -69,6 +79,7 @@ export class PrismaAppSync {
         })
 
         this.resolver = new PrismaAppSyncResolver({
+            prisma: this.prisma,
             connectionUrl: this.options.connectionUrl,
             debug: this.options.debug,
             sanitize: this.options.sanitize,
@@ -213,9 +224,5 @@ export class PrismaAppSync {
         this.resolver.setAfterResolveHook(callbackFunc)
 
         return this
-    }
-
-    public async $disconnect() {
-        return await this.resolver.disconnect()
     }
 }

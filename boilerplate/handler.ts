@@ -22,7 +22,7 @@ export const main = async (event: any, context: any, callback: any) => {
         console.info('Resolver result:', result)
 
         // Close database connection
-        await app.$disconnect()
+        await app.prisma.$disconnect()
 
         // Return query result
         return Promise.resolve(result)
@@ -37,7 +37,7 @@ export const main = async (event: any, context: any, callback: any) => {
         console.error(`API [${error?.errorType || 'Internal Server Error'}]: `, privateError)
 
         // Close database connection
-        if (app) await app.$disconnect()
+        if (app) await app.prisma.$disconnect()
 
         // Return error response
         return Promise.reject(error)

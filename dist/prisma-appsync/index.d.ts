@@ -1,3 +1,4 @@
+import { PrismaClient } from '@prisma/client';
 import { PrismaAppSyncAdapter } from './_adapter';
 import { PrismaAppSyncResolver } from './_resolver';
 import { Options, AdapterOptions, RequestProps, AuthType, AuthIdentityProps, AuthRule, CustomResolverProps, AfterResolveProps, BeforeResolveProps } from './_types';
@@ -6,6 +7,7 @@ export { PrismaAppSyncAdapter, PrismaAppSyncResolver, Options, AdapterOptions, R
 export declare class PrismaAppSync {
     adapter: PrismaAppSyncAdapter;
     resolver: PrismaAppSyncResolver;
+    prisma: PrismaClient;
     private options;
     constructor(options: Options);
     parseEvent(event: any): this;
@@ -17,5 +19,4 @@ export declare class PrismaAppSync {
     resolve(): Promise<any>;
     beforeResolve(callbackFunc: Function): this;
     afterResolve(callbackFunc: Function): this;
-    $disconnect(): Promise<any>;
 }

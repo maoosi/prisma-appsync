@@ -1,5 +1,5 @@
-import nunjucks from 'nunjucks'
-import prettier, { RequiredOptions } from 'prettier'
+import * as nunjucks from 'nunjucks'
+import * as prettier from 'prettier'
 import { plural } from 'pluralize'
 import { DMMF } from '@prisma/generator-helper'
 import { load as loadYaml } from 'js-yaml'
@@ -15,19 +15,13 @@ import {
 import { parseAnnotations } from 'graphql-annotations'
 import { join, extname, basename, dirname } from 'path'
 import { readFile, outputFile, writeFile, readFileSync, copy } from 'fs-extra'
-// import { inspect } from 'util'
-import _ from 'lodash'
+import { mixin, flow, camelCase, upperFirst, merge } from 'lodash-es'
 
 // AppSync schema helper
 const { convertSchemas } = require('@maoosi/appsync-schema-converter')
 
-// Custom lodash functions
-_.mixin({ pascalCase: _.flow(_.camelCase, _.upperFirst) })
-declare module "lodash" {
-    export interface LoDashStatic {
-        pascalCase(string?: string): string
-    }
-}
+// Custom lodash function
+const pascalCase = flow(camelCase, upperFirst)
 
 export class PrismaAppSyncCompiler {
     private dmmf:DMMF.Document
@@ -68,7 +62,7 @@ export class PrismaAppSyncCompiler {
         this.data = {
             models: [],
             enums: [],
-            directiveAliases: _.merge({ default: String() }, this.options.directiveAliases),
+            directiveAliases: merge({ default: String() }, this.options.directiveAliases),
             customResolvers: []
         }
 
@@ -333,7 +327,7 @@ export class PrismaAppSyncCompiler {
         const inputContent:string = await readFile(inputFile, { encoding: 'utf8' })
 
         const env = nunjucks.configure({ autoescape: true })
-        env.addFilter('pascalCase', (str:string) => _.pascalCase(str))
+        env.addFilter('pascalCase', (str:string) => pascalCase(str))
 
         let outputContent:string = nunjucks.renderString(
             inputContent.trim(),
@@ -346,7 +340,7 @@ export class PrismaAppSyncCompiler {
             ? outputFileOptions.outputFilename  
             : basename(inputFile.replace('.njk', ''))
         
-        let parserOpt:RequiredOptions['parser']|boolean
+        let parserOpt:prettier.RequiredOptions['parser']|boolean
 
         switch (extname(outputFilename)) {
             case '.ts': parserOpt = 'typescript'; break
@@ -404,7 +398,7 @@ export class PrismaAppSyncCompiler {
 
     // Return relation name from Prisma type
     private getFieldRelationName(field:DMMF.Field, model:DMMF.Model):string {
-        return _.pascalCase(`${model.name} ${field.name}`)
+        return pascalCase(`${model.name} ${field.name}`)
     }
 
     // Return relation kind (`one` or `many`) from Prisma type
@@ -531,7 +525,7 @@ export class PrismaAppSyncCompiler {
             })
 
         // merge directive alias with annotations
-        annotations = _.merge(annotations, directiveAliases)
+        annotations = merge(annotations, directiveAliases)
 
         // generate directives list based on priorityScheme
         for (const schemaScope in priorityScheme) {

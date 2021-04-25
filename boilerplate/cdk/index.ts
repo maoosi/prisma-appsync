@@ -90,33 +90,37 @@ export class AppSyncCdkStack extends cdk.Stack {
         const lambdaFunction = new NodejsFunction(this, `${process.env.SERVICES_PREFIX}_Function`, {
             functionName: `${process.env.SERVICES_PREFIX}_Function`,
             role: lambdaExecutionRole,
-            runtime: Runtime.NODEJS_12_X,
+            runtime: Runtime.NODEJS_14_X,
             timeout: cdk.Duration.seconds(10),
             handler: 'main',
             entry: path.join(__dirname, process.env.HANDLER_FUNCTION_PATH || ``),
-            memorySize: 512,
+            memorySize: 1536,
             depsLockFilePath: path.join(__dirname, '../yarn.lock'),
             bundling: {
                 minify: true,
                 commandHooks: {
                     beforeBundling(inputDir: string, outputDir: string): string[] {
-                        const schemaPath =  path.join(
-                            inputDir, process.env.PRISMA_SCHEMA_ROOT_PATH || 'schema.prisma'
-                        )
-                        return [`cp ${schemaPath} ${outputDir}`]
+                        return [
+                            `cp ${path.join(inputDir, process.env.PRISMA_SCHEMA_ROOT_PATH || 'schema.prisma')} ${outputDir}`
+                        ]
                     },
                     beforeInstall() {
                         return []
                     },
-                    afterBundling() {
+                    afterBundling(inputDir: string, outputDir: string): string[] {
                         return [
-                            'npx prisma generate', 
-                            'rm -rf node_modules/prisma/query-engine-darwin', 
-                            'rm -rf node_modules/prisma/query-engine-rhel-openssl-1.0.x'
+                            <% if (testingMode) { %>`cp -R ${path.join(inputDir, 'node_modules/.tmp/prisma-appsync/')} ${path.join(outputDir, 'node_modules/')}`,
+                            <% } %>'npx prisma generate', 
+                            'rm -rf node_modules/@prisma/engines', 
+                            'rm -rf node_modules/@prisma/client/node_modules', 
+                            'rm -rf node_modules/.bin', 
+                            'rm -rf node_modules/prisma',
+                            'rm -rf node_modules/prisma-appsync',
                         ]
                     }
                 },
-                nodeModules: ['prisma', '@prisma/client', 'prisma-appsync'],
+                <% if (testingMode) { %>nodeModules: ['prisma', '@prisma/client'],<% } else { %>nodeModules: ['prisma', '@prisma/client', 'prisma-appsync'],<% } %>
+                forceDockerBundling: true
             },
             environment: {
                 CONNECTION_URL: process.env.PRISMA_CONNECTION_URL || ``
@@ -164,7 +168,7 @@ export class AppSyncCdkStack extends cdk.Stack {
         )
 
         // read resolvers from yaml
-        const resolvers = yaml.safeLoad(
+        const resolvers = yaml.load(
             fs.readFileSync(
                 path.join(__dirname, process.env.APPSYNC_RESOLVERS_PATH || ``),
                 'utf8'

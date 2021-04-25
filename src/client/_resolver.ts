@@ -14,10 +14,9 @@ import {
 import { PrismaExclWords, AuthActions, Operations } from './_constants'
 import { dot } from 'dot-object'
 import { createAliasResolver, defineAbility, subject } from '@casl/ability'
-import { difference, merge, keys, every, upperFirst, pick } from 'lodash'
+import { difference, merge, keys, every, upperFirst, pick } from 'lodash-es'
 import { InternalError, UnauthorizedError } from './_errors'
-
-const { PrismaClient } = require('@prisma/client')
+import { PrismaClient } from '@prisma/client'
 
 export class PrismaAppSyncResolver {
     private debug:boolean
@@ -25,38 +24,16 @@ export class PrismaAppSyncResolver {
     private beforeResolveHook:Function
     private beforeResolveHookProps:BeforeResolveProps
     private afterResolveHook:Function
-    public prisma:any
+    private prisma:PrismaClient
     private authorizationRules:CaslRule[]
 
     constructor(options:PrivateOptions) {
-        this.prisma = null
+        this.prisma = options.prisma
         this.debug = options.debug
         this.authIdentity = { authorization: null }
         this.authorizationRules = []
         this.beforeResolveHook = async () => { return true }
         this.afterResolveHook = async () => { return true }
-
-        process.env.CHECKPOINT_DISABLE = '1'
-        process.env.DATABASE_URL = options.connectionUrl
-
-        this.initPrisma()
-
-        return this
-    }
-
-    private async initPrisma() {
-        if (!this.prisma) {
-            this.prisma = new PrismaClient({
-                log: [ { emit: 'event', level: 'query' } ],
-                errorFormat: 'pretty',
-            })
-
-            if (this.debug) {
-                this.prisma.$on('query', (log:any) => {
-                    console.log('MySQL query: ', JSON.stringify(log))
-                })
-            }
-        }
 
         return this
     }
@@ -160,7 +137,7 @@ export class PrismaAppSyncResolver {
         let conditionsKeys = []
 
         // define casl ability
-        const ability = defineAbility({ resolveAction }, (allow:any, deny:any) => {
+        const ability = defineAbility((allow:any, deny:any) => {
             this.authorizationRules.forEach((rule:CaslRule) => {
                 const caslRule:any = [rule.action, rule.subject.toLocaleLowerCase()]
 
@@ -210,7 +187,7 @@ export class PrismaAppSyncResolver {
                     else deny(...caslRule)
                 }
             })
-        })
+        }, { resolveAction })
 
         if (this.debug) {
             console.log(
@@ -288,7 +265,6 @@ export class PrismaAppSyncResolver {
             operation: operation,
             subject: subject,
             fields: fields,
-            prisma: this.prisma,
             requestSetPaths: requestSetPaths,
             args: args
         }
@@ -392,7 +368,6 @@ export class PrismaAppSyncResolver {
         await this.runBeforeResolveHook({ operation: Operations.custom, model, args })
 
         const callbackProps:CustomResolverProps = {
-            prisma: this.prisma,
             args: args,
             authIdentity: this.authIdentity
         }
@@ -510,11 +485,5 @@ export class PrismaAppSyncResolver {
         await this.runAfterResolveHook({ result: results })
 
         return results
-    }
-
-    public async disconnect() {
-        return this.prisma
-            ? await this.prisma.$disconnect()
-            : false
     }
 }

@@ -26,7 +26,7 @@
 
 ## ⚓ Compatibility
 
-- Prisma 2.10.1
+- Prisma 2.21.2
 
 ## 📓 Documentation
 
@@ -39,12 +39,20 @@
 ## 🧙‍♂️ Contributors
 
 <table>
-      <tr>
-        <td align="center" style="border:0;">
-            <a href="https://github.com/maoosi" target="_blank">
-                <img src="https://avatars2.githubusercontent.com/u/4679377?v=3?s=120" width="120px;" alt="maoosi"/>
-                <br /><sub><b>Sylvain (maoosi)</b></sub>
-            </a>
+    <tr>
+        <td align="center">
+            <div>
+                <sub><b>Owner/Maintainer</b></sub>
+            </div>
+            <div>
+                <a href="https://github.com/maoosi" target="_blank">
+                    <img src="https://avatars2.githubusercontent.com/u/4679377?v=3?s=120" width="120px;" alt="maoosi"/>
+                    <br /><sub><b>Sylvain (@maoosi)</b></sub>
+                </a>
+            </div>
+            <div>
+                <a href="https://www.buymeacoffee.com/maoosi" target="_blank"><sub>☕ Buy me a coffee</sub></a>
+            </div>
         </td>
     </tr>
 </table>
@@ -53,7 +61,7 @@
 
 <table>
       <tr>
-        <td align="center" style="border:0;width:200px;">
+        <td align="center" style="width:200px;">
             <a href="https://travistravis.co" target="_blank">
                 <img src="https://prisma-appsync.vercel.app/travistravis.co.png" width="160px;" alt="travistravis.co"/>
                 <br /><b>Travis</b>

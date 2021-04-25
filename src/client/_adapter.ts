@@ -1,5 +1,5 @@
 import { singular } from 'pluralize'
-import { merge, camelCase } from 'lodash'
+import { merge, camelCase } from 'lodash-es'
 import {
     RequestProps,
     PrivateOptions,
