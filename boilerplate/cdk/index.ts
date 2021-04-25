@@ -114,7 +114,8 @@ export class AppSyncCdkStack extends cdk.Stack {
                             'rm -rf node_modules/@prisma/engines', 
                             'rm -rf node_modules/@prisma/client/node_modules', 
                             'rm -rf node_modules/.bin', 
-                            'rm -rf node_modules/prisma'
+                            'rm -rf node_modules/prisma',
+                            'rm -rf node_modules/prisma-appsync',
                         ]
                     }
                 },
