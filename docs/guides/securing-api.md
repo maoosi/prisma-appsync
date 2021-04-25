@@ -138,7 +138,7 @@ See full list of options, methods and types in the [Reference](/reference) secti
 import { AuthModes, AuthActions } from './generated/prisma-appsync/client'
 
 // before resolving any query
-app.beforeResolve(async ({ authIdentity, prisma }: BeforeResolveProps) => {
+app.beforeResolve(async ({ authIdentity }: BeforeResolveProps) => {
 
     // rules only apply to Cognito authorization type
     if (authIdentity.authorization === AuthModes.AMAZON_COGNITO_USER_POOLS) {

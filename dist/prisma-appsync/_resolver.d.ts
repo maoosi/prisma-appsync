@@ -5,10 +5,9 @@ export declare class PrismaAppSyncResolver {
     private beforeResolveHook;
     private beforeResolveHookProps;
     private afterResolveHook;
-    prisma: any;
+    private prisma;
     private authorizationRules;
     constructor(options: PrivateOptions);
-    private initPrisma;
     private getRequestSetPaths;
     private getAbilitySubjectEntity;
     private isAuthorizedQuery;
@@ -29,5 +28,4 @@ export declare class PrismaAppSyncResolver {
     upsert(model: string, args: RequestProps): Promise<any>;
     delete(model: string, args: RequestProps): Promise<any>;
     deleteMany(model: string, args: RequestProps): Promise<any>;
-    disconnect(): Promise<any>;
 }

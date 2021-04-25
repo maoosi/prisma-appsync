@@ -54,7 +54,6 @@ app.beforeResolve(async ({
     args,
     authIdentity,
     fields,
-    prisma,
     requestSetPaths,
     subject    
 }: BeforeResolveProps) => {
@@ -181,12 +180,17 @@ Resolve the API request using Prisma-AppSync and return the result formatted for
 const result = await app.resolve()
 ```
 
-## $disconnect
+## prisma
 
-Close the database connections. Similar to [Prisma $disconnect method](https://www.prisma.io/docs/reference/api-reference/prisma-client-reference/#disconnect-1).
-
-### Example
+Access Prisma Client.
 
 ```typescript
-await app.$disconnect()
+// use prisma middleware
+app.prisma.$use(async (params, next) => {
+    console.log('This is middleware!')
+    return next(params)
+})
+
+// close the database connections
+await app.prisma.$disconnect()
 ```

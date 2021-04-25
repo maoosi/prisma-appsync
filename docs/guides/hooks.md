@@ -27,7 +27,6 @@ export type BeforeResolveProps = {
     args: RequestProps
     authIdentity: AuthIdentityProps
     fields: string[]
-    prisma: PrismaClient
     requestSetPaths: any
     subject: string
 }
@@ -108,7 +107,6 @@ export type AfterResolveProps = {
     args: RequestProps
     authIdentity: AuthIdentityProps
     fields: string[]
-    prisma: PrismaClient
     requestSetPaths: any
     result: any
     subject: string

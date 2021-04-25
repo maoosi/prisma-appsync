@@ -3,6 +3,10 @@ import { AuthModes, Operations, AuthActions } from './_constants';
 export declare type ExperimentalOptions = {
     dateTimeFieldsRegex?: RegExp | boolean;
 };
+export declare type CustomPrismaClientOptions = {
+    connectionUrl: string;
+    debug?: boolean;
+};
 export declare type Options = {
     customResolvers?: any;
     connectionUrl: string;
@@ -15,6 +19,7 @@ export declare type PrivateOptions = {
     connectionUrl: string;
     debug: boolean;
     sanitize: boolean;
+    prisma: PrismaClient;
     experimental?: ExperimentalOptions;
 };
 export declare type AdapterOptions = {
@@ -23,7 +28,6 @@ export declare type AdapterOptions = {
     sanitize?: boolean;
 };
 export declare type CustomResolverProps = {
-    prisma?: PrismaClient;
     args?: RequestProps;
     authIdentity?: AuthIdentityProps;
 };
@@ -40,7 +44,6 @@ export declare type BeforeResolveProps = {
     operation: Operation;
     subject: string;
     fields: string[];
-    prisma: PrismaClient;
     requestSetPaths: any;
     args: RequestProps;
 };
@@ -49,7 +52,6 @@ export declare type AfterResolveProps = {
     operation: Operation;
     subject: string;
     fields: string[];
-    prisma: PrismaClient;
     requestSetPaths: any;
     args: RequestProps;
     result: any;

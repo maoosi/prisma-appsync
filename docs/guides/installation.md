@@ -145,7 +145,7 @@ export const main = async (event: any, context: any) => {
     const result = await app.resolve()
 
     // close database connection
-    await app.$disconnect()
+    await app.prisma.$disconnect()
 
     // return query result
     return Promise.resolve(result)

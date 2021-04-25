@@ -2,6 +2,31 @@
 
 ## Version 1.0.0-beta.52
 
+### ⚠️ Breaking
+
+- Feat: Providing easier access to Prisma Client
+
+```typescript
+// initialise client
+const app = new PrismaAppSync({
+    connectionUrl: process.env.CONNECTION_URL
+})
+
+// access Prisma client
+app.prisma.$use(async (params, next) => {
+  console.log('This is middleware!')
+  return next(params)
+})
+```
+
+**Migration guide:**
+
+- `app.$disconnect` replaced with `app.prisma.$disconnect`.
+- `prisma` parameter removed from the before and after hooks functions. To access prisma from within hooks, directly use `app.prisma`.
+- `prisma` parameter removed from the CustomResolverProps. To access prisma from within hooks, directly use `app.prisma`.
+
+### Non-breaking
+
 - Feat: Support for prisma ^2.21.2 added.
 - Feat: Lambda bundle size reduced (provided CDK boilerplate).
 
@@ -18,9 +43,8 @@ afterBundling(inputDir: string, outputDir: string): string[] {
 }
 ```
 
-- Feat: Contribution guide added (see [CONTRIBUTING.md](CONTRIBUTING.md)) w/ new boilerplate testing workflow.
+- Feat: Contribution guide added (see [CONTRIBUTING.md](CONTRIBUTING.md)) with new boilerplate testing workflow.
 - Feat: Core library is now using Pnpm instead of Yarn.
-- Fix: Dependencies upgraded.
 
 ## Version 1.0.0-beta.51
 
