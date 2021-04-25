@@ -14,7 +14,7 @@ import {
 import { PrismaExclWords, AuthActions, Operations } from './_constants'
 import { dot } from 'dot-object'
 import { createAliasResolver, defineAbility, subject } from '@casl/ability'
-import { difference, merge, keys, every, upperFirst, pick } from 'lodash'
+import { difference, merge, keys, every, upperFirst, pick } from 'lodash-es'
 import { InternalError, UnauthorizedError } from './_errors'
 
 const { PrismaClient } = require('@prisma/client')

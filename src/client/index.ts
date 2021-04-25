@@ -15,7 +15,7 @@ import {
 import { AuthModes, Operations, AuthActions } from './_constants'
 import escape from 'validator/lib/escape'
 import xss from 'xss'
-import { clone } from 'lodash'
+import { clone } from 'lodash-es'
 import { BadRequestError } from './_errors'
 
 export {
