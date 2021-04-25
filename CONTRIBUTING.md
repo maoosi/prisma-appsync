@@ -1,6 +1,5 @@
 # Contributing
 
-
 ## Bug Reports and Feature Requests
 
 If you have found a bug or have a feature request then please create an issue in this repository (please search first in case a similar issue already exists).
