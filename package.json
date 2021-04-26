@@ -1,7 +1,7 @@
 {
     "name": "prisma-appsync",
     "description": "⚡ AppSync GraphQL API Generator for ◭ Prisma 2, the next-gen ORM.",
-    "version": "1.0.0-beta.53",
+    "version": "1.0.0-beta.54",
     "bin": "./dist/generator.js",
     "repository": "git@github.com:maoosi/prisma-appsync.git",
     "author": "maoosi <hello@sylvainsimao.fr>",
@@ -17,8 +17,7 @@
         "docs:build": "vuepress build docs",
         "test": "pnpm test:generate && jest test/ -e",
         "test:generate": "pnpm build && prisma generate --schema=./test/schema.prisma",
-        "prepare": "pnpm test",
-        "postinstall": "prisma generate"
+        "prepare": "pnpm test"
     },
     "engines": {
         "node": ">=10",
