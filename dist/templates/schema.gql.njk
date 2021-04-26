@@ -1,3 +1,51 @@
+enum OrderByArg {
+    ASC
+    DESC
+}
+
+type BatchPayload {{ directiveAliases.default | safe }} {
+    count: Int
+}
+
+input AWSDateTimeFilter {
+    equals: AWSDateTime
+    gt: AWSDateTime
+    gte: AWSDateTime
+    in: [AWSDateTime!]
+    lt: AWSDateTime
+    lte: AWSDateTime
+    not: AWSDateTimeFilter
+    notIn: [AWSDateTime!]
+}
+
+input IntFilter {
+    contains: Int
+    endsWith: Int
+    equals: Int
+    gt: Int
+    gte: Int
+    in: [Int!]
+    lt: Int
+    lte: Int
+    not: IntFilter
+    notIn: [Int!]
+    startsWith: Int
+}
+
+input StringFilter {
+    contains: String
+    endsWith: String
+    equals: String
+    gt: String
+    gte: String
+    in: [String!]
+    lt: String
+    lte: String
+    not: StringFilter
+    notIn: [String!]
+    startsWith: String
+}
+
 {% for enum in enums %}
     enum {{ enum.name }} {
         {% for value in enum.values -%}
@@ -6,11 +54,6 @@
     }
 {% endfor %}
 
-enum OrderByArg {
-    ASC
-    DESC
-}
-
 {% for model in models %}
     type {{ model.name }} {{ model.directives.type | safe }} {
         {% for field in model.fields -%}
@@ -18,10 +61,6 @@ enum OrderByArg {
         {% endfor %}
     }
 {% endfor %}
-
-type BatchPayload {{ directiveAliases.default | safe }} {
-    count: Int
-}
 
 {% for model in models %}
     {% if model.idFields | length -%}
@@ -56,24 +95,31 @@ type BatchPayload {{ directiveAliases.default | safe }} {
         {% endfor %}
     }
 
+    input {{ model.name }}ListRelationFilter {
+        every: {{ model.name }}WhereInput
+        none: {{ model.name }}WhereInput
+        some: {{ model.name }}WhereInput
+    }
+
+    {% for field in model.fields -%}
+        {% if field.scalar in ["String", "Int", "AWSDateTime"] -%}
+            union {{ model.name }}{{ field.name | pascalCase }}Filter = {{ field.scalar }} | {{ field.scalar }}Filter
+        {% endif -%}
+    {% endfor %}
+    
     input {{ model.name }}WhereInput {
         OR: [{{ model.name }}WhereInput]
         NOT: [{{ model.name }}WhereInput]
         AND: [{{ model.name }}WhereInput]
         {% for field in model.fields -%}
             {% if not field.relation -%}
-                {{ field.name }}: {{ field.scalar }}
-                {{ field.name }}_equals: {{ field.scalar }}
-                {{ field.name }}_not: {{ field.scalar }}
-                {{ field.name }}_lt: {{ field.scalar }}
-                {{ field.name }}_lte: {{ field.scalar }}
-                {{ field.name }}_gt: {{ field.scalar }}
-                {{ field.name }}_gte: {{ field.scalar }}
-                {{ field.name }}_contains: {{ field.scalar }}
-                {{ field.name }}_startsWith: {{ field.scalar }}
-                {{ field.name }}_endsWith: {{ field.scalar }}
+                {% if field.scalar in ["String", "Int", "AWSDateTime"] -%}
+                    {{ field.name }}: {{ model.name }}{{ field.name | pascalCase }}Filter
+                {% else -%}
+                    {{ field.name }}: {{ field.scalar }}
+                {% endif -%}
             {% else -%}
-                {{ field.name }}: {{ field.relation.type }}WhereInput
+                {{ field.name }}: {{ field.relation.type }}ListRelationFilter
             {% endif -%}
         {% endfor %}
     }
@@ -201,7 +247,9 @@ type Query {
         ): {{ model.name }} {{ model.directives.get | safe }}
         list{{ model.pluralizedName }}(
             where: {{ model.name }}WhereInput,
-            orderBy: {{ model.name }}OrderByInput
+            orderBy: {{ model.name }}OrderByInput,
+            skip: Int,
+            take: Int
         ): [{{ model.name }}] {{ model.directives.list | safe }}
     {% endfor %}
 }
