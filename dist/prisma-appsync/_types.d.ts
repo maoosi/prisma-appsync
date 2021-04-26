@@ -1,8 +1,5 @@
 import { PrismaClient } from '@prisma/client';
 import { AuthModes, Operations, AuthActions } from './_constants';
-export declare type ExperimentalOptions = {
-    dateTimeFieldsRegex?: RegExp | boolean;
-};
 export declare type CustomPrismaClientOptions = {
     connectionUrl: string;
     debug?: boolean;
@@ -11,20 +8,20 @@ export declare type Options = {
     connectionUrl: string;
     debug?: boolean;
     sanitize?: boolean;
-    experimental?: ExperimentalOptions;
 };
 export declare type PrivateOptions = {
-    customResolvers: any;
     connectionUrl: string;
     debug: boolean;
     sanitize: boolean;
-    prisma: PrismaClient;
-    experimental?: ExperimentalOptions;
 };
 export declare type AdapterOptions = {
-    customResolvers?: any;
-    debug?: boolean;
-    sanitize?: boolean;
+    customResolvers: any;
+    debug: boolean;
+};
+export declare type ResolverOptions = {
+    prisma: PrismaClient;
+    customResolvers: any;
+    debug: boolean;
 };
 export declare type CustomResolverProps = {
     args?: RequestProps;

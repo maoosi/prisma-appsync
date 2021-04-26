@@ -1,4 +1,4 @@
-import { PrivateOptions, RequestProps, AuthType, CaslRule } from './_types';
+import { RequestProps, AuthType, CaslRule, ResolverOptions } from './_types';
 export declare class PrismaAppSyncResolver {
     private debug;
     private authIdentity;
@@ -7,7 +7,7 @@ export declare class PrismaAppSyncResolver {
     private afterResolveHook;
     private prisma;
     private authorizationRules;
-    constructor(options: PrivateOptions);
+    constructor(options: ResolverOptions);
     private getRequestSetPaths;
     private getAbilitySubjectEntity;
     private isAuthorizedQuery;
