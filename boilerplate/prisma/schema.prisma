@@ -9,7 +9,9 @@ generator client {
 }
 
 generator appsync {
-    <% if (testingMode) { %>provider = "./node_modules/prisma-appsync/dist/generator.js"<% } else { %>provider = "prisma-appsync"<% } %>
+    <% if (testingMode) { %>provider = "./node_modules/prisma-appsync/dist/generator.js"
+    customSchema = "./custom-schema.gql"
+    customResolvers = "./custom-resolvers.yaml"<% } else { %>provider = "prisma-appsync"<% } %>
 }
 
 model User {
@@ -23,12 +25,13 @@ model User {
 
 model Post {
     id        Int      @id @default(autoincrement())
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-    published Boolean  @default(false)
-    title     String   @db.VarChar(255)
     author    User?    @relation(fields: [authorId], references: [id])
     authorId  Int?
+    title     String   @db.VarChar(255)
+    views     Int?     @default(1)
+    published Boolean? @default(false)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }
 
 enum Role {

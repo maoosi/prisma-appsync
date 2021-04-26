@@ -2,7 +2,7 @@ import { singular } from 'pluralize'
 import { merge, camelCase } from 'lodash-es'
 import {
     RequestProps,
-    PrivateOptions,
+    AdapterOptions,
     AuthType,
     Operation
 } from './_types'
@@ -26,7 +26,7 @@ export class PrismaAppSyncAdapter {
     public authIdentityType:AuthType
     public authIdentityObj:any
 
-    constructor(event:any, options?:PrivateOptions) {
+    constructor(event:any, options:AdapterOptions) {
         this.operation = null
         this.model = String()
         this.requestSetPaths = []

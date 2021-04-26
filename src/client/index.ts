@@ -16,7 +16,7 @@ import {
 import { AuthModes, Operations, AuthActions } from './_constants'
 import escape from 'validator/lib/escape'
 import xss from 'xss'
-import { clone } from 'lodash-es'
+import { clone, merge } from 'lodash-es'
 import { BadRequestError } from './_errors'
 import { CustomPrismaClient } from './_prisma'
 
@@ -41,6 +41,7 @@ export class PrismaAppSync {
     public adapter:PrismaAppSyncAdapter
     public resolver:PrismaAppSyncResolver
     public prisma:PrismaClient
+    private customResolvers:any
     private options:PrivateOptions
 
     constructor(options:Options) {
@@ -49,17 +50,10 @@ export class PrismaAppSync {
             debug: typeof options.debug !== 'undefined'
                 ? options.debug : false,
             sanitize: typeof options.sanitize !== 'undefined'
-                ? options.sanitize : true,
-            customResolvers: typeof options.customResolvers !== 'undefined'
-                ? options.customResolvers : {},
-            experimental: {
-                dateTimeFieldsRegex:
-                    typeof options.experimental !== 'undefined'
-                    && typeof options.experimental.dateTimeFieldsRegex !== 'undefined'
-                        ? options.experimental.dateTimeFieldsRegex : false,
-            },
-            prisma: null
+                ? options.sanitize : true
         }
+
+        this.customResolvers = {}
 
         this.prisma = new CustomPrismaClient({
             connectionUrl: this.options.connectionUrl,
@@ -69,21 +63,22 @@ export class PrismaAppSync {
         return this
     }
 
+    public registerCustomResolvers(customResolvers:any) {
+        this.customResolvers = merge({}, this.customResolvers, customResolvers)
+
+        return this
+    }
+
     public parseEvent(event:any) {
         this.adapter = new PrismaAppSyncAdapter(event, {
-            prisma: this.prisma,
-            connectionUrl: this.options.connectionUrl,
             debug: this.options.debug,
-            sanitize: this.options.sanitize,
-            customResolvers: this.options.customResolvers,
+            customResolvers: this.customResolvers,
         })
 
         this.resolver = new PrismaAppSyncResolver({
             prisma: this.prisma,
-            connectionUrl: this.options.connectionUrl,
             debug: this.options.debug,
-            sanitize: this.options.sanitize,
-            customResolvers: this.options.customResolvers,
+            customResolvers: this.customResolvers,
         })
 
         return this
@@ -161,36 +156,11 @@ export class PrismaAppSync {
         }
     }
 
-    private experimentalDateTimeFieldsRegex(data:any) {
-        const outputData = clone(data)
-
-        for (const prop in outputData) {
-            if (Object.prototype.hasOwnProperty.call(outputData, prop)) {
-                const value = outputData[prop]
-
-                if (typeof value === 'object') {
-                    outputData[prop] = this.experimentalDateTimeFieldsRegex(value)
-                } else if (
-                    typeof this.options.experimental.dateTimeFieldsRegex !== 'boolean'
-                    && prop.match(this.options.experimental.dateTimeFieldsRegex)
-                    && typeof value === 'string'
-                ) {
-                    outputData[prop] = new Date(value)
-                }
-            }
-        }
-
-        return outputData
-    }
-
     public async resolve() {
         if (this.adapter.operation.length === 0)
             throw new BadRequestError(`Impossible to resolve with undefined operation.`)
         if (this.adapter.model.length === 0)
             throw new BadRequestError(`Impossible to resolve with undefined model.`)
-
-        if (this.options.experimental.dateTimeFieldsRegex)
-            this.adapter.args = this.experimentalDateTimeFieldsRegex(this.adapter.args)
 
         if (this.options.sanitize)
             this.adapter.args = this.sanitize(this.adapter.args)
@@ -204,7 +174,7 @@ export class PrismaAppSync {
             ? await this.resolver[this.adapter.operation](
                 this.adapter.model,
                 this.adapter.args,
-                this.options.customResolvers[this.adapter.model]
+                this.customResolvers[this.adapter.model]
             )
             : await this.resolver[this.adapter.operation](
                 this.adapter.model,

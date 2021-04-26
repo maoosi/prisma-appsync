@@ -152,8 +152,10 @@ describe('Fine-grained access control with CASL', () => {
 
     test('Should allow custom resolver query using allow rule', async() => {
         const app = new PrismaAppSync({
-            connectionUrl: String(),
-            customResolvers: { incrementPostsViews: async () => { return true } }
+            connectionUrl: String()
+        })
+        app.registerCustomResolvers({
+            incrementPostsViews: async () => { return true}
         })
         app.parseEvent({
             "arguments": {},
@@ -168,8 +170,10 @@ describe('Fine-grained access control with CASL', () => {
 
     test('Should deny custom resolver query using deny rule', async() => {
         const app = new PrismaAppSync({
-            connectionUrl: String(),
-            customResolvers: { incrementPostsViews: async () => { return true } }
+            connectionUrl: String()
+        })
+        app.registerCustomResolvers({
+            incrementPostsViews: async () => { return true}
         })
         app.parseEvent({
             "arguments": {},

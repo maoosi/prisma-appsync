@@ -1,0 +1,4 @@
+-   
+    typeName: Mutation
+    fieldName: incrementPostsViews
+    dataSource: prisma-appsync

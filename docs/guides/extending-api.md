@@ -36,18 +36,19 @@ import { PrismaAppSync, CustomResolverProps } from './generated/prisma-appsync/c
 
 // ...
 
+const app = new PrismaAppSync({
+    connectionUrl: String(process.env.CONNECTION_URL)
+})
+
 const incrementPostsViews = 
-    async ({ prisma, args }: CustomResolverProps) => {
-        return await prisma.post.update({
+    async ({ args }: CustomResolverProps) => {
+        return await app.prisma.post.update({
             data: { views: { increment: 1 } },
             where: { id: args.postId }
         })
     }
 
-const app = new PrismaAppSync({
-    connectionUrl: String(process.env.CONNECTION_URL),
-    customResolvers: { incrementPostsViews }
-})
+app.registerCustomResolvers({ incrementPostsViews })
 ```
 
 See full list of options, methods and types in the [Reference](/reference) section.

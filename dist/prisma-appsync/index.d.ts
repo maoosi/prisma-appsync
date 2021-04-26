@@ -8,8 +8,10 @@ export declare class PrismaAppSync {
     adapter: PrismaAppSyncAdapter;
     resolver: PrismaAppSyncResolver;
     prisma: PrismaClient;
+    private customResolvers;
     private options;
     constructor(options: Options);
+    registerCustomResolvers(customResolvers: any): this;
     parseEvent(event: any): this;
     sanitize(data: any): any;
     allow(authorizationRule: AuthRule): void;
