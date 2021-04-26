@@ -17,6 +17,7 @@ const app = new PrismaAppSync({
     connectionUrl: process.env.DB_CONNECTION_URL,
     sanitize: true,
     debug: true,
+    defaultPagination: 50
 }: Options)
 ```
 
@@ -27,6 +28,7 @@ const app = new PrismaAppSync({
 | `connectionUrl` | Database [Connection URL](https://www.prisma.io/docs/reference/database-reference/connection-urls). |
 | `debug` | Enable or disable detailed logs for Prisma-AppSync. Default to `false`. |
 | `sanitize` | Enable or disable xss sanitization. Default to `true`. |
+| `defaultPagination` | Default pagination `take` value. Default to `50`. Setting it to `false` will disable using a default limit. |
 
 #### [Relevant types](/reference/client-types.html#constructor)
 
@@ -194,7 +196,7 @@ const result = await app.resolve()
 
 ## prisma
 
-Access Prisma Client.
+Accessing Prisma Client.
 
 ```typescript
 // use prisma middleware

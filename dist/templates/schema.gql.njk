@@ -18,9 +18,18 @@ input AWSDateTimeFilter {
     notIn: [AWSDateTime!]
 }
 
+input FloatFilter {
+    equals: Float
+    gt: Float
+    gte: Float
+    in: [Float!]
+    lt: Float
+    lte: Float
+    not: FloatFilter
+    notIn: [Float!]
+}
+
 input IntFilter {
-    contains: Int
-    endsWith: Int
     equals: Int
     gt: Int
     gte: Int
@@ -29,21 +38,51 @@ input IntFilter {
     lte: Int
     not: IntFilter
     notIn: [Int!]
-    startsWith: Int
+}
+
+input AWSJSONFilter {
+    contains: String
+    endsWith: String
+    equals: AWSJSON
+    in: [AWSJSON!]
+    not: AWSJSONFilter
+    notIn: [AWSJSON!]
+    startsWith: String
+}
+
+input AWSEmailFilter {
+    contains: String
+    endsWith: String
+    equals: AWSEmail
+    in: [AWSEmail!]
+    not: AWSEmailFilter
+    notIn: [AWSEmail!]
+    startsWith: String
+}
+
+input AWSURLFilter {
+    contains: String
+    endsWith: String
+    equals: AWSURL
+    in: [AWSURL!]
+    not: AWSURLFilter
+    notIn: [AWSURL!]
+    startsWith: String
 }
 
 input StringFilter {
     contains: String
     endsWith: String
     equals: String
-    gt: String
-    gte: String
     in: [String!]
-    lt: String
-    lte: String
     not: StringFilter
     notIn: [String!]
     startsWith: String
+}
+
+input BooleanFilter {
+    equals: Boolean
+    not: BooleanFilter
 }
 
 {% for enum in enums %}
@@ -100,12 +139,6 @@ input StringFilter {
         none: {{ model.name }}WhereInput
         some: {{ model.name }}WhereInput
     }
-
-    {% for field in model.fields -%}
-        {% if field.scalar in ["String", "Int", "AWSDateTime"] -%}
-            union {{ model.name }}{{ field.name | pascalCase }}Filter = {{ field.scalar }} | {{ field.scalar }}Filter
-        {% endif -%}
-    {% endfor %}
     
     input {{ model.name }}WhereInput {
         OR: [{{ model.name }}WhereInput]
@@ -113,13 +146,17 @@ input StringFilter {
         AND: [{{ model.name }}WhereInput]
         {% for field in model.fields -%}
             {% if not field.relation -%}
-                {% if field.scalar in ["String", "Int", "AWSDateTime"] -%}
-                    {{ field.name }}: {{ model.name }}{{ field.name | pascalCase }}Filter
+                {% if field.scalar in ["Int", "Float", "AWSDateTime", "AWSJSON", "AWSEmail", "AWSURL", "Boolean"] -%}
+                    {{ field.name }}: {{ field.scalar }}Filter
                 {% else -%}
-                    {{ field.name }}: {{ field.scalar }}
+                    {{ field.name }}: StringFilter
                 {% endif -%}
             {% else -%}
-                {{ field.name }}: {{ field.relation.type }}ListRelationFilter
+                {% if field.relation.kind === "one" -%}
+                    {{ field.name }}: {{ field.relation.type }}WhereInput
+                {% else  -%}
+                    {{ field.name }}: {{ field.relation.type }}ListRelationFilter
+                {% endif -%}
             {% endif -%}
         {% endfor %}
     }

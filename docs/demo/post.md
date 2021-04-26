@@ -13,12 +13,14 @@ sidebarDepth: 0
 
 List of fields available in the `Post` type.
 
-| Field     | Kind         | Scalar Type | Unique   | Required (create) |
-| --------- | ------------ | ----------- | -------- | ----------------- |
-| id        | scalar       | Int         | **true** | **true**          |
-| title     | scalar       | String      | false    | **true**          |
-| author    | **relation** | User        | false    | false             |
-| published | scalar       | Boolean     | false    | **true**          |
+| Field       | Scalar Type       | Unique  | Required (create) |
+| ----------- | ----------------- | ------- | ----------------- |
+| id          | Int               | true    | true              |
+| title       | String            | _false_ | true              |
+| author      | [User](./User.md) | _false_ | _false_           |
+| authorId    | Int               | true    | _false_           |
+| published   | Boolean           | _false_ | true              |
+| lastSavedAt | AWSDateTime       | _false_ | true              |
 
 ## Queries
 
@@ -26,12 +28,12 @@ Queries are responsible for all `Read` operations.
 
 The generated queries are:
 
--   `getPost`: Read a single post.
--   `listPosts`: Read multiple posts.
+-   `getPost`: Read a single Post.
+-   `listPosts`: Read multiple Posts.
 
-### Querying a single post
+### Querying a single Post
 
-Single post queries can take one input:
+Single Post queries can take one input:
 
 -   `where`: `PostWhereUniqueInput!` A required object type specifying a field with a unique constraint (like id).
 
@@ -42,18 +44,22 @@ query {
     getPost(where: { id: 2 }) {
         id
         title
-        author # One-to-one relation
+        author # Relation to one
+        authorId
         published
+        lastSavedAt
     }
 }
 ```
 
-### Querying multiple posts
+### Querying multiple Posts
 
-Multiple posts queries can take two inputs:
+Multiple Posts queries can take four inputs:
 
 -   `where`: `PostWhereInput` An optional object type to filter the content based on a nested set of criteria.
 -   `orderBy`: `PostOrderByInput` An optional object type to select which field(s) and order to sort the records on. Sorting can be in ascending order `ASC` or descending order `DESC`.
+-   `skip`: `Int` An optional number that specifies how many of the returned objects in the list should be skipped.
+-   `take`: `Int` An optional number that specifies how many objects should be returned in the list.
 
 **Standard query**
 
@@ -62,82 +68,55 @@ query {
     listPosts {
         id
         title
-        author # One-to-one relation
+        author # Relation to one
+        authorId
         published
+        lastSavedAt
     }
 }
 ```
 
-**Standard query with where**
+**Standard query with offset pagination**
+
+```graphql
+query {
+    listPosts(skip: 0, take: 25) {
+        id
+        title
+        author # Relation to one
+        authorId
+        published
+        lastSavedAt
+    }
+}
+```
+
+**Standard query with simple where filter**
 
 ```graphql
 query {
     listPosts(where: { title: "Foo" }) {
         id
         title
-        author # One-to-one relation
+        author # Relation to one
+        authorId
         published
+        lastSavedAt
     }
 }
 ```
 
-**Advanced query using filters**
-
-<details><summary>List of all filters available</summary>
-<p>
-
-```graphql
-getid: Int
-    id_equals: Int
-    id_not: Int
-    id_lt: Int
-    id_lte: Int
-    id_gt: Int
-    id_gte: Int
-    id_contains: Int
-    id_startsWith: Int
-    id_endsWith: Int
-gettitle: String
-    title_equals: String
-    title_not: String
-    title_lt: String
-    title_lte: String
-    title_gt: String
-    title_gte: String
-    title_contains: String
-    title_startsWith: String
-    title_endsWith: String
-getauthorId: Int
-    authorId_equals: Int
-    authorId_not: Int
-    authorId_lt: Int
-    authorId_lte: Int
-    authorId_gt: Int
-    authorId_gte: Int
-    authorId_contains: Int
-    authorId_startsWith: Int
-    authorId_endsWith: Int
-getpublished: Boolean
-    published_equals: Boolean
-    published_not: Boolean
-    published_lt: Boolean
-    published_lte: Boolean
-    published_gt: Boolean
-    published_gte: Boolean
-    published_contains: Boolean
-    published_startsWith: Boolean
-    published_endsWith: Boolean
-
-```
-
-</p>
-</details>
+**Standard query with more advanced where filter**
 
 ```graphql
 query {
-    listPosts(where: { title_startsWith: "Foo" }) {
-        author # One-to-one relation
+    listPosts(where: { title: { startsWith: "Foo" } }) {
+        id
+        title
+        author # Relation to one
         authorId
+        published
+        lastSavedAt
     }
 }
 ```
@@ -149,8 +128,10 @@ query {
     listPosts(orderBy: { title: DESC }) {
         id
         title
-        author # One-to-one relation
+        author # Relation to one
+        authorId
         published
+        lastSavedAt
     }
 }
 ```
@@ -161,15 +142,15 @@ Mutations are responsible for all `Create`, `Update`, and `Delete` operations.
 
 The generated mutations are:
 
--   `createPost`: Create a single post.
--   `updatePost`: Update a single post.
--   `upsertPost`: Update existing OR create single post.
--   `deletePost`: Delete a single post.
--   `deleteManyPosts`: Delete multiple posts.
+-   `createPost`: Create a single Post.
+-   `updatePost`: Update a single Post.
+-   `upsertPost`: Update existing OR create single Post.
+-   `deletePost`: Delete a single Post.
+-   `deleteManyPosts`: Delete multiple Posts.
 
-### Creating a single post
+### Creating a single Post
 
-Single post create mutations can take one input:
+Single Post create mutations can take one input:
 
 -   `data`: `PostCreateInput!` A required object type specifying the data to create a new record.
 
@@ -182,11 +163,14 @@ mutation {
             title: "Foo"
             authorId: 2
             published: false
+            lastSavedAt: "dd/mm/YYYY"
         }
     ) {
         id
         title
+        authorId
         published
+        lastSavedAt
     }
 }
 ```
@@ -198,9 +182,9 @@ mutation {
 
 ```graphql
 author: {
-    create: UserCreateInput, # One-to-one relation
-    connect: UserWhereUniqueInput, # One-to-one relation
-    connectOrCreate: UserConnectOrCreateInput # One-to-one relation
+    create: PostAuthorCreateInput, # Relation to one
+    connect: PostAuthorWhereUniqueInput, # Relation to one
+    connectOrCreate: PostAuthorConnectOrCreateInput # Relation to one
 }
 ```
 
@@ -224,9 +208,9 @@ mutation {
 }
 ```
 
-### Updating a single post
+### Updating a single Post
 
-Single post update mutations can take two input:
+Single Post update mutations can take two input:
 
 -   `where`: `PostWhereUniqueInput!` A required object type specifying a field with a unique constraint (like id).
 -   `data`: `PostUpdateInput!` A required object type specifying the data to update.
@@ -241,11 +225,14 @@ mutation {
             title: "Foo"
             authorId: 2
             published: false
+            lastSavedAt: "dd/mm/YYYY"
         }
     ) {
         id
         title
+        authorId
         published
+        lastSavedAt
     }
 }
 ```
@@ -257,11 +244,11 @@ mutation {
 
 ```graphql
 author: {
-    create: UserCreateInput, # One-to-one relation
-    connect: UserWhereUniqueInput, # One-to-one relation
-    connectOrCreate: UserConnectOrCreateInput, # One-to-one relation
-    update: UserUpdateInput, # One-to-one relation
-    upsert: UserUpsertInput, # One-to-one relation
+    create: PostAuthorCreateInput, # Relation to one
+    connect: PostAuthorWhereUniqueInput, # Relation to one
+    connectOrCreate: PostAuthorConnectOrCreateInput, # Relation to one
+    update: PostAuthorUpdateInput, # Relation to one
+    upsert: PostAuthorUpsertInput, # Relation to one
     delete: true,
     disconnect: true,
 }
@@ -287,9 +274,9 @@ mutation {
 }
 ```
 
-### Deleting a single post
+### Deleting a single Post
 
-Single post delete mutations can take one input:
+Single Post delete mutations can take one input:
 
 -   `where`: `PostWhereUniqueInput!` A required object type specifying a field with a unique constraint (like id).
 
@@ -300,14 +287,16 @@ mutation {
     deletePost(where: { id: 2 }) {
         id
         title
+        authorId
         published
+        lastSavedAt
     }
 }
 ```
 
-### Deleting multiple posts
+### Deleting multiple Posts
 
-Multiple posts delete mutations can take one input:
+Multiple Posts delete mutations can take one input:
 
 -   `where`: `PostWhereInput!` A required object type specifying a field with a unique constraint (like title).
 
@@ -327,38 +316,44 @@ mutation {
 
 Subscriptions allows listen for data changes when a specific event happens, in real-time.
 
-### Subscribing to a single post creation
+### Subscribing to a single Post creation
 
 ```graphql
 subscription {
     onCreatedPost {
         id
         title
+        authorId
         published
+        lastSavedAt
     }
 }
 ```
 
-### Subscribing to a single post update
+### Subscribing to a single Post update
 
 ```graphql
 subscription {
     onUpdatedPost {
         id
         title
+        authorId
         published
+        lastSavedAt
     }
 }
 ```
 
-### Subscribing to a single post deletion
+### Subscribing to a single Post deletion
 
 ```graphql
 subscription {
     onDeletedPost {
         id
         title
+        authorId
         published
+        lastSavedAt
     }
 }
 ```

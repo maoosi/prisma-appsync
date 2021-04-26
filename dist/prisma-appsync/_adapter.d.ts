@@ -2,6 +2,7 @@ import { RequestProps, AdapterOptions, AuthType, Operation } from './_types';
 export declare class PrismaAppSyncAdapter {
     private customResolvers;
     private debug;
+    private defaultPagination;
     operation: Operation;
     model: string;
     args: RequestProps;
@@ -16,7 +17,5 @@ export declare class PrismaAppSyncAdapter {
     private getInclude;
     private getSelect;
     private parseSelectionList;
-    private parseData;
-    private parseWhere;
     private parseOrderBy;
 }

@@ -1,5 +1,4 @@
 import {
-    PrivateOptions,
     RequestProps,
     AuthType,
     AuthIdentityProps,
@@ -308,7 +307,7 @@ export class PrismaAppSyncResolver {
     }
 
     private async runAfterResolveHook({ result }:{ result:any }) {
-        const afterResolveHookProps:AfterResolveProps = merge(this.beforeResolveHookProps, { result })
+        const afterResolveHookProps:AfterResolveProps = merge({}, this.beforeResolveHookProps, { result })
 
         if (this.debug) {
             console.log(
@@ -336,7 +335,7 @@ export class PrismaAppSyncResolver {
         { authIdentityType, authIdentityObj }:
         { authIdentityType:AuthType, authIdentityObj:any }
     ) {
-        this.authIdentity = merge(authIdentityObj, {
+        this.authIdentity = merge({}, authIdentityObj, {
             authorization: authIdentityType,
         })
 
@@ -403,7 +402,9 @@ export class PrismaAppSyncResolver {
         const results = await this.prisma[model].findMany({
             ...(args.where && {where: args.where}),
             ...(args.orderBy && {orderBy: args.orderBy}),
-            ...(args.select && {select: args.select})
+            ...(args.select && {select: args.select}),
+            ...(typeof args.skip !== 'undefined' && {skip: args.skip}),
+            ...(typeof args.take !== 'undefined' && {take: args.take}),
         })
 
         await this.runAfterResolveHook({ result: results })

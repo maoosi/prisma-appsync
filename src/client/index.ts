@@ -4,7 +4,6 @@ import { PrismaAppSyncResolver } from './_resolver'
 import {
     Options,
     PrivateOptions,
-    AdapterOptions,
     RequestProps,
     AuthType,
     AuthIdentityProps,
@@ -17,14 +16,13 @@ import { AuthModes, Operations, AuthActions } from './_constants'
 import escape from 'validator/lib/escape'
 import xss from 'xss'
 import { clone, merge } from 'lodash-es'
-import { BadRequestError } from './_errors'
+import { BadRequestError, InternalError } from './_errors'
 import { CustomPrismaClient } from './_prisma'
 
 export {
     PrismaAppSyncAdapter,
     PrismaAppSyncResolver,
     Options,
-    AdapterOptions,
     RequestProps,
     AuthType,
     AuthIdentityProps,
@@ -50,7 +48,9 @@ export class PrismaAppSync {
             debug: typeof options.debug !== 'undefined'
                 ? options.debug : false,
             sanitize: typeof options.sanitize !== 'undefined'
-                ? options.sanitize : true
+                ? options.sanitize : true,
+            defaultPagination: typeof options.defaultPagination !== 'undefined'
+                ? options.defaultPagination : 50
         }
 
         this.customResolvers = {}
@@ -64,13 +64,18 @@ export class PrismaAppSync {
     }
 
     public registerCustomResolvers(customResolvers:any) {
-        this.customResolvers = merge({}, this.customResolvers, customResolvers)
+        this.customResolvers = customResolvers
+
+        if (this.options.debug) {
+            console.log('Registered custom resolvers: ', Object.keys(this.customResolvers))
+        }
 
         return this
     }
 
     public parseEvent(event:any) {
         this.adapter = new PrismaAppSyncAdapter(event, {
+            defaultPagination: this.options.defaultPagination,
             debug: this.options.debug,
             customResolvers: this.customResolvers,
         })

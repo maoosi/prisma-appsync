@@ -1,6 +1,4 @@
 export declare const PrismaAppSyncOperations: string[];
-export declare const PrismaCombinators: string[];
-export declare const PrismaOperators: string[];
 export declare const PrismaOrderByArgs: string[];
 export declare const PrismaExclWords: string[];
 export declare const AuthModes: {

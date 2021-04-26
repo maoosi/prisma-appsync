@@ -69,10 +69,12 @@ query {
 
 ### Querying multiple {{ model.pluralizedName }}
 
-Multiple {{ model.pluralizedName }} queries can take two inputs:
+Multiple {{ model.pluralizedName }} queries can take four inputs:
 
 - `where`: `{{ model.name }}WhereInput` An optional object type to filter the content based on a nested set of criteria.
 - `orderBy`: `{{ model.name }}OrderByInput` An optional object type to select which field(s) and order to sort the records on. Sorting can be in ascending order `ASC` or descending order `DESC`.
+- `skip`: `Int` An optional number that specifies how many of the returned objects in the list should be skipped.
+- `take`: `Int` An optional number that specifies how many objects should be returned in the list.
 
 **Standard query**
 
@@ -92,11 +94,14 @@ query {
 }
 ```
 
-**Standard query with where**
+**Standard query with offset pagination**
 
 ```graphql
 query {
-    list{{ model.pluralizedName }}(where: { {{ modelField.name }}: {{ modelField.sample | safe }} }) {
+    list{{ model.pluralizedName }}(
+        skip: 0
+        take: 25
+    ) {
         {% for field in model.fields -%}
         {% if field.relation and field.relation.kind === 'one' -%}
         {{ field.name }} # Relation to one
@@ -110,34 +115,33 @@ query {
 }
 ```
 
-**Advanced query using filters**
-
-<details><summary>List of all filters available</summary>
-<p>
-
-```graphql
-{% for field in model.fields -%}
-{% if not field.relation -%}
-{{ field.name }}: {{ field.scalar }}
-    {{ field.name }}_equals: {{ field.scalar }}
-    {{ field.name }}_not: {{ field.scalar }}
-    {{ field.name }}_lt: {{ field.scalar }}
-    {{ field.name }}_lte: {{ field.scalar }}
-    {{ field.name }}_gt: {{ field.scalar }}
-    {{ field.name }}_gte: {{ field.scalar }}
-    {{ field.name }}_contains: {{ field.scalar }}
-    {{ field.name }}_startsWith: {{ field.scalar }}
-    {{ field.name }}_endsWith: {{ field.scalar }}
-{% endif -%}
-{% endfor %}
-```
-
-</p>
-</details>
+**Standard query with basic where filter**
 
 ```graphql
 query {
-    list{{ model.pluralizedName }}(where: { {{ modelField.name }}_startsWith: {{ modelField.sample | safe }} }) {
+    list{{ model.pluralizedName }}(where: {
+        {{ modelField.name }}: { equals: {{ modelField.sample | safe }}}
+    }) {
+        {% for field in model.fields -%}
+        {% if field.relation and field.relation.kind === 'one' -%}
+        {{ field.name }} # Relation to one
+        {% elseif  field.relation and field.relation.kind === 'many' %}
+        {{ field.name }} # Relation to many
+        {% else -%}
+        {{ field.name }}
+        {% endif -%}
+        {% endfor -%}
+    }
+}
+```
+
+**Standard query with more advanced where filter**
+
+```graphql
+query {
+    list{{ model.pluralizedName }}(where: {
+        {{ modelField.name }}: { startsWith: {{ modelField.sample | safe }}}
+    }) {
         {% for field in model.fields -%}
         {% if field.relation and field.relation.kind === 'one' -%}
         {{ field.name }} # Relation to one
