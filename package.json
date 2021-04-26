@@ -17,7 +17,8 @@
         "docs:build": "vuepress build docs",
         "test": "pnpm test:generate && jest test/ -e",
         "test:generate": "pnpm build && prisma generate --schema=./test/schema.prisma",
-        "prepare": "pnpm test"
+        "prepare": "pnpm test",
+        "postinstall": "prisma generate"
     },
     "engines": {
         "node": ">=10",
