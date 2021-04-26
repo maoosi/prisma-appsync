@@ -32,9 +32,7 @@ export type BeforeResolveProps = {
 }
 ```
 
-The `prisma` parameter is giving direct access to the Prisma Client instance, allowing to build custom database queries directly.
-
-Here is an example of what the various parameters (excl. `prisma`) might contain:
+Here is an example of what the various parameters might contain:
 
 ```json
 {
