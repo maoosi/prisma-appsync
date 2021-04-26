@@ -20,6 +20,10 @@ const app = new PrismaAppSync({
 app.registerCustomResolvers({ incrementPostsViews })
 ```
 
+### Non-breaking
+
+- Feat: For contributors, running `yarn create prisma-appsync-app . --test` now also creates a custom resolver for testing purpose.
+
 ## Version 1.0.0-beta.52
 
 ### ⚠️ Breaking

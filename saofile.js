@@ -49,7 +49,8 @@ module.exports = {
                 filters: {
                     'cdk/node_modules/': false,
                     'cdk/yarn.lock': false,
-                    'prisma/**': 'createSchema',
+                    'prisma/schema.prisma': 'createSchema',
+                    'prisma/custom-*': 'testingMode',
                 }
             }
         ]

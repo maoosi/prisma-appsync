@@ -13,8 +13,25 @@ export const main = async (event: any, context: any, callback: any) => {
     console.info('Received event:', JSON.stringify(event))
 
     try {
+        <% if (testingMode) { %>// Custom resolver
+        const incrementPostsViews = 
+            async (customResolverParams) => {
+                console.log('Hello from incrementPostsViews!', JSON.stringify(customResolverParams))
+                return await app.prisma.post.update({
+                    data: { views: { increment: 1 } },
+                    where: { id: customResolverParams.args.postId }
+                })
+            }
 
-        // Parse the `event` from your Lambda function
+        app.registerCustomResolvers({ incrementPostsViews })
+
+        // Prisma middleware
+        app.prisma.$use(async (params, next) => {
+            console.log('Hello from Prisma middleware!', params)
+            return next(params)
+        })
+        
+        <% } %>// Parse the `event` from your Lambda function
         app.parseEvent(event)
 
         // Handle CRUD operations / resolve query

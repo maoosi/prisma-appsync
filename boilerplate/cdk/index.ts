@@ -100,9 +100,17 @@ export class AppSyncCdkStack extends cdk.Stack {
                 minify: true,
                 commandHooks: {
                     beforeBundling(inputDir: string, outputDir: string): string[] {
+                        <% if (testingMode) { %>const prismaSchema = path.join(inputDir, process.env.PRISMA_SCHEMA_ROOT_PATH || 'schema.prisma')
+                        const customSchema = path.join(path.dirname(prismaSchema), 'custom-schema.gql')
+                        const customResolvers = path.join(path.dirname(prismaSchema), 'custom-resolvers.yaml')
+
                         return [
+                            `cp ${prismaSchema} ${outputDir}`,
+                            `cp ${customSchema} ${outputDir}`,
+                            `cp ${customResolvers} ${outputDir}`,
+                        ]<% } else { %>return [
                             `cp ${path.join(inputDir, process.env.PRISMA_SCHEMA_ROOT_PATH || 'schema.prisma')} ${outputDir}`
-                        ]
+                        ]<% } %>
                     },
                     beforeInstall() {
                         return []
