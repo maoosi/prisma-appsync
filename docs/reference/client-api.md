@@ -37,8 +37,15 @@ Custom resolvers to extend the generated CRUD API.
 ### Example
 
 ```typescript
-app.registerCustomResolvers({ incrementPostsViews })
+app.registerCustomResolvers({
+    incrementPostsViews: async (props:CustomResolverProps) => {
+        console.log("Hello from the `incrementPostsViews` custom resolver", props)
+        return {}
+    }
+})
 ```
+
+#### [Relevant types](/reference/client-types.html#customresolverprops)
 
 ## parseEvent
 

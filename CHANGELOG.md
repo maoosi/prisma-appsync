@@ -23,6 +23,7 @@ app.registerCustomResolvers({ incrementPostsViews })
 ### Non-breaking
 
 - Feat: For contributors, running `yarn create prisma-appsync-app . --test` now also creates a custom resolver for testing purpose.
+- Fix: PNPM install not running `prisma generate` by default ([issues/11](https://github.com/maoosi/prisma-appsync/issues/11))
 
 ## Version 1.0.0-beta.52
 

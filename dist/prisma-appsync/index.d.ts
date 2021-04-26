@@ -17,7 +17,6 @@ export declare class PrismaAppSync {
     allow(authorizationRule: AuthRule): void;
     deny(authorizationRule: AuthRule): void;
     private addAuthorizationRule;
-    private experimentalDateTimeFieldsRegex;
     resolve(): Promise<any>;
     beforeResolve(callbackFunc: Function): this;
     afterResolve(callbackFunc: Function): this;

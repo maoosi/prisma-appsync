@@ -29,26 +29,41 @@ generator appsync {
 
 ## 👉 2. Lambda function handler
 
-The second step is to update the Lambda function handler. More precisely, to add a `customResolvers` object inside `new PrismaAppSync()` class instantiation. Since the mutation name in our schema is `incrementPostsViews`, we use the same name for our custom resolver.
+The second step is to update the Lambda function handler. More precisely, to use the `registerCustomResolvers` method to register `incrementPostsViews` as a custom resolver (matching the mutation name from our schema).
 
-```typescript
-import { PrismaAppSync, CustomResolverProps } from './generated/prisma-appsync/client'
+```typescript{11-19}
+import { PrismaAppSync, CustomResolverProps } from './prisma/generated/prisma-appsync/client'
 
-// ...
-
+// initialise client
 const app = new PrismaAppSync({
-    connectionUrl: String(process.env.CONNECTION_URL)
+    connectionUrl: process.env.CONNECTION_URL,
+    debug: true
 })
 
-const incrementPostsViews = 
-    async ({ args }: CustomResolverProps) => {
-        return await app.prisma.post.update({
-            data: { views: { increment: 1 } },
-            where: { id: args.postId }
-        })
-    }
+// Lambda function handler
+export const main = async (event: any, context: any) => {
+    // register new custom resolver `incrementPostsViews`
+    const incrementPostsViews = 
+        async ({ args }: CustomResolverProps) => {
+            return await app.prisma.post.update({
+                data: { views: { increment: 1 } },
+                where: { id: args.postId }
+            })
+        }
+    app.registerCustomResolvers({ incrementPostsViews })
 
-app.registerCustomResolvers({ incrementPostsViews })
+    // parse the `event` from your Lambda function
+    app.parseEvent(event)
+
+    // handle CRUD operations / resolve query
+    const result = await app.resolve()
+
+    // close database connection
+    await app.prisma.$disconnect()
+
+    // return query result
+    return Promise.resolve(result)
+})
 ```
 
 See full list of options, methods and types in the [Reference](/reference) section.
