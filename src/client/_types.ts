@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma/client'
 import { AuthModes, Operations, AuthActions } from './_constants'
 
 export type CustomPrismaClientOptions = {
