@@ -190,6 +190,7 @@ export class PrismaAppSyncCompiler {
                             name: field.name,
                             scalar: this.getFieldScalar(field),
                             isRequired: this.isFieldRequired(field),
+                            isEnum: this.isFieldEnum(field),
                             isEditable: !this.isFieldGeneratedRelation(field, model) 
                                 && !this.isFieldImmutableDate(field),
                             isUnique: this.isFieldUnique(field, model),
@@ -280,6 +281,7 @@ export class PrismaAppSyncCompiler {
                 subFields.push({
                     name: idFields.join('_'),
                     scalar: `${idFields.join('_')}FieldsInput!`,
+                    isEnum: false,
                     isRequired: true,
                     isEditable: false,
                     isUnique: true,
@@ -302,6 +304,11 @@ export class PrismaAppSyncCompiler {
     private isFieldRequired(searchField:DMMF.Field):boolean {
         return searchField.isRequired 
             && !(searchField.relationName && searchField.isList)
+    }
+
+    // Return true if field is an enum type
+    private isFieldEnum(searchField:DMMF.Field):boolean {
+        return searchField.kind === 'enum' 
     }
 
     // Return true if field shouldn't be mutated manually (e.g. `updatedAt`)

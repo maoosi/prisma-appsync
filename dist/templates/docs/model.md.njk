@@ -71,7 +71,7 @@ query {
 
 Multiple {{ model.pluralizedName }} queries can take four inputs:
 
-- `where`: `{{ model.name }}WhereInput` An optional object type to filter the content based on a nested set of criteria.
+- `where`: `{{ model.name }}WhereFilterInput` An optional object type to filter the content based on a nested set of criteria.
 - `orderBy`: `{{ model.name }}OrderByInput` An optional object type to select which field(s) and order to sort the records on. Sorting can be in ascending order `ASC` or descending order `DESC`.
 - `skip`: `Int` An optional number that specifies how many of the returned objects in the list should be skipped.
 - `take`: `Int` An optional number that specifies how many objects should be returned in the list.
@@ -398,7 +398,7 @@ mutation {
 
 Multiple {{ model.pluralizedName }} delete mutations can take one input:
 
-- `where`: `{{ model.name }}WhereInput!` A required object type specifying a field with a unique constraint (like {{ modelField.name }}).
+- `where`: `{{ model.name }}WhereFilterInput!` A required object type specifying a field with a unique constraint (like {{ modelField.name }}).
 
 **Standard deleteMany mutation**
 
