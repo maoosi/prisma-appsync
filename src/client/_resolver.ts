@@ -95,10 +95,27 @@ export class PrismaAppSyncResolver {
         // we need a query
         else {
             entitySource = 'database'
-            entity = await this.prisma[model].findUnique({
-                where: args.where,
-                select
-            })
+
+            if (this.debug) {
+                console.log(
+                    `Querying database to read entity from auto-generated query: `,
+                    JSON.stringify({ model, operation: action, where: args.where, select })
+                )
+            }
+
+            if (action === AuthActions.list || action === AuthActions.deleteMany) {
+                const entities = await this.prisma[model].findMany({
+                    where: args.where,
+                    select
+                })
+                // TODO: check all entities, instead of only the first one
+                entity = entities.length > 0 ? entities[0] : {}
+            } else {
+                entity = await this.prisma[model].findUnique({
+                    where: args.where,
+                    select
+                })
+            }
         }
 
         if (this.debug) {

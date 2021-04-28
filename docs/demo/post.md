@@ -56,7 +56,7 @@ query {
 
 Multiple Posts queries can take four inputs:
 
--   `where`: `PostWhereInput` An optional object type to filter the content based on a nested set of criteria.
+-   `where`: `PostWhereFilterInput` An optional object type to filter the content based on a nested set of criteria.
 -   `orderBy`: `PostOrderByInput` An optional object type to select which field(s) and order to sort the records on. Sorting can be in ascending order `ASC` or descending order `DESC`.
 -   `skip`: `Int` An optional number that specifies how many of the returned objects in the list should be skipped.
 -   `take`: `Int` An optional number that specifies how many objects should be returned in the list.
@@ -91,11 +91,11 @@ query {
 }
 ```
 
-**Standard query with simple where filter**
+**Standard query with basic where filter**
 
 ```graphql
 query {
-    listPosts(where: { title: "Foo" }) {
+    listPosts(where: { title: { equals: "Foo" } }) {
         id
         title
         author # Relation to one
@@ -110,7 +110,9 @@ query {
 
 ```graphql
 query {
-    listPosts(where: { title: { startsWith: "Foo" } }) {
+    listPosts(
+        where: { title: { not: { equals: "Foo" } } }
+    ) {
         id
         title
         author # Relation to one
@@ -298,7 +300,7 @@ mutation {
 
 Multiple Posts delete mutations can take one input:
 
--   `where`: `PostWhereInput!` A required object type specifying a field with a unique constraint (like title).
+-   `where`: `PostWhereFilterInput!` A required object type specifying a field with a unique constraint (like title).
 
 **Standard deleteMany mutation**
 

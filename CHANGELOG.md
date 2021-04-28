@@ -5,11 +5,11 @@
 ### ⚠️ Breaking
 
 - Feat: Introducing pagination on list queries.
-- Feat: Filtering on fields have been entirely refactored to be closer to the Prisma syntax.
+- Feat: Introducing entirely refactored filters on list queries, closer to the Prisma syntax.
 
 #### Filtering (breaking)
 
-To simplify both usage and implementation, filtering on fields have been refactored entirely. The syntax is now closer to [how Prisma handles filtering](https://www.prisma.io/docs/reference/api-reference/prisma-client-reference#filter-conditions-and-operators).
+To simplify both usage and implementation, filtering on fields and relations have been refactored entirely. The syntax is now closer to [how Prisma handles filtering](https://www.prisma.io/docs/reference/api-reference/prisma-client-reference#filter-conditions-and-operators).
 
 ```graphql
 # before

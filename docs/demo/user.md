@@ -55,7 +55,7 @@ query {
 
 Multiple Users queries can take four inputs:
 
--   `where`: `UserWhereInput` An optional object type to filter the content based on a nested set of criteria.
+-   `where`: `UserWhereFilterInput` An optional object type to filter the content based on a nested set of criteria.
 -   `orderBy`: `UserOrderByInput` An optional object type to select which field(s) and order to sort the records on. Sorting can be in ascending order `ASC` or descending order `DESC`.
 -   `skip`: `Int` An optional number that specifies how many of the returned objects in the list should be skipped.
 -   `take`: `Int` An optional number that specifies how many objects should be returned in the list.
@@ -90,11 +90,11 @@ query {
 }
 ```
 
-**Standard query with simple where filter**
+**Standard query with basic where filter**
 
 ```graphql
 query {
-    listUsers(where: { role: Role }) {
+    listUsers(where: { role: { equals: Role } }) {
         id
         username
         email
@@ -109,7 +109,7 @@ query {
 
 ```graphql
 query {
-    listUsers(where: { role: { startsWith: Role } }) {
+    listUsers(where: { role: { not: { equals: Role } } }) {
         id
         username
         email
@@ -291,7 +291,7 @@ mutation {
 
 Multiple Users delete mutations can take one input:
 
--   `where`: `UserWhereInput!` A required object type specifying a field with a unique constraint (like role).
+-   `where`: `UserWhereFilterInput!` A required object type specifying a field with a unique constraint (like role).
 
 **Standard deleteMany mutation**
 

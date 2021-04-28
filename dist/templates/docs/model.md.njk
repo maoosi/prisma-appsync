@@ -140,7 +140,7 @@ query {
 ```graphql
 query {
     list{{ model.pluralizedName }}(where: {
-        {{ modelField.name }}: { startsWith: {{ modelField.sample | safe }}}
+        {{ modelField.name }}: { not: { equals: {{ modelField.sample | safe }} } }
     }) {
         {% for field in model.fields -%}
         {% if field.relation and field.relation.kind === 'one' -%}
