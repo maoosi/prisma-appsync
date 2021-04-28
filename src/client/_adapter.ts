@@ -7,8 +7,6 @@ import {
     Operation
 } from './_types'
 import {
-    PrismaCombinators,
-    PrismaOperators,
     PrismaAppSyncOperations,
     PrismaOrderByArgs,
     AuthModes,
@@ -19,6 +17,7 @@ import { BadRequestError, InternalError } from './_errors'
 export class PrismaAppSyncAdapter {
     private customResolvers:any
     private debug:boolean
+    private defaultPagination:number|false
     public operation:Operation
     public model:string
     public args:RequestProps
@@ -35,6 +34,7 @@ export class PrismaAppSyncAdapter {
         this.authIdentityObj = {}
         this.customResolvers = options.customResolvers
         this.debug = options.debug
+        this.defaultPagination = options.defaultPagination
 
         this.verifyIntegrity(event)
         this.parseRequest(event)
@@ -121,26 +121,37 @@ export class PrismaAppSyncAdapter {
     }
 
     private parseArgs(event:any) {
-        this.args = merge(this.args, this.parseSelectionList(event.info.selectionSetList))
+        this.args = merge({}, this.args, this.parseSelectionList(event.info.selectionSetList))
 
         if (this.operation !== Operations.custom) {
-            if (event.arguments.data) {
-                this.args.data = this.parseData(event.arguments.data)
+            if (typeof event.arguments.data !== 'undefined') {
+                this.args.data = event.arguments.data
             }
     
-            if (event.arguments.where) {
-                const _list:Operation[] = [Operations.list]
-                this.args.where = _list.includes(this.operation)
-                    ? this.parseWhere(event.arguments.where)
-                    : event.arguments.where
+            if (typeof event.arguments.where !== 'undefined') {
+                this.args.where = event.arguments.where
             }
     
             const _getOrList:Operation[] = [Operations.get, Operations.list]
-            if (event.arguments.orderBy && _getOrList.includes(this.operation)) {
+            if (typeof event.arguments.orderBy !== 'undefined' && _getOrList.includes(this.operation)) {
                 this.args.orderBy = this.parseOrderBy(event.arguments.orderBy)
             }
+
+            if (this.operation === Operations.list) {
+                if (typeof event.arguments.skip !== 'undefined' ) {
+                    this.args.skip = event.arguments.skip
+                } else if (this.defaultPagination !== false) {
+                    this.args.skip = 0
+                }
+
+                if (typeof event.arguments.take !== 'undefined' ) {
+                    this.args.take = event.arguments.take
+                } else if (this.defaultPagination !== false) {
+                    this.args.take = this.defaultPagination
+                }
+            }
         } else {
-            this.args = merge(this.args, event.arguments)
+            this.args = merge({}, this.args, event.arguments)
         }
 
         return this
@@ -180,8 +191,8 @@ export class PrismaAppSyncAdapter {
             const parts = path.split('/')
 
             if (!parts.includes('__typename')) {
-                if (parts.length > 1) args = merge(args, this.getInclude(parts))
-                else args = merge(args, this.getSelect(parts))
+                if (parts.length > 1) args = merge({}, args, this.getInclude(parts))
+                else args = merge({}, args, this.getSelect(parts))
             }
         }
 
@@ -190,60 +201,11 @@ export class PrismaAppSyncAdapter {
                 if (typeof args.select[include] !== 'undefined') delete args.select[include]
             }
 
-            args.select = merge(args.select, args.include)
+            args.select = merge({}, args.select, args.include)
             delete args.include
         }
         
         return args
-    }
-
-    private parseData(dataInput:any) {
-        const dataOutput:any = {}
-        
-        for (const input in dataInput) {
-            dataOutput[input] = dataInput[input]
-        }
-        
-        return dataOutput
-    }
-
-    private parseWhere(whereInput:any) {
-        let whereOutput:any = {}
-
-        for (const input in whereInput) {
-            const condition = input.split(/_(.+)/)
-            const field = condition[0]
-            const filter = condition[1]
-
-            if (PrismaCombinators.includes(field)) {
-                if (Array.isArray(whereInput[input])) {
-                    whereOutput[field] = []
-                    whereInput[input].forEach((group:any) => {
-                        whereOutput[field].push(
-                            this.parseWhere(group)
-                        )
-                    })
-                } else {
-                    whereOutput[field] = this.parseWhere(whereInput[input])
-                }
-            } else if (PrismaOperators.includes(filter)) {
-                whereOutput[field] = {
-                    [filter]: whereInput[
-                        input
-                    ]
-                }
-            } else if (typeof filter === 'undefined' && typeof whereInput[input] === 'object') {
-                whereOutput[field] = this.parseWhere(whereInput[input])
-            } else if (typeof filter === 'undefined' && typeof whereInput[input] !== 'object') {
-                whereOutput[field] = {
-                    'equals': whereInput[
-                        input
-                    ]
-                }
-            }
-        }
-        
-        return whereOutput
     }
 
     private parseOrderBy(orderByInput:any) {

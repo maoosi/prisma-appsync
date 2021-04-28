@@ -6,8 +6,14 @@ const app = new PrismaAppSync({
     connectionUrl: process.env.CONNECTION_URL,
     debug: true
 })
+<% if (testingMode) { %>
+// Prisma middleware
+app.prisma.$use(async (params, next) => {
+    console.log('Hello from Prisma middleware!', params)
+    return next(params)
+})
 
-// Lambda function handler
+<% } %>// Lambda function handler
 export const main = async (event: any, context: any, callback: any) => {
     context.callbackWaitsForEmptyEventLoop = false
     console.info('Received event:', JSON.stringify(event))
@@ -22,24 +28,14 @@ export const main = async (event: any, context: any, callback: any) => {
                     where: { id: customResolverParams.args.postId }
                 })
             }
-
         app.registerCustomResolvers({ incrementPostsViews })
 
-        // Prisma middleware
-        app.prisma.$use(async (params, next) => {
-            console.log('Hello from Prisma middleware!', params)
-            return next(params)
-        })
-        
         <% } %>// Parse the `event` from your Lambda function
         app.parseEvent(event)
 
         // Handle CRUD operations / resolve query
         const result = await app.resolve()
         console.info('Resolver result:', result)
-
-        // Close database connection
-        await app.prisma.$disconnect()
 
         // Return query result
         return Promise.resolve(result)

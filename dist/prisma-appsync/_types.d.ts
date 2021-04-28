@@ -8,13 +8,16 @@ export declare type Options = {
     connectionUrl: string;
     debug?: boolean;
     sanitize?: boolean;
+    defaultPagination?: number | false;
 };
 export declare type PrivateOptions = {
     connectionUrl: string;
     debug: boolean;
     sanitize: boolean;
+    defaultPagination: number | false;
 };
 export declare type AdapterOptions = {
+    defaultPagination: number | false;
     customResolvers: any;
     debug: boolean;
 };
@@ -33,6 +36,8 @@ export declare type RequestProps = {
     include?: any;
     where?: any;
     orderBy?: any;
+    skip?: number;
+    take?: number;
     [key: string]: any;
 };
 export declare type BeforeResolveProps = {
