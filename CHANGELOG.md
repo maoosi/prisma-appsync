@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 1.0.0-beta.55
+## Version 1.0.0-beta.56
 
 ### ⚠️ Breaking
 
@@ -21,7 +21,7 @@ query {
     }
 }
 
-# after (1.0.0-beta.55+)
+# after (1.0.0-beta.56+)
 query {
     listPosts(
         where: { title: { startsWith: "Foo" } }
@@ -41,7 +41,7 @@ query {
     }
 }
 
-# after (1.0.0-beta.55+)
+# after (1.0.0-beta.56+)
 query {
     listPosts(
         where: { title: { equals: "Foo" } }
@@ -51,12 +51,18 @@ query {
 }
 ```
 
+Some Types have also been renamed for more consistency:
+
+- `CreateRelations` renamed to `CreateRelationsInput`
+- `UpdateRelations` renamed to `UpdateRelationsInput`
+- `WhereInput` renamed to `WhereFilterInput`
+
 #### Pagination (breaking)
 
 Introducing pagination on list queries ([using Prisma offset pagination](https://www.prisma.io/docs/concepts/components/prisma-client/pagination)).
 
 ```graphql
-# after (1.0.0-beta.55+)
+# after (1.0.0-beta.56+)
 query {
     listPosts(
         skip: 0
