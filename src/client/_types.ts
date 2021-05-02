@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma/client'
 import { AuthModes, Operations, AuthActions } from './_constants'
 
 export type CustomPrismaClientOptions = {
@@ -10,15 +10,18 @@ export type Options = {
     connectionUrl: string
     debug?: boolean
     sanitize?: boolean
+    defaultPagination?: number | false
 }
 
 export type PrivateOptions = {
     connectionUrl: string
     debug: boolean
     sanitize: boolean
+    defaultPagination: number | false
 }
 
 export type AdapterOptions = {
+    defaultPagination: number | false
     customResolvers: any
     debug: boolean
 }
@@ -40,6 +43,8 @@ export type RequestProps = {
     include?: any
     where?: any
     orderBy?: any
+    skip?: number
+    take?: number
     [key:string]: any
 }
 

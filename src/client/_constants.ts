@@ -8,14 +8,6 @@ export const PrismaAppSyncOperations = [
     'delete'
 ]
 
-export const PrismaCombinators = [
-    'AND', 'NOT', 'OR'
-]
-
-export const PrismaOperators = [
-    'equals', 'not', 'lt', 'lte', 'gt', 'gte', 'contains', 'startsWith', 'endsWith'
-]
-
 export const PrismaOrderByArgs = [
     'asc', 'desc'
 ]

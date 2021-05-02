@@ -1,3 +1,4 @@
+// @ts-ignore: has no exported member 'Prisma'
 import { PrismaClient, Prisma } from '@prisma/client'
 import { CustomPrismaClientOptions } from './_types'
 

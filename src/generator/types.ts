@@ -35,6 +35,7 @@ export type DMMFPAS_Field = {
     scalar:string
     isRequired:boolean
     isEditable:boolean
+    isEnum:boolean
     isUnique:boolean
     directives?:DMMFPAS_Directives
     relation?:DMMFPAS_Relation

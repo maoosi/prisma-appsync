@@ -1,5 +1,98 @@
 # Changelog
 
+## Version 1.0.0-beta.56
+
+### ⚠️ Breaking
+
+- Feat: Introducing pagination on list queries.
+- Feat: Introducing entirely refactored filters on list queries, closer to the Prisma syntax.
+
+#### Filtering (breaking)
+
+To simplify both usage and implementation, filtering on fields and relations have been refactored entirely. The syntax is now closer to [how Prisma handles filtering](https://www.prisma.io/docs/reference/api-reference/prisma-client-reference#filter-conditions-and-operators).
+
+```graphql
+# before
+query {
+    listPosts(
+        where: { title_startsWith: "Foo" }
+    ) {
+        title
+    }
+}
+
+# after (1.0.0-beta.56+)
+query {
+    listPosts(
+        where: { title: { startsWith: "Foo" } }
+    ) {
+        title
+    }
+}
+```
+
+```graphql
+# before
+query {
+    listPosts(
+        where: { title: "Foo" }
+    ) {
+        title
+    }
+}
+
+# after (1.0.0-beta.56+)
+query {
+    listPosts(
+        where: { title: { equals: "Foo" } }
+    ) {
+        title
+    }
+}
+```
+
+Some Types have also been renamed for more consistency:
+
+- `CreateRelations` renamed to `CreateRelationsInput`
+- `UpdateRelations` renamed to `UpdateRelationsInput`
+- `WhereInput` renamed to `WhereFilterInput`
+
+#### Pagination (breaking)
+
+Introducing pagination on list queries ([using Prisma offset pagination](https://www.prisma.io/docs/concepts/components/prisma-client/pagination)).
+
+```graphql
+# after (1.0.0-beta.56+)
+query {
+    listPosts(
+        skip: 0
+        take: 20
+    ) {
+        title
+    }
+}
+```
+
+If the `take` parameter is omitted, PrismaAppSync will use a default value of `50`. It is also possible to change the default value:
+
+```typescript
+// Set the default value to 50, if the `take` parameter is omitted.
+const app = new PrismaAppSync({
+    connectionUrl: process.env.DB_CONNECTION_URL,
+    defaultPagination: 20
+})
+
+// Disable pagination limit, if the `take` parameter is omitted.
+const app = new PrismaAppSync({
+    connectionUrl: process.env.DB_CONNECTION_URL,
+    defaultPagination: false
+})
+```
+
+### Non-breaking
+
+- Fix: Has no exported member 'Prisma' issue resolved ([issues/11](https://github.com/maoosi/prisma-appsync/issues/11))
+
 ## Version 1.0.0-beta.53
 
 ### ⚠️ Breaking
