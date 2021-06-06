@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 1.0.0-beta.57
+
+- Feat: Support for prisma ^2.24.1 added.
+- Fix: Type issue in the Boilerplate.
+
 ## Version 1.0.0-beta.56
 
 ### ⚠️ Breaking

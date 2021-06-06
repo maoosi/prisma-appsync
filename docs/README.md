@@ -26,4 +26,4 @@ sidebarDepth: 0
 
 ## ⚓ Compatibility
 
-- Prisma 2.21.2
+- Prisma 2.24.1

@@ -26,7 +26,7 @@
 
 ## ⚓ Compatibility
 
-- Prisma 2.21.2
+- Prisma 2.24.1
 
 ## 📓 Documentation
 
