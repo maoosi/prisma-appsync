@@ -115,7 +115,7 @@ export class AppSyncCdkStack extends cdk.Stack {
                     beforeInstall() {
                         return []
                     },
-                    afterBundling(inputDir: string, outputDir: string): string[] {
+                    afterBundling(<% if (testingMode) { %>inputDir: string, outputDir: string<% } %>): string[] {
                         return [
                             <% if (testingMode) { %>`cp -R ${path.join(inputDir, 'node_modules/.tmp/prisma-appsync/')} ${path.join(outputDir, 'node_modules/')}`,
                             <% } %>'npx prisma generate', 
