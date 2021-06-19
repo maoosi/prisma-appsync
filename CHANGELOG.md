@@ -35,6 +35,7 @@ Using a model name format other than PascalCase OR already in the plural form, w
 ### Misc
 
 - Boilerplate updated to work with new changes listed above.
+- Upgraded Prisma to v2.25.0.
 
 ## Version 1.0.0-beta.57
 
