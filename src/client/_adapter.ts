@@ -138,7 +138,7 @@ export class PrismaAppSyncAdapter {
             if (typeof event.arguments.where !== 'undefined') {
                 this.args.where = event.arguments.where
             }
-    
+
             const _getOrList:Operation[] = [Operations.get, Operations.list]
             if (typeof event.arguments.orderBy !== 'undefined' && _getOrList.includes(this.operation)) {
                 this.args.orderBy = this.parseOrderBy(event.arguments.orderBy)
@@ -155,6 +155,10 @@ export class PrismaAppSyncAdapter {
                     this.args.take = event.arguments.take
                 } else if (this.defaultPagination !== false) {
                     this.args.take = this.defaultPagination
+                }
+            } else if (this.operation === Operations.createMany) {
+                if (typeof event.arguments.skipDuplicates !== 'undefined' ) {
+                    this.args.skipDuplicates = event.arguments.skipDuplicates
                 }
             }
         } else {
