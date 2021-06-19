@@ -42,6 +42,7 @@ export class PrismaAppSyncCompiler {
                     subscription: ['subscription', 'type', 'default'],
                     get: ['get', 'query', 'type', 'default'],
                     list: ['list', 'query', 'type', 'default'],
+                    count: ['count', 'query', 'type', 'default'],
                     create: ['create', 'mutation', 'type', 'default'],
                     update: ['update', 'mutation', 'type', 'default'],
                     upsert: ['upsert', 'mutation', 'type', 'default'],

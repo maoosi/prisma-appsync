@@ -103,6 +103,7 @@ export const AuthActions = {
     createMany: 'createMany',
     updateMany: 'updateMany',
     deleteMany: 'deleteMany',
+    count: 'count',
 } as const
 ```
 

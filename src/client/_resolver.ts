@@ -103,7 +103,7 @@ export class PrismaAppSyncResolver {
                 )
             }
 
-            if (action === AuthActions.list || action === AuthActions.createMany || action === AuthActions.updateMany || action === AuthActions.deleteMany) {
+            if (action === AuthActions.list || action === AuthActions.count || action === AuthActions.createMany || action === AuthActions.updateMany || action === AuthActions.deleteMany) {
                 const entities = await this.prisma[model].findMany({
                     where: args.where,
                     select
@@ -141,11 +141,13 @@ export class PrismaAppSyncResolver {
     
         // define action aliases (or groups)
         const actionAliases = {
-            access: [ AuthActions.get, AuthActions.list ],
+            access: [ AuthActions.get, AuthActions.list, AuthActions.count ],
             modify: [
                 AuthActions.upsert,
                 AuthActions.update,
+                AuthActions.updateMany,
                 AuthActions.delete,
+                AuthActions.deleteMany,
             ],
         }
         const resolveAction = createAliasResolver(actionAliases)
@@ -417,6 +419,24 @@ export class PrismaAppSyncResolver {
         if (process.env.JEST_WORKER_ID) return args
 
         const results = await this.prisma[model].findMany({
+            ...(args.where && {where: args.where}),
+            ...(args.orderBy && {orderBy: args.orderBy}),
+            ...(args.select && {select: args.select}),
+            ...(typeof args.skip !== 'undefined' && {skip: args.skip}),
+            ...(typeof args.take !== 'undefined' && {take: args.take}),
+        })
+
+        await this.runAfterResolveHook({ result: results })
+
+        return results
+    }
+
+    public async count(model:string, args:RequestProps) {
+        await this.runBeforeResolveHook({ operation: Operations.count, model, args })
+
+        if (process.env.JEST_WORKER_ID) return args
+
+        const results = await this.prisma[model].count({
             ...(args.where && {where: args.where}),
             ...(args.orderBy && {orderBy: args.orderBy}),
             ...(args.select && {select: args.select}),

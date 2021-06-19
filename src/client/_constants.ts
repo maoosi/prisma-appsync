@@ -7,7 +7,8 @@ export const PrismaAppSyncOperations = [
     'update',
     'upsert',
     'deleteMany', // deleteMany always comes before delete
-    'delete'
+    'delete',
+    'count'
 ]
 
 export const PrismaOrderByArgs = [
@@ -35,6 +36,7 @@ export const Operations = {
     createMany: 'createMany',
     updateMany: 'updateMany',
     deleteMany: 'deleteMany',
+    count: 'count'
 } as const
 
 export const AuthActions = {
@@ -52,4 +54,5 @@ export const AuthActions = {
     createMany: 'createMany',
     updateMany: 'updateMany',
     deleteMany: 'deleteMany',
+    count: 'count'
 } as const

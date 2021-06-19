@@ -100,11 +100,12 @@ model Post {
 `@PrismaAppSync.[scope]` must refer to an existing alias from the generator config. With `[scope]` being one of the following:
 
 - `type`: Applies to all operations (`query` + `mutation` + `subscription`).
-- `query`: Applies to any query (`get` + `list`). Overrides `type`.
+- `query`: Applies to any query (`get` + `list` + `count`). Overrides `type`.
 - `mutation`: Applies to any mutation (`create` + `update` + `upsert` + `delete` + `createMany` + `updateMany` + `deleteMany`). Overrides `type`.
 - `subscription`: Applies to any subscription. Overrides `type`.
 - `get`: Applies only to get operation. Overrides `type` and `query`.
 - `list`: Applies only to list operation. Overrides `type` and `query`.
+- `count`: Applies only to count operation. Overrides `type` and `query`.
 - `create`: Applies only to creation operation. Overrides `type` and `mutation`.
 - `update`: Applies only to update operation. Overrides `type` and `mutation`.
 - `upsert`: Applies only to upsert operation. Overrides `type` and `mutation`.

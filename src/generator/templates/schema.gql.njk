@@ -305,6 +305,12 @@ type Query {
             skip: Int,
             take: Int
         ): [{{ model.name }}] {{ model.directives.list | safe }}
+        count{{ model.pluralizedName }}(
+            where: {{ model.name }}WhereFilterInput,
+            orderBy: {{ model.name }}OrderByInput,
+            skip: Int,
+            take: Int
+        ): Int {{ model.directives.count | safe }}
     {% endfor %}
 }
 
