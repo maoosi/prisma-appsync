@@ -22,15 +22,13 @@ Using a model name format other than PascalCase OR already in the plural form, w
 - Model `PersonEmails`: Mapping back to the right `prismaClient.personemails`
 - Model `person_emails`: Properly converted to `getPersonEmails` and mapped back to `prismaClient.person_emails`
 
-### Feat: New Mutations availables
+### Feat: New Queries, Mutations and Subscriptions added
 
-- **createMany** (e.g. `createManyPosts`).
-- **updateMany** (e.g. `updateManyPosts`).
-
-### Feat: New Subscriptions availables
-
-- **onUpserted** (e.g. `onUpsertedPost`): Triggered on `create`, `update`, or `upsert` mutation.
-- **onModified** (e.g. `onMutatedPost`): Triggered on `create`, `update`, `upsert`, or `delete` mutation.
+- Query **count** (e.g. `countPosts`).
+- Mutation **createMany** (e.g. `createManyPosts`).
+- Mutation **updateMany** (e.g. `updateManyPosts`).
+- Subscription **onUpserted** (e.g. `onUpsertedPost`): Triggered on `create`, `update`, or `upsert` mutation.
+- Subscription **onMutated** (e.g. `onMutatedPost`): Triggered on `create`, `update`, `upsert`, or `delete` mutation.
 
 ### Misc
 
