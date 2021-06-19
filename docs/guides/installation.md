@@ -6,10 +6,8 @@ sidebarDepth: 0
 
 - 👉 [Sample Lambda function](#👉-bonus-sample-lambda-function)
 
-
 ::: danger
-
-Prisma-AppSync is highly experimental and it is not recommended to use in Production at this stage. Breaking changes might be introduced at anytime between beta versions. Feedback, suggestions and PRs welcomed.
+risma-AppSync is NOT ready for Production and is only recommended to use for prototyping until a stable version is released. Breaking changes might be introduced at anytime during the beta. Feedback, suggestions and PRs welcomed.
 :::
 
 > **Before starting, it is assumed that you have:**

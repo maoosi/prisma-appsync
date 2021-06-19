@@ -6,7 +6,7 @@ sidebarDepth: 0
 
 ## 👾 What is this?
 
-> **Prisma-AppSync** is a custom Generator for [Prisma 2](https://www.prisma.io), that automatically generates a fully working AWS AppSync ⚡ GraphQL CRUD API.
+> **Prisma-AppSync** is a [Prisma](https://www.prisma.io) Generator, that automatically converts your Schema into a fully working ⚡&#160;GraphQL API for [AWS AppSync](https://aws.amazon.com/appsync/).
 
 ## ✨ Automatically generated
 
