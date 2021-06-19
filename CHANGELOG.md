@@ -2,7 +2,7 @@
 
 ## 🎉 Version 1.0.0-beta.58
 
-### (Breaking) Fix: Issue linked to Prisma models naming
+### ⚠️ (Breaking) Fix: Issue linked to Prisma models naming
 
 Using a model name format other than PascalCase OR already in the plural form, was causing mapping issues between GraphQL queries and Prisma Client.
 
@@ -22,7 +22,7 @@ Using a model name format other than PascalCase OR already in the plural form, w
 - Model `PersonEmails`: Mapping back to the right `prismaClient.personemails`
 - Model `person_emails`: Properly converted to `getPersonEmails` and mapped back to `prismaClient.person_emails`
 
-### Feat: New Queries, Mutations and Subscriptions added
+### 🆕 Feat: New Queries, Mutations and Subscriptions added
 
 - Query **count** (e.g. `countPosts`).
 - Mutation **createMany** (e.g. `createManyPosts`).
@@ -30,7 +30,7 @@ Using a model name format other than PascalCase OR already in the plural form, w
 - Subscription **onUpserted** (e.g. `onUpsertedPost`): Triggered on `create`, `update`, or `upsert` mutation.
 - Subscription **onMutated** (e.g. `onMutatedPost`): Triggered on `create`, `update`, `upsert`, or `delete` mutation.
 
-### Misc
+### 🆕 Misc
 
 - Boilerplate updated to work with new changes listed above.
 - Upgraded Prisma to v2.25.0.
