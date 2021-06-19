@@ -279,7 +279,7 @@ type Mutation {
         ): {{ model.name }} {{ model.directives.update | safe }}
         updateMany{{ model.pluralizedName }}(
             where: {{ model.name }}WhereFilterInput!,
-            data: [{{ model.name }}UpdateInput!]
+            data: {{ model.name }}UpdateInput!
         ): BatchPayload {{ model.directives.updateMany | safe }}
         upsert{{ model.name }}(
             data: {{ model.name }}UpdateInput!,
