@@ -322,6 +322,16 @@ type Subscription {
             {% endfor %}
         ): {{ model.name }}
             @aws_subscribe(mutations: ["update{{ model.name }}"]) {{ model.directives.subscription | safe }}
+        onUpserted{{ model.name }}(
+            {% if model.idFields | length -%}
+                {{ model.idFields | join("_") }}: 
+                    {{ model.idFields | join(" ") | pascalCase }}FieldsInput!
+            {% endif %}
+            {% for field in model.subscriptionFields -%}
+                {{ field.name }}: {{ field.scalar }}
+            {% endfor %}
+        ): {{ model.name }}
+            @aws_subscribe(mutations: ["create{{ model.name }}", "update{{ model.name }}", "upsert{{ model.name }}"]) {{ model.directives.subscription | safe }}
         onDeleted{{ model.name }}(
             {% if model.idFields | length -%}
                 {{ model.idFields | join("_") }}:
@@ -332,5 +342,15 @@ type Subscription {
             {% endfor %}
         ): {{ model.name }}
             @aws_subscribe(mutations: ["delete{{ model.name }}"]) {{ model.directives.subscription | safe }}
+        onMutated{{ model.name }}(
+            {% if model.idFields | length -%}
+                {{ model.idFields | join("_") }}:
+                    {{ model.idFields | join(" ") | pascalCase }}FieldsInput!
+            {% endif %}
+            {% for field in model.subscriptionFields -%}
+                {{ field.name }}: {{ field.scalar }}
+            {% endfor %}
+        ): {{ model.name }}
+            @aws_subscribe(mutations: ["create{{ model.name }}", "update{{ model.name }}", "upsert{{ model.name }}", "delete{{ model.name }}"]) {{ model.directives.subscription | safe }}
     {% endfor %}
 }

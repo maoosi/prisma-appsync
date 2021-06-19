@@ -1,7 +1,9 @@
 export const PrismaAppSyncOperations = [
     'get',
     'list',
+    'createMany', // createMany always comes before create
     'create',
+    'updateMany', // updateMany always comes before update
     'update',
     'upsert',
     'deleteMany', // deleteMany always comes before delete
@@ -30,6 +32,8 @@ export const Operations = {
     upsert: 'upsert',
     update: 'update',
     delete: 'delete',
+    createMany: 'createMany',
+    updateMany: 'updateMany',
     deleteMany: 'deleteMany',
 } as const
 
@@ -45,5 +49,7 @@ export const AuthActions = {
     upsert: 'upsert',
     update: 'update',
     delete: 'delete',
+    createMany: 'createMany',
+    updateMany: 'updateMany',
     deleteMany: 'deleteMany',
 } as const

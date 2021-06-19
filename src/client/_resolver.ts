@@ -103,7 +103,7 @@ export class PrismaAppSyncResolver {
                 )
             }
 
-            if (action === AuthActions.list || action === AuthActions.deleteMany) {
+            if (action === AuthActions.list || action === AuthActions.createMany || action === AuthActions.updateMany || action === AuthActions.deleteMany) {
                 const entities = await this.prisma[model].findMany({
                     where: args.where,
                     select
@@ -444,6 +444,20 @@ export class PrismaAppSyncResolver {
         return results
     }
 
+    public async createMany(model:string, args:RequestProps) {
+        await this.runBeforeResolveHook({ operation: Operations.createMany, model, args })
+
+        if (process.env.JEST_WORKER_ID) return args
+
+        const results = await this.prisma[model].createMany({
+            where: args.where
+        })
+
+        await this.runAfterResolveHook({ result: results })
+
+        return results
+    }
+
     public async update(model:string, args:RequestProps) {
         await this.runBeforeResolveHook({ operation: Operations.update, model, args })
 
@@ -453,6 +467,20 @@ export class PrismaAppSyncResolver {
             data: args.data,
             where: args.where,
             ...(args.select && {select: args.select}),
+        })
+
+        await this.runAfterResolveHook({ result: results })
+
+        return results
+    }
+
+    public async updateMany(model:string, args:RequestProps) {
+        await this.runBeforeResolveHook({ operation: Operations.updateMany, model, args })
+
+        if (process.env.JEST_WORKER_ID) return args
+
+        const results = await this.prisma[model].updateMany({
+            where: args.where
         })
 
         await this.runAfterResolveHook({ result: results })

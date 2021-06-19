@@ -101,7 +101,7 @@ model Post {
 
 - `type`: Applies to all operations (`query` + `mutation` + `subscription`).
 - `query`: Applies to any query (`get` + `list`). Overrides `type`.
-- `mutation`: Applies to any mutation (`create` + `update` + `upsert` + `delete` + `deleteMany`). Overrides `type`.
+- `mutation`: Applies to any mutation (`create` + `update` + `upsert` + `delete` + `createMany` + `updateMany` + `deleteMany`). Overrides `type`.
 - `subscription`: Applies to any subscription. Overrides `type`.
 - `get`: Applies only to get operation. Overrides `type` and `query`.
 - `list`: Applies only to list operation. Overrides `type` and `query`.
@@ -109,6 +109,8 @@ model Post {
 - `update`: Applies only to update operation. Overrides `type` and `mutation`.
 - `upsert`: Applies only to upsert operation. Overrides `type` and `mutation`.
 - `delete`: Applies only to update operation. Overrides `type` and `mutation`.
+- `createMany`: Applies only to createMany operation. Overrides `type` and `mutation`.
+- `updateMany`: Applies only to updateMany operation. Overrides `type` and `mutation`.
 - `deleteMany`: Applies only to deleteMany operation. Overrides `type` and `mutation`.
 
 ## 👉 Fine-Grained Access Control

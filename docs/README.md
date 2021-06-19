@@ -16,11 +16,11 @@ sidebarDepth: 0
 
 ## ✔️ Features
 
-- AppSync CRUD API (get/list/create/update/delete/deleteMany).
+- AppSync CRUD API (get / list / create / update / upsert / delete / createMany / updateMany / deleteMany).
 - Extensible TypeScript Class with support for hooks and custom resolvers.
 - Support for AppSync authorization modes, as well as fine-grained access control.
-- Real-time subscriptions (onCreated/onUpdated/onDeleted).
-- Exposes Prisma relation queries (create/connect/connectOrCreate/update/upsert/delete/disconnect/set/updateMany/deleteMany).
+- Real-time subscriptions (onCreated / onUpdated / onDeleted).
+- Exposes Prisma relation queries (create / connect / connectOrCreate / update / upsert / delete / disconnect / set / updateMany / deleteMany).
 - Full CloudWatch logs for easy debugging on AWS.
 - XSS data sanitization by default.
 

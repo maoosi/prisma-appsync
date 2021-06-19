@@ -3,6 +3,7 @@ export declare class PrismaAppSyncAdapter {
     private customResolvers;
     private debug;
     private defaultPagination;
+    private config;
     operation: Operation;
     model: string;
     args: RequestProps;

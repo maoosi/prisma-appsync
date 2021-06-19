@@ -11,12 +11,14 @@ export declare type Options = {
     defaultPagination?: number | false;
 };
 export declare type PrivateOptions = {
+    config: any;
     connectionUrl: string;
     debug: boolean;
     sanitize: boolean;
     defaultPagination: number | false;
 };
 export declare type AdapterOptions = {
+    config: any;
     defaultPagination: number | false;
     customResolvers: any;
     debug: boolean;
