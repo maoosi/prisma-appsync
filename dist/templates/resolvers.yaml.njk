@@ -25,6 +25,14 @@
     dataSource: prisma-appsync
 -   
     typeName: Mutation
+    fieldName: createMany{{ model.pluralizedName }}
+    dataSource: prisma-appsync
+-   
+    typeName: Mutation
+    fieldName: updateMany{{ model.pluralizedName }}
+    dataSource: prisma-appsync
+-   
+    typeName: Mutation
     fieldName: deleteMany{{ model.pluralizedName }}
     dataSource: prisma-appsync
 {% endfor -%}

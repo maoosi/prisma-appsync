@@ -24,7 +24,9 @@ export declare class PrismaAppSyncResolver {
     get(model: string, args: RequestProps): Promise<any>;
     list(model: string, args: RequestProps): Promise<any>;
     create(model: string, args: RequestProps): Promise<any>;
+    createMany(model: string, args: RequestProps): Promise<any>;
     update(model: string, args: RequestProps): Promise<any>;
+    updateMany(model: string, args: RequestProps): Promise<any>;
     upsert(model: string, args: RequestProps): Promise<any>;
     delete(model: string, args: RequestProps): Promise<any>;
     deleteMany(model: string, args: RequestProps): Promise<any>;

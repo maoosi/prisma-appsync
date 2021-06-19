@@ -47,6 +47,7 @@ export type RequestProps = {
     orderBy?: any
     skip?: number
     take?: number
+    skipDuplicates?: boolean
     [key:string]: any
 }
 

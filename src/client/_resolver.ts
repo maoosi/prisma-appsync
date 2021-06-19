@@ -450,7 +450,8 @@ export class PrismaAppSyncResolver {
         if (process.env.JEST_WORKER_ID) return args
 
         const results = await this.prisma[model].createMany({
-            where: args.where
+            data: args.data,
+            ...(args.skipDuplicates && {skipDuplicates: args.skipDuplicates})
         })
 
         await this.runAfterResolveHook({ result: results })
@@ -480,6 +481,7 @@ export class PrismaAppSyncResolver {
         if (process.env.JEST_WORKER_ID) return args
 
         const results = await this.prisma[model].updateMany({
+            data: args.data,
             where: args.where
         })
 

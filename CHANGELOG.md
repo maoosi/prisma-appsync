@@ -1,5 +1,41 @@
 # Changelog
 
+## Version 1.0.0-beta.58
+
+### (Breaking) Fix: Issue linked to Prisma models naming
+
+Using a model name format other than PascalCase OR already in the plural form, was causing mapping issues between GraphQL queries and Prisma Client.
+
+> Only breaking in case you were NOT following PascalCase naming convention for models OR affected by one of the below examples.
+
+#### Before
+
+- Model `person`: GQL types generated were not using camelCase (`getperson`, `listpersons`, etc...)
+- Model `People`: Was wrongly mapping to singular `person` instead of `people`.
+- Model `PersonEmails`: Was wrongly mapping to `prismaClient.personemail` instead of `prismaClient.personemails`
+- Model `person_emails`: Was throwing an error when calling the API.
+
+#### After
+
+- Model `person`: GQL types are now properly using camelCase (`getPerson`, `listPersons`, etc...)
+- Model `People`: Mapping back to the right `people` model.
+- Model `PersonEmails`: Mapping back to the right `prismaClient.personemails`
+- Model `person_emails`: Properly converted to `getPersonEmails` and mapped back to `prismaClient.person_emails`
+
+### Feat: New Mutations availables
+
+- **createMany** (e.g. `createManyPosts`).
+- **updateMany** (e.g. `updateManyPosts`).
+
+### Feat: New Subscriptions availables
+
+- **onUpserted** (e.g. `onUpsertedPost`): Triggered on `create`, `update`, or `upsert` mutation.
+- **onModified** (e.g. `onMutatedPost`): Triggered on `create`, `update`, `upsert`, or `delete` mutation.
+
+### Misc
+
+- Boilerplate updated to work with new changes listed above.
+
 ## Version 1.0.0-beta.57
 
 - Feat: Support for prisma ^2.24.1 added.

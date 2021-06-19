@@ -119,28 +119,6 @@ input BooleanFilterInput {
         }
     {% endif %}
 
-    input {{ model.name }}CreateInput {
-        {% for field in model.fields -%}
-            {% if field.isEditable and not field.relation -%}
-                {{ field.name }}: 
-                    {{ field.scalar }}{% if field.isRequired -%}!{% endif %} {{ field.directives.create | safe }}
-            {% elseif field.isEditable and field.relation -%}
-                {{ field.name }}: 
-                    {{ field.relation.name }}CreateRelationsInput{% if field.isRequired -%}!{% endif %} {{ field.directives.create | safe }}
-            {% endif -%}
-        {% endfor %}
-    }
-
-    input {{ model.name }}UpdateInput {
-        {% for field in model.fields -%}
-            {% if field.isEditable and not field.relation -%}
-                {{ field.name }}: {{ field.scalar }} {{ field.directives.update | safe }}
-            {% elseif field.isEditable and field.relation -%}
-                {{ field.name }}: {{ field.relation.name }}UpdateRelationsInput {{ field.directives.update | safe }}
-            {% endif -%}
-        {% endfor %}
-    }
-
     input {{ model.name }}FilterRelationsInput {
         every: {{ model.name }}WhereFilterInput
         none: {{ model.name }}WhereFilterInput
@@ -190,14 +168,36 @@ input BooleanFilterInput {
         {% endfor %}
     }
 
+    input {{ model.name }}CreateInput {
+        {% for field in model.fields -%}
+            {% if field.isEditable and not field.relation -%}
+                {{ field.name }}: 
+                    {{ field.scalar }}{% if field.isRequired -%}!{% endif %} {{ field.directives.create | safe }}
+            {% elseif field.isEditable and field.relation -%}
+                {{ field.name }}: 
+                    {{ field.relation.name }}CreateRelationsInput{% if field.isRequired -%}!{% endif %} {{ field.directives.create | safe }}
+            {% endif -%}
+        {% endfor %}
+    }
+
+    input {{ model.name }}UpdateInput {
+        {% for field in model.fields -%}
+            {% if field.isEditable and not field.relation -%}
+                {{ field.name }}: {{ field.scalar }} {{ field.directives.update | safe }}
+            {% elseif field.isEditable and field.relation -%}
+                {{ field.name }}: {{ field.relation.name }}UpdateRelationsInput {{ field.directives.update | safe }}
+            {% endif -%}
+        {% endfor %}
+    }
+
     input {{ model.name }}UpdateUniqueInput {
         data: {{ model.name }}UpdateInput!
         where: {{ model.name }}WhereUniqueInput!
     }
 
     input {{ model.name }}UpdateManyInput {
-        data: {{ model.name }}UpdateInput!
         where: {{ model.name }}WhereFilterInput!
+        data: {{ model.name }}UpdateInput!
     }
 
     input {{ model.name }}UpsertInput {
@@ -269,10 +269,18 @@ type Mutation {
         create{{ model.name }}(
             data: {{ model.name }}CreateInput!
         ): {{ model.name }} {{ model.directives.create | safe }}
+        createMany{{ model.pluralizedName }}(
+            data: [{{ model.name }}CreateInput!],
+            skipDuplicates: Boolean
+        ): BatchPayload {{ model.directives.createMany | safe }}
         update{{ model.name }}(
-            data: {{ model.name }}UpdateInput!,
-            where: {{ model.name }}WhereUniqueInput!
+            where: {{ model.name }}WhereUniqueInput!,
+            data: {{ model.name }}UpdateInput!
         ): {{ model.name }} {{ model.directives.update | safe }}
+        updateMany{{ model.pluralizedName }}(
+            where: {{ model.name }}WhereFilterInput!,
+            data: [{{ model.name }}UpdateInput!]
+        ): BatchPayload {{ model.directives.updateMany | safe }}
         upsert{{ model.name }}(
             data: {{ model.name }}UpdateInput!,
             where: {{ model.name }}WhereUniqueInput!

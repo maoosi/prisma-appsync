@@ -14,6 +14,8 @@ export declare const Operations: {
     readonly upsert: "upsert";
     readonly update: "update";
     readonly delete: "delete";
+    readonly createMany: "createMany";
+    readonly updateMany: "updateMany";
     readonly deleteMany: "deleteMany";
 };
 export declare const AuthActions: {
@@ -28,5 +30,7 @@ export declare const AuthActions: {
     readonly upsert: "upsert";
     readonly update: "update";
     readonly delete: "delete";
+    readonly createMany: "createMany";
+    readonly updateMany: "updateMany";
     readonly deleteMany: "deleteMany";
 };
