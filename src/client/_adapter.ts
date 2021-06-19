@@ -18,6 +18,7 @@ export class PrismaAppSyncAdapter {
     private customResolvers:any
     private debug:boolean
     private defaultPagination:number|false
+    private config:any
     public operation:Operation
     public model:string
     public args:RequestProps
@@ -35,6 +36,7 @@ export class PrismaAppSyncAdapter {
         this.customResolvers = options.customResolvers
         this.debug = options.debug
         this.defaultPagination = options.defaultPagination
+        this.config = options.config
 
         this.verifyIntegrity(event)
         this.parseRequest(event)
@@ -107,13 +109,18 @@ export class PrismaAppSyncAdapter {
                 )
             }
 
-            // record operation + model
+            // record operation
             this.operation = operation
-            this.model = camelCase(
-                singular(
-                    fieldName.replace(this.operation, '')
-                )
-            )
+
+            // record model
+            const modelName = fieldName.replace(this.operation, '')
+            const singularModelName = singular(modelName)
+
+            this.model = 
+                this.config.prismaClientModels 
+                && typeof this.config.prismaClientModels[modelName] !== 'undefined'
+                    ? this.config.prismaClientModels[modelName]
+                    : singularModelName.charAt(0).toLowerCase() + singularModelName.slice(1)
 
         }
 

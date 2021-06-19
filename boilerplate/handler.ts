@@ -12,8 +12,8 @@ app.prisma.$use(async (params, next) => {
     console.log('Hello from Prisma middleware!', params)
     return next(params)
 })
-
 <% } %>// Lambda function handler
+
 export const main = async (event: any, context: any, callback: any) => {
     context.callbackWaitsForEmptyEventLoop = false
     console.info('Received event:', JSON.stringify(event))

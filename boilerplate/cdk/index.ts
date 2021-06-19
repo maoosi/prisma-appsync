@@ -32,7 +32,14 @@ export class AppSyncCdkStack extends cdk.Stack {
         // create new API
         const graphqlApi = new GraphqlApi(this, `${process.env.SERVICES_PREFIX}_Api`, {
             name: `${process.env.SERVICES_PREFIX}_Api`,
-            schema: Schema.fromAsset( path.join(__dirname, process.env.APPSYNC_SCHEMA_PATH || ``) ),
+            schema: Schema.fromAsset( 
+                path.join(
+                    __dirname, 
+                    String(process.env.ROOT_DIR_PATH),
+                    String(process.env.PRISMA_APPSYNC_OUTPUT_PATH),
+                    'schema.gql'
+                ) 
+            ),
             authorizationConfig: {
                 defaultAuthorization: {
                     authorizationType: AuthorizationType.API_KEY
@@ -93,37 +100,60 @@ export class AppSyncCdkStack extends cdk.Stack {
             runtime: Runtime.NODEJS_14_X,
             timeout: cdk.Duration.seconds(10),
             handler: 'main',
-            entry: path.join(__dirname, process.env.HANDLER_FUNCTION_PATH || ``),
+            entry: path.join(
+                __dirname, 
+                String(process.env.ROOT_DIR_PATH),
+                String(process.env.HANDLER_FUNCTION_PATH)
+            ),
             memorySize: 1536,
             depsLockFilePath: path.join(__dirname, '../yarn.lock'),
             bundling: {
                 minify: true,
                 commandHooks: {
                     beforeBundling(inputDir: string, outputDir: string): string[] {
-                        <% if (testingMode) { %>const prismaSchema = path.join(inputDir, process.env.PRISMA_SCHEMA_ROOT_PATH || 'schema.prisma')
-                        const customSchema = path.join(path.dirname(prismaSchema), 'custom-schema.gql')
-                        const customResolvers = path.join(path.dirname(prismaSchema), 'custom-resolvers.yaml')
+                        const prismaSchema = path.join(
+                            inputDir, 
+                            String(process.env.PRISMA_SCHEMA_PATH)
+                        )
+
+                        <% if (testingMode) { %>
+                        const customSchema = path.join(
+                            path.dirname(prismaSchema), 
+                            'custom-schema.gql'
+                        )
+                        const customResolvers = path.join(
+                            path.dirname(prismaSchema), 
+                            'custom-resolvers.yaml'
+                        )
 
                         return [
                             `cp ${prismaSchema} ${outputDir}`,
                             `cp ${customSchema} ${outputDir}`,
                             `cp ${customResolvers} ${outputDir}`,
                         ]<% } else { %>return [
-                            `cp ${path.join(inputDir, process.env.PRISMA_SCHEMA_ROOT_PATH || 'schema.prisma')} ${outputDir}`
+                            `cp ${prismaSchema} ${outputDir}`,
                         ]<% } %>
                     },
                     beforeInstall() {
                         return []
                     },
-                    afterBundling(<% if (testingMode) { %>inputDir: string, outputDir: string<% } %>): string[] {
+                    afterBundling(inputDir: string<% if (testingMode) { %>, outputDir: string<% } %>): string[] {
+                        const configPath = path.join(
+                            inputDir,
+                            String(process.env.PRISMA_APPSYNC_OUTPUT_PATH),
+                            'client/config.json'
+                        )
+
                         return [
                             <% if (testingMode) { %>`cp -R ${path.join(inputDir, 'node_modules/.tmp/prisma-appsync/')} ${path.join(outputDir, 'node_modules/')}`,
                             <% } %>'npx prisma generate', 
+                            `cp ${configPath} .`,
                             'rm -rf node_modules/@prisma/engines', 
                             'rm -rf node_modules/@prisma/client/node_modules', 
                             'rm -rf node_modules/.bin', 
                             'rm -rf node_modules/prisma',
                             'rm -rf node_modules/prisma-appsync',
+                            'rm -rf generated'
                         ]
                     }
                 },
@@ -131,7 +161,7 @@ export class AppSyncCdkStack extends cdk.Stack {
                 forceDockerBundling: true
             },
             environment: {
-                CONNECTION_URL: process.env.PRISMA_CONNECTION_URL || ``
+                CONNECTION_URL: String(process.env.PRISMA_CONNECTION_URL)
             }
         })
 
@@ -178,7 +208,12 @@ export class AppSyncCdkStack extends cdk.Stack {
         // read resolvers from yaml
         const resolvers = yaml.load(
             fs.readFileSync(
-                path.join(__dirname, process.env.APPSYNC_RESOLVERS_PATH || ``),
+                path.join(
+                    __dirname, 
+                    String(process.env.ROOT_DIR_PATH),
+                    String(process.env.PRISMA_APPSYNC_OUTPUT_PATH),
+                    'resolvers.yaml'
+                ),
                 'utf8'
             )
         )
@@ -218,5 +253,5 @@ export class AppSyncCdkStack extends cdk.Stack {
 }
 
 const app = new cdk.App()
-new AppSyncCdkStack(app, process.env.SERVICES_PREFIX || 'AppSyncGraphQL')
+new AppSyncCdkStack(app, String(process.env.SERVICES_PREFIX))
 app.synth()

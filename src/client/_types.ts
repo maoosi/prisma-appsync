@@ -14,6 +14,7 @@ export type Options = {
 }
 
 export type PrivateOptions = {
+    config: any
     connectionUrl: string
     debug: boolean
     sanitize: boolean
@@ -21,6 +22,7 @@ export type PrivateOptions = {
 }
 
 export type AdapterOptions = {
+    config: any
     defaultPagination: number | false
     customResolvers: any
     debug: boolean

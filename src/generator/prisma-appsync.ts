@@ -3,6 +3,7 @@ import { PrismaAppSyncCompiler } from './compiler'
 import { generatorHandler } from '@prisma/generator-helper'
 import { parseEnvValue } from '@prisma/sdk'
 
+
 // Read Prisma AppSync version
 const generatorVersion = require('../../package.json').version
 
@@ -67,6 +68,13 @@ generatorHandler({
                     console.log(`[Prisma-AppSync] Generating schema.`)
                 }
 
+                 // Generate client config
+                 await compiler.makeClientConfig()
+
+                 if (debug) {
+                     console.log(`[Prisma-AppSync] Generating client config.`)
+                 }
+
                 // Generate schema
                 await compiler.makeSchema(options.generator.config.customSchema)
 
@@ -78,7 +86,7 @@ generatorHandler({
                 await compiler.makeResolvers(options.generator.config.customResolvers)
 
                 if (debug) {
-                    console.log(`[Prisma-AppSync] Generating docs.`)
+                    console.log(`[Prisma-AppSync] Generating models mapping.`)
                 }
 
                 // Generate docs

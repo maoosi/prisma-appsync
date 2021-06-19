@@ -46,6 +46,8 @@ export class PrismaAppSyncCompiler {
                     update: ['update', 'mutation', 'type', 'default'],
                     upsert: ['upsert', 'mutation', 'type', 'default'],
                     delete: ['delete', 'mutation', 'type', 'default'],
+                    createMany: ['createMany', 'mutation', 'type', 'default'],
+                    updateMany: ['updateMany', 'mutation', 'type', 'default'],
                     deleteMany: ['deleteMany', 'mutation', 'type', 'default'],
                 },
                 field: {
@@ -114,6 +116,16 @@ export class PrismaAppSyncCompiler {
             await writeFile(generatorSchemaPath, prettySchema)
 
         }
+
+        return this
+    }
+
+    // Generate and output AppSync client config
+    public async makeClientConfig():Promise<this> {
+        await this.makeFile(
+            join(__dirname, './templates/client/config.json.njk'),
+            { outputDir: 'client' }
+        )
 
         return this
     }
@@ -210,8 +222,9 @@ export class PrismaAppSyncCompiler {
                 })
             
                 this.data.models.push({
-                    name: model.name,
-                    pluralizedName: plural(model.name),
+                    name: pascalCase(model.name),
+                    pluralizedName: pascalCase(plural(model.name)),
+                    prismaRef: model.name.charAt(0).toLowerCase() + model.name.slice(1),
                     ...(Object.keys(modelDirectives).length > 0 && {
                         directives: modelDirectives
                     }),

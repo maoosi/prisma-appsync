@@ -1,0 +1,10 @@
+{
+    "prismaClientModels": {
+    {% for model in models -%}
+        {% if model.name !== model.pluralizedName -%}
+        "{{ model.pluralizedName }}": "{{ model.prismaRef }}",
+        {% endif -%}
+        "{{ model.name }}": "{{ model.prismaRef }}"{% if not loop.last %},{% endif %}
+    {% endfor -%}
+    }
+}

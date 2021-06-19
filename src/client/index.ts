@@ -15,9 +15,11 @@ import {
 import { AuthModes, Operations, AuthActions } from './_constants'
 import escape from 'validator/lib/escape'
 import xss from 'xss'
-import { clone, merge } from 'lodash-es'
-import { BadRequestError, InternalError } from './_errors'
+import { clone } from 'lodash-es'
+import { BadRequestError } from './_errors'
 import { CustomPrismaClient } from './_prisma'
+import { readFileSync } from 'fs'
+import { join } from 'path'
 
 export {
     PrismaAppSyncAdapter,
@@ -44,6 +46,7 @@ export class PrismaAppSync {
 
     constructor(options:Options) {
         this.options = {
+            config: {},
             connectionUrl: options.connectionUrl,
             debug: typeof options.debug !== 'undefined'
                 ? options.debug : false,
@@ -51,6 +54,16 @@ export class PrismaAppSync {
                 ? options.sanitize : true,
             defaultPagination: typeof options.defaultPagination !== 'undefined'
                 ? options.defaultPagination : 50
+        }
+
+        try { 
+            this.options.config = JSON.parse(
+                readFileSync(join(__dirname, '/config.json'), 'utf8')
+            )
+        } catch {
+            if (this.options.debug) {
+                console.log('Project config file is missing at `client/config.json`.')
+            }
         }
 
         this.customResolvers = {}
@@ -75,6 +88,7 @@ export class PrismaAppSync {
 
     public parseEvent(event:any) {
         this.adapter = new PrismaAppSyncAdapter(event, {
+            config: this.options.config,
             defaultPagination: this.options.defaultPagination,
             debug: this.options.debug,
             customResolvers: this.customResolvers,
