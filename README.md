@@ -4,7 +4,7 @@
 
 # Prisma-AppSync &middot; [![Generic badge](https://img.shields.io/badge/Generator%20for-◭%20Prisma-9F7AEA.svg)](https://www.prisma.io) [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/maoosi/prisma-appsync/graphs/commit-activity)
 
-**Prisma-AppSync** is a [Prisma](https://www.prisma.io) Generator, that automatically converts your Schema into a fully working ⚡&#160;GraphQL API for [AWS AppSync](https://aws.amazon.com/appsync/).
+**Prisma-AppSync** is a [Prisma](https://www.prisma.io) Generator, that automatically converts your Schema into a full-blown ⚡&#160;GraphQL&#160;API for [AWS AppSync](https://aws.amazon.com/appsync/).
 
 > ⚠️ ⚠️ Prisma-AppSync is NOT ready for Production and is only recommended to use for prototyping until a stable version is released. Breaking changes might be introduced at anytime during the beta. Feedback, suggestions and PRs welcomed.
 
@@ -26,7 +26,7 @@
 
 ## ⚓ Compatibility
 
-- Prisma 2.24.1
+- Prisma 2.25.0
 
 ## 📓 Documentation
 
