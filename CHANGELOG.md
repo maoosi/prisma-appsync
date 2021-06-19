@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 1.0.0-beta.58
+## 🎉 Version 1.0.0-beta.58
 
 ### (Breaking) Fix: Issue linked to Prisma models naming
 
@@ -35,12 +35,12 @@ Using a model name format other than PascalCase OR already in the plural form, w
 - Boilerplate updated to work with new changes listed above.
 - Upgraded Prisma to v2.25.0.
 
-## Version 1.0.0-beta.57
+## 🎉 Version 1.0.0-beta.57
 
 - Feat: Support for prisma ^2.24.1 added.
 - Fix: Type issue in the Boilerplate.
 
-## Version 1.0.0-beta.56
+## 🎉 Version 1.0.0-beta.56
 
 ### ⚠️ Breaking
 
@@ -133,7 +133,7 @@ const app = new PrismaAppSync({
 
 - Fix: Has no exported member 'Prisma' issue resolved ([issues/11](https://github.com/maoosi/prisma-appsync/issues/11))
 
-## Version 1.0.0-beta.53
+## 🎉 Version 1.0.0-beta.53
 
 ### ⚠️ Breaking
 
@@ -158,7 +158,7 @@ app.registerCustomResolvers({ incrementPostsViews })
 - Feat: For contributors, running `yarn create prisma-appsync-app . --test` now also creates a custom resolver for testing purpose.
 - Fix: PNPM install not running `prisma generate` by default ([issues/11](https://github.com/maoosi/prisma-appsync/issues/11))
 
-## Version 1.0.0-beta.52
+## 🎉 Version 1.0.0-beta.52
 
 ### ⚠️ Breaking
 
@@ -203,7 +203,7 @@ afterBundling(inputDir: string, outputDir: string): string[] {
 - Feat: Contribution guide added (see [CONTRIBUTING.md](CONTRIBUTING.md)) with new boilerplate testing workflow.
 - Feat: Core library is now using Pnpm instead of Yarn.
 
-## Version 1.0.0-beta.51
+## 🎉 Version 1.0.0-beta.51
 
 - Fix: Support for prisma ^2.20 added (output for generators can now be env vars).
 - Feat: Ability to exclude fields and models from the generated GraphQL schema and API using `/// @PrismaAppSync.ignore` ([more details in the docs](https://prisma-appsync.vercel.app/guides/ignore.html)).
