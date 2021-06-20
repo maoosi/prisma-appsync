@@ -15,8 +15,9 @@
         "build:client": "esbuild src/client/index.ts --bundle --minify --keep-names --platform=node --external:fsevents --external:@prisma/client --outfile=dist/prisma-appsync/index.js && tsc src/client/*.ts --outDir dist/prisma-appsync/ --declaration --emitDeclarationOnly",
         "docs:dev": "vuepress dev docs --host localhost",
         "docs:build": "vuepress build docs",
-        "test": "pnpm test:generate && jest test/ -e",
+        "test": "pnpm test:generate && jest test/ -e && pnpm test:copydocs",
         "test:generate": "pnpm build && prisma generate --schema=./test/schema.prisma",
+        "test:copydocs": "cp test/generated/prisma-appsync/docs/Post.md docs/demo/_post.md && cp test/generated/prisma-appsync/docs/User.md docs/demo/_user.md",
         "prepare": "pnpm test"
     },
     "engines": {
