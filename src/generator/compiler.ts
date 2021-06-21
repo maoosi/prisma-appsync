@@ -14,8 +14,8 @@ import {
 } from './types'
 import { parseAnnotations } from 'graphql-annotations'
 import { join, extname, basename, dirname } from 'path'
-import { readFile, outputFile, writeFile, readFileSync, copy } from 'fs-extra'
-import { mixin, flow, camelCase, upperFirst, merge } from 'lodash-es'
+import { readFile, outputFile, writeFile, readFileSync, copy, openSync, writeSync, close } from 'fs-extra'
+import { flow, camelCase, upperFirst, merge } from 'lodash-es'
 
 // AppSync schema helper
 const { convertSchemas } = require('@maoosi/appsync-schema-converter')
@@ -121,14 +121,23 @@ export class PrismaAppSyncCompiler {
         return this
     }
 
-    // Generate and output AppSync client config
-    public async makeClientConfig():Promise<this> {
-        await this.makeFile(
-            join(__dirname, './templates/client/config.json.njk'),
-            { outputDir: 'client' }
-        )
+    // Return the AppSync client config
+    public getClientConfig():string {
+        const config = {
+            prismaClientModels: {}
+        }
 
-        return this
+        for (let i = 0; i < this.data.models.length; i++) {
+            const model = this.data.models[i]
+
+            if (model.name !== model.pluralizedName) {
+                config['prismaClientModels'][model.pluralizedName] = model.prismaRef
+            }
+            
+            config['prismaClientModels'][model.name] = model.prismaRef
+        }
+
+        return JSON.stringify(config)
     }
 
     // Generate and output AppSync resolvers
@@ -163,6 +172,17 @@ export class PrismaAppSyncCompiler {
             join(__dirname, './prisma-appsync'),
             join(this.options.outputDir, 'client')
         )
+
+        // edit output to inject env var at beginning
+        const clientPath = join(this.options.outputDir, 'client', 'index.js')
+        const clientContent = readFileSync(clientPath)
+        const clientDescriptor = openSync(clientPath, 'w+')
+        const clientConfig = Buffer.from(
+            `process.env.PRISMA_APPSYNC_GENERATED_CONFIG=${JSON.stringify(this.getClientConfig())};`
+        )
+        writeSync(clientDescriptor, clientConfig, 0, clientConfig.length, 0)
+        writeSync(clientDescriptor, clientContent, 0, clientContent.length, clientConfig.length)
+        close(clientDescriptor)
 
         return this
     }

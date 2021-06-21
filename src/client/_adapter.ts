@@ -1,4 +1,3 @@
-import { singular } from 'pluralize'
 import { merge } from 'lodash-es'
 import {
     RequestProps,
@@ -113,14 +112,12 @@ export class PrismaAppSyncAdapter {
 
             // record model
             const modelName = fieldName.replace(this.operation, '')
-            const singularModelName = singular(modelName)
 
-            this.model = 
-                this.config.prismaClientModels 
-                && typeof this.config.prismaClientModels[modelName] !== 'undefined'
-                    ? this.config.prismaClientModels[modelName]
-                    : singularModelName.charAt(0).toLowerCase() + singularModelName.slice(1)
+            if (!this.config || typeof this.config.prismaClientModels === 'undefined' || typeof this.config.prismaClientModels[modelName] === 'undefined') {
+                throw new InternalError('Issue parsing prismaClientModels from auto-injected environment variable `PRISMA_APPSYNC_GENERATED_CONFIG`.')
+            }
 
+            this.model = this.config.prismaClientModels[modelName]
         }
 
         return this.parseArgs(event)

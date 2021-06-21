@@ -137,17 +137,10 @@ export class AppSyncCdkStack extends cdk.Stack {
                     beforeInstall() {
                         return []
                     },
-                    afterBundling(inputDir: string<% if (testingMode) { %>, outputDir: string<% } %>): string[] {
-                        const configPath = path.join(
-                            inputDir,
-                            String(process.env.PRISMA_APPSYNC_OUTPUT_PATH),
-                            'client/config.json'
-                        )
-
+                    afterBundling(<% if (testingMode) { %>inputDir: string, outputDir: string<% } %>): string[] {
                         return [
                             <% if (testingMode) { %>`cp -R ${path.join(inputDir, 'node_modules/.tmp/prisma-appsync/')} ${path.join(outputDir, 'node_modules/')}`,
                             <% } %>'npx prisma generate', 
-                            `cp ${configPath} .`,
                             'rm -rf node_modules/@prisma/engines', 
                             'rm -rf node_modules/@prisma/client/node_modules', 
                             'rm -rf node_modules/.bin', 

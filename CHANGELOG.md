@@ -6,7 +6,7 @@
 
 Using a model name format other than PascalCase OR already in the plural form, was causing mapping issues between GraphQL queries and Prisma Client.
 
-> Only breaking in case you were NOT following PascalCase naming convention for models OR affected by one of the below examples.
+> This feature is only breaking in case you were NOT following PascalCase naming convention for models OR affected by one of the below examples.
 
 #### Before
 

@@ -68,13 +68,6 @@ generatorHandler({
                     console.log(`[Prisma-AppSync] Generating schema.`)
                 }
 
-                 // Generate client config
-                 await compiler.makeClientConfig()
-
-                 if (debug) {
-                     console.log(`[Prisma-AppSync] Generating client config.`)
-                 }
-
                 // Generate schema
                 await compiler.makeSchema(options.generator.config.customSchema)
 

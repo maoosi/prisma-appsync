@@ -18,8 +18,6 @@ import xss from 'xss'
 import { clone } from 'lodash-es'
 import { BadRequestError } from './_errors'
 import { CustomPrismaClient } from './_prisma'
-import { readFileSync } from 'fs'
-import { join } from 'path'
 
 export {
     PrismaAppSyncAdapter,
@@ -46,7 +44,7 @@ export class PrismaAppSync {
 
     constructor(options:Options) {
         this.options = {
-            config: {},
+            config: JSON.parse(process.env.PRISMA_APPSYNC_GENERATED_CONFIG || '{}'),
             connectionUrl: options.connectionUrl,
             debug: typeof options.debug !== 'undefined'
                 ? options.debug : false,
@@ -54,16 +52,6 @@ export class PrismaAppSync {
                 ? options.sanitize : true,
             defaultPagination: typeof options.defaultPagination !== 'undefined'
                 ? options.defaultPagination : 50
-        }
-
-        try { 
-            this.options.config = JSON.parse(
-                readFileSync(join(__dirname, '/config.json'), 'utf8')
-            )
-        } catch {
-            if (this.options.debug) {
-                console.log('Project config file is missing at `client/config.json`.')
-            }
         }
 
         this.customResolvers = {}
