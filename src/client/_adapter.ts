@@ -8,7 +8,6 @@ import {
 } from './_types'
 import {
     PrismaAppSyncOperations,
-    PrismaOrderByArgs,
     AuthModes,
     Operations,
 } from './_constants'
@@ -144,16 +143,16 @@ export class PrismaAppSyncAdapter {
                 this.args.orderBy = this.parseOrderBy(event.arguments.orderBy)
             }
 
-            if (this.operation === Operations.list) {
+            if (this.operation === Operations.list || this.operation === Operations.count) {
                 if (typeof event.arguments.skip !== 'undefined' ) {
                     this.args.skip = event.arguments.skip
-                } else if (this.defaultPagination !== false) {
+                } else if (this.defaultPagination !== false && this.operation === Operations.list) {
                     this.args.skip = 0
                 }
 
                 if (typeof event.arguments.take !== 'undefined' ) {
                     this.args.take = event.arguments.take
-                } else if (this.defaultPagination !== false) {
+                } else if (this.defaultPagination !== false && this.operation === Operations.list) {
                     this.args.take = this.defaultPagination
                 }
             } else if (this.operation === Operations.createMany) {
@@ -219,18 +218,27 @@ export class PrismaAppSyncAdapter {
         return args
     }
 
-    private parseOrderBy(orderByInput:any) {
-        const orderByOutput:any = []
-
-        for (const input in orderByInput) {
-            const orderByArg = orderByInput[input].toLowerCase()
-            if (PrismaOrderByArgs.includes(orderByArg)) {
-                orderByOutput.push({
-                    [input]: orderByArg
-                })
-            }
+    private getOrderBy(sortObj:any): any {
+        const key:any = Object.keys(sortObj)[0]
+        const value = typeof sortObj[key] === 'object'
+            ? this.getOrderBy(sortObj[key])
+            : sortObj[key].toLowerCase()
+    
+        return {
+            [key]: value
         }
+    }
 
+    private parseOrderBy(orderByInputs:any) {
+        const orderByOutput:any = []
+    
+        const orderByInputsArray = Array.isArray(orderByInputs)
+            ? orderByInputs : [orderByInputs]
+    
+        orderByInputsArray.forEach((orderByInput:any) => {
+            orderByOutput.push( this.getOrderBy(orderByInput) )
+        })
+    
         return orderByOutput
     }
 }

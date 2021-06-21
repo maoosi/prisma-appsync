@@ -1,88 +1,13 @@
-enum OrderByArg {
-    ASC
-    DESC
-}
+{% for model in models %}
+    type {{ model.name }} {{ model.directives.type | safe }} {
+        {% for field in model.fields -%}
+            {{ field.name }}: {{ field.scalar }}{% if field.isRequired -%}!{% endif %} {{ field.directives.field | safe }}
+        {% endfor %}
+    }
+{% endfor %}
 
 type BatchPayload {{ directiveAliases.default | safe }} {
     count: Int
-}
-
-input AWSDateTimeFilterInput {
-    equals: AWSDateTime
-    gt: AWSDateTime
-    gte: AWSDateTime
-    in: [AWSDateTime!]
-    lt: AWSDateTime
-    lte: AWSDateTime
-    not: AWSDateTimeFilterInput
-    notIn: [AWSDateTime!]
-}
-
-input FloatFilterInput {
-    equals: Float
-    gt: Float
-    gte: Float
-    in: [Float!]
-    lt: Float
-    lte: Float
-    not: FloatFilterInput
-    notIn: [Float!]
-}
-
-input IntFilterInput {
-    equals: Int
-    gt: Int
-    gte: Int
-    in: [Int!]
-    lt: Int
-    lte: Int
-    not: IntFilterInput
-    notIn: [Int!]
-}
-
-input AWSJSONFilterInput {
-    contains: String
-    endsWith: String
-    equals: AWSJSON
-    in: [AWSJSON!]
-    not: AWSJSONFilterInput
-    notIn: [AWSJSON!]
-    startsWith: String
-}
-
-input AWSEmailFilterInput {
-    contains: String
-    endsWith: String
-    equals: AWSEmail
-    in: [AWSEmail!]
-    not: AWSEmailFilterInput
-    notIn: [AWSEmail!]
-    startsWith: String
-}
-
-input AWSURLFilterInput {
-    contains: String
-    endsWith: String
-    equals: AWSURL
-    in: [AWSURL!]
-    not: AWSURLFilterInput
-    notIn: [AWSURL!]
-    startsWith: String
-}
-
-input StringFilterInput {
-    contains: String
-    endsWith: String
-    equals: String
-    in: [String!]
-    not: StringFilterInput
-    notIn: [String!]
-    startsWith: String
-}
-
-input BooleanFilterInput {
-    equals: Boolean
-    not: BooleanFilterInput
 }
 
 {% for enum in enums %}
@@ -100,13 +25,10 @@ input BooleanFilterInput {
     }
 {% endfor %}
 
-{% for model in models %}
-    type {{ model.name }} {{ model.directives.type | safe }} {
-        {% for field in model.fields -%}
-            {{ field.name }}: {{ field.scalar }}{% if field.isRequired -%}!{% endif %} {{ field.directives.field | safe }}
-        {% endfor %}
-    }
-{% endfor %}
+enum OrderByArg {
+    ASC
+    DESC
+}
 
 {% for model in models %}
     {% if model.idFields | length -%}
@@ -176,6 +98,15 @@ input BooleanFilterInput {
             {% elseif field.isEditable and field.relation -%}
                 {{ field.name }}: 
                     {{ field.relation.name }}CreateRelationsInput{% if field.isRequired -%}!{% endif %} {{ field.directives.create | safe }}
+            {% endif -%}
+        {% endfor %}
+    }
+    
+    input {{ model.name }}CreateManyInput {
+        {% for field in model.fields -%}
+            {% if field.isEditable and not field.relation -%}
+                {{ field.name }}: 
+                    {{ field.scalar }}{% if field.isRequired -%}!{% endif %} {{ field.directives.create | safe }}
             {% endif -%}
         {% endfor %}
     }
@@ -264,30 +195,115 @@ input BooleanFilterInput {
     {% endfor %}
 {% endfor %}
 
+input AWSDateTimeFilterInput {
+    equals: AWSDateTime
+    gt: AWSDateTime
+    gte: AWSDateTime
+    in: [AWSDateTime!]
+    lt: AWSDateTime
+    lte: AWSDateTime
+    not: AWSDateTimeFilterInput
+    notIn: [AWSDateTime!]
+}
+
+input FloatFilterInput {
+    equals: Float
+    gt: Float
+    gte: Float
+    in: [Float!]
+    lt: Float
+    lte: Float
+    not: FloatFilterInput
+    notIn: [Float!]
+}
+
+input IntFilterInput {
+    equals: Int
+    gt: Int
+    gte: Int
+    in: [Int!]
+    lt: Int
+    lte: Int
+    not: IntFilterInput
+    notIn: [Int!]
+}
+
+input AWSJSONFilterInput {
+    contains: String
+    endsWith: String
+    equals: AWSJSON
+    in: [AWSJSON!]
+    not: AWSJSONFilterInput
+    notIn: [AWSJSON!]
+    startsWith: String
+}
+
+input AWSEmailFilterInput {
+    contains: String
+    endsWith: String
+    equals: AWSEmail
+    in: [AWSEmail!]
+    not: AWSEmailFilterInput
+    notIn: [AWSEmail!]
+    startsWith: String
+}
+
+input AWSURLFilterInput {
+    contains: String
+    endsWith: String
+    equals: AWSURL
+    in: [AWSURL!]
+    not: AWSURLFilterInput
+    notIn: [AWSURL!]
+    startsWith: String
+}
+
+input StringFilterInput {
+    contains: String
+    endsWith: String
+    equals: String
+    in: [String!]
+    not: StringFilterInput
+    notIn: [String!]
+    startsWith: String
+}
+
+input BooleanFilterInput {
+    equals: Boolean
+    not: BooleanFilterInput
+}
+
 type Mutation {
     {% for model in models %}
+        # Create a new single {{ model.name }} record.
         create{{ model.name }}(
             data: {{ model.name }}CreateInput!
         ): {{ model.name }} {{ model.directives.create | safe }}
+        # Create multiple new {{ model.name }} records.
         createMany{{ model.pluralizedName }}(
-            data: [{{ model.name }}CreateInput!],
+            data: [{{ model.name }}CreateManyInput!],
             skipDuplicates: Boolean
         ): BatchPayload {{ model.directives.createMany | safe }}
+        # Update an existing single {{ model.name }} record.
         update{{ model.name }}(
             where: {{ model.name }}WhereUniqueInput!,
             data: {{ model.name }}UpdateInput!
         ): {{ model.name }} {{ model.directives.update | safe }}
+        # Update multiple existing {{ model.name }} records.
         updateMany{{ model.pluralizedName }}(
             where: {{ model.name }}WhereFilterInput!,
             data: {{ model.name }}UpdateInput!
         ): BatchPayload {{ model.directives.updateMany | safe }}
+        # Update an existing or create a new single {{ model.name }} record.
         upsert{{ model.name }}(
             data: {{ model.name }}UpdateInput!,
             where: {{ model.name }}WhereUniqueInput!
         ): {{ model.name }} {{ model.directives.upsert | safe }}
+        # Delete a single {{ model.name }} record.
         delete{{ model.name }}(
             where: {{ model.name }}WhereUniqueInput!
         ): {{ model.name }} {{ model.directives.delete | safe }}
+        # Delete multiple {{ model.name }} records.
         deleteMany{{ model.pluralizedName }}(
             where: {{ model.name }}WhereFilterInput!
         ): BatchPayload {{ model.directives.deleteMany | safe }}
@@ -296,18 +312,21 @@ type Mutation {
 
 type Query {
     {% for model in models %}
+        # Find a single {{ model.name }} record by unique identifier.
         get{{ model.name }}(
             where: {{ model.name }}WhereUniqueInput!
         ): {{ model.name }} {{ model.directives.get | safe }}
+        # Find many {{ model.name }} records (optional query filters).
         list{{ model.pluralizedName }}(
             where: {{ model.name }}WhereFilterInput,
-            orderBy: {{ model.name }}OrderByInput,
+            orderBy: [{{ model.name }}OrderByInput],
             skip: Int,
             take: Int
         ): [{{ model.name }}] {{ model.directives.list | safe }}
+        # Count all {{ model.name }} records (optional query filters).
         count{{ model.pluralizedName }}(
             where: {{ model.name }}WhereFilterInput,
-            orderBy: {{ model.name }}OrderByInput,
+            orderBy: [{{ model.name }}OrderByInput],
             skip: Int,
             take: Int
         ): Int {{ model.directives.count | safe }}
@@ -316,6 +335,7 @@ type Query {
 
 type Subscription {
     {% for model in models %}
+        # Triggered from `create{{ model.name }}` mutation (excl. `createMany{{ model.pluralizedName }}` and `upsert{{ model.name }}`).
         onCreated{{ model.name }}(
             {% if model.idFields | length -%}
                 {{ model.idFields | join("_") }}: 
@@ -326,6 +346,7 @@ type Subscription {
             {% endfor %}
         ): {{ model.name }}
             @aws_subscribe(mutations: ["create{{ model.name }}"]) {{ model.directives.subscription | safe }}
+        # Triggered from `update{{ model.name }}` mutation (excl. `updateMany{{ model.pluralizedName }}` and `upsert{{ model.name }}`).
         onUpdated{{ model.name }}(
             {% if model.idFields | length -%}
                 {{ model.idFields | join("_") }}: 
@@ -336,6 +357,7 @@ type Subscription {
             {% endfor %}
         ): {{ model.name }}
             @aws_subscribe(mutations: ["update{{ model.name }}"]) {{ model.directives.subscription | safe }}
+        # Triggered from `upsert{{ model.name }}` mutation.
         onUpserted{{ model.name }}(
             {% if model.idFields | length -%}
                 {{ model.idFields | join("_") }}: 
@@ -345,7 +367,8 @@ type Subscription {
                 {{ field.name }}: {{ field.scalar }}
             {% endfor %}
         ): {{ model.name }}
-            @aws_subscribe(mutations: ["create{{ model.name }}", "update{{ model.name }}", "upsert{{ model.name }}"]) {{ model.directives.subscription | safe }}
+            @aws_subscribe(mutations: ["upsert{{ model.name }}"]) {{ model.directives.subscription | safe }}
+        # Triggered from `delete{{ model.name }}` mutation (excl. `deleteMany{{ model.pluralizedName }}`).
         onDeleted{{ model.name }}(
             {% if model.idFields | length -%}
                 {{ model.idFields | join("_") }}:
@@ -356,6 +379,7 @@ type Subscription {
             {% endfor %}
         ): {{ model.name }}
             @aws_subscribe(mutations: ["delete{{ model.name }}"]) {{ model.directives.subscription | safe }}
+        # Triggered from ANY SINGLE record mutation (excl. `on*Many{{ model.pluralizedName }}`).
         onMutated{{ model.name }}(
             {% if model.idFields | length -%}
                 {{ model.idFields | join("_") }}:
@@ -366,5 +390,17 @@ type Subscription {
             {% endfor %}
         ): {{ model.name }}
             @aws_subscribe(mutations: ["create{{ model.name }}", "update{{ model.name }}", "upsert{{ model.name }}", "delete{{ model.name }}"]) {{ model.directives.subscription | safe }}
+        # Triggered from `createMany{{ model.pluralizedName }}` mutation.
+        onCreatedMany{{ model.pluralizedName }}: BatchPayload
+            @aws_subscribe(mutations: ["createMany{{ model.pluralizedName }}"]) {{ model.directives.subscription | safe }}
+        # Triggered from `updateMany{{ model.pluralizedName }}` mutation.
+        onUpdatedMany{{ model.pluralizedName }}: BatchPayload
+            @aws_subscribe(mutations: ["updateMany{{ model.pluralizedName }}"]) {{ model.directives.subscription | safe }}
+        # Triggered from `deleteMany{{ model.pluralizedName }}` mutation.
+        onDeletedMany{{ model.pluralizedName }}: BatchPayload
+            @aws_subscribe(mutations: ["deleteMany{{ model.pluralizedName }}"]) {{ model.directives.subscription | safe }}
+        # Triggered from ANY MULTIPLE records mutation (excl. single record mutations).
+        onMutatedMany{{ model.pluralizedName }}: BatchPayload
+            @aws_subscribe(mutations: ["createMany{{ model.pluralizedName }}", "updateMany{{ model.pluralizedName }}", "deleteMany{{ model.pluralizedName }}"]) {{ model.directives.subscription | safe }}
     {% endfor %}
 }

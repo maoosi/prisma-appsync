@@ -52,21 +52,21 @@ export type RequestProps = {
 }
 
 export type BeforeResolveProps = {
-    authIdentity: AuthIdentityProps
-    operation: Operation
-    subject: string
-    fields: string[]
-    requestSetPaths: any
     args: RequestProps
+    authIdentity: AuthIdentityProps
+    fields: string[]
+    operation: Operation
+    requestSetPaths: any
+    subject: string
 }
 
 export type AfterResolveProps = {
-    authIdentity: AuthIdentityProps
-    operation: Operation
-    subject: string
-    fields: string[]
-    requestSetPaths: any
     args: RequestProps
+    authIdentity: AuthIdentityProps
+    fields: string[]
+    operation: Operation
+    requestSetPaths: any
+    subject: string
     result: any
 }
 
