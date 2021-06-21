@@ -1,6 +1,129 @@
 # Changelog
 
-## Version 1.0.0-beta.56
+## 🎉 Version 1.0.0-beta.58
+
+### ⚠️ (Breaking) Fix: Issue linked to Prisma models naming
+
+Using a model name format other than PascalCase OR already in the plural form, was causing mapping issues between GraphQL queries and Prisma Client.
+
+> This feature is only breaking in case you were NOT following PascalCase naming convention for models OR affected by one of the below examples.
+
+#### Before
+
+- Model `person`: GQL types generated were not using camelCase (`getperson`, `listpersons`, etc...)
+- Model `People`: Was wrongly mapping to singular `person` instead of `people`.
+- Model `PersonEmails`: Was wrongly mapping to `prismaClient.personemail` instead of `prismaClient.personemails`
+- Model `person_emails`: Was throwing an error when calling the API.
+
+#### After
+
+- Model `person`: GQL types are now properly using camelCase (`getPerson`, `listPersons`, etc...)
+- Model `People`: Mapping back to the right `people` model.
+- Model `PersonEmails`: Mapping back to the right `prismaClient.personemails`
+- Model `person_emails`: Properly converted to `getPersonEmails` and mapped back to `prismaClient.person_emails`
+
+### ⚠️ (Breaking) Feat: orderBy query filter updated to support multiple fields
+
+> This has also been updated in prevision to `orderByRelations` getting out of Preview.
+
+#### Before
+
+```graphql
+query {
+    listPosts(orderBy: { title: ASC }) {
+        title
+    }
+}
+```
+
+#### After
+
+```graphql
+query {
+    listPosts(
+        orderBy: [
+            { title: ASC },
+            { preview: ASC },
+        ]
+    ) {
+        title
+    }
+}
+```
+
+### 🆕 Feat: New Queries, Mutations and Subscriptions added
+
+```graphql
+# New `createMany` mutation (example for Post model)
+mutation {
+    createManyPosts(
+        data: [
+            { title: "How to get started with Prisma-AppSync" }
+            { title: "How to migrate to Prisma-AppSync" }
+        ]
+    ) {
+        count
+    }
+}
+
+# New `updateMany` mutation (example for Post model)
+mutation {
+    updateManyPosts(
+        where: { title: { startsWith: "How to" } }
+        data: { category: "guides" }
+    ) {
+        count
+    }
+}
+
+# New `count` query (example for Post model)
+query {
+    countPosts(
+        where: { title: { startsWith: "How to" } }
+    )
+}
+
+# New `onUpserted` subscription (example for Post model)
+# > Triggered from `upsertPost` mutation.
+subscription {
+    onUpsertedPost {
+        title
+        category
+    }
+}
+
+# New `onMutated` subscription (example for Post model)
+# > Triggered from ANY SINGLE record mutation (excl. `on*ManyPosts`).
+subscription {
+    onMutatedPost {
+        title
+        category
+    }
+}
+
+# New `on[Action]Many` subscriptions (example for Post model)
+subscription { onCreatedManyPosts { count } }
+subscription { onUpdatedManyPosts { count } }
+subscription { onDeletedManyPosts { count } }
+
+# New `onMutatedMany` subscription (example for Post model)
+# > Triggered from ANY MULTIPLE records mutation (excl. single record mutations).
+subscription { onMutatedManyPosts { count } }
+```
+
+### 🆕 Misc
+
+- Comments added in the generate GraphQL schema (visible from AppSync query editor docs).
+- Updated Boilerplate to reflect new changes.
+- Updated generated API documentation to reflect new changes.
+- Upgraded Prisma to v2.25.0.
+
+## 🎉 Version 1.0.0-beta.57
+
+- Feat: Support for prisma ^2.24.1 added.
+- Fix: Type issue in the Boilerplate.
+
+## 🎉 Version 1.0.0-beta.56
 
 ### ⚠️ Breaking
 
@@ -93,7 +216,7 @@ const app = new PrismaAppSync({
 
 - Fix: Has no exported member 'Prisma' issue resolved ([issues/11](https://github.com/maoosi/prisma-appsync/issues/11))
 
-## Version 1.0.0-beta.53
+## 🎉 Version 1.0.0-beta.53
 
 ### ⚠️ Breaking
 
@@ -118,7 +241,7 @@ app.registerCustomResolvers({ incrementPostsViews })
 - Feat: For contributors, running `yarn create prisma-appsync-app . --test` now also creates a custom resolver for testing purpose.
 - Fix: PNPM install not running `prisma generate` by default ([issues/11](https://github.com/maoosi/prisma-appsync/issues/11))
 
-## Version 1.0.0-beta.52
+## 🎉 Version 1.0.0-beta.52
 
 ### ⚠️ Breaking
 
@@ -163,7 +286,7 @@ afterBundling(inputDir: string, outputDir: string): string[] {
 - Feat: Contribution guide added (see [CONTRIBUTING.md](CONTRIBUTING.md)) with new boilerplate testing workflow.
 - Feat: Core library is now using Pnpm instead of Yarn.
 
-## Version 1.0.0-beta.51
+## 🎉 Version 1.0.0-beta.51
 
 - Fix: Support for prisma ^2.20 added (output for generators can now be env vars).
 - Feat: Ability to exclude fields and models from the generated GraphQL schema and API using `/// @PrismaAppSync.ignore` ([more details in the docs](https://prisma-appsync.vercel.app/guides/ignore.html)).

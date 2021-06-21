@@ -67,8 +67,8 @@ module.exports = {
                 path: '/demo/',
                 collapsable: false,
                 children:  [
-                    '/demo/user',
-                    '/demo/post',
+                    '/demo/User',
+                    '/demo/Post',
                 ]
             }
         ]

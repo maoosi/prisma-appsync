@@ -8,6 +8,10 @@
     fieldName: list{{ model.pluralizedName }}
     dataSource: prisma-appsync
 -   
+    typeName: Query
+    fieldName: count{{ model.pluralizedName }}
+    dataSource: prisma-appsync
+-   
     typeName: Mutation
     fieldName: create{{ model.name }}
     dataSource: prisma-appsync
@@ -22,6 +26,14 @@
 -   
     typeName: Mutation
     fieldName: delete{{ model.name }}
+    dataSource: prisma-appsync
+-   
+    typeName: Mutation
+    fieldName: createMany{{ model.pluralizedName }}
+    dataSource: prisma-appsync
+-   
+    typeName: Mutation
+    fieldName: updateMany{{ model.pluralizedName }}
     dataSource: prisma-appsync
 -   
     typeName: Mutation

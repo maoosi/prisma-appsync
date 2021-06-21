@@ -14,6 +14,7 @@ export type Options = {
 }
 
 export type PrivateOptions = {
+    config: any
     connectionUrl: string
     debug: boolean
     sanitize: boolean
@@ -21,6 +22,7 @@ export type PrivateOptions = {
 }
 
 export type AdapterOptions = {
+    config: any
     defaultPagination: number | false
     customResolvers: any
     debug: boolean
@@ -45,25 +47,26 @@ export type RequestProps = {
     orderBy?: any
     skip?: number
     take?: number
+    skipDuplicates?: boolean
     [key:string]: any
 }
 
 export type BeforeResolveProps = {
-    authIdentity: AuthIdentityProps
-    operation: Operation
-    subject: string
-    fields: string[]
-    requestSetPaths: any
     args: RequestProps
+    authIdentity: AuthIdentityProps
+    fields: string[]
+    operation: Operation
+    requestSetPaths: any
+    subject: string
 }
 
 export type AfterResolveProps = {
-    authIdentity: AuthIdentityProps
-    operation: Operation
-    subject: string
-    fields: string[]
-    requestSetPaths: any
     args: RequestProps
+    authIdentity: AuthIdentityProps
+    fields: string[]
+    operation: Operation
+    requestSetPaths: any
+    subject: string
     result: any
 }
 

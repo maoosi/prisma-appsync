@@ -3,7 +3,7 @@ import { PrismaAppSync } from './prisma/generated/prisma-appsync/client'
 
 // Initialise client
 const app = new PrismaAppSync({
-    connectionUrl: process.env.CONNECTION_URL,
+    connectionUrl: String(process.env.CONNECTION_URL),
     debug: true
 })
 <% if (testingMode) { %>
@@ -12,8 +12,8 @@ app.prisma.$use(async (params, next) => {
     console.log('Hello from Prisma middleware!', params)
     return next(params)
 })
-
 <% } %>// Lambda function handler
+
 export const main = async (event: any, context: any, callback: any) => {
     context.callbackWaitsForEmptyEventLoop = false
     console.info('Received event:', JSON.stringify(event))

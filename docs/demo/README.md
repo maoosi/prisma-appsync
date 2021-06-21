@@ -429,5 +429,5 @@ type Subscription {
 
 Prisma-AppSync automatically generate the following API docs (specs):
 
-- [User Type](/demo/user.html)
-- [Post Type](/demo/post.html)
+- [User Type](/demo/User.html)
+- [Post Type](/demo/Post.html)
