@@ -7,7 +7,7 @@ sidebarDepth: 0
 - 👉 [Sample Lambda function](#👉-bonus-sample-lambda-function)
 
 ::: danger
-risma-AppSync is NOT ready for Production and is only recommended to use for prototyping until a stable version is released. Breaking changes might be introduced at anytime during the beta. Feedback, suggestions and PRs welcomed.
+Prisma-AppSync is NOT ready for Production and is only recommended to use for prototyping until a stable version is released. Breaking changes might be introduced at anytime during the beta. Feedback, suggestions and PRs welcomed.
 :::
 
 > **Before starting, it is assumed that you have:**
@@ -66,7 +66,7 @@ Prisma-AppSync will generate the below:
 
 ## Using Prisma-AppSync boilerplate
 
-> **If you are already familiar with Amazon AWS and AppSync, you can stop here and directly use the generated files with your own setup 🚀:**
+> **If you have a high level of experience working with Amazon AWS and AppSync, you can stop here and directly use the generated files with your own setup 🚀:**
 >
 > - `resolver.yaml` contain all resolver mapping templates for AppSync.
 > - `schema.gql` contain the GraphQL schema for AppSync.
@@ -121,7 +121,7 @@ cdk deploy
 
 ## 👉 Bonus: Sample Lambda function
 
-If you are new to Amazon AWS and AppSync, it is recommended to use the Boilerplate provided instead (steps 5 & 6).
+Unless you have a high level of experience working with Amazon AWS and AppSync, it is recommended to use the Boilerplate provided instead (steps 5 & 6).
 
 ```typescript
 // import PrismaAppSync client

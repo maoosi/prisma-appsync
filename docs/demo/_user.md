@@ -25,10 +25,11 @@ The generated queries are:
 
 -   `getUser`: Read a single User.
 -   `listUsers`: Read multiple Users.
+-   `countUsers`: Count all Users.
 
 ### Querying a single User
 
-Single User queries can take one input:
+Single User queries take one input:
 
 -   `where`: `UserWhereUniqueInput!` A required object type specifying a field with a unique constraint (like id).
 
@@ -52,7 +53,7 @@ query {
 Multiple Users queries can take four inputs:
 
 -   `where`: `UserWhereFilterInput` An optional object type to filter the content based on a nested set of criteria.
--   `orderBy`: `UserOrderByInput` An optional object type to select which field(s) and order to sort the records on. Sorting can be in ascending order `ASC` or descending order `DESC`.
+-   `orderBy`: `[UserOrderByInput]` An optional array to select which field(s) and order to sort the records on. Sorting can be in ascending order `ASC` or descending order `DESC`.
 -   `skip`: `Int` An optional number that specifies how many of the returned objects in the list should be skipped.
 -   `take`: `Int` An optional number that specifies how many objects should be returned in the list.
 
@@ -120,7 +121,7 @@ query {
 
 ```graphql
 query {
-    listUsers(orderBy: { role: DESC }) {
+    listUsers(orderBy: [{ role: DESC }]) {
         id
         username
         email
@@ -130,6 +131,25 @@ query {
     }
 }
 ```
+
+### Counting Users
+
+Counting Users queries can take four inputs:
+
+-   `where`: `UserWhereFilterInput` An optional object type to filter the content based on a nested set of criteria.
+-   `orderBy`: `[UserOrderByInput]` An optional array to select which field(s) and order to sort the records on. Sorting can be in ascending order `ASC` or descending order `DESC`.
+-   `skip`: `Int` An optional number that specifies how many of the returned objects in the list should be skipped.
+-   `take`: `Int` An optional number that specifies how many objects should be returned in the list.
+
+**Standard query**
+
+```graphql
+query {
+    countUsers
+}
+```
+
+> `countUsers` returns an integer that represents the number of records found.
 
 ## Mutations
 
@@ -147,7 +167,7 @@ The generated mutations are:
 
 ### Creating a single User
 
-Single User create mutations can take one input:
+Single User create mutations take one input:
 
 -   `data`: `UserCreateInput!` A required object type specifying the data to create a new record.
 
@@ -203,7 +223,7 @@ mutation {
 
 ### Updating a single User
 
-Single User update mutations can take two input:
+Single User update mutations take two inputs:
 
 -   `where`: `UserWhereUniqueInput!` A required object type specifying a field with a unique constraint (like id).
 -   `data`: `UserUpdateInput!` A required object type specifying the data to update.
@@ -268,7 +288,7 @@ mutation {
 
 ### Deleting a single User
 
-Single User delete mutations can take one input:
+Single User delete mutations take one input:
 
 -   `where`: `UserWhereUniqueInput!` A required object type specifying a field with a unique constraint (like id).
 
@@ -285,11 +305,59 @@ mutation {
 }
 ```
 
+### Creating multiple Users
+
+Multiple Users create mutations take one input:
+
+-   `data`: `[UserCreateManyInput!]` A required array specifying the data to create new records.
+-   `skipDuplicates`: `Boolean` An optional Boolean specifying if unique fields or ID fields that already exist should be skipped.
+
+**Standard deleteMany mutation**
+
+```graphql
+mutation {
+    createManyUsers(
+        data: [
+            { role: Role }
+            { role: Role }
+            { role: Role }
+        ]
+        skipDuplicates: true
+    ) {
+        count
+    }
+}
+```
+
+> `createManyUsers` returns an integer that represents the number of records that were created.
+
+### Updating multiple Users
+
+Multiple Users update mutations take two inputs:
+
+-   `where`: `UserWhereFilterInput!` A required object type to filter the content based on a nested set of criteria.
+-   `data`: `UserUpdateInput!` A required object type specifying the data to update records with.
+
+**Standard updateMany mutation**
+
+```graphql
+mutation {
+    updateManyUsers(
+        where: { role: Role }
+        data: { role: Role }
+    ) {
+        count
+    }
+}
+```
+
+> `updateManyUsers` returns an integer that represents the number of records that were updated.
+
 ### Deleting multiple Users
 
 Multiple Users delete mutations can take one input:
 
--   `where`: `UserWhereFilterInput!` A required object type specifying a field with a unique constraint (like role).
+-   `where`: `UserWhereFilterInput!` A required object type to filter the content based on a nested set of criteria.
 
 **Standard deleteMany mutation**
 
@@ -309,6 +377,8 @@ Subscriptions allows listen for data changes when a specific event happens, in r
 
 ### Subscribing to a single User creation
 
+Triggered from `createUser` mutation (excl. `createManyUsers` and `upsertUser`).
+
 ```graphql
 subscription {
     onCreatedUser {
@@ -322,6 +392,8 @@ subscription {
 
 ### Subscribing to a single User update
 
+Triggered from `updateUser` mutation (excl. `updateManyUsers` and `upsertUser`).
+
 ```graphql
 subscription {
     onUpdatedUser {
@@ -333,7 +405,24 @@ subscription {
 }
 ```
 
+### Subscribing to a single User upsert
+
+Triggered from `upsertUser` mutation.
+
+```graphql
+subscription {
+    onUpsertedUser {
+        id
+        username
+        email
+        role
+    }
+}
+```
+
 ### Subscribing to a single User deletion
+
+Triggered from `deleteUser` mutation (excl. `deleteManyUsers`).
 
 ```graphql
 subscription {
@@ -342,6 +431,69 @@ subscription {
         username
         email
         role
+    }
+}
+```
+
+### Subscribing to a single User mutation
+
+Triggered from ANY SINGLE record mutation (excl. `on*ManyUsers`).
+
+```graphql
+subscription {
+    onMutatedUser {
+        id
+        username
+        email
+        role
+    }
+}
+```
+
+### Subscribing to many User creations
+
+Triggered from `createManyUsers` mutation.
+
+```graphql
+subscription {
+    onCreatedManyUsers {
+        count
+    }
+}
+```
+
+### Subscribing to many User updates
+
+Triggered from `updateManyUsers` mutation.
+
+```graphql
+subscription {
+    onUpdatedManyUsers {
+        count
+    }
+}
+```
+
+### Subscribing to many User deletions
+
+Triggered from `deleteManyUsers` mutation.
+
+```graphql
+subscription {
+    onDeletedManyUsers {
+        count
+    }
+}
+```
+
+### Subscribing to many User mutations
+
+Triggered from ANY MULTIPLE records mutation (excl. single record mutations).
+
+```graphql
+subscription {
+    onMutatedManyUsers {
+        count
     }
 }
 ```

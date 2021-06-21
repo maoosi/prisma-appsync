@@ -22,17 +22,100 @@ Using a model name format other than PascalCase OR already in the plural form, w
 - Model `PersonEmails`: Mapping back to the right `prismaClient.personemails`
 - Model `person_emails`: Properly converted to `getPersonEmails` and mapped back to `prismaClient.person_emails`
 
+### ⚠️ (Breaking) Feat: orderBy query filter updated to support multiple fields
+
+> This has also been updated in prevision to `orderByRelations` getting out of Preview.
+
+#### Before
+
+```graphql
+query {
+    listPosts(orderBy: { title: ASC }) {
+        title
+    }
+}
+```
+
+#### After
+
+```graphql
+query {
+    listPosts(
+        orderBy: [
+            { title: ASC },
+            { preview: ASC },
+        ]
+    ) {
+        title
+    }
+}
+```
+
 ### 🆕 Feat: New Queries, Mutations and Subscriptions added
 
-- Query **count** (e.g. `countPosts`).
-- Mutation **createMany** (e.g. `createManyPosts`).
-- Mutation **updateMany** (e.g. `updateManyPosts`).
-- Subscription **onUpserted** (e.g. `onUpsertedPost`): Triggered on `create`, `update`, or `upsert` mutation.
-- Subscription **onMutated** (e.g. `onMutatedPost`): Triggered on `create`, `update`, `upsert`, or `delete` mutation.
+```graphql
+# New `createMany` mutation (example for Post model)
+mutation {
+    createManyPosts(
+        data: [
+            { title: "How to get started with Prisma-AppSync" }
+            { title: "How to migrate to Prisma-AppSync" }
+        ]
+    ) {
+        count
+    }
+}
+
+# New `updateMany` mutation (example for Post model)
+mutation {
+    updateManyPosts(
+        where: { title: { startsWith: "How to" } }
+        data: { category: "guides" }
+    ) {
+        count
+    }
+}
+
+# New `count` query (example for Post model)
+query {
+    countPosts(
+        where: { title: { startsWith: "How to" } }
+    )
+}
+
+# New `onUpserted` subscription (example for Post model)
+# > Triggered from `upsertPost` mutation.
+subscription {
+    onUpsertedPost {
+        title
+        category
+    }
+}
+
+# New `onMutated` subscription (example for Post model)
+# > Triggered from ANY SINGLE record mutation (excl. `on*ManyPosts`).
+subscription {
+    onMutatedPost {
+        title
+        category
+    }
+}
+
+# New `on[Action]Many` subscriptions (example for Post model)
+subscription { onCreatedManyPosts { count } }
+subscription { onUpdatedManyPosts { count } }
+subscription { onDeletedManyPosts { count } }
+
+# New `onMutatedMany` subscription (example for Post model)
+# > Triggered from ANY MULTIPLE records mutation (excl. single record mutations).
+subscription { onMutatedManyPosts { count } }
+```
 
 ### 🆕 Misc
 
-- Boilerplate updated to work with new changes listed above.
+- Comments added in the generate GraphQL schema (visible from AppSync query editor docs).
+- Updated Boilerplate to reflect new changes.
+- Updated generated API documentation to reflect new changes.
 - Upgraded Prisma to v2.25.0.
 
 ## 🎉 Version 1.0.0-beta.57

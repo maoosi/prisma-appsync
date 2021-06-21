@@ -26,10 +26,11 @@ The generated queries are:
 
 -   `getPost`: Read a single Post.
 -   `listPosts`: Read multiple Posts.
+-   `countPosts`: Count all Posts.
 
 ### Querying a single Post
 
-Single Post queries can take one input:
+Single Post queries take one input:
 
 -   `where`: `PostWhereUniqueInput!` A required object type specifying a field with a unique constraint (like id).
 
@@ -53,7 +54,7 @@ query {
 Multiple Posts queries can take four inputs:
 
 -   `where`: `PostWhereFilterInput` An optional object type to filter the content based on a nested set of criteria.
--   `orderBy`: `PostOrderByInput` An optional object type to select which field(s) and order to sort the records on. Sorting can be in ascending order `ASC` or descending order `DESC`.
+-   `orderBy`: `[PostOrderByInput]` An optional array to select which field(s) and order to sort the records on. Sorting can be in ascending order `ASC` or descending order `DESC`.
 -   `skip`: `Int` An optional number that specifies how many of the returned objects in the list should be skipped.
 -   `take`: `Int` An optional number that specifies how many objects should be returned in the list.
 
@@ -123,7 +124,9 @@ query {
 
 ```graphql
 query {
-    listPosts(orderBy: { title: DESC }) {
+    listPosts(
+        orderBy: [{ title: DESC }, { published: ASC }]
+    ) {
         id
         title
         author # Relation to one
@@ -133,6 +136,25 @@ query {
     }
 }
 ```
+
+### Counting Posts
+
+Counting Posts queries can take four inputs:
+
+-   `where`: `PostWhereFilterInput` An optional object type to filter the content based on a nested set of criteria.
+-   `orderBy`: `[PostOrderByInput]` An optional array to select which field(s) and order to sort the records on. Sorting can be in ascending order `ASC` or descending order `DESC`.
+-   `skip`: `Int` An optional number that specifies how many of the returned objects in the list should be skipped.
+-   `take`: `Int` An optional number that specifies how many objects should be returned in the list.
+
+**Standard query**
+
+```graphql
+query {
+    countPosts
+}
+```
+
+> `countPosts` returns an integer that represents the number of records found.
 
 ## Mutations
 
@@ -150,7 +172,7 @@ The generated mutations are:
 
 ### Creating a single Post
 
-Single Post create mutations can take one input:
+Single Post create mutations take one input:
 
 -   `data`: `PostCreateInput!` A required object type specifying the data to create a new record.
 
@@ -210,7 +232,7 @@ mutation {
 
 ### Updating a single Post
 
-Single Post update mutations can take two input:
+Single Post update mutations take two inputs:
 
 -   `where`: `PostWhereUniqueInput!` A required object type specifying a field with a unique constraint (like id).
 -   `data`: `PostUpdateInput!` A required object type specifying the data to update.
@@ -276,7 +298,7 @@ mutation {
 
 ### Deleting a single Post
 
-Single Post delete mutations can take one input:
+Single Post delete mutations take one input:
 
 -   `where`: `PostWhereUniqueInput!` A required object type specifying a field with a unique constraint (like id).
 
@@ -294,11 +316,59 @@ mutation {
 }
 ```
 
+### Creating multiple Posts
+
+Multiple Posts create mutations take one input:
+
+-   `data`: `[PostCreateManyInput!]` A required array specifying the data to create new records.
+-   `skipDuplicates`: `Boolean` An optional Boolean specifying if unique fields or ID fields that already exist should be skipped.
+
+**Standard deleteMany mutation**
+
+```graphql
+mutation {
+    createManyPosts(
+        data: [
+            { title: "Foo" }
+            { title: "Foo" }
+            { title: "Foo" }
+        ]
+        skipDuplicates: true
+    ) {
+        count
+    }
+}
+```
+
+> `createManyPosts` returns an integer that represents the number of records that were created.
+
+### Updating multiple Posts
+
+Multiple Posts update mutations take two inputs:
+
+-   `where`: `PostWhereFilterInput!` A required object type to filter the content based on a nested set of criteria.
+-   `data`: `PostUpdateInput!` A required object type specifying the data to update records with.
+
+**Standard updateMany mutation**
+
+```graphql
+mutation {
+    updateManyPosts(
+        where: { title: "Foo" }
+        data: { title: "Foo" }
+    ) {
+        count
+    }
+}
+```
+
+> `updateManyPosts` returns an integer that represents the number of records that were updated.
+
 ### Deleting multiple Posts
 
 Multiple Posts delete mutations can take one input:
 
--   `where`: `PostWhereFilterInput!` A required object type specifying a field with a unique constraint (like title).
+-   `where`: `PostWhereFilterInput!` A required object type to filter the content based on a nested set of criteria.
 
 **Standard deleteMany mutation**
 
@@ -318,6 +388,8 @@ Subscriptions allows listen for data changes when a specific event happens, in r
 
 ### Subscribing to a single Post creation
 
+Triggered from `createPost` mutation (excl. `createManyPosts` and `upsertPost`).
+
 ```graphql
 subscription {
     onCreatedPost {
@@ -332,6 +404,8 @@ subscription {
 
 ### Subscribing to a single Post update
 
+Triggered from `updatePost` mutation (excl. `updateManyPosts` and `upsertPost`).
+
 ```graphql
 subscription {
     onUpdatedPost {
@@ -344,7 +418,25 @@ subscription {
 }
 ```
 
+### Subscribing to a single Post upsert
+
+Triggered from `upsertPost` mutation.
+
+```graphql
+subscription {
+    onUpsertedPost {
+        id
+        title
+        authorId
+        published
+        lastSavedAt
+    }
+}
+```
+
 ### Subscribing to a single Post deletion
+
+Triggered from `deletePost` mutation (excl. `deleteManyPosts`).
 
 ```graphql
 subscription {
@@ -354,6 +446,70 @@ subscription {
         authorId
         published
         lastSavedAt
+    }
+}
+```
+
+### Subscribing to a single Post mutation
+
+Triggered from ANY SINGLE record mutation (excl. `on*ManyPosts`).
+
+```graphql
+subscription {
+    onMutatedPost {
+        id
+        title
+        authorId
+        published
+        lastSavedAt
+    }
+}
+```
+
+### Subscribing to many Post creations
+
+Triggered from `createManyPosts` mutation.
+
+```graphql
+subscription {
+    onCreatedManyPosts {
+        count
+    }
+}
+```
+
+### Subscribing to many Post updates
+
+Triggered from `updateManyPosts` mutation.
+
+```graphql
+subscription {
+    onUpdatedManyPosts {
+        count
+    }
+}
+```
+
+### Subscribing to many Post deletions
+
+Triggered from `deleteManyPosts` mutation.
+
+```graphql
+subscription {
+    onDeletedManyPosts {
+        count
+    }
+}
+```
+
+### Subscribing to many Post mutations
+
+Triggered from ANY MULTIPLE records mutation (excl. single record mutations).
+
+```graphql
+subscription {
+    onMutatedManyPosts {
+        count
     }
 }
 ```

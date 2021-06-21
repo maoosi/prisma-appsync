@@ -10,15 +10,15 @@ sidebarDepth: 0
 
 ## 🧐 Under the hood
 
-Even though it is provided as a single Prisma Generator package, **Prisma-AppSync** could be broken down to 3 core elements:
-
-![Architecture diagram](/prisma-appsync-diagram.png)
-
-- <span style="color:#f59837;">**Prisma-AppSync Client**</span>, a TypeScript client (think of it as Prisma Client on steroids) ready to use within the API resolver function. Capable to handle CRUD operations with a single line of code, it also give access to advanced features for securing, extending and customising the API.
+**Prisma-AppSync** can be broken down to 3 core elements:
 
 - <span style="color:#557af4;">**Prisma-AppSync Generator**</span>, who's role is to parse the `schema.prisma` file, generate the Client, generate files for AWS AppSync (Schema + Resolver mapping settings), and generate the API documentation.
 
-- <span style="color:#02b414;">**Prisma-AppSync Boilerplate**</span>, made of an AWS CDK template and a sample Lambda Function (Direct Lambda Resolver for AppSync), both designed to help get started with integration and deployement.
+- <span style="color:#f59837;">**Prisma-AppSync Client**</span>, a TypeScript client (think of it as Prisma Client on steroids) ready to use within the API resolver function. Capable to handle CRUD operations with a single line of code, it also give access to advanced features for securing, extending and customising the API.
+
+- <span style="color:#02b414;">**Prisma-AppSync Boilerplate**</span>, a starter kit made of an AWS CDK template and a sample Lambda Function (Direct Lambda Resolver for AppSync), both designed to help get started with integration and deployement.
+
+![Architecture diagram](/prisma-appsync-diagram.png)
 
 ## ❓ Why?
 
@@ -27,7 +27,7 @@ Even though it is provided as a single Prisma Generator package, **Prisma-AppSyn
 - Open-source, really active community, and a full-time team of developers.
 - Best-in-class developers' experience to interact with and manage data.
 - Growing ecosystem with Prisma Client (ORM), Prisma Migrate (migration system) and Prisma Studio (GUI).
-- Work with multiple data sources (MySQL, PostgreSQL, SQLite, SQL Server).
+- Work with multiple data sources (MySQL, PostgreSQL, SQLite, SQL Server, MongoDB).
 - Single source of truth for modeling data using a `schema.prisma` file.
 
 **Why AWS AppSync?**
@@ -39,8 +39,8 @@ Even though it is provided as a single Prisma Generator package, **Prisma-AppSyn
 
 ## 🗺️ Roadmap
 
-- Support more Prisma features (relation queries, createMany, ...)
-- Refactor and expand testing coverage
+- Support more Prisma features (orderBy relations, aggregate queries, ...)
 - Work on security (refactor access-control system, protect n+1 queries, ...)
+- Refactor and expand testing coverage to progress towards stable.
 
 [See full list here](https://github.com/maoosi/prisma-appsync/projects/1)

@@ -15,6 +15,7 @@ export type Options = {
     connectionUrl: string
     debug?: boolean
     sanitize?: boolean
+    defaultPagination?: number | false
 }
 ```
 
@@ -24,10 +25,10 @@ export type Options = {
 
 ```typescript
 export type BeforeResolveProps = {
-    operation: Operation
     args: RequestProps
     authIdentity: AuthIdentityProps
     fields: string[]
+    operation: Operation
     requestSetPaths: any
     subject: string
 }
@@ -37,13 +38,13 @@ export type BeforeResolveProps = {
 
 ```typescript
 export type AfterResolveProps = {
-    operation: Operation
     args: RequestProps
     authIdentity: AuthIdentityProps
     fields: string[]
+    operation: Operation
     requestSetPaths: any
-    result: any
     subject: string
+    result: any
 }
 ```
 
@@ -56,6 +57,9 @@ export type RequestProps = {
     include?: any
     where?: any
     orderBy?: any
+    skip?: number
+    take?: number
+    skipDuplicates?: boolean
     [key:string]: any
 }
 ```
