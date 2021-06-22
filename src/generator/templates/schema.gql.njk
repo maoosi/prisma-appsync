@@ -275,35 +275,49 @@ input BooleanFilterInput {
 
 type Mutation {
     {% for model in models %}
-        # Create a new single {{ model.name }} record.
+        """
+        Create a new single {{ model.name }} record.
+        """
         create{{ model.name }}(
             data: {{ model.name }}CreateInput!
         ): {{ model.name }} {{ model.directives.create | safe }}
-        # Create multiple new {{ model.name }} records.
+        """
+        Create multiple new {{ model.name }} records.
+        """
         createMany{{ model.pluralizedName }}(
             data: [{{ model.name }}CreateManyInput!],
             skipDuplicates: Boolean
         ): BatchPayload {{ model.directives.createMany | safe }}
-        # Update an existing single {{ model.name }} record.
+        """
+        Update an existing single {{ model.name }} record.
+        """
         update{{ model.name }}(
             where: {{ model.name }}WhereUniqueInput!,
             data: {{ model.name }}UpdateInput!
         ): {{ model.name }} {{ model.directives.update | safe }}
-        # Update multiple existing {{ model.name }} records.
+        """
+        Update multiple existing {{ model.name }} records.
+        """
         updateMany{{ model.pluralizedName }}(
             where: {{ model.name }}WhereFilterInput!,
             data: {{ model.name }}UpdateInput!
         ): BatchPayload {{ model.directives.updateMany | safe }}
-        # Update an existing or create a new single {{ model.name }} record.
+        """
+        Update an existing or create a new single {{ model.name }} record.
+        """
         upsert{{ model.name }}(
             data: {{ model.name }}UpdateInput!,
             where: {{ model.name }}WhereUniqueInput!
         ): {{ model.name }} {{ model.directives.upsert | safe }}
-        # Delete a single {{ model.name }} record.
+        """
+        Delete a single {{ model.name }} record.
+        """
         delete{{ model.name }}(
             where: {{ model.name }}WhereUniqueInput!
         ): {{ model.name }} {{ model.directives.delete | safe }}
-        # Delete multiple {{ model.name }} records.
+        """
+        Delete multiple {{ model.name }} records.
+        """
         deleteMany{{ model.pluralizedName }}(
             where: {{ model.name }}WhereFilterInput!
         ): BatchPayload {{ model.directives.deleteMany | safe }}
@@ -312,18 +326,24 @@ type Mutation {
 
 type Query {
     {% for model in models %}
-        # Find a single {{ model.name }} record by unique identifier.
+        """
+        Find a single {{ model.name }} record by unique identifier.
+        """
         get{{ model.name }}(
             where: {{ model.name }}WhereUniqueInput!
         ): {{ model.name }} {{ model.directives.get | safe }}
-        # Find many {{ model.name }} records (optional query filters).
+        """
+        Find many {{ model.name }} records (optional query filters).
+        """
         list{{ model.pluralizedName }}(
             where: {{ model.name }}WhereFilterInput,
             orderBy: [{{ model.name }}OrderByInput],
             skip: Int,
             take: Int
         ): [{{ model.name }}] {{ model.directives.list | safe }}
-        # Count all {{ model.name }} records (optional query filters).
+        """
+        Count all {{ model.name }} records (optional query filters).
+        """
         count{{ model.pluralizedName }}(
             where: {{ model.name }}WhereFilterInput,
             orderBy: [{{ model.name }}OrderByInput],
@@ -335,7 +355,9 @@ type Query {
 
 type Subscription {
     {% for model in models %}
-        # Triggered from `create{{ model.name }}` mutation (excl. `createMany{{ model.pluralizedName }}` and `upsert{{ model.name }}`).
+        """
+        Triggered from `create{{ model.name }}` mutation (excl. `createMany{{ model.pluralizedName }}` and `upsert{{ model.name }}`).
+        """
         onCreated{{ model.name }}(
             {% if model.idFields | length -%}
                 {{ model.idFields | join("_") }}: 
@@ -346,7 +368,9 @@ type Subscription {
             {% endfor %}
         ): {{ model.name }}
             @aws_subscribe(mutations: ["create{{ model.name }}"]) {{ model.directives.subscription | safe }}
-        # Triggered from `update{{ model.name }}` mutation (excl. `updateMany{{ model.pluralizedName }}` and `upsert{{ model.name }}`).
+        """
+        Triggered from `update{{ model.name }}` mutation (excl. `updateMany{{ model.pluralizedName }}` and `upsert{{ model.name }}`).
+        """
         onUpdated{{ model.name }}(
             {% if model.idFields | length -%}
                 {{ model.idFields | join("_") }}: 
@@ -357,7 +381,9 @@ type Subscription {
             {% endfor %}
         ): {{ model.name }}
             @aws_subscribe(mutations: ["update{{ model.name }}"]) {{ model.directives.subscription | safe }}
-        # Triggered from `upsert{{ model.name }}` mutation.
+        """
+        Triggered from `upsert{{ model.name }}` mutation.
+        """
         onUpserted{{ model.name }}(
             {% if model.idFields | length -%}
                 {{ model.idFields | join("_") }}: 
@@ -368,7 +394,9 @@ type Subscription {
             {% endfor %}
         ): {{ model.name }}
             @aws_subscribe(mutations: ["upsert{{ model.name }}"]) {{ model.directives.subscription | safe }}
-        # Triggered from `delete{{ model.name }}` mutation (excl. `deleteMany{{ model.pluralizedName }}`).
+        """
+        Triggered from `delete{{ model.name }}` mutation (excl. `deleteMany{{ model.pluralizedName }}`).
+        """
         onDeleted{{ model.name }}(
             {% if model.idFields | length -%}
                 {{ model.idFields | join("_") }}:
@@ -379,7 +407,9 @@ type Subscription {
             {% endfor %}
         ): {{ model.name }}
             @aws_subscribe(mutations: ["delete{{ model.name }}"]) {{ model.directives.subscription | safe }}
-        # Triggered from ANY SINGLE record mutation (excl. `on*Many{{ model.pluralizedName }}`).
+        """
+        Triggered from ANY SINGLE record mutation (excl. `on*Many{{ model.pluralizedName }}`).
+        """
         onMutated{{ model.name }}(
             {% if model.idFields | length -%}
                 {{ model.idFields | join("_") }}:
@@ -390,16 +420,24 @@ type Subscription {
             {% endfor %}
         ): {{ model.name }}
             @aws_subscribe(mutations: ["create{{ model.name }}", "update{{ model.name }}", "upsert{{ model.name }}", "delete{{ model.name }}"]) {{ model.directives.subscription | safe }}
-        # Triggered from `createMany{{ model.pluralizedName }}` mutation.
+        """
+        Triggered from `createMany{{ model.pluralizedName }}` mutation.
+        """
         onCreatedMany{{ model.pluralizedName }}: BatchPayload
             @aws_subscribe(mutations: ["createMany{{ model.pluralizedName }}"]) {{ model.directives.subscription | safe }}
-        # Triggered from `updateMany{{ model.pluralizedName }}` mutation.
+        """
+        Triggered from `updateMany{{ model.pluralizedName }}` mutation.
+        """
         onUpdatedMany{{ model.pluralizedName }}: BatchPayload
             @aws_subscribe(mutations: ["updateMany{{ model.pluralizedName }}"]) {{ model.directives.subscription | safe }}
-        # Triggered from `deleteMany{{ model.pluralizedName }}` mutation.
+        """
+        Triggered from `deleteMany{{ model.pluralizedName }}` mutation.
+        """
         onDeletedMany{{ model.pluralizedName }}: BatchPayload
             @aws_subscribe(mutations: ["deleteMany{{ model.pluralizedName }}"]) {{ model.directives.subscription | safe }}
-        # Triggered from ANY MULTIPLE records mutation (excl. single record mutations).
+        """
+        Triggered from ANY MULTIPLE records mutation (excl. single record mutations).
+        """
         onMutatedMany{{ model.pluralizedName }}: BatchPayload
             @aws_subscribe(mutations: ["createMany{{ model.pluralizedName }}", "updateMany{{ model.pluralizedName }}", "deleteMany{{ model.pluralizedName }}"]) {{ model.directives.subscription | safe }}
     {% endfor %}

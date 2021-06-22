@@ -24,8 +24,6 @@ Using a model name format other than PascalCase OR already in the plural form, w
 
 ### ⚠️ (Breaking) Feat: orderBy query filter updated to support multiple fields
 
-> This has also been updated in prevision to `orderByRelations` getting out of Preview.
-
 #### Before
 
 ```graphql
