@@ -18,7 +18,8 @@
         "test": "pnpm test:generate && jest test/ -e && pnpm test:copydocs",
         "test:generate": "pnpm build && prisma generate --schema=./test/schema.prisma",
         "test:copydocs": "cp test/generated/prisma-appsync/docs/Post.md docs/demo/_post.md && cp test/generated/prisma-appsync/docs/User.md docs/demo/_user.md",
-        "prepare": "pnpm test"
+        "prepare": "pnpm test",
+        "test:alpha": "jest src/client.alpha/**.spec.ts"
     },
     "engines": {
         "node": ">=12",
