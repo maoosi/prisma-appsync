@@ -18,7 +18,7 @@ import { readFile, outputFile, writeFile, readFileSync, copy, openSync, writeSyn
 import { flow, camelCase, upperFirst, merge } from 'lodash-es'
 
 // AppSync schema helper
-const { convertSchemas } = require('@maoosi/appsync-schema-converter')
+const { convertSchemas } = require('appsync-schema-converter')
 
 // Custom lodash function
 const pascalCase = flow(camelCase, upperFirst)
@@ -39,6 +39,7 @@ export class PrismaAppSyncCompiler {
                     type: ['type', 'default'],
                     query: ['query', 'type', 'default'],
                     mutation: ['mutation', 'type', 'default'],
+                    batch: ['batch', 'mutation', 'type', 'default'],
                     subscription: ['subscription', 'type', 'default'],
                     get: ['get', 'query', 'type', 'default'],
                     list: ['list', 'query', 'type', 'default'],
@@ -47,15 +48,12 @@ export class PrismaAppSyncCompiler {
                     update: ['update', 'mutation', 'type', 'default'],
                     upsert: ['upsert', 'mutation', 'type', 'default'],
                     delete: ['delete', 'mutation', 'type', 'default'],
-                    createMany: ['createMany', 'mutation', 'type', 'default'],
-                    updateMany: ['updateMany', 'mutation', 'type', 'default'],
-                    deleteMany: ['deleteMany', 'mutation', 'type', 'default'],
+                    createMany: ['createMany', 'batch', 'mutation', 'type', 'default'],
+                    updateMany: ['updateMany', 'batch', 'mutation', 'type', 'default'],
+                    deleteMany: ['deleteMany', 'batch', 'mutation', 'type', 'default'],
                 },
                 field: {
                     field: ['field'],
-                    mutation: ['mutation', 'field'],
-                    create: ['create', 'mutation', 'field'],
-                    update: ['update', 'mutation', 'field'],
                 }
             },
             aliasPrefix: 'directiveAlias_',
@@ -98,7 +96,7 @@ export class PrismaAppSyncCompiler {
             )
 
             // Merge both schema into one
-            const mergedSchema = convertSchemas([generatedSchema, userSchema], {
+            const mergedSchema = await convertSchemas([generatedSchema, userSchema], {
                 commentDescriptions: true,
                 includeDirectives: true,
             })

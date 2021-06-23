@@ -2,7 +2,6 @@ lockfileVersion: 5.3
 
 specifiers:
   '@casl/ability': ^5.2.2
-  '@maoosi/appsync-schema-converter': ^1.0.2
   '@prisma/client': ^2.25.0
   '@prisma/generator-helper': ^2.25.0
   '@prisma/sdk': ^2.25.0
@@ -16,6 +15,7 @@ specifiers:
   '@types/validator': ^13.1.3
   '@vuepress/plugin-back-to-top': ^1.8.2
   '@vuepress/plugin-medium-zoom': ^1.8.2
+  appsync-schema-converter: ^1.0.5
   babel-jest: ^26.6.3
   dot-object: ^2.1.4
   esbuild: ^0.11.23
@@ -39,7 +39,6 @@ specifiers:
 
 devDependencies:
   '@casl/ability': 5.2.2
-  '@maoosi/appsync-schema-converter': 1.0.2
   '@prisma/client': 2.25.0_prisma@2.25.0
   '@prisma/generator-helper': 2.25.0
   '@prisma/sdk': 2.25.0
@@ -53,6 +52,7 @@ devDependencies:
   '@types/validator': 13.1.3
   '@vuepress/plugin-back-to-top': 1.8.2
   '@vuepress/plugin-medium-zoom': 1.8.2
+  appsync-schema-converter: 1.0.5_graphql@15.5.0
   babel-jest: 26.6.3
   dot-object: 2.1.4
   esbuild: 0.11.23
@@ -1849,12 +1849,6 @@ packages:
       chalk: 4.1.0
     dev: true
 
-  /@maoosi/appsync-schema-converter/1.0.2:
-    resolution: {integrity: sha512-o4ZLpS3bhxBfffC2zRyz77g6BEYZSUDxYS8WQdCBxmPQFpqRpc2pcBtfun0AOAcvCzcqicy/lqzb5tiUfn+vLQ==}
-    dependencies:
-      graphql14: /graphql/14.7.0
-    dev: true
-
   /@mrmlnc/readdir-enhanced/2.2.1:
     resolution: {integrity: sha512-bPHp6Ji8b41szTOcaP63VlnbbO5Ny6dwAATtY6JTjh5N2OLrb5Qk/Th5cRkRQhkWCt+EJsYrNB0MiL+Gpn6e3g==}
     engines: {node: '>=4'}
@@ -2861,6 +2855,14 @@ packages:
     dependencies:
       normalize-path: 3.0.0
       picomatch: 2.3.0
+    dev: true
+
+  /appsync-schema-converter/1.0.5_graphql@15.5.0:
+    resolution: {integrity: sha512-nIuIllW5MIK1M9ExA5fQlYhFFvMfvBHBARwzsXhA+/sGOx913AQNV1hJfs8RrjYnpSEfjZ6PqeDNr1BhE6dyZw==}
+    peerDependencies:
+      graphql: ^14.2.0 || ^15.0.0
+    dependencies:
+      graphql: 15.5.0
     dev: true
 
   /aproba/1.2.0:
@@ -5729,13 +5731,6 @@ packages:
       safe-eval: 0.4.1
     dev: true
 
-  /graphql/14.7.0:
-    resolution: {integrity: sha512-l0xWZpoPKpppFzMfvVyFmp9vLN7w/ZZJPefUicMCepfJeQ8sMcztloGYY9DfjVPo6tIUDzU5Hw3MUbIjj9AVVA==}
-    engines: {node: '>= 6.x'}
-    dependencies:
-      iterall: 1.3.0
-    dev: true
-
   /graphql/15.5.0:
     resolution: {integrity: sha512-OmaM7y0kaK31NKG31q4YbD2beNYa6jBBKtMFT6gLYJljHLJr42IqJ8KX08u3Li/0ifzTU5HjmoOOrwa5BRLeDA==}
     engines: {node: '>= 10.x'}
@@ -6648,10 +6643,6 @@ packages:
     dependencies:
       html-escaper: 2.0.2
       istanbul-lib-report: 3.0.0
-    dev: true
-
-  /iterall/1.3.0:
-    resolution: {integrity: sha512-QZ9qOMdF+QLHxy1QIpUHUU1D5pS2CG2P69LF6L6CPjPYA/XMOmKV3PZpawHoAjHNyB0swdVTRxdYT4tbBbxqwg==}
     dev: true
 
   /javascript-stringify/1.6.0:

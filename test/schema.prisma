@@ -26,11 +26,14 @@ generator appsync {
 
     // Can access: server
     directiveAlias_serverOnly = "@aws_api_key"
+
+    //Test
+    directiveAlias_test = "@aws_api_key @aws_cognito_user_pools(cognito_groups: [\"test\"])"
 }
 
 /// @PrismaAppSync.type: '@@loggedInUsers'
 /// @PrismaAppSync.upsert: '@@serverOnly'
-/// @PrismaAppSync.create: '@@serverOnly'
+/// @PrismaAppSync.mutation: '@@test'
 model User {
     id              Int         @id @default(autoincrement())
     username        String      @unique

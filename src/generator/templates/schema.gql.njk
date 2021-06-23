@@ -94,10 +94,10 @@ enum OrderByArg {
         {% for field in model.fields -%}
             {% if field.isEditable and not field.relation -%}
                 {{ field.name }}: 
-                    {{ field.scalar }}{% if field.isRequired -%}!{% endif %} {{ field.directives.create | safe }}
+                    {{ field.scalar }}{% if field.isRequired -%}!{% endif %}
             {% elseif field.isEditable and field.relation -%}
                 {{ field.name }}: 
-                    {{ field.relation.name }}CreateRelationsInput{% if field.isRequired -%}!{% endif %} {{ field.directives.create | safe }}
+                    {{ field.relation.name }}CreateRelationsInput{% if field.isRequired -%}!{% endif %}
             {% endif -%}
         {% endfor %}
     }
@@ -106,7 +106,7 @@ enum OrderByArg {
         {% for field in model.fields -%}
             {% if field.isEditable and not field.relation -%}
                 {{ field.name }}: 
-                    {{ field.scalar }}{% if field.isRequired -%}!{% endif %} {{ field.directives.create | safe }}
+                    {{ field.scalar }}{% if field.isRequired -%}!{% endif %}
             {% endif -%}
         {% endfor %}
     }
@@ -114,9 +114,9 @@ enum OrderByArg {
     input {{ model.name }}UpdateInput {
         {% for field in model.fields -%}
             {% if field.isEditable and not field.relation -%}
-                {{ field.name }}: {{ field.scalar }} {{ field.directives.update | safe }}
+                {{ field.name }}: {{ field.scalar }}
             {% elseif field.isEditable and field.relation -%}
-                {{ field.name }}: {{ field.relation.name }}UpdateRelationsInput {{ field.directives.update | safe }}
+                {{ field.name }}: {{ field.relation.name }}UpdateRelationsInput
             {% endif -%}
         {% endfor %}
     }

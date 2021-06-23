@@ -74,10 +74,7 @@ model Post {
 
 `@PrismaAppSync.[scope]` must refer to an existing alias from the generator config. With `[scope]` being one of the following:
 
-- `field`: Applies to all operations (`mutation` + `create` + `update`).
-- `mutation`: Applies to any mutation (`create` + `update`). Overrides `field`.
-- `create`: Applies only to create operation. Overrides `field` and `mutation`.
-- `update`: Applies only to update operation. Overrides `field` and `mutation`.
+- `field`: Applies to all types (`mutation` + `create` + `update`).
 
 ### Protecting types
 
@@ -99,20 +96,21 @@ model Post {
 
 `@PrismaAppSync.[scope]` must refer to an existing alias from the generator config. With `[scope]` being one of the following:
 
-- `type`: Applies to all operations (`query` + `mutation` + `subscription`).
+- `type`: Applies to all types (`query` + `mutation` + `subscription`).
 - `query`: Applies to any query (`get` + `list` + `count`). Overrides `type`.
 - `mutation`: Applies to any mutation (`create` + `update` + `upsert` + `delete` + `createMany` + `updateMany` + `deleteMany`). Overrides `type`.
 - `subscription`: Applies to any subscription. Overrides `type`.
-- `get`: Applies only to get operation. Overrides `type` and `query`.
-- `list`: Applies only to list operation. Overrides `type` and `query`.
-- `count`: Applies only to count operation. Overrides `type` and `query`.
-- `create`: Applies only to creation operation. Overrides `type` and `mutation`.
-- `update`: Applies only to update operation. Overrides `type` and `mutation`.
-- `upsert`: Applies only to upsert operation. Overrides `type` and `mutation`.
-- `delete`: Applies only to update operation. Overrides `type` and `mutation`.
-- `createMany`: Applies only to createMany operation. Overrides `type` and `mutation`.
-- `updateMany`: Applies only to updateMany operation. Overrides `type` and `mutation`.
-- `deleteMany`: Applies only to deleteMany operation. Overrides `type` and `mutation`.
+- `get`: Applies only to get action. Overrides `type` and `query`.
+- `list`: Applies only to list action. Overrides `type` and `query`.
+- `count`: Applies only to count action. Overrides `type` and `query`.
+- `create`: Applies only to creation action. Overrides `type` and `mutation`.
+- `update`: Applies only to update action. Overrides `type` and `mutation`.
+- `upsert`: Applies only to upsert action. Overrides `type` and `mutation`.
+- `delete`: Applies only to update action. Overrides `type` and `mutation`.
+- `createMany`: Applies only to createMany action. Overrides `type` and `mutation`.
+- `updateMany`: Applies only to updateMany action. Overrides `type` and `mutation`.
+- `deleteMany`: Applies only to deleteMany action. Overrides `type` and `mutation`.
+- `batch`: Applies only to any batch mutation. Overrides `type` and `mutation`.
 
 ## 👉 Fine-Grained Access Control
 

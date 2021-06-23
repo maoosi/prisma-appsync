@@ -111,6 +111,7 @@ subscription { onMutatedManyPosts { count } }
 
 ### 🆕 Misc
 
+- The `authIdentity` property (accessible from the hooks) now includes `requestApiKey` and `requestUserAgent` when using `API_KEY` authorization.
 - Comments added in the generate GraphQL schema (visible from AppSync query editor docs).
 - Updated Boilerplate to reflect new changes.
 - Updated generated API documentation to reflect new changes.

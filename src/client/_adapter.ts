@@ -55,7 +55,15 @@ export class PrismaAppSyncAdapter {
     private detectCallerIdentity(event:any) {
         if (typeof event.identity === 'undefined' || !event.identity || event.identity.length < 1) {
             this.authIdentityType = AuthModes.API_KEY
-            this.authIdentityObj = {}
+            this.authIdentityObj = !event.request || !event.request.headers
+                ? {} : {
+                    ...(typeof event.request.headers['x-api-key'] !== 'undefined' && {
+                        requestApiKey: event.request.headers['x-api-key'],
+                    }),
+                    ...(typeof event.request.headers['user-agent'] !== 'undefined' && {
+                        requestUserAgent: event.request.headers['user-agent'],
+                    })
+                }
         } else if (typeof event.identity['sub'] !== 'undefined') {
             this.authIdentityType = AuthModes.AMAZON_COGNITO_USER_POOLS
             this.authIdentityObj = event.identity
