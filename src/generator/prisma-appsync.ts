@@ -3,9 +3,6 @@ import { PrismaAppSyncCompiler } from './compiler'
 import { generatorHandler } from '@prisma/generator-helper'
 import { parseEnvValue } from '@prisma/sdk'
 
-// Read Prisma AppSync version
-const generatorVersion = require('../../package.json').version
-
 // Prisma AppSync Generator Handler
 generatorHandler({
     onManifest() {
@@ -13,7 +10,6 @@ generatorHandler({
             defaultOutput: 'generated/prisma-appsync',
             prettyName: 'Prisma-AppSync',
             requiresEngines: ['queryEngine'],
-            version: generatorVersion,
         }
     },
     async onGenerate(options:any) {
