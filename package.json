@@ -1,7 +1,7 @@
 {
     "name": "prisma-appsync",
-    "description": "⚡ AppSync GraphQL API Generator for ◭ Prisma 2, the next-gen ORM.",
-    "version": "1.0.0-beta.58.1",
+    "description": "Prisma Generator, that automatically converts your Schema into a full-blown ⚡ GraphQL API for AWS AppSync.",
+    "version": "1.0.0-beta.58.2",
     "bin": "./dist/generator.js",
     "repository": "git@github.com:maoosi/prisma-appsync.git",
     "author": "maoosi <hello@sylvainsimao.fr>",

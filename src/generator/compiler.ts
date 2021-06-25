@@ -78,43 +78,47 @@ export class PrismaAppSyncCompiler {
         const generatorSchemaPath = await this.makeFile(
             join(__dirname, './templates/schema.gql.njk')
         )
- 
-        if (customSchemaPath) {
 
+        let userSchema = null
+
+        if (customSchemaPath) {
             if (this.options.debug) {
                 console.log(`[Prisma-AppSync] Adding custom schema: `, join(dirname(this.options.schemaPath), customSchemaPath))
             }
 
             // read custom user schema
-            const userSchema = await readFile(
-                join(dirname(this.options.schemaPath), customSchemaPath), { encoding: 'utf-8' }
-            )
-
-            // read generated schema
-            const generatedSchema = await readFile(
-                generatorSchemaPath, { encoding: 'utf-8' }
-            )
-
-            // Merge both schema into one
-            const mergedSchema = await convertSchemas([generatedSchema, userSchema], {
-                commentDescriptions: true,
-                includeDirectives: true,
-            })
-
-            // Prettify schema output
-            const prettySchema = prettier.format(mergedSchema, {
-                semi: false,
-                parser: 'graphql',
-                tabWidth: 4,
-                trailingComma: 'none',
-                singleQuote: true,
-                printWidth: 60
-            })
-
-            // Overrite generator schema with the new one
-            await writeFile(generatorSchemaPath, prettySchema)
-
+            userSchema = await readFile(join(
+                dirname(this.options.schemaPath), customSchemaPath
+            ), { encoding: 'utf-8' })
         }
+
+        // read generated schema
+        const generatedSchema = await readFile(
+            generatorSchemaPath, { encoding: 'utf-8' }
+        )
+
+        // list of schemas to merge
+        const schemasList = [generatedSchema]
+        if (userSchema !== null) schemasList.push(userSchema)
+
+        // Merge both schema into one
+        const mergedSchema = await convertSchemas(schemasList, {
+            commentDescriptions: true,
+            includeDirectives: true,
+        })
+
+        // Prettify schema output
+        const prettySchema = prettier.format(mergedSchema, {
+            semi: false,
+            parser: 'graphql',
+            tabWidth: 4,
+            trailingComma: 'none',
+            singleQuote: true,
+            printWidth: 60
+        })
+
+        // Overrite generator schema with the new one
+        await writeFile(generatorSchemaPath, prettySchema)
 
         return this
     }
@@ -222,8 +226,7 @@ export class PrismaAppSyncCompiler {
                             scalar: this.getFieldScalar(field),
                             isRequired: this.isFieldRequired(field),
                             isEnum: this.isFieldEnum(field),
-                            isEditable: !this.isFieldGeneratedRelation(field, model) 
-                                && !this.isFieldImmutableDate(field),
+                            isEditable: !this.isFieldImmutableDate(field),
                             isUnique: this.isFieldUnique(field, model),
                             ...(field.relationName && {
                                 relation: {
