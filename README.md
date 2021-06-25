@@ -2,11 +2,11 @@
     <img width="250" height="250" src="https://prisma-appsync.vercel.app/prisma-appsync-logo.png" alt="Prisma-AppSync" />
 </p>
 
-# Prisma-AppSync &middot; [![Generic badge](https://img.shields.io/badge/Generator%20for-◭%20Prisma%202-9F7AEA.svg)](https://www.prisma.io) [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/maoosi/prisma-appsync/graphs/commit-activity)
+# Prisma-AppSync &middot; [![Generic badge](https://img.shields.io/badge/Generator%20for-◭%20Prisma-9F7AEA.svg)](https://www.prisma.io) [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/maoosi/prisma-appsync/graphs/commit-activity)
 
-**Prisma-AppSync** is a custom Generator for [Prisma 2](https://www.prisma.io), that automatically generates a fully working AWS AppSync ⚡ GraphQL CRUD API.
+**Prisma-AppSync** is a [Prisma](https://www.prisma.io) Generator, that automatically converts your Schema into a full-blown ⚡&#160;GraphQL&#160;API for [AWS AppSync](https://aws.amazon.com/appsync/).
 
-> ⚠️ ⚠️ Prisma-AppSync is highly experimental and it is not recommended to use in Production at this stage. Breaking changes might be introduced at anytime between beta versions. Feedback, suggestions and PRs welcomed.
+> ⚠️ ⚠️ Prisma-AppSync is NOT ready for Production and is only recommended to use for prototyping until a stable version is released. Breaking changes might be introduced at anytime during the beta. Feedback, suggestions and PRs welcomed.
 
 ## ✨ Automatically generated
 
@@ -16,17 +16,17 @@
 
 ## ✔️ Features
 
-- AppSync CRUD API (get/list/create/update/delete/deleteMany).
+- AppSync CRUD API (get / list / create / update / upsert / delete / createMany / updateMany / deleteMany).
 - Extensible TypeScript Class with support for hooks and custom resolvers.
 - Support for AppSync authorization modes, as well as fine-grained access control.
-- Real-time subscriptions (onCreated/onUpdated/onDeleted).
-- Exposes Prisma relation queries (create/connect/connectOrCreate/update/upsert/delete/disconnect/set/updateMany/deleteMany).
+- Real-time subscriptions (onCreated / onUpdated / onDeleted).
+- Exposes Prisma relation queries (create / connect / connectOrCreate / update / upsert / delete / disconnect / set / updateMany / deleteMany).
 - Full CloudWatch logs for easy debugging on AWS.
 - XSS data sanitization by default.
 
 ## ⚓ Compatibility
 
-- Prisma 2.24.1
+- Prisma 2.25.0
 
 ## 📓 Documentation
 

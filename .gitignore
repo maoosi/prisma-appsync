@@ -5,6 +5,9 @@ node_modules/
 # Test files
 test/generated/
 
+# Dist folder
+dist/
+
 # Docs
 docs/.vuepress/dist/
 

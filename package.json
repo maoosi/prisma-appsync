@@ -1,7 +1,7 @@
 {
     "name": "prisma-appsync",
-    "description": "⚡ AppSync GraphQL API Generator for ◭ Prisma 2, the next-gen ORM.",
-    "version": "1.0.0-beta.57",
+    "description": "Prisma Generator, that automatically converts your Schema into a full-blown ⚡ GraphQL API for AWS AppSync.",
+    "version": "1.0.0-beta.58.2",
     "bin": "./dist/generator.js",
     "repository": "git@github.com:maoosi/prisma-appsync.git",
     "author": "maoosi <hello@sylvainsimao.fr>",
@@ -15,13 +15,14 @@
         "build:client": "esbuild src/client/index.ts --bundle --minify --keep-names --platform=node --external:fsevents --external:@prisma/client --outfile=dist/prisma-appsync/index.js && tsc src/client/*.ts --outDir dist/prisma-appsync/ --declaration --emitDeclarationOnly",
         "docs:dev": "vuepress dev docs --host localhost",
         "docs:build": "vuepress build docs",
-        "test": "pnpm test:generate && jest test/ -e",
+        "test": "pnpm test:generate && jest test/ -e && pnpm test:copydocs",
         "test:generate": "pnpm build && prisma generate --schema=./test/schema.prisma",
+        "test:copydocs": "cp test/generated/prisma-appsync/docs/Post.md docs/demo/_post.md && cp test/generated/prisma-appsync/docs/User.md docs/demo/_user.md",
         "prepare": "pnpm test"
     },
     "engines": {
-        "node": ">=10",
-        "pnpm": ">=3"
+        "node": ">=12",
+        "pnpm": ">=6"
     },
     "keywords": [
         "api",
@@ -30,14 +31,15 @@
         "crud",
         "generator",
         "graphql",
-        "prisma"
+        "prisma",
+        "prisma-appsync",
+        "appsync-crud-api"
     ],
     "devDependencies": {
         "@casl/ability": "^5.2.2",
-        "@maoosi/appsync-schema-converter": "^1.0.2",
-        "@prisma/client": "^2.24.1",
-        "@prisma/generator-helper": "^2.24.1",
-        "@prisma/sdk": "^2.24.1",
+        "@prisma/client": "^2.25.0",
+        "@prisma/generator-helper": "^2.25.0",
+        "@prisma/sdk": "^2.25.0",
         "@types/dot-object": "^2.1.2",
         "@types/fs-extra": "^9.0.10",
         "@types/jest": "^26.0.22",
@@ -48,9 +50,10 @@
         "@types/validator": "^13.1.3",
         "@vuepress/plugin-back-to-top": "^1.8.2",
         "@vuepress/plugin-medium-zoom": "^1.8.2",
+        "appsync-schema-converter": "^1.0.5",
         "babel-jest": "^26.6.3",
         "dot-object": "^2.1.4",
-        "esbuild": "^0.11.6",
+        "esbuild": "^0.11.23",
         "fs-extra": "^9.1.0",
         "graphql": "^15.5.0",
         "graphql-annotations": "^0.0.3",
@@ -61,12 +64,12 @@
         "nunjucks": "^3.2.3",
         "pluralize": "^8.0.0",
         "prettier": "^2.2.1",
-        "prisma": "^2.24.1",
+        "prisma": "^2.25.0",
         "ts-custom-error": "^3.2.0",
         "ts-jest": "^26.5.4",
         "typescript": "^4.2.3",
         "validator": "^13.5.2",
         "vuepress": "^1.8.2",
-        "xss": "^1.0.8"
+        "xss": "^1.0.9"
     }
 }

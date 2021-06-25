@@ -11,24 +11,24 @@ module.exports = {
         return !this.testingMode ? [
             {
                 name: 'name',
-                message: 'How do you want to name the new API?',
+                message: 'What\'s the name of your API?',
                 default: 'PrismaAppSync'
             },
             {
                 name: 'createSchema',
-                message: 'Do you want to add a sample prisma.schema file?',
+                message: 'Do you want a sample `schema.prisma` file to be generated for you?',
                 type: 'confirm',
                 default: false
             },
             {
                 name: 'connectionUrl',
-                message: 'Enter your database connection url',
+                message: 'What\'s your database connection url?',
                 default: 'postgresql://janedoe:mypassword@localhost:5432/mydb'
             }
         ]: [
             {
                 name: 'connectionUrl',
-                message: 'Enter your TEST database connection url',
+                message: 'What\'s your TEST database connection url?',
                 default: 'postgresql://janedoe:mypassword@localhost:5432/mydb'
             }
         ]

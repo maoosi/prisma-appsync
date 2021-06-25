@@ -16,6 +16,7 @@ export interface CompilerOptionsPrivate extends CompilerOptions {
 export type DMMFPAS_Model = {
     name:string
     pluralizedName:string
+    prismaRef:string
     fields:DMMFPAS_Field[]
     directives?:DMMFPAS_Directives
     idFields:string[]

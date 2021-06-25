@@ -15,8 +15,8 @@ import {
 import { AuthModes, Operations, AuthActions } from './_constants'
 import escape from 'validator/lib/escape'
 import xss from 'xss'
-import { clone, merge } from 'lodash-es'
-import { BadRequestError, InternalError } from './_errors'
+import { clone } from 'lodash-es'
+import { BadRequestError } from './_errors'
 import { CustomPrismaClient } from './_prisma'
 
 export {
@@ -44,6 +44,7 @@ export class PrismaAppSync {
 
     constructor(options:Options) {
         this.options = {
+            config: JSON.parse(process.env.PRISMA_APPSYNC_GENERATED_CONFIG || '{}'),
             connectionUrl: options.connectionUrl,
             debug: typeof options.debug !== 'undefined'
                 ? options.debug : false,
@@ -75,6 +76,7 @@ export class PrismaAppSync {
 
     public parseEvent(event:any) {
         this.adapter = new PrismaAppSyncAdapter(event, {
+            config: this.options.config,
             defaultPagination: this.options.defaultPagination,
             debug: this.options.debug,
             customResolvers: this.customResolvers,

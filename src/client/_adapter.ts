@@ -1,5 +1,4 @@
-import { singular } from 'pluralize'
-import { merge, camelCase } from 'lodash-es'
+import { merge } from 'lodash-es'
 import {
     RequestProps,
     AdapterOptions,
@@ -8,7 +7,6 @@ import {
 } from './_types'
 import {
     PrismaAppSyncOperations,
-    PrismaOrderByArgs,
     AuthModes,
     Operations,
 } from './_constants'
@@ -18,6 +16,7 @@ export class PrismaAppSyncAdapter {
     private customResolvers:any
     private debug:boolean
     private defaultPagination:number|false
+    private config:any
     public operation:Operation
     public model:string
     public args:RequestProps
@@ -35,6 +34,7 @@ export class PrismaAppSyncAdapter {
         this.customResolvers = options.customResolvers
         this.debug = options.debug
         this.defaultPagination = options.defaultPagination
+        this.config = options.config
 
         this.verifyIntegrity(event)
         this.parseRequest(event)
@@ -55,7 +55,15 @@ export class PrismaAppSyncAdapter {
     private detectCallerIdentity(event:any) {
         if (typeof event.identity === 'undefined' || !event.identity || event.identity.length < 1) {
             this.authIdentityType = AuthModes.API_KEY
-            this.authIdentityObj = {}
+            this.authIdentityObj = !event.request || !event.request.headers
+                ? {} : {
+                    ...(typeof event.request.headers['x-api-key'] !== 'undefined' && {
+                        requestApiKey: event.request.headers['x-api-key'],
+                    }),
+                    ...(typeof event.request.headers['user-agent'] !== 'undefined' && {
+                        requestUserAgent: event.request.headers['user-agent'],
+                    })
+                }
         } else if (typeof event.identity['sub'] !== 'undefined') {
             this.authIdentityType = AuthModes.AMAZON_COGNITO_USER_POOLS
             this.authIdentityObj = event.identity
@@ -107,14 +115,17 @@ export class PrismaAppSyncAdapter {
                 )
             }
 
-            // record operation + model
+            // record operation
             this.operation = operation
-            this.model = camelCase(
-                singular(
-                    fieldName.replace(this.operation, '')
-                )
-            )
 
+            // record model
+            const modelName = fieldName.replace(this.operation, '')
+
+            if (!this.config || typeof this.config.prismaClientModels === 'undefined' || typeof this.config.prismaClientModels[modelName] === 'undefined') {
+                throw new InternalError('Issue parsing prismaClientModels from auto-injected environment variable `PRISMA_APPSYNC_GENERATED_CONFIG`.')
+            }
+
+            this.model = this.config.prismaClientModels[modelName]
         }
 
         return this.parseArgs(event)
@@ -131,23 +142,27 @@ export class PrismaAppSyncAdapter {
             if (typeof event.arguments.where !== 'undefined') {
                 this.args.where = event.arguments.where
             }
-    
+
             const _getOrList:Operation[] = [Operations.get, Operations.list]
             if (typeof event.arguments.orderBy !== 'undefined' && _getOrList.includes(this.operation)) {
                 this.args.orderBy = this.parseOrderBy(event.arguments.orderBy)
             }
 
-            if (this.operation === Operations.list) {
+            if (this.operation === Operations.list || this.operation === Operations.count) {
                 if (typeof event.arguments.skip !== 'undefined' ) {
                     this.args.skip = event.arguments.skip
-                } else if (this.defaultPagination !== false) {
+                } else if (this.defaultPagination !== false && this.operation === Operations.list) {
                     this.args.skip = 0
                 }
 
                 if (typeof event.arguments.take !== 'undefined' ) {
                     this.args.take = event.arguments.take
-                } else if (this.defaultPagination !== false) {
+                } else if (this.defaultPagination !== false && this.operation === Operations.list) {
                     this.args.take = this.defaultPagination
+                }
+            } else if (this.operation === Operations.createMany) {
+                if (typeof event.arguments.skipDuplicates !== 'undefined' ) {
+                    this.args.skipDuplicates = event.arguments.skipDuplicates
                 }
             }
         } else {
@@ -208,18 +223,27 @@ export class PrismaAppSyncAdapter {
         return args
     }
 
-    private parseOrderBy(orderByInput:any) {
-        const orderByOutput:any = []
-
-        for (const input in orderByInput) {
-            const orderByArg = orderByInput[input].toLowerCase()
-            if (PrismaOrderByArgs.includes(orderByArg)) {
-                orderByOutput.push({
-                    [input]: orderByArg
-                })
-            }
+    private getOrderBy(sortObj:any): any {
+        const key:any = Object.keys(sortObj)[0]
+        const value = typeof sortObj[key] === 'object'
+            ? this.getOrderBy(sortObj[key])
+            : sortObj[key].toLowerCase()
+    
+        return {
+            [key]: value
         }
+    }
 
+    private parseOrderBy(orderByInputs:any) {
+        const orderByOutput:any = []
+    
+        const orderByInputsArray = Array.isArray(orderByInputs)
+            ? orderByInputs : [orderByInputs]
+    
+        orderByInputsArray.forEach((orderByInput:any) => {
+            orderByOutput.push( this.getOrderBy(orderByInput) )
+        })
+    
         return orderByOutput
     }
 }

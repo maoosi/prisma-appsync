@@ -14,7 +14,7 @@ import {
 import { PrismaExclWords, AuthActions, Operations } from './_constants'
 import { dot } from 'dot-object'
 import { createAliasResolver, defineAbility, subject } from '@casl/ability'
-import { difference, merge, keys, every, upperFirst, pick } from 'lodash-es'
+import { difference, merge, keys, every, pick } from 'lodash-es'
 import { InternalError, UnauthorizedError } from './_errors'
 import { PrismaClient } from '@prisma/client'
 
@@ -103,7 +103,7 @@ export class PrismaAppSyncResolver {
                 )
             }
 
-            if (action === AuthActions.list || action === AuthActions.deleteMany) {
+            if (action === AuthActions.list || action === AuthActions.count || action === AuthActions.createMany || action === AuthActions.updateMany || action === AuthActions.deleteMany) {
                 const entities = await this.prisma[model].findMany({
                     where: args.where,
                     select
@@ -141,11 +141,13 @@ export class PrismaAppSyncResolver {
     
         // define action aliases (or groups)
         const actionAliases = {
-            access: [ AuthActions.get, AuthActions.list ],
+            access: [ AuthActions.get, AuthActions.list, AuthActions.count ],
             modify: [
                 AuthActions.upsert,
                 AuthActions.update,
+                AuthActions.updateMany,
                 AuthActions.delete,
+                AuthActions.deleteMany,
             ],
         }
         const resolveAction = createAliasResolver(actionAliases)
@@ -275,7 +277,7 @@ export class PrismaAppSyncResolver {
         const requestSetPaths = this.getRequestSetPaths({ operation, model, args })
         const fieldsObj = merge({}, args.data || {}, args.select || {}, args.include || {})
         const fields = keys(fieldsObj)
-        const subject = operation !== 'custom' ? upperFirst(model) : model
+        const subject = model
 
         this.beforeResolveHookProps = {
             authIdentity: this.authIdentity,
@@ -429,6 +431,24 @@ export class PrismaAppSyncResolver {
         return results
     }
 
+    public async count(model:string, args:RequestProps) {
+        await this.runBeforeResolveHook({ operation: Operations.count, model, args })
+
+        if (process.env.JEST_WORKER_ID) return args
+
+        const results = await this.prisma[model].count({
+            ...(args.where && {where: args.where}),
+            ...(args.orderBy && {orderBy: args.orderBy}),
+            ...(args.select && {select: args.select}),
+            ...(typeof args.skip !== 'undefined' && {skip: args.skip}),
+            ...(typeof args.take !== 'undefined' && {take: args.take}),
+        })
+
+        await this.runAfterResolveHook({ result: results })
+
+        return results
+    }
+
     public async create(model:string, args:RequestProps) {
         await this.runBeforeResolveHook({ operation: Operations.create, model, args })
 
@@ -437,6 +457,21 @@ export class PrismaAppSyncResolver {
         const results = await this.prisma[model].create({
             data: args.data,
             ...(args.select && {select: args.select}),
+        })
+
+        await this.runAfterResolveHook({ result: results })
+
+        return results
+    }
+
+    public async createMany(model:string, args:RequestProps) {
+        await this.runBeforeResolveHook({ operation: Operations.createMany, model, args })
+
+        if (process.env.JEST_WORKER_ID) return args
+
+        const results = await this.prisma[model].createMany({
+            data: args.data,
+            ...(args.skipDuplicates && {skipDuplicates: args.skipDuplicates})
         })
 
         await this.runAfterResolveHook({ result: results })
@@ -453,6 +488,21 @@ export class PrismaAppSyncResolver {
             data: args.data,
             where: args.where,
             ...(args.select && {select: args.select}),
+        })
+
+        await this.runAfterResolveHook({ result: results })
+
+        return results
+    }
+
+    public async updateMany(model:string, args:RequestProps) {
+        await this.runBeforeResolveHook({ operation: Operations.updateMany, model, args })
+
+        if (process.env.JEST_WORKER_ID) return args
+
+        const results = await this.prisma[model].updateMany({
+            data: args.data,
+            where: args.where
         })
 
         await this.runAfterResolveHook({ result: results })

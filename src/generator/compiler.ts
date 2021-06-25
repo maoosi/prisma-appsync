@@ -14,11 +14,11 @@ import {
 } from './types'
 import { parseAnnotations } from 'graphql-annotations'
 import { join, extname, basename, dirname } from 'path'
-import { readFile, outputFile, writeFile, readFileSync, copy } from 'fs-extra'
-import { mixin, flow, camelCase, upperFirst, merge } from 'lodash-es'
+import { readFile, outputFile, writeFile, readFileSync, copy, openSync, writeSync, close } from 'fs-extra'
+import { flow, camelCase, upperFirst, merge } from 'lodash-es'
 
 // AppSync schema helper
-const { convertSchemas } = require('@maoosi/appsync-schema-converter')
+const { convertSchemas } = require('appsync-schema-converter')
 
 // Custom lodash function
 const pascalCase = flow(camelCase, upperFirst)
@@ -39,20 +39,21 @@ export class PrismaAppSyncCompiler {
                     type: ['type', 'default'],
                     query: ['query', 'type', 'default'],
                     mutation: ['mutation', 'type', 'default'],
+                    batch: ['batch', 'mutation', 'type', 'default'],
                     subscription: ['subscription', 'type', 'default'],
                     get: ['get', 'query', 'type', 'default'],
                     list: ['list', 'query', 'type', 'default'],
+                    count: ['count', 'query', 'type', 'default'],
                     create: ['create', 'mutation', 'type', 'default'],
                     update: ['update', 'mutation', 'type', 'default'],
                     upsert: ['upsert', 'mutation', 'type', 'default'],
                     delete: ['delete', 'mutation', 'type', 'default'],
-                    deleteMany: ['deleteMany', 'mutation', 'type', 'default'],
+                    createMany: ['createMany', 'batch', 'mutation', 'type', 'default'],
+                    updateMany: ['updateMany', 'batch', 'mutation', 'type', 'default'],
+                    deleteMany: ['deleteMany', 'batch', 'mutation', 'type', 'default'],
                 },
                 field: {
                     field: ['field'],
-                    mutation: ['mutation', 'field'],
-                    create: ['create', 'mutation', 'field'],
-                    update: ['update', 'mutation', 'field'],
                 }
             },
             aliasPrefix: 'directiveAlias_',
@@ -77,45 +78,68 @@ export class PrismaAppSyncCompiler {
         const generatorSchemaPath = await this.makeFile(
             join(__dirname, './templates/schema.gql.njk')
         )
- 
-        if (customSchemaPath) {
 
+        let userSchema = null
+
+        if (customSchemaPath) {
             if (this.options.debug) {
                 console.log(`[Prisma-AppSync] Adding custom schema: `, join(dirname(this.options.schemaPath), customSchemaPath))
             }
 
             // read custom user schema
-            const userSchema = await readFile(
-                join(dirname(this.options.schemaPath), customSchemaPath), { encoding: 'utf-8' }
-            )
-
-            // read generated schema
-            const generatedSchema = await readFile(
-                generatorSchemaPath, { encoding: 'utf-8' }
-            )
-
-            // Merge both schema into one
-            const mergedSchema = convertSchemas([generatedSchema, userSchema], {
-                commentDescriptions: true,
-                includeDirectives: true,
-            })
-
-            // Prettify schema output
-            const prettySchema = prettier.format(mergedSchema, {
-                semi: false,
-                parser: 'graphql',
-                tabWidth: 4,
-                trailingComma: 'none',
-                singleQuote: true,
-                printWidth: 60
-            })
-
-            // Overrite generator schema with the new one
-            await writeFile(generatorSchemaPath, prettySchema)
-
+            userSchema = await readFile(join(
+                dirname(this.options.schemaPath), customSchemaPath
+            ), { encoding: 'utf-8' })
         }
 
+        // read generated schema
+        const generatedSchema = await readFile(
+            generatorSchemaPath, { encoding: 'utf-8' }
+        )
+
+        // list of schemas to merge
+        const schemasList = [generatedSchema]
+        if (userSchema !== null) schemasList.push(userSchema)
+
+        // Merge both schema into one
+        const mergedSchema = await convertSchemas(schemasList, {
+            commentDescriptions: true,
+            includeDirectives: true,
+        })
+
+        // Prettify schema output
+        const prettySchema = prettier.format(mergedSchema, {
+            semi: false,
+            parser: 'graphql',
+            tabWidth: 4,
+            trailingComma: 'none',
+            singleQuote: true,
+            printWidth: 60
+        })
+
+        // Overrite generator schema with the new one
+        await writeFile(generatorSchemaPath, prettySchema)
+
         return this
+    }
+
+    // Return the AppSync client config
+    public getClientConfig():string {
+        const config = {
+            prismaClientModels: {}
+        }
+
+        for (let i = 0; i < this.data.models.length; i++) {
+            const model = this.data.models[i]
+
+            if (model.name !== model.pluralizedName) {
+                config['prismaClientModels'][model.pluralizedName] = model.prismaRef
+            }
+            
+            config['prismaClientModels'][model.name] = model.prismaRef
+        }
+
+        return JSON.stringify(config)
     }
 
     // Generate and output AppSync resolvers
@@ -150,6 +174,17 @@ export class PrismaAppSyncCompiler {
             join(__dirname, './prisma-appsync'),
             join(this.options.outputDir, 'client')
         )
+
+        // edit output to inject env var at beginning
+        const clientPath = join(this.options.outputDir, 'client', 'index.js')
+        const clientContent = readFileSync(clientPath)
+        const clientDescriptor = openSync(clientPath, 'w+')
+        const clientConfig = Buffer.from(
+            `process.env.PRISMA_APPSYNC_GENERATED_CONFIG=${JSON.stringify(this.getClientConfig())};`
+        )
+        writeSync(clientDescriptor, clientConfig, 0, clientConfig.length, 0)
+        writeSync(clientDescriptor, clientContent, 0, clientContent.length, clientConfig.length)
+        close(clientDescriptor)
 
         return this
     }
@@ -191,8 +226,7 @@ export class PrismaAppSyncCompiler {
                             scalar: this.getFieldScalar(field),
                             isRequired: this.isFieldRequired(field),
                             isEnum: this.isFieldEnum(field),
-                            isEditable: !this.isFieldGeneratedRelation(field, model) 
-                                && !this.isFieldImmutableDate(field),
+                            isEditable: !this.isFieldImmutableDate(field),
                             isUnique: this.isFieldUnique(field, model),
                             ...(field.relationName && {
                                 relation: {
@@ -210,8 +244,9 @@ export class PrismaAppSyncCompiler {
                 })
             
                 this.data.models.push({
-                    name: model.name,
-                    pluralizedName: plural(model.name),
+                    name: pascalCase(model.name),
+                    pluralizedName: pascalCase(plural(model.name)),
+                    prismaRef: model.name.charAt(0).toLowerCase() + model.name.slice(1),
                     ...(Object.keys(modelDirectives).length > 0 && {
                         directives: modelDirectives
                     }),

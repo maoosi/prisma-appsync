@@ -6,7 +6,7 @@ sidebarDepth: 0
 
 ## 👾 What is this?
 
-> **Prisma-AppSync** is a custom Generator for [Prisma 2](https://www.prisma.io), that automatically generates a fully working AWS AppSync ⚡ GraphQL CRUD API.
+> **Prisma-AppSync** is a [Prisma](https://www.prisma.io) Generator, that automatically converts your Schema into a full-blown ⚡&#160;GraphQL&#160;API for [AWS AppSync](https://aws.amazon.com/appsync/).
 
 ## ✨ Automatically generated
 
@@ -16,14 +16,14 @@ sidebarDepth: 0
 
 ## ✔️ Features
 
-- AppSync CRUD API (get/list/create/update/delete/deleteMany).
+- AppSync CRUD API (get / list / create / update / upsert / delete / createMany / updateMany / deleteMany).
 - Extensible TypeScript Class with support for hooks and custom resolvers.
 - Support for AppSync authorization modes, as well as fine-grained access control.
-- Real-time subscriptions (onCreated/onUpdated/onDeleted).
-- Exposes Prisma relation queries (create/connect/connectOrCreate/update/upsert/delete/disconnect/set/updateMany/deleteMany).
+- Real-time subscriptions (onCreated / onUpdated / onDeleted).
+- Exposes Prisma relation queries (create / connect / connectOrCreate / update / upsert / delete / disconnect / set / updateMany / deleteMany).
 - Full CloudWatch logs for easy debugging on AWS.
 - XSS data sanitization by default.
 
 ## ⚓ Compatibility
 
-- Prisma 2.24.1
+- Prisma 2.25.0

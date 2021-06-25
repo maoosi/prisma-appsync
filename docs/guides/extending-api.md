@@ -58,9 +58,6 @@ export const main = async (event: any, context: any) => {
     // handle CRUD operations / resolve query
     const result = await app.resolve()
 
-    // close database connection
-    await app.prisma.$disconnect()
-
     // return query result
     return Promise.resolve(result)
 })
@@ -94,18 +91,24 @@ generator appsync {
 
 We want to make sure both `custom-schema.gql` and `custom-resolvers.yaml` files are copied in the build folder, so that Prisma generate works properly.
 
-To do so, we update the `cdk/index.ts` file with highlighted code:
+To do so, we update the beforeBundling function (located inside `cdk/index.ts`) with the below:
 
-```typescript{7-15}
+```typescript{7-21}
 const lambdaFunction = new NodejsFunction(this, `${process.env.SERVICES_PREFIX}_Function`, {
     // ...
     bundling: {
-        minify: true,
+        // ...
         commandHooks: {
             beforeBundling(inputDir: string, outputDir: string): string[] {
-                const prismaSchema = path.join(inputDir, process.env.PRISMA_SCHEMA_ROOT_PATH || 'schema.prisma')
-                const customSchema = path.join(path.dirname(prismaSchema), 'custom-schema.gql')
-                const customResolvers = path.join(path.dirname(prismaSchema), 'custom-resolvers.yaml')
+                const prismaSchema = path.join(
+                    inputDir, String(process.env.PRISMA_SCHEMA_PATH)
+                )
+                const customSchema = path.join(
+                    path.dirname(prismaSchema), 'custom-schema.gql'
+                )
+                const customResolvers = path.join(
+                    path.dirname(prismaSchema), 'custom-resolvers.yaml'
+                )
 
                 return [
                     `cp ${prismaSchema} ${outputDir}`,
@@ -113,18 +116,9 @@ const lambdaFunction = new NodejsFunction(this, `${process.env.SERVICES_PREFIX}_
                     `cp ${customResolvers} ${outputDir}`,
                 ]
             },
-            beforeInstall() {
-                return []
-            },
-            afterBundling() {
-                return [
-                    'npx prisma generate', 
-                    'rm -rf node_modules/prisma/query-engine-darwin', 
-                    'rm -rf node_modules/prisma/query-engine-rhel-openssl-1.0.x'
-                ]
-            }
+            // ...
         },
-        nodeModules: ['prisma', '@prisma/client', 'prisma-appsync'],
+        // ...
     }
 })
 ```

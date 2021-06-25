@@ -1,5 +1,6 @@
 {% set modelFieldUnique = false -%}
 {% set modelField = false -%}
+{% set modelFieldSecondary = false -%}
 {% set modelRelationOne = false -%}
 {% set modelRelationMany = false -%}
 {% for field in model.fields -%}
@@ -8,6 +9,8 @@
     {% endif -%}
     {% if (not field.isUnique and not field.relation) and not modelField -%}
         {% set modelField = field -%}
+    {% elseif (not field.isUnique and not field.relation) and not modelFieldSecondary -%}
+        {% set modelFieldSecondary = field -%}
     {% endif -%}
     {% if (field.relation and field.relation.kind === 'one') and not modelRelationOne -%}
         {% set modelRelationOne = field -%}
@@ -42,10 +45,11 @@ The generated queries are:
 
 - `get{{ model.name }}`: Read a single {{ model.name }}.
 - `list{{ model.pluralizedName }}`: Read multiple {{ model.pluralizedName }}.
+- `count{{ model.pluralizedName }}`: Count all {{ model.pluralizedName }}.
 
 ### Querying a single {{ model.name }}
 
-Single {{ model.name }} queries can take one input:
+Single {{ model.name }} queries take one input:
 
 - `where`: `{{ model.name }}WhereUniqueInput!` A required object type specifying a field with a unique constraint (like {{ modelFieldUnique.name }}).
 
@@ -72,7 +76,7 @@ query {
 Multiple {{ model.pluralizedName }} queries can take four inputs:
 
 - `where`: `{{ model.name }}WhereFilterInput` An optional object type to filter the content based on a nested set of criteria.
-- `orderBy`: `{{ model.name }}OrderByInput` An optional object type to select which field(s) and order to sort the records on. Sorting can be in ascending order `ASC` or descending order `DESC`.
+- `orderBy`: `[{{ model.name }}OrderByInput]` An optional array to select which field(s) and order to sort the records on. Sorting can be in ascending order `ASC` or descending order `DESC`.
 - `skip`: `Int` An optional number that specifies how many of the returned objects in the list should be skipped.
 - `take`: `Int` An optional number that specifies how many objects should be returned in the list.
 
@@ -159,7 +163,12 @@ query {
 
 ```graphql
 query {
-    list{{ model.pluralizedName }}(orderBy: { {{ modelField.name }}: DESC }) {
+    list{{ model.pluralizedName }}(
+        orderBy: [
+            { {{ modelField.name }}: DESC }
+            {% if modelFieldSecondary -%}{ {{ modelFieldSecondary.name }}: ASC }{% endif -%}
+        ]
+    ) {
         {% for field in model.fields -%}
         {% if field.relation and field.relation.kind === 'one' -%}
         {{ field.name }} # Relation to one
@@ -173,6 +182,25 @@ query {
 }
 ```
 
+### Counting {{ model.pluralizedName }}
+
+Counting {{ model.pluralizedName }} queries can take four inputs:
+
+- `where`: `{{ model.name }}WhereFilterInput` An optional object type to filter the content based on a nested set of criteria.
+- `orderBy`: `[{{ model.name }}OrderByInput]` An optional array to select which field(s) and order to sort the records on. Sorting can be in ascending order `ASC` or descending order `DESC`.
+- `skip`: `Int` An optional number that specifies how many of the returned objects in the list should be skipped.
+- `take`: `Int` An optional number that specifies how many objects should be returned in the list.
+
+**Standard query**
+
+```graphql
+query {
+    count{{ model.pluralizedName }}
+}
+```
+
+> `count{{ model.pluralizedName }}` returns an integer that represents the number of records found.
+
 ## Mutations
 
 Mutations are responsible for all `Create`, `Update`, and `Delete` operations.
@@ -183,11 +211,13 @@ The generated mutations are:
 - `update{{ model.name }}`: Update a single {{ model.name }}.
 - `upsert{{ model.name }}`: Update existing OR create single {{ model.name }}.
 - `delete{{ model.name }}`: Delete a single {{ model.name }}.
+- `createMany{{ model.pluralizedName }}`: Create multiple {{ model.pluralizedName }}.
+- `updateMany{{ model.pluralizedName }}`: Update multiple {{ model.pluralizedName }}.
 - `deleteMany{{ model.pluralizedName }}`: Delete multiple {{ model.pluralizedName }}.
 
 ### Creating a single {{ model.name }}
 
-Single {{ model.name }} create mutations can take one input:
+Single {{ model.name }} create mutations take one input:
 
 - `data`: `{{ model.name }}CreateInput!` A required object type specifying the data to create a new record.
 
@@ -272,7 +302,7 @@ mutation {
 
 ### Updating a single {{ model.name }}
 
-Single {{ model.name }} update mutations can take two input:
+Single {{ model.name }} update mutations take two inputs:
 
 - `where`: `{{ model.name }}WhereUniqueInput!` A required object type specifying a field with a unique constraint (like {{ modelFieldUnique.name }}).
 - `data`: `{{ model.name }}UpdateInput!` A required object type specifying the data to update.
@@ -372,7 +402,7 @@ mutation {
 
 ### Deleting a single {{ model.name }}
 
-Single {{ model.name }} delete mutations can take one input:
+Single {{ model.name }} delete mutations take one input:
 
 - `where`: `{{ model.name }}WhereUniqueInput!` A required object type specifying a field with a unique constraint (like {{ modelFieldUnique.name }}).
 
@@ -394,11 +424,59 @@ mutation {
 }
 ```
 
+### Creating multiple {{ model.pluralizedName }}
+
+Multiple {{ model.pluralizedName }} create mutations take one input:
+
+- `data`: `[{{ model.name }}CreateManyInput!]` A required array specifying the data to create new records.
+- `skipDuplicates`: `Boolean` An optional Boolean specifying if unique fields or ID fields that already exist should be skipped.
+
+**Standard deleteMany mutation**
+
+```graphql
+mutation {
+    createMany{{ model.pluralizedName }}(
+        data: [
+            { {{ modelField.name }}: {{ modelField.sample | safe }} }
+            { {{ modelField.name }}: {{ modelField.sample | safe }} }
+            { {{ modelField.name }}: {{ modelField.sample | safe }} }
+        ],
+        skipDuplicates: true
+    ) {
+        count
+    }
+}
+```
+
+> `createMany{{ model.pluralizedName }}` returns an integer that represents the number of records that were created.
+
+### Updating multiple {{ model.pluralizedName }}
+
+Multiple {{ model.pluralizedName }} update mutations take two inputs:
+
+- `where`: `{{ model.name }}WhereFilterInput!` A required object type to filter the content based on a nested set of criteria.
+- `data`: `{{ model.name }}UpdateInput!` A required object type specifying the data to update records with.
+
+**Standard updateMany mutation**
+
+```graphql
+mutation {
+    updateMany{{ model.pluralizedName }}(
+        where: { {{ modelField.name }}: {{ modelField.sample | safe }} }
+        data: { {{ modelField.name }}: {{ modelField.sample | safe }} }
+    ) {
+        count
+    }
+}
+```
+
+> `updateMany{{ model.pluralizedName }}` returns an integer that represents the number of records that were updated.
+
 ### Deleting multiple {{ model.pluralizedName }}
 
 Multiple {{ model.pluralizedName }} delete mutations can take one input:
 
-- `where`: `{{ model.name }}WhereFilterInput!` A required object type specifying a field with a unique constraint (like {{ modelField.name }}).
+- `where`: `{{ model.name }}WhereFilterInput!` A required object type to filter the content based on a nested set of criteria.
 
 **Standard deleteMany mutation**
 
@@ -422,6 +500,8 @@ Subscriptions allows listen for data changes when a specific event happens, in r
 
 ### Subscribing to a single {{ model.name }} creation
 
+Triggered from `create{{ model.name }}` mutation (excl. `createMany{{ model.pluralizedName }}` and `upsert{{ model.name }}`).
+
 ```graphql
 subscription {
     onCreated{{ model.name }} {
@@ -436,6 +516,8 @@ subscription {
 
 ### Subscribing to a single {{ model.name }} update
 
+Triggered from `update{{ model.name }}` mutation (excl. `updateMany{{ model.pluralizedName }}` and `upsert{{ model.name }}`).
+
 ```graphql
 subscription {
     onUpdated{{ model.name }} {
@@ -448,7 +530,25 @@ subscription {
 }
 ```
 
+### Subscribing to a single {{ model.name }} upsert
+
+Triggered from `upsert{{ model.name }}` mutation.
+
+```graphql
+subscription {
+    onUpserted{{ model.name }} {
+        {% for field in model.fields -%}
+        {% if not field.relation -%}
+        {{ field.name }}
+        {% endif -%}
+        {% endfor -%}
+    }
+}
+```
+
 ### Subscribing to a single {{ model.name }} deletion
+
+Triggered from `delete{{ model.name }}` mutation (excl. `deleteMany{{ model.pluralizedName }}`).
 
 ```graphql
 subscription {
@@ -460,3 +560,60 @@ subscription {
         {% endfor -%}
     }
 }
+```
+
+### Subscribing to a single {{ model.name }} mutation
+
+Triggered from ANY SINGLE record mutation (excl. `on*Many{{ model.pluralizedName }}`).
+
+```graphql
+subscription {
+    onMutated{{ model.name }} {
+        {% for field in model.fields -%}
+        {% if not field.relation -%}
+        {{ field.name }}
+        {% endif -%}
+        {% endfor -%}
+    }
+}
+```
+
+### Subscribing to many {{ model.name }} creations
+
+Triggered from `createMany{{ model.pluralizedName }}` mutation.
+
+```graphql
+subscription {
+    onCreatedMany{{ model.pluralizedName }} { count }
+}
+```
+
+### Subscribing to many {{ model.name }} updates
+
+Triggered from `updateMany{{ model.pluralizedName }}` mutation.
+
+```graphql
+subscription {
+    onUpdatedMany{{ model.pluralizedName }} { count }
+}
+```
+
+### Subscribing to many {{ model.name }} deletions
+
+Triggered from `deleteMany{{ model.pluralizedName }}` mutation.
+
+```graphql
+subscription {
+    onDeletedMany{{ model.pluralizedName }} { count }
+}
+```
+
+### Subscribing to many {{ model.name }} mutations
+
+Triggered from ANY MULTIPLE records mutation (excl. single record mutations).
+
+```graphql
+subscription {
+    onMutatedMany{{ model.pluralizedName }} { count }
+}
+```
