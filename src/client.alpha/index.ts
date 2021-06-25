@@ -1,4 +1,4 @@
-import { AppsyncEvent, ResolverQuery, Action, Actions, Model, Models, Args } from './defs'
+import { PrismaAppSyncOptions } from './defs'
 
 export class PrismaAppSync {
 
@@ -15,35 +15,6 @@ export class PrismaAppSync {
     // }
 
 }
-
-type PrismaAppSyncOptions = {
-    event: any,
-    customResolvers?: {},
-    beforeResolve?: () => Promise<void>
-    afterResolve?: () => Promise<void>
-    shield?: () => Promise<Shield>
-}
-
-export type ShieldDirective = {
-    rule?: Boolean
-    filter?: Promise<boolean>
-    afterResolve?: () => Promise<void>
-}
-
-
-export interface Shield {
-    [key in Model]: {
-        [key in Action]: ShieldDirective
-    }
-}
-
-const shield:Shield = {
-    2: {
-        glut: 'xxx'
-    }
-}
-
-
 
 // // init prisma-appsync client
 // const prismaAppSync = new PrismaAppSync({

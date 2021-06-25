@@ -19,7 +19,7 @@
         "test:generate": "pnpm build && prisma generate --schema=./test/schema.prisma",
         "test:copydocs": "cp test/generated/prisma-appsync/docs/Post.md docs/demo/_post.md && cp test/generated/prisma-appsync/docs/User.md docs/demo/_user.md",
         "prepare": "pnpm test",
-        "test:alpha": "jest src/client.alpha/**.spec.ts"
+        "test:alpha": "jest src/client.alpha/**.spec.ts --verbose"
     },
     "engines": {
         "node": ">=12",

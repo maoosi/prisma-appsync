@@ -18,7 +18,7 @@ export function parseEvent(
     const action = getAction({ operation })
     const model = getModel({ operation, action })
     const fields = getFields({ _selectionSetList: appsyncEvent.info.selectionSetList })
-    const args = getArgs({ _arguments: appsyncEvent.arguments })
+    const args = getArgs({ action, _arguments: appsyncEvent.arguments })
     const type = getType({ _parentTypeName: appsyncEvent.info.parentTypeName })
 
     return { operation, action, model, fields, args, type }
@@ -92,7 +92,49 @@ export function getType(
 
 // return Prisma args (where, data, orderBy, ...)
 export function getArgs(
-    { _arguments }: { _arguments:any }
+    { action, _arguments, defaultPagination }: 
+    { action: Action, _arguments:any, defaultPagination?:false|number }
 ): Args {
-    return {}
+    const args:Args = {}
+
+    if (typeof _arguments.data !== 'undefined') args.data = _arguments.data
+    if (typeof _arguments.where !== 'undefined') args.where = _arguments.where
+    if (typeof _arguments.orderBy !== 'undefined') args.orderBy = parseOrderBy(_arguments.orderBy)
+    if (typeof _arguments.skipDuplicates !== 'undefined') args.skipDuplicates = _arguments.skipDuplicates
+
+    if (typeof _arguments.skip !== 'undefined') args.skip = parseInt(_arguments.skip)
+    else if (
+        typeof defaultPagination !== 'undefined' &&
+        defaultPagination !== false && action === Actions.list) {
+        args.skip = 0
+    }
+
+    if (typeof _arguments.take !== 'undefined') args.take = parseInt(_arguments.take)
+    else if (
+        typeof defaultPagination !== 'undefined' &&
+        defaultPagination !== false && action === Actions.list) {
+        args.take = defaultPagination
+    }
+
+    return args
+}
+
+function getOrderBy(sortObj:any): any {
+    const key:any = Object.keys(sortObj)[0]
+    const value = typeof sortObj[key] === 'object'
+        ? getOrderBy(sortObj[key])
+        : sortObj[key].toLowerCase()
+
+    return { [key]: value }
+}
+
+function parseOrderBy(orderByInputs:any): any[] {
+    const orderByOutput:any = []
+    const orderByInputsArray = Array.isArray(orderByInputs)
+        ? orderByInputs : [orderByInputs]
+    orderByInputsArray.forEach((orderByInput:any) => {
+        orderByOutput.push( getOrderBy(orderByInput) )
+    })
+
+    return orderByOutput
 }
