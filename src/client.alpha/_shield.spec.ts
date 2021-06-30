@@ -1,5 +1,6 @@
-import { Shield, ActionsAliases, Models } from './defs'
-import { getDirectiveParam } from './shield'
+import { ShieldDirectives, ActionsAliases, Models } from './defs'
+import { getDirectiveParam } from './_shield'
+
 
 describe('CLIENT #shield', () => {
 
@@ -15,7 +16,7 @@ describe('CLIENT #shield', () => {
                 models.forEach((model:string | null) => {
                     actions.forEach((action:string | null) => {
                         let subject:any = String()
-                        let shield:Shield = {}
+                        let shield:ShieldDirectives = {}
                         let expected = String()
                         let target = String()
 

@@ -1,8 +1,23 @@
-import { AppsyncEvent, ResolverQuery, Action, Actions, Model, Args } from './defs'
+import {
+    AppsyncEvent,
+    ResolverQuery,
+    Action,
+    Actions,
+    Model,
+    Args,
+    ActionsAliases,
+    ActionsAlias
+} from './defs'
 
-// parse appsync event in lambda resolver
+
+/**
+ * Return ResolverQuery from parse AppSync direct resolver event.
+ * @param  {AppsyncEvent} appsyncEvent
+ * @param  {any} customResolvers?
+ * @returns ResolverQuery
+ */
 export function parseEvent(
-    appsyncEvent:AppsyncEvent, customResolvers?:any
+    appsyncEvent:AppsyncEvent, customResolvers?:any|null
 ):ResolverQuery {
     if (!(
         appsyncEvent.info && 
@@ -14,17 +29,32 @@ export function parseEvent(
         throw new Error(`Error reading required parameters from appsyncEvent.`)
     }
 
+    let model:Model, action:Action, actionAlias:ActionsAlias
     const operation = getOperation({ fieldName: appsyncEvent.info.fieldName })
-    const action = getAction({ operation })
-    const model = getModel({ operation, action })
+
+    if (customResolvers && typeof customResolvers[operation] !== 'undefined') {
+        action = operation
+        actionAlias = operation
+        model = 'custom'
+    } else {
+        action = getAction({ operation })
+        actionAlias = getActionAlias({ action })
+        model = getModel({ operation, action })
+    }
+    
     const fields = getFields({ _selectionSetList: appsyncEvent.info.selectionSetList })
     const args = getArgs({ action, _arguments: appsyncEvent.arguments })
     const type = getType({ _parentTypeName: appsyncEvent.info.parentTypeName })
 
-    return { operation, action, model, fields, args, type }
+    return { operation, action, actionAlias, model, fields, args, type }
 }
 
-// return operation (getPost, listUsers, ...)
+
+/**
+ * Return operation (`getPost`, `listUsers`, ...) from parsed `event.info.fieldName`.
+ * @param  {{fieldName:string}} {fieldName}
+ * @returns string
+ */
 export function getOperation(
     { fieldName }: { fieldName: string }
 ):string {
@@ -36,7 +66,12 @@ export function getOperation(
     return operation
 }
 
-// return action (get, list, create, ...)
+
+/**
+ * Return action (`get`, `list`, `create`, ...) from parsed `operation`.
+ * @param  {{operation:string}} {operation}
+ * @returns Action
+ */
 export function getAction(
     { operation }: { operation: string }
 ):Action {
@@ -52,7 +87,38 @@ export function getAction(
     return action
 }
 
-// return model (Post, User, ...)
+
+/**
+ * Return action alias (`access`, `create`, `modify`, `subscribe`) from parsed `action`.
+ * @param  {{action:string}} {operation}
+ * @returns Action
+ */
+export function getActionAlias(
+    { action }: { action: Action }
+):ActionsAlias {
+    let actionAlias:ActionsAlias
+
+    for (const alias in ActionsAliases) {
+        const actionsList = ActionsAliases[alias]
+
+        if (actionsList.includes(action)) {
+            actionAlias = alias as ActionsAlias
+            break;
+        }
+    }
+
+    if (! (typeof action !== 'undefined' && action.length > 0) ) 
+        throw new Error(`Error parsing 'action' from input event.`)
+    
+    return actionAlias
+}
+
+
+/**
+ *  Return model (`Post`, `User`, ...) from parsed `operation` and `action`.
+ * @param  {{operation:string, action:Action}} {operation, action}
+ * @returns Model
+ */
 export function getModel(
     { operation, action }: { operation: string, action: Action }
 ):Model {
@@ -64,7 +130,12 @@ export function getModel(
     return model
 }
 
-// return fields (title, author, ...)
+
+/**
+ * Return fields (`title`, `author`, ...) from parsed `event.info.selectionSetList`.
+ * @param  {{_selectionSetList:string[]}} {_selectionSetList}
+ * @returns string
+ */
 export function getFields(
     { _selectionSetList }: { _selectionSetList:string[] }
 ):string[] {
@@ -78,7 +149,12 @@ export function getFields(
     return fields
 }
 
-// return GraphQL type (Query, Mutation, Subscription)
+
+/**
+ * Return GraphQL type (`Query`, `Mutation` or `Subscription`) from parsed `event.info.parentTypeName`.
+ * @param  {{_parentTypeName:string}} {_parentTypeName}
+ * @returns Query
+ */
 export function getType(
     { _parentTypeName }: { _parentTypeName:string }
 ): 'Query' | 'Mutation' | 'Subscription' {
@@ -90,7 +166,11 @@ export function getType(
     return type as 'Query' | 'Mutation' | 'Subscription'
 }
 
-// return Prisma args (where, data, orderBy, ...)
+/**
+ * Return Prisma args (`where`, `data`, `orderBy`, ...) from parsed `action` and `event.arguments`.
+ * @param  {{action: Action, _arguments:any, defaultPagination?:false|number}} { action, _arguments, defaultPagination }
+ * @returns Args
+ */
 export function getArgs(
     { action, _arguments, defaultPagination }: 
     { action: Action, _arguments:any, defaultPagination?:false|number }
@@ -119,7 +199,16 @@ export function getArgs(
     return args
 }
 
+
+/**
+ * Return individual `orderBy` record formatted for Prisma.
+ * @param  {any} sortObj
+ * @returns any
+ */
 function getOrderBy(sortObj:any): any {
+    if (Object.keys(sortObj).length > 1)
+        throw new Error(`Wrong 'orderBy' input format.`)
+
     const key:any = Object.keys(sortObj)[0]
     const value = typeof sortObj[key] === 'object'
         ? getOrderBy(sortObj[key])
@@ -128,6 +217,12 @@ function getOrderBy(sortObj:any): any {
     return { [key]: value }
 }
 
+
+/**
+ * Return Prisma `orderBy` from parsed `event.arguments.orderBy`.
+ * @param  {any} orderByInputs
+ * @returns any
+ */
 function parseOrderBy(orderByInputs:any): any[] {
     const orderByOutput:any = []
     const orderByInputsArray = Array.isArray(orderByInputs)

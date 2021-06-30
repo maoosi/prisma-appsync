@@ -1,8 +1,16 @@
-import { Shield, ShieldSubject, ShieldDirective, ShieldDirectiveParam} from './defs'
+import { ShieldDirectives, ShieldSubject, ShieldDirectiveParam, ShieldDirectivePossibleTypes } from './defs'
 
+
+/**
+ * Return a ShieldDirective for a given param (`rule`, `filter`, `afterResolve`, ...) based on an input Shield and ShieldSubject.
+ * @param  {Shield} shield
+ * @param  {ShieldSubject} subject
+ * @param  {ShieldDirectiveParam} param
+ * @returns ShieldDirective
+ */
 export function getDirectiveParam(
-    shield:Shield, subject:ShieldSubject, param:ShieldDirectiveParam
-): ShieldDirective|null {
+    shield:ShieldDirectives, subject:ShieldSubject, param:ShieldDirectiveParam
+): ShieldDirectivePossibleTypes {
     let directiveParam:any = null
 
     // find rule from [custom.string.param]
@@ -18,12 +26,12 @@ export function getDirectiveParam(
     else if (
         typeof subject !== 'string' && 
         typeof subject.model !== 'undefined' &&
-        typeof subject.action !== 'undefined' &&
+        typeof subject.actionAlias !== 'undefined' &&
         typeof shield[subject.model] !== 'undefined' && 
-        typeof shield[subject.model][subject.action] !== 'undefined' &&
-        typeof shield[subject.model][subject.action][param] !== 'undefined'
+        typeof shield[subject.model][subject.actionAlias] !== 'undefined' &&
+        typeof shield[subject.model][subject.actionAlias][param] !== 'undefined'
     ) {
-        directiveParam = shield[subject.model][subject.action][param]
+        directiveParam = shield[subject.model][subject.actionAlias][param]
     }
     // find rule from [model.param]
     else if (
@@ -34,14 +42,14 @@ export function getDirectiveParam(
     ) {
         directiveParam = shield[subject.model][param]
     }
-    // find rule from [*.action.param]
+    // find rule from [*.actionAlias.param]
     else if (
         typeof subject !== 'string' && 
-        typeof subject.action !== 'undefined' &&
-        typeof shield['*'][subject.action] !== 'undefined' && 
-        typeof shield['*'][subject.action][param] !== 'undefined'
+        typeof subject.actionAlias !== 'undefined' &&
+        typeof shield['*'][subject.actionAlias] !== 'undefined' && 
+        typeof shield['*'][subject.actionAlias][param] !== 'undefined'
     ) {
-        directiveParam = shield['*'][subject.action][param]
+        directiveParam = shield['*'][subject.actionAlias][param]
     }
     // find rule from [*.param]
     else if (

@@ -1,4 +1,6 @@
-import { Prisma } from '@prisma/client'
+import { PrismaClient, Prisma } from '@prisma/client'
+
+export { PrismaClient }
 
 export type AppsyncEvent = {
     arguments?: any,
@@ -10,16 +12,23 @@ export type AppsyncEvent = {
 }
 
 export type PrismaAppSyncOptions = {
+    connectionUrl?: string,
+    sanitize?: boolean,
+    debug?: boolean,
+    defaultPagination?: number | false
+}
+
+export type ResolveParams = {
     event: AppsyncEvent,
     customResolvers?: {},
     beforeResolve?: () => Promise<void>
     afterResolve?: () => Promise<void>
-    shield?: () => Promise<Shield>
+    shield?: () => Promise<ShieldDirectives>
 }
 
 export const Models = Prisma.ModelName
 
-export type Model = typeof Models[keyof typeof Models]
+export type Model = typeof Models[keyof typeof Models] | 'custom'
 
 export const Actions = {
     // queries
@@ -82,19 +91,20 @@ export const ActionsAliases = {
     ]
 } as const
 
-export type Action = typeof Actions[keyof typeof Actions]
-export type ActionsAlias = keyof typeof ActionsAliases
+export type Action = typeof Actions[keyof typeof Actions] | string
+export type ActionsAlias = keyof typeof ActionsAliases | string
 
 export type GraphQLType = 'Query' | 'Mutation' | 'Subscription'
 
 export type ShieldSubject = string | {
-    action: ActionsAlias
+    actionAlias: ActionsAlias
     model: Model
 }
 
 export type ResolverQuery = {
     operation: string
     action: Action
+    actionAlias: ActionsAlias
     model: Model
     fields: string[]
     args: Args
@@ -108,17 +118,21 @@ export type Args = {
     skip?: number
     take?: number
     skipDuplicates?: boolean
+    select?: any
 }
 
-export type ShieldDirectiveParam = 'rule' | 'filter' | 'afterResolve'
+export type ShieldDirectivePossibleTypes = Boolean | (() => void) | null
+
+export type ShieldDirectiveParam = 'rule' | 'filter' | 'beforeResolve' | 'afterResolve'
 
 export type ShieldDirective = {
     rule?: Boolean
     filter?: ({ field }:any) => boolean
+    beforeResolve?: () => void
     afterResolve?: () => void
 }
 
-export type Shield = {
+export type ShieldDirectives = {
     [key in Model] ? : ShieldDirective | {
         [key in ActionsAlias] ? : ShieldDirective
     }
