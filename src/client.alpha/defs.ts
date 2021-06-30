@@ -96,7 +96,7 @@ export type ActionsAlias = keyof typeof ActionsAliases | string
 
 export type GraphQLType = 'Query' | 'Mutation' | 'Subscription'
 
-export type ShieldSubject = string | {
+export type ShieldSubject = {
     actionAlias: ActionsAlias
     model: Model
 }

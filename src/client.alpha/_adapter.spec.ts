@@ -91,11 +91,13 @@ describe('CLIENT #adapter', () => {
             const result = getArgs({
                 action: Actions.get,
                 _arguments: { 
-                    selectionSetList: [
-                        "title",
-                        "createdAt",
-                        "status",
-                    ]
+                    info: {
+                        selectionSetList: [
+                            "title",
+                            "createdAt",
+                            "status",
+                        ]
+                    }
                 }
             })
             expect(result).toStrictEqual({
@@ -110,24 +112,30 @@ describe('CLIENT #adapter', () => {
             const result = getArgs({
                 action: Actions.list,
                 _arguments: { 
-                    selectionSetList: [
-                        "title",
-                        "createdAt",
-                        "comments",
-                        "comments/post",
-                        "comment/author",
-                        "comment/author/email"
-                    ]
+                    info: {
+                        selectionSetList: [
+                            "title",
+                            "createdAt",
+                            "comments",
+                            "comments/post",
+                            "comments/author",
+                            "comments/author/email"
+                        ]
+                    }
                 }
             })
-            expect(result).toStrictEqual({
-                include: {
+            expect(result).toEqual({
+                select: {
                     title: true,
                     createdAt: true,
                     comments: {
-                        post: true,
-                        author: {
-                            email: true
+                        select: {
+                            post: true,
+                            author: {
+                                select: {
+                                    email: true
+                                }
+                            }
                         }
                     }
                 }
@@ -160,7 +168,7 @@ describe('CLIENT #adapter', () => {
                 action: Actions.list,
                 _arguments: { 
                     orderBy: [
-                        { title: 'ASC', content: 'DESC' },
+                        { title: 'ASC' },
                         { postedAt: 'DESC' }
                     ]
                 }
@@ -171,6 +179,17 @@ describe('CLIENT #adapter', () => {
                     { postedAt: 'desc' }
                 ]
             })
+        })
+        test('expect "orderBy" to throw an error when using wrong format', () => {
+            expect(() => getArgs({
+                action: Actions.list,
+                _arguments: { 
+                    orderBy: [
+                        { title: 'ASC', content: 'DESC' },
+                        { postedAt: 'DESC' }
+                    ]
+                }
+            })).toThrow(Error)
         })
         test('expect "skip" to be converted to prisma syntax', () => {
             const result = getArgs({

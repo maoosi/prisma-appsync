@@ -1,4 +1,4 @@
-import { ShieldDirectives, ActionsAliases, Models } from './defs'
+import { ShieldDirectives, ActionsAliases, Models, ShieldSubject, Model, ActionsAlias } from './defs'
 import { getDirectiveParam } from './_shield'
 
 
@@ -8,41 +8,41 @@ describe('CLIENT #shield', () => {
         const cases = []
         const models = [null].concat( Object.keys(Models) )
         const actions = [null].concat( Object.keys(ActionsAliases) )
-        const params = ['rule', 'filter', 'afterResolve']
+        const params = ['rule', 'filter', 'afterResolve', 'afterResolve']
         const isParamDefined = [true, false]
 
         isParamDefined.forEach((isParamDefined:boolean) => {
             params.forEach((param:string) => {
-                models.forEach((model:string | null) => {
-                    actions.forEach((action:string | null) => {
-                        let subject:any = String()
+                models.forEach((model:Model | null) => {
+                    actions.forEach((action:ActionsAlias | null) => {
+                        let subject:ShieldSubject
                         let shield:ShieldDirectives = {}
                         let expected = String()
                         let target = String()
 
                         if (model && action) {
-                            subject = { model: model, action: action }
+                            subject = { model: model, actionAlias: action }
                         } else if (model) {
-                            subject = { model: model }
+                            subject = { model: model, actionAlias: `` }
                         } else {
-                            subject = { model: 'custom', action: 'myCustomQuery' }
+                            subject = { model: 'custom', actionAlias: 'myCustomQuery' }
                         }
 
-                        if (isParamDefined && subject.action) {
+                        if (isParamDefined && subject.actionAlias) {
                             shield = {
                                 '*': {
                                     [param]: `return *`
                                 },
                                 [subject.model]: {
                                     [param]: `return parent model`,
-                                    [subject.action]: {
+                                    [subject.actionAlias]: {
                                         [param]: `return action`
                                     }
                                 }
                             }
-                            target = `${subject.model} > ${subject.action} (action)`
+                            target = `${subject.model} > ${subject.actionAlias} (action)`
                             expected = `return action`
-                        } else if (isParamDefined && !subject.action) {
+                        } else if (isParamDefined && !subject.actionAlias) {
                             shield = {
                                 '*': {
                                     [param]: `return *`
@@ -53,19 +53,19 @@ describe('CLIENT #shield', () => {
                             }
                             target = `${subject.model} (model)`
                             expected = `return model`
-                        } else if (!isParamDefined && subject.action) {
+                        } else if (!isParamDefined && subject.actionAlias) {
                             shield = {
                                 '*': {
                                     [param]: `return *`
                                 },
                                 [subject.model]: {
                                     [param]: `return parent model`,
-                                    [subject.action]: {}
+                                    [subject.actionAlias]: {}
                                 }
                             }
-                            target = `${subject.model} > ${subject.action} (action)`
+                            target = `${subject.model} > ${subject.actionAlias} (action)`
                             expected = `return parent model`
-                        } else if (!isParamDefined && !subject.action) {
+                        } else if (!isParamDefined && !subject.actionAlias) {
                             shield = {
                                 '*': {
                                     [param]: `return *`

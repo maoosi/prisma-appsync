@@ -15,17 +15,27 @@ export function getDirectiveParam(
 
     // find rule from [custom.string.param]
     if (
-        typeof subject === 'string' && 
+        typeof subject.model !== 'undefined' &&
+        subject.model === 'custom' && 
         typeof shield['custom'] !== 'undefined' && 
-        typeof shield['custom'][subject] !== 'undefined' && 
-        typeof shield['custom'][subject][param] !== 'undefined'
+        typeof shield['custom'][subject.actionAlias] !== 'undefined' && 
+        typeof shield['custom'][subject.actionAlias][param] !== 'undefined'
     ) {
-        directiveParam = shield['custom'][subject][param]
+        directiveParam = shield['custom'][subject.actionAlias][param]
+    }
+    // find rule from [custom.param]
+    else if (
+        typeof subject.model !== 'undefined' &&
+        subject.model === 'custom' && 
+        typeof shield['custom'] !== 'undefined' && 
+        typeof shield['custom'][param] !== 'undefined'
+    ) {
+        directiveParam = shield['custom'][param]
     }
     // find rule from [model.action.param]
     else if (
-        typeof subject !== 'string' && 
         typeof subject.model !== 'undefined' &&
+        subject.model !== 'custom' &&
         typeof subject.actionAlias !== 'undefined' &&
         typeof shield[subject.model] !== 'undefined' && 
         typeof shield[subject.model][subject.actionAlias] !== 'undefined' &&
@@ -35,7 +45,8 @@ export function getDirectiveParam(
     }
     // find rule from [model.param]
     else if (
-        typeof subject !== 'string' && 
+        typeof subject.model !== 'undefined' &&
+        subject.model !== 'custom' &&
         typeof subject.model !== 'undefined' &&
         typeof shield[subject.model] !== 'undefined' && 
         typeof shield[subject.model][param] !== 'undefined'
@@ -44,7 +55,8 @@ export function getDirectiveParam(
     }
     // find rule from [*.actionAlias.param]
     else if (
-        typeof subject !== 'string' && 
+        typeof subject.model !== 'undefined' &&
+        subject.model !== 'custom' &&
         typeof subject.actionAlias !== 'undefined' &&
         typeof shield['*'][subject.actionAlias] !== 'undefined' && 
         typeof shield['*'][subject.actionAlias][param] !== 'undefined'

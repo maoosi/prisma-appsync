@@ -8,6 +8,7 @@ import {
     ActionsAliases,
     ActionsAlias
 } from './defs'
+const { merge } = require('lodash')
 
 
 /**
@@ -182,6 +183,10 @@ export function getArgs(
     if (typeof _arguments.orderBy !== 'undefined') args.orderBy = parseOrderBy(_arguments.orderBy)
     if (typeof _arguments.skipDuplicates !== 'undefined') args.skipDuplicates = _arguments.skipDuplicates
 
+    if (typeof _arguments.info !== 'undefined' && typeof _arguments.info.selectionSetList !== 'undefined') {
+        args.select = parseSelectionList(_arguments.info.selectionSetList)
+    }
+
     if (typeof _arguments.skip !== 'undefined') args.skip = parseInt(_arguments.skip)
     else if (
         typeof defaultPagination !== 'undefined' &&
@@ -232,4 +237,57 @@ function parseOrderBy(orderByInputs:any): any[] {
     })
 
     return orderByOutput
+}
+
+
+function getInclude(parts:any): any {
+    const field = parts[0]
+    const value = parts.length > 1
+        ? getSelect(parts.splice(1))
+        : true
+
+    return {
+        include: {
+            [field]: value
+        }
+    }
+}
+
+function getSelect(parts:any): any {
+    const field = parts[0]
+    const value = parts.length > 1 
+        ? getSelect(parts.splice(1))
+        : true
+
+    return {
+        select: {
+            [field]: value
+        }
+    }
+}
+
+
+function parseSelectionList(selectionSetList:any) {
+    let args:any = {}
+
+    for (let i = 0; i < selectionSetList.length; i++) {
+        const path = selectionSetList[i]
+        const parts = path.split('/')
+
+        if (!parts.includes('__typename')) {
+            if (parts.length > 1) args = merge({}, args, getInclude(parts))
+            else args = merge({}, args, getSelect(parts))
+        }
+    }
+
+    if (args.include) {
+        for (const include in args.include) {
+            if (typeof args.select[include] !== 'undefined') delete args.select[include]
+        }
+
+        args.select = merge({}, args.select, args.include)
+        delete args.include
+    }
+    
+    return args.select
 }
