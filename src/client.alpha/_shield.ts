@@ -13,7 +13,7 @@ export function getDirectiveParam(
 ): ShieldDirectivePossibleTypes {
     let directiveParam:any = null
 
-    // find rule from [custom.string.param]
+    // find param from [custom.string.param]
     if (
         typeof subject.model !== 'undefined' &&
         subject.model === 'custom' && 
@@ -23,7 +23,7 @@ export function getDirectiveParam(
     ) {
         directiveParam = shield['custom'][subject.actionAlias][param]
     }
-    // find rule from [custom.param]
+    // find param from [custom.param]
     else if (
         typeof subject.model !== 'undefined' &&
         subject.model === 'custom' && 
@@ -32,7 +32,7 @@ export function getDirectiveParam(
     ) {
         directiveParam = shield['custom'][param]
     }
-    // find rule from [model.action.param]
+    // find param from [model.action.param]
     else if (
         typeof subject.model !== 'undefined' &&
         subject.model !== 'custom' &&
@@ -43,7 +43,7 @@ export function getDirectiveParam(
     ) {
         directiveParam = shield[subject.model][subject.actionAlias][param]
     }
-    // find rule from [model.param]
+    // find param from [model.param]
     else if (
         typeof subject.model !== 'undefined' &&
         subject.model !== 'custom' &&
@@ -53,7 +53,7 @@ export function getDirectiveParam(
     ) {
         directiveParam = shield[subject.model][param]
     }
-    // find rule from [*.actionAlias.param]
+    // find param from [*.actionAlias.param]
     else if (
         typeof subject.model !== 'undefined' &&
         subject.model !== 'custom' &&
@@ -63,7 +63,7 @@ export function getDirectiveParam(
     ) {
         directiveParam = shield['*'][subject.actionAlias][param]
     }
-    // find rule from [*.param]
+    // find param from [*.param]
     else if (
         typeof shield['*'] !== 'undefined' && 
         typeof shield['*'][param] !== 'undefined'
@@ -72,4 +72,19 @@ export function getDirectiveParam(
     }
 
     return directiveParam
+}
+
+
+export function sanitize() {
+
+}
+
+
+export function canAccess() {
+
+}
+
+
+export function filterFields() {
+    
 }

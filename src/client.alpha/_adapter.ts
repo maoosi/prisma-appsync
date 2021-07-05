@@ -169,12 +169,12 @@ export function getType(
 
 /**
  * Return Prisma args (`where`, `data`, `orderBy`, ...) from parsed `action` and `event.arguments`.
- * @param  {{action: Action, _arguments:any, defaultPagination?:false|number}} { action, _arguments, defaultPagination }
+ * @param  {{action: Action, _arguments:any, defaultPagination:false|number}} { action, _arguments, defaultPagination }
  * @returns Args
  */
 export function getArgs(
     { action, _arguments, defaultPagination }: 
-    { action: Action, _arguments:any, defaultPagination?:false|number }
+    { action: Action, _arguments:any, defaultPagination:false|number }
 ): Args {
     const args:Args = {}
 
@@ -188,16 +188,12 @@ export function getArgs(
     }
 
     if (typeof _arguments.skip !== 'undefined') args.skip = parseInt(_arguments.skip)
-    else if (
-        typeof defaultPagination !== 'undefined' &&
-        defaultPagination !== false && action === Actions.list) {
+    else if (defaultPagination !== false && action === Actions.list) {
         args.skip = 0
     }
 
     if (typeof _arguments.take !== 'undefined') args.take = parseInt(_arguments.take)
-    else if (
-        typeof defaultPagination !== 'undefined' &&
-        defaultPagination !== false && action === Actions.list) {
+    else if (defaultPagination !== false && action === Actions.list) {
         args.take = defaultPagination
     }
 
@@ -240,6 +236,11 @@ function parseOrderBy(orderByInputs:any): any[] {
 }
 
 
+/**
+ * Return individual `include` field formatted for Prisma.
+ * @param  {any} parts
+ * @returns any
+ */
 function getInclude(parts:any): any {
     const field = parts[0]
     const value = parts.length > 1
@@ -253,6 +254,12 @@ function getInclude(parts:any): any {
     }
 }
 
+
+/**
+ * Return individual `select` field formatted for Prisma.
+ * @param  {any} parts
+ * @returns any
+ */
 function getSelect(parts:any): any {
     const field = parts[0]
     const value = parts.length > 1 
@@ -267,6 +274,11 @@ function getSelect(parts:any): any {
 }
 
 
+/**
+ * Return Prisma `select` from parsed `event.arguments.info.selectionSetList`.
+ * @param  {any} selectionSetList
+ * @returns any
+ */
 function parseSelectionList(selectionSetList:any) {
     let args:any = {}
 
@@ -289,5 +301,7 @@ function parseSelectionList(selectionSetList:any) {
         delete args.include
     }
     
-    return args.select
+    return typeof args.select !== 'undefined'
+        ? args.select
+        : {}
 }

@@ -1,16 +1,16 @@
 import { PrismaClient, ResolverQuery } from './defs'
 
 
-// export async function customQuery(prismaClient:PrismaClient, query:ResolverQuery, callback:Function) {
-//     const callbackProps:CustomResolverProps = {
-//         args: query.args,
-//         authIdentity: this.authIdentity
-//     }
+export async function customQuery(query:ResolverQuery, callback:Function) {
+    const callbackProps:CustomResolverProps = {
+        args: query.args,
+        authIdentity: this.authIdentity
+    }
 
-//     const results = await callback(callbackProps)
+    const results = await callback(callbackProps)
 
-//     return results
-// }
+    return results
+}
 
 
 /**
