@@ -20,15 +20,17 @@ export type PrismaAppSyncOptions = {
 
 export type ResolveParams = {
     event: AppsyncEvent,
-    customResolvers?: {},
-    beforeResolve?: () => Promise<void>
-    afterResolve?: () => Promise<void>
-    shield?: () => Promise<ShieldDirectives>
+    before?: () => Promise<void>
+    after?: () => Promise<void>
 }
+
+export const ReservedPrismaKeys = [
+    'data', 'where', 'orderBy', 'create', 'connect', 'connectOrCreate', 'update', 'upsert', 'delete', 'disconnect', 'set', 'updateMany', 'deleteMany', 'select', 'include'
+]
 
 export const Models = Prisma.ModelName
 
-export type Model = typeof Models[keyof typeof Models] | 'custom'
+export type Model = typeof Models[keyof typeof Models]
 
 export const Actions = {
     // queries
@@ -62,13 +64,33 @@ export const Actions = {
 } as const
 
 export const ActionsAliases = {
+    access: 'access',
+    batchAccess: 'batchAccess',
+    create: 'create',
+    batchCreate: 'batchCreate',
+    delete: 'delete',
+    batchDelete: 'batchDelete',
+    modify: 'modify',
+    batchModify: 'modify',
+    subscribe: 'subscribe',
+    batchSubscribe: 'subscribe',
+} as const
+
+export const ActionsAliasesList = {
     access: [
         Actions.get, 
-        Actions.list, 
+        Actions.list,
+        Actions.count
+    ],
+    batchAccess: [
+        Actions.list,
         Actions.count
     ],
     create: [
         Actions.create,
+        Actions.createMany,
+    ],
+    batchCreate: [
         Actions.createMany,
     ],
     modify: [
@@ -76,6 +98,17 @@ export const ActionsAliases = {
         Actions.update,
         Actions.updateMany,
         Actions.delete,
+        Actions.deleteMany,
+    ],
+    batchModify: [
+        Actions.updateMany,
+        Actions.deleteMany,
+    ],
+    delete: [
+        Actions.delete,
+        Actions.deleteMany,
+    ],
+    batchDelete: [
         Actions.deleteMany,
     ],
     subscribe: [
@@ -88,27 +121,44 @@ export const ActionsAliases = {
         Actions.onUpserted,
         Actions.onDeleted,
         Actions.onMutated,
+    ],
+    batchSubscribe: [
+        Actions.onCreatedMany,
+        Actions.onUpdatedMany,
+        Actions.onDeletedMany,
+        Actions.onMutatedMany,
     ]
 } as const
 
 export type Action = typeof Actions[keyof typeof Actions] | string
-export type ActionsAlias = keyof typeof ActionsAliases | string
+export type ActionsAlias = keyof typeof ActionsAliases
 
 export type GraphQLType = 'Query' | 'Mutation' | 'Subscription'
 
-export type ShieldSubject = {
+export type Subject = {
     actionAlias: ActionsAlias
     model: Model
-}
+} | string
 
 export type ResolverQuery = {
     operation: string
     action: Action
-    actionAlias: ActionsAlias
-    model: Model
+    subject: Subject
     fields: string[]
     args: Args
-    type: GraphQLType
+    type: GraphQLType,
+    authIdentity: AuthIdentity
+}
+
+export const AuthModes = {
+    API_KEY: 'API_KEY',
+    AWS_IAM: 'AWS_IAM',
+    AMAZON_COGNITO_USER_POOLS: 'AMAZON_COGNITO_USER_POOLS'
+} as const
+
+export type AuthIdentity = {
+    authorization: typeof AuthModes[keyof typeof AuthModes]
+    [key:string]: any
 }
 
 export type Args = {
@@ -132,7 +182,7 @@ export type ShieldDirective = {
     afterResolve?: () => void
 }
 
-export type ShieldDirectives = {
+export type Shield = {
     [key in Model] ? : ShieldDirective | {
         [key in ActionsAlias] ? : ShieldDirective
     }

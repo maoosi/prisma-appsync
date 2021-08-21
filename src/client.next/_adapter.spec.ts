@@ -1,5 +1,5 @@
-import { getAction, getOperation, getModel, getFields, getType, getArgs } from './_adapter'
-import { Actions, Action } from './defs'
+import { getAction, getOperation, getModel, getFields, getType, getArgs, getPaths } from './_adapter'
+import { Actions, Action, Models, ActionsAliases } from './defs'
 
 
 describe('CLIENT #adapter', () => {
@@ -9,7 +9,7 @@ describe('CLIENT #adapter', () => {
             return [`${action}People`, `${action}People`]
         })
         test.each(cases)(
-            'when fieldName is "s", expect action to equal "%s"',
+            'when fieldName is "%s", expect operation to equal "%s"',
             (fieldName, expected) => {
                 const result = getOperation({ fieldName })
                 expect(result).toEqual(expected)
@@ -98,7 +98,8 @@ describe('CLIENT #adapter', () => {
                             "status",
                         ]
                     }
-                }
+                },
+                defaultPagination: false
             })
             expect(result).toStrictEqual({
                 select: {
@@ -122,7 +123,8 @@ describe('CLIENT #adapter', () => {
                             "comments/author/email"
                         ]
                     }
-                }
+                },
+                defaultPagination: false
             })
             expect(result).toEqual({
                 select: {
@@ -146,7 +148,8 @@ describe('CLIENT #adapter', () => {
                 action: Actions.count,
                 _arguments: { 
                     where: { title: { startsWith: 'Hello' } }
-                }
+                },
+                defaultPagination: false
             })
             expect(result).toStrictEqual({
                 where: { title: { startsWith: 'Hello' } }
@@ -157,7 +160,8 @@ describe('CLIENT #adapter', () => {
                 action: Actions.create,
                 _arguments: { 
                     data: { title: 'Hello', content: 'World' }
-                }
+                },
+                defaultPagination: false
             })
             expect(result).toStrictEqual({
                 data: { title: 'Hello', content: 'World' }
@@ -171,7 +175,8 @@ describe('CLIENT #adapter', () => {
                         { title: 'ASC' },
                         { postedAt: 'DESC' }
                     ]
-                }
+                },
+                defaultPagination: false
             })
             expect(result).toStrictEqual({
                 orderBy: [
@@ -188,27 +193,31 @@ describe('CLIENT #adapter', () => {
                         { title: 'ASC', content: 'DESC' },
                         { postedAt: 'DESC' }
                     ]
-                }
+                },
+                defaultPagination: false
             })).toThrow(Error)
         })
         test('expect "skip" to be converted to prisma syntax', () => {
             const result = getArgs({
                 action: Actions.list,
-                _arguments: { skip: '5' }
+                _arguments: { skip: '5' },
+                defaultPagination: false
             })
             expect(result).toStrictEqual({ skip: 5 })
         })
         test('expect "take" to be converted to prisma syntax', () => {
             const result = getArgs({
                 action: Actions.list,
-                _arguments: { take: '3' }
+                _arguments: { take: '3' },
+                defaultPagination: false
             })
             expect(result).toStrictEqual({ take: 3 })
         })
         test('expect "skipDuplicates" to be converted to prisma syntax', () => {
             const result = getArgs({
                 action: Actions.list,
-                _arguments: { skipDuplicates: true }
+                _arguments: { skipDuplicates: true },
+                defaultPagination: false
             })
             expect(result).toStrictEqual({ skipDuplicates: true })
         })
@@ -227,6 +236,57 @@ describe('CLIENT #adapter', () => {
                 _arguments: {}
             })
             expect(result).toStrictEqual({ skip: 0, take: 50 })
+        })
+    })
+
+    describe('.getPaths?', () => {
+        test('expect nested update to return matching paths', () => {
+            const result = getPaths({
+                action: Actions.update,
+                subject: {
+                    actionAlias: ActionsAliases.modify,
+                    model: Models.Post
+                },
+                args: getArgs({
+                    action: Actions.update,
+                    _arguments: {
+                        data: {
+                            title: "New title",
+                            author: {
+                                connect: {
+                                    username: "other user"
+                                }
+                            }
+                        },
+                        info: {
+                            selectionSetList: [
+                                '__typename',
+                                'title',
+                                'comment',
+                                'comment/content',
+                                'comment/author',
+                                'comment/author/email',
+                                'comment/author/username',
+                                'comment/author/badges',
+                                'comment/author/badges/label',
+                                'comment/author/badges/owners',
+                                'comment/author/badges/owners/email',
+                            ]
+                        }
+                    },
+                    defaultPagination: false
+                })
+            })
+            expect(result).toEqual([
+                "/update/post/title",
+                "/update/post/author/username",
+                "/access/post/title",
+                "/access/post/comment/content",
+                "/access/post/comment/author/email",
+                "/access/post/comment/author/username",
+                "/access/post/comment/author/badges/label",
+                "/access/post/comment/author/badges/owners/email",
+            ])
         })
     })
     

@@ -1,14 +1,22 @@
+import merge from 'lodash/merge'
+import { InternalError } from './_debug'
+import { dot } from 'dot-object'
 import {
+    PrismaAppSyncOptions,
     AppsyncEvent,
     ResolverQuery,
     Action,
     Actions,
     Model,
     Args,
+    ActionsAliasesList,
+    ActionsAlias,
     ActionsAliases,
-    ActionsAlias
+    Subject,
+    AuthIdentity,
+    AuthModes,
+    ReservedPrismaKeys
 } from './defs'
-const { merge } = require('lodash')
 
 
 /**
@@ -18,7 +26,7 @@ const { merge } = require('lodash')
  * @returns ResolverQuery
  */
 export function parseEvent(
-    appsyncEvent:AppsyncEvent, customResolvers?:any|null
+    appsyncEvent:AppsyncEvent, options:PrismaAppSyncOptions, customResolvers?:any|null
 ):ResolverQuery {
     if (!(
         appsyncEvent.info && 
@@ -30,24 +38,83 @@ export function parseEvent(
         throw new Error(`Error reading required parameters from appsyncEvent.`)
     }
 
-    let model:Model, action:Action, actionAlias:ActionsAlias
+    let action:Action, subject: Subject
     const operation = getOperation({ fieldName: appsyncEvent.info.fieldName })
 
     if (customResolvers && typeof customResolvers[operation] !== 'undefined') {
         action = operation
-        actionAlias = operation
-        model = 'custom'
+        subject = operation
     } else {
         action = getAction({ operation })
-        actionAlias = getActionAlias({ action })
-        model = getModel({ operation, action })
+        subject = {
+            actionAlias: getActionAlias({ action }),
+            model: getModel({ operation, action })
+        }
     }
     
+    const authIdentity = getAuthIdentity({ appsyncEvent })
     const fields = getFields({ _selectionSetList: appsyncEvent.info.selectionSetList })
-    const args = getArgs({ action, _arguments: appsyncEvent.arguments })
+    const args = getArgs({ action, _arguments: appsyncEvent.arguments, defaultPagination: options.defaultPagination })
     const type = getType({ _parentTypeName: appsyncEvent.info.parentTypeName })
 
-    return { operation, action, actionAlias, model, fields, args, type }
+    return { operation, action, subject, fields, args, type, authIdentity }
+}
+
+
+/**
+ * Return auth. identity from parsed `event`.
+ * @param  {{appsyncEvent:any}} {appsyncEvent}
+ * @returns AuthIdentity
+ */
+export function getAuthIdentity(
+    { appsyncEvent }: { appsyncEvent: any }
+):AuthIdentity {
+    let authIdentity:AuthIdentity = null
+
+    if (
+        typeof appsyncEvent.identity === 'undefined' || 
+        !appsyncEvent.identity || 
+        appsyncEvent.identity.length < 1
+    ) {
+        authIdentity = merge({}, appsyncEvent.identity, {
+            authorization: AuthModes.API_KEY,
+            ...(
+                appsyncEvent.request && 
+                appsyncEvent.request.headers &&
+                typeof appsyncEvent.request.headers['x-api-key'] !== 'undefined' &&
+                {
+                    requestApiKey: appsyncEvent.request.headers['x-api-key'],
+                }
+            ),
+            ...(
+                appsyncEvent.request && 
+                appsyncEvent.request.headers &&
+                typeof appsyncEvent.request.headers['user-agent'] !== 'undefined' &&
+                {
+                    requestUserAgent: appsyncEvent.request.headers['user-agent'],
+                }
+            )
+        })
+    } else if (typeof appsyncEvent.identity['sub'] !== 'undefined') {
+        authIdentity = merge({}, appsyncEvent.identity, {
+            authorization: AuthModes.AMAZON_COGNITO_USER_POOLS
+        })
+    } else if (
+        typeof appsyncEvent.identity['cognitoIdentityAuthType'] !== 'undefined' ||
+        typeof appsyncEvent.identity['cognitoIdentityAuthProvider'] !== 'undefined' ||
+        typeof appsyncEvent.identity['cognitoIdentityPoolId'] !== 'undefined' ||
+        typeof appsyncEvent.identity['cognitoIdentityId'] !== 'undefined'
+    ) {
+        authIdentity = merge({}, appsyncEvent.identity, {
+            authorization: AuthModes.AWS_IAM
+        })
+    } else {
+        throw new InternalError(
+            `Couldn't detect caller identity from: ${JSON.stringify(appsyncEvent.identity)}`
+        )
+    }
+
+    return authIdentity
 }
 
 
@@ -99,8 +166,8 @@ export function getActionAlias(
 ):ActionsAlias {
     let actionAlias:ActionsAlias
 
-    for (const alias in ActionsAliases) {
-        const actionsList = ActionsAliases[alias]
+    for (const alias in ActionsAliasesList) {
+        const actionsList = ActionsAliasesList[alias]
 
         if (actionsList.includes(action)) {
             actionAlias = alias as ActionsAlias
@@ -304,4 +371,44 @@ function parseSelectionList(selectionSetList:any) {
     return typeof args.select !== 'undefined'
         ? args.select
         : {}
+}
+
+
+/**
+ * Return all paths ([`/get/post/title`, `/get/post/date`, ...])
+ * @param  {{action:Action, subject:Subject, args:Args}} {action, subject, args}
+ * @returns string
+ */
+export function getPaths(
+    { action, subject, args }:
+    { action:Action, subject:Subject, args:Args }
+):string[] {
+    const paths:string[] = []
+    const model = typeof subject === 'string' ? subject : subject.model
+
+    if (typeof args.data !== 'undefined') {
+        const inputs:any[] = Array.isArray(args.data) ? args.data : [args.data]
+
+        inputs.forEach((input:string) => {
+            const objectPaths = dot(input)
+
+            for (const key in objectPaths) {
+                const item = key.split('.').filter((k) => !ReservedPrismaKeys.includes(k)).join('/')
+                const path = (`/${action}/${model}/${item}`).toLowerCase()
+                if (!paths.includes(path)) paths.push(path)
+            }
+        })
+    }
+
+    if (typeof args.select !== 'undefined') {
+        const objectPaths = dot(args.select)
+
+        for (const key in objectPaths) {
+            const item = key.split('.').filter((k) => !ReservedPrismaKeys.includes(k)).join('/')
+            const path = (`/${ActionsAliases.access}/${model}/${item}`).toLowerCase()
+            if (!paths.includes(path)) paths.push(path)
+        }
+    }
+
+    return paths
 }

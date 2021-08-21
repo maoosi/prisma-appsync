@@ -9,6 +9,7 @@ specifiers:
   '@types/fs-extra': ^9.0.10
   '@types/jest': ^26.0.22
   '@types/js-yaml': ^4.0.0
+  '@types/lodash': ^4.14.172
   '@types/nunjucks': ^3.1.4
   '@types/pluralize': ^0.0.29
   '@types/prettier': ^2.2.3
@@ -26,6 +27,7 @@ specifiers:
   jest-transform-graphql: ^2.1.0
   js-yaml: ^4.0.0
   lodash-es: ^4.17.21
+  minimatch: ^3.0.4
   nunjucks: ^3.2.3
   pluralize: ^8.0.0
   prettier: ^2.2.1
@@ -46,6 +48,7 @@ devDependencies:
   '@types/fs-extra': 9.0.10
   '@types/jest': 26.0.22
   '@types/js-yaml': 4.0.0
+  '@types/lodash': 4.14.172
   '@types/nunjucks': 3.1.4
   '@types/pluralize': 0.0.29
   '@types/prettier': 2.2.3
@@ -63,6 +66,7 @@ devDependencies:
   jest-transform-graphql: 2.1.0
   js-yaml: 4.0.0
   lodash-es: 4.17.21
+  minimatch: 3.0.4
   nunjucks: 3.2.3
   pluralize: 8.0.0
   prettier: 2.2.1
@@ -2103,6 +2107,10 @@ packages:
 
   /@types/json-schema/7.0.7:
     resolution: {integrity: sha512-cxWFQVseBm6O9Gbw1IWb8r6OS4OhSt3hPZLkFApLjM8TEXROBuQGLAH2i2gZpcXdLBIrpXuTDhH7Vbm1iXmNGA==}
+    dev: true
+
+  /@types/lodash/4.14.172:
+    resolution: {integrity: sha512-/BHF5HAx3em7/KkzVKm3LrsD6HZAXuXO1AJZQ3cRRBZj4oHZDviWPYu0aEplAqDFNHZPW6d3G7KN+ONcCCC7pw==}
     dev: true
 
   /@types/minimatch/3.0.4:

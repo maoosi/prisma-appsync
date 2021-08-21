@@ -1,25 +1,15 @@
 import { PrismaClient, ResolverQuery } from './defs'
 
 
-export async function customQuery(query:ResolverQuery, callback:Function) {
-    const callbackProps:CustomResolverProps = {
-        args: query.args,
-        authIdentity: this.authIdentity
-    }
-
-    const results = await callback(callbackProps)
-
-    return results
-}
-
-
 /**
  * https://www.prisma.io/docs/reference/api-reference/prisma-client-reference#findunique
  * @param  {PrismaClient} prismaClient
  * @param  {ResolverQuery} query
  */
 export async function getQuery(prismaClient:PrismaClient, query:ResolverQuery) {
-    const results = await prismaClient[query.model].findUnique({
+    if (typeof query.subject === 'string') return;
+
+    const results = await prismaClient[query.subject.model].findUnique({
         where: query.args.where,
         ...(query.args.select && { select: query.args.select })
     })
@@ -34,7 +24,9 @@ export async function getQuery(prismaClient:PrismaClient, query:ResolverQuery) {
  * @param  {ResolverQuery} query
  */
 export async function listQuery(prismaClient:PrismaClient, query:ResolverQuery) {
-    const results = await prismaClient[query.model].findMany({
+    if (typeof query.subject === 'string') return;
+
+    const results = await prismaClient[query.subject.model].findMany({
         ...(query.args.where && { where: query.args.where }),
         ...(query.args.orderBy && { orderBy: query.args.orderBy }),
         ...(query.args.select && { select: query.args.select }),
@@ -52,7 +44,9 @@ export async function listQuery(prismaClient:PrismaClient, query:ResolverQuery) 
  * @param  {ResolverQuery} query
  */
 export async function countQuery(prismaClient:PrismaClient, query:ResolverQuery) {
-    const results = await prismaClient[query.model].count({
+    if (typeof query.subject === 'string') return;
+
+    const results = await prismaClient[query.subject.model].count({
         ...(query.args.where && { where: query.args.where }),
         ...(query.args.orderBy && { orderBy: query.args.orderBy }),
         ...(query.args.select && { select: query.args.select }),
@@ -70,7 +64,9 @@ export async function countQuery(prismaClient:PrismaClient, query:ResolverQuery)
  * @param  {ResolverQuery} query
  */
 export async function createQuery(prismaClient:PrismaClient, query:ResolverQuery) {
-    const results = await prismaClient[query.model].create({
+    if (typeof query.subject === 'string') return;
+
+    const results = await prismaClient[query.subject.model].create({
         data: query.args.data,
         ...(query.args.select && { select: query.args.select }),
     })
@@ -85,7 +81,9 @@ export async function createQuery(prismaClient:PrismaClient, query:ResolverQuery
  * @param  {ResolverQuery} query
  */
 export async function createManyQuery(prismaClient:PrismaClient, query:ResolverQuery) {
-    const results = await prismaClient[query.model].createMany({
+    if (typeof query.subject === 'string') return;
+
+    const results = await prismaClient[query.subject.model].createMany({
         data: query.args.data,
         ...(query.args.skipDuplicates && { skipDuplicates: query.args.skipDuplicates })
     })
@@ -100,7 +98,9 @@ export async function createManyQuery(prismaClient:PrismaClient, query:ResolverQ
  * @param  {ResolverQuery} query
  */
 export async function updateQuery(prismaClient:PrismaClient, query:ResolverQuery) {
-    const results = await prismaClient[query.model].update({
+    if (typeof query.subject === 'string') return;
+
+    const results = await prismaClient[query.subject.model].update({
         data: query.args.data,
         where: query.args.where,
         ...(query.args.select && { select: query.args.select }),
@@ -116,7 +116,9 @@ export async function updateQuery(prismaClient:PrismaClient, query:ResolverQuery
  * @param  {ResolverQuery} query
  */
 export async function updateManyQuery(prismaClient:PrismaClient, query:ResolverQuery) {
-    const results = await prismaClient[query.model].updateMany({
+    if (typeof query.subject === 'string') return;
+
+    const results = await prismaClient[query.subject.model].updateMany({
         data: query.args.data,
         where: query.args.where
     })
@@ -131,7 +133,9 @@ export async function updateManyQuery(prismaClient:PrismaClient, query:ResolverQ
  * @param  {ResolverQuery} query
  */
 export async function upsertQuery(prismaClient:PrismaClient, query:ResolverQuery) {
-    const results = await prismaClient[query.model].upsert({
+    if (typeof query.subject === 'string') return;
+
+    const results = await prismaClient[query.subject.model].upsert({
         update: query.args.data,
         create: query.args.data,
         where: query.args.where,
@@ -148,7 +152,9 @@ export async function upsertQuery(prismaClient:PrismaClient, query:ResolverQuery
  * @param  {ResolverQuery} query
  */
 export async function deleteQuery(prismaClient:PrismaClient, query:ResolverQuery) {
-    const results = await prismaClient[query.model].delete({
+    if (typeof query.subject === 'string') return;
+
+    const results = await prismaClient[query.subject.model].delete({
         where: query.args.where,
         ...(query.args.select && { select: query.args.select }),
     })
@@ -163,7 +169,9 @@ export async function deleteQuery(prismaClient:PrismaClient, query:ResolverQuery
  * @param  {ResolverQuery} query
  */
 export async function deleteManyQuery(prismaClient:PrismaClient, query:ResolverQuery) {
-    const results = await prismaClient[query.model].deleteMany({
+    if (typeof query.subject === 'string') return;
+
+    const results = await prismaClient[query.subject.model].deleteMany({
         where: query.args.where
     })
 
