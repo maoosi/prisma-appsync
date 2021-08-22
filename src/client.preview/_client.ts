@@ -1,6 +1,7 @@
-import { ResolveParams, PrismaAppSyncOptions, ResolverQuery, PrismaClient } from './defs'
+import { ResolveParams, PrismaAppSyncOptions, ResolverQuery, PrismaClient, Shield, Authorization } from './defs'
+import { UnauthorizedError } from './_debug'
 import { parseEvent } from './_adapter'
-import { canAccess, getApplicableRules } from './_shield'
+import { getAuthorization } from './_shield'
 import * as queries from './_queries'
 
 
@@ -9,8 +10,8 @@ export class PrismaAppSync {
     private event: ResolveParams['event']
     private resolverQuery: ResolverQuery
     private resolvers: {} | null
-    private before: ResolveParams['before'] | null
-    private after: ResolveParams['after'] | null
+    private shield: ResolveParams['shield'] | null
+    private hooks: ResolveParams['hooks'] | null
     private isFirstResolve: boolean
     public prismaClient:PrismaClient
 
@@ -23,8 +24,8 @@ export class PrismaAppSync {
         this.isFirstResolve = true
 
         this.options = {
-            connectionUrl: typeof options.connectionUrl !== 'undefined'
-                ? options.connectionUrl
+            connectionString: typeof options.connectionString !== 'undefined'
+                ? options.connectionString
                 : String(process.env.DATABASE_URL),
             sanitize: typeof options.sanitize !== 'undefined'
                 ? options.sanitize
@@ -35,6 +36,9 @@ export class PrismaAppSync {
             defaultPagination: typeof options.defaultPagination !== 'undefined'
                 ? options.defaultPagination
                 : 50,
+            maxDepth: typeof options.maxDepth !== 'undefined'
+                ? options.maxDepth
+                : 3,
         }
 
         this.prismaClient = new PrismaClient()
@@ -51,8 +55,8 @@ export class PrismaAppSync {
     public async resolve(resolveParams:ResolveParams):Promise<any> {
         // Core :: only read params other than `event` on first .resolve() call
         if (this.isFirstResolve) {
-            this.before = resolveParams.before || null
-            this.after = resolveParams.after || null
+            this.shield = resolveParams.shield || null
+            this.hooks = resolveParams.hooks || null
         }
 
         // Core :: this is not anymore the first .resolve() call
@@ -62,22 +66,35 @@ export class PrismaAppSync {
         this.event = resolveParams.event
         this.resolverQuery = parseEvent(this.event, this.resolvers)
 
-        // Before :: run before function and extract config
-        const beforeConfig = await this.before()
+        // Shield :: read shield from config
+        const shield: Shield = await this.shield(this.resolverQuery)
 
-        // Before :: read applicable rules from config
-        const rules = getApplicableRules(beforeConfig, this.resolverQuery)
+        // Shield :: get authorization object
+        const authorization: Authorization = getAuthorization({ shield, paths: this.resolverQuery.paths })
 
-        // Before :: if any of applicable rules shield is equal to `false`, we reject the API call
-        if (!canAccess(rules)) {
-            new UnauthorizedError(``)
+        // Shield :: if `canAccess` if equal to `false`, we reject the API call
+        if (!authorization.canAccess) {
+            const reason = typeof authorization.reason === 'string'
+                ? authorization.reason
+                : authorization.reason()
+            new UnauthorizedError(reason)
             return;
         }
 
-        // Before :: if any of applicable rules is an object, combine with Prisma query
-        if (rule && typeof rule !== 'boolean') {
+        // Shield :: if `prismaFilter` is set, combine with current Prisma query
+        if (authorization.prismaFilter) {
             this.prismaClient.$use(async (params, next) => {
-                // need to merge
+                if (typeof params.args.where !== 'undefined' && params.args.where.length > 0) {
+                    params.args.where = {
+                        AND: [
+                            params.args.where,
+                            authorization.prismaFilter
+                        ]
+                    }
+                } else {
+                    params.args.where = authorization.prismaFilter
+                }
+                
                 return next(params)
             })
         }

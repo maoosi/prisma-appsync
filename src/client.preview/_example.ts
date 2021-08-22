@@ -1,3 +1,5 @@
+import { PrismaAppSync } from './index'
+
 // init prisma-appsync client
 const prismaAppSync = new PrismaAppSync({
     connectionString: process.env.DATABASE_URL
@@ -18,7 +20,7 @@ export const main = async (event: any, context: any) => {
             // disabled one of the generated CRUD API query
             getComment: false
         },
-        before: ({ authIdentity }) => {
+        shield: ({ authIdentity }) => {
             const isDefaultAllowed = false
             const isAdmin = authIdentity.groups.includes('admin')
             const isOwner = { owner: { cognitoSub: authIdentity.sub } }
@@ -29,26 +31,25 @@ export const main = async (event: any, context: any) => {
 
                 // can only be modified by owner
                 'modify/{post,comment}{,/**}': {
-                    shield: isOwner,
+                    rule: isOwner,
                     reason: ({ model }) => `${model} can only be modified by their owner.`,
                 },
 
                 // protected field
                 '**/*password{,/**}': {
-                    shield: false,
+                    rule: false,
                     reason: () => 'Field password is not accessible.',
                 },
 
                 // run code before calling custom resolver
                 '**/*myCustomQuery{,/**}': {
-                    shield: isAdmin,
-                    run: () => {}
+                    rule: isAdmin,
                 },
             }
         },
-        after: () => {
+        hooks: () => {
             return {
-                'modify/comment': async ({ prismaClient, args, result }) => {
+                'after:modify/comment': async ({ prismaClient, args, result }) => {
                     await prismaClient.notification.create({ data: args.data })
                     return result
                 },

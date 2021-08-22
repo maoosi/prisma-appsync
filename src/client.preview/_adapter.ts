@@ -15,14 +15,16 @@ import {
     Subject,
     AuthIdentity,
     AuthModes,
-    ReservedPrismaKeys
+    ReservedPrismaKeys,
+    BatchActionsList
 } from './defs'
 
 
 /**
  * Return ResolverQuery from parse AppSync direct resolver event.
  * @param  {AppsyncEvent} appsyncEvent
- * @param  {any} customResolvers?
+ * @param  {PrismaAppSyncOptions} options
+ * @param  {any|null} customResolvers?
  * @returns ResolverQuery
  */
 export function parseEvent(
@@ -52,12 +54,23 @@ export function parseEvent(
         }
     }
     
-    const authIdentity = getAuthIdentity({ appsyncEvent })
-    const fields = getFields({ _selectionSetList: appsyncEvent.info.selectionSetList })
-    const args = getArgs({ action, _arguments: appsyncEvent.arguments, defaultPagination: options.defaultPagination })
-    const type = getType({ _parentTypeName: appsyncEvent.info.parentTypeName })
+    const authIdentity = getAuthIdentity({ 
+        appsyncEvent 
+    })
+    const fields = getFields({ 
+        _selectionSetList: appsyncEvent.info.selectionSetList
+    })
+    const args = getArgs({ 
+        action, _arguments: appsyncEvent.arguments, defaultPagination: options.defaultPagination
+    })
+    const type = getType({ 
+        _parentTypeName: appsyncEvent.info.parentTypeName
+    })
+    const paths = getPaths({ 
+        action, subject, args
+    })
 
-    return { operation, action, subject, fields, args, type, authIdentity }
+    return { operation, action, subject, fields, args, type, authIdentity, paths }
 }
 
 
@@ -158,8 +171,8 @@ export function getAction(
 
 /**
  * Return action alias (`access`, `create`, `modify`, `subscribe`) from parsed `action`.
- * @param  {{action:string}} {operation}
- * @returns Action
+ * @param  {{action:string}} {action}
+ * @returns ActionsAlias
  */
 export function getActionAlias(
     { action }: { action: Action }
@@ -202,7 +215,7 @@ export function getModel(
 /**
  * Return fields (`title`, `author`, ...) from parsed `event.info.selectionSetList`.
  * @param  {{_selectionSetList:string[]}} {_selectionSetList}
- * @returns string
+ * @returns string[]
  */
 export function getFields(
     { _selectionSetList }: { _selectionSetList:string[] }
@@ -221,7 +234,7 @@ export function getFields(
 /**
  * Return GraphQL type (`Query`, `Mutation` or `Subscription`) from parsed `event.info.parentTypeName`.
  * @param  {{_parentTypeName:string}} {_parentTypeName}
- * @returns Query
+ * @returns 'Query' | 'Mutation' | 'Subscription'
  */
 export function getType(
     { _parentTypeName }: { _parentTypeName:string }
@@ -289,7 +302,7 @@ function getOrderBy(sortObj:any): any {
 /**
  * Return Prisma `orderBy` from parsed `event.arguments.orderBy`.
  * @param  {any} orderByInputs
- * @returns any
+ * @returns any[]
  */
 function parseOrderBy(orderByInputs:any): any[] {
     const orderByOutput:any = []
@@ -346,7 +359,7 @@ function getSelect(parts:any): any {
  * @param  {any} selectionSetList
  * @returns any
  */
-function parseSelectionList(selectionSetList:any) {
+function parseSelectionList(selectionSetList:any): any {
     let args:any = {}
 
     for (let i = 0; i < selectionSetList.length; i++) {
@@ -375,9 +388,9 @@ function parseSelectionList(selectionSetList:any) {
 
 
 /**
- * Return all paths ([`/get/post/title`, `/get/post/date`, ...])
+ * Return req and res paths (`/update/post/title`, `/get/post/date`, ...)
  * @param  {{action:Action, subject:Subject, args:Args}} {action, subject, args}
- * @returns string
+ * @returns string[]
  */
 export function getPaths(
     { action, subject, args }:
@@ -385,6 +398,7 @@ export function getPaths(
 ):string[] {
     const paths:string[] = []
     const model = typeof subject === 'string' ? subject : subject.model
+    const isBatchAction:boolean = BatchActionsList.includes(action)
 
     if (typeof args.data !== 'undefined') {
         const inputs:any[] = Array.isArray(args.data) ? args.data : [args.data]
@@ -405,7 +419,8 @@ export function getPaths(
 
         for (const key in objectPaths) {
             const item = key.split('.').filter((k) => !ReservedPrismaKeys.includes(k)).join('/')
-            const path = (`/${ActionsAliases.access}/${model}/${item}`).toLowerCase()
+            const selectAction = isBatchAction ? Actions.list : Actions.get
+            const path = (`/${selectAction}/${model}/${item}`).toLowerCase()
             if (!paths.includes(path)) paths.push(path)
         }
     }

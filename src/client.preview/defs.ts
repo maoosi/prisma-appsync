@@ -12,16 +12,18 @@ export type AppsyncEvent = {
 }
 
 export type PrismaAppSyncOptions = {
-    connectionUrl?: string,
+    connectionString?: string,
     sanitize?: boolean,
     debug?: boolean,
     defaultPagination?: number | false
+    maxDepth?: number
 }
 
 export type ResolveParams = {
     event: AppsyncEvent,
-    before?: () => Promise<void>
-    after?: () => Promise<void>
+    resolvers?: object,
+    shield?: (ResolverQuery) => Shield
+    hooks?: (ResolverQuery) => Hooks
 }
 
 export const ReservedPrismaKeys = [
@@ -130,6 +132,18 @@ export const ActionsAliasesList = {
     ]
 } as const
 
+let actionsListMultiple:Action[] = []
+let actionsListSingle:Action[] = []
+for (const actionAlias in ActionsAliasesList) {
+    if (actionAlias.startsWith('batch')) {
+        actionsListMultiple = actionsListMultiple.concat(ActionsAliasesList[actionAlias])
+    } else {
+        actionsListSingle = actionsListSingle.concat(ActionsAliasesList[actionAlias])
+    }
+}
+export const ActionsList = actionsListMultiple.filter((item, pos) => actionsListMultiple.indexOf(item) === pos)
+export const BatchActionsList = actionsListSingle.filter((item, pos) => actionsListSingle.indexOf(item) === pos)
+
 export type Action = typeof Actions[keyof typeof Actions] | string
 export type ActionsAlias = keyof typeof ActionsAliases
 
@@ -148,6 +162,7 @@ export type ResolverQuery = {
     args: Args
     type: GraphQLType,
     authIdentity: AuthIdentity
+    paths: string[]
 }
 
 export const AuthModes = {
@@ -171,27 +186,20 @@ export type Args = {
     select?: any
 }
 
-export type ShieldDirectivePossibleTypes = Boolean | (() => void) | null
-
-export type ShieldDirectiveParam = 'rule' | 'filter' | 'beforeResolve' | 'afterResolve'
-
-export type ShieldDirective = {
-    rule?: Boolean
-    filter?: ({ field }:any) => boolean
-    beforeResolve?: () => void
-    afterResolve?: () => void
+export type Shield = {
+    [matcher: string]: {
+        rule: boolean | object
+        reason?: string | Function
+    } | boolean
 }
 
-export type Shield = {
-    [key in Model] ? : ShieldDirective | {
-        [key in ActionsAlias] ? : ShieldDirective
-    }
-} | {
-    '*' ? : ShieldDirective | {
-        [key in ActionsAlias] ? : ShieldDirective
-    }
-} | {
-    'custom' ? : ShieldDirective | {
-        [key: string]: ShieldDirective
-    }
+export type Hooks = {
+    [matcher: string]: Function
+}
+
+export type Authorization = {
+    canAccess: boolean
+    reason: string | Function
+    prismaFilter: object
+    matcher: string
 }

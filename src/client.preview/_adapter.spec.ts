@@ -240,6 +240,45 @@ describe('CLIENT #adapter', () => {
     })
 
     describe('.getPaths?', () => {
+        test('expect nested get to return matching paths', () => {
+            const result = getPaths({
+                action: Actions.get,
+                subject: {
+                    actionAlias: ActionsAliases.access,
+                    model: Models.Post
+                },
+                args: getArgs({
+                    action: Actions.get,
+                    _arguments: {
+                        info: {
+                            selectionSetList: [
+                                '__typename',
+                                'title',
+                                'comment',
+                                'comment/content',
+                                'comment/author',
+                                'comment/author/email',
+                                'comment/author/username',
+                                'comment/author/badges',
+                                'comment/author/badges/label',
+                                'comment/author/badges/owners',
+                                'comment/author/badges/owners/email',
+                            ]
+                        }
+                    },
+                    defaultPagination: false
+                })
+            })
+            expect(result).toEqual([
+                "/get/post/title",
+                "/get/post/comment/content",
+                "/get/post/comment/author/email",
+                "/get/post/comment/author/username",
+                "/get/post/comment/author/badges/label",
+                "/get/post/comment/author/badges/owners/email",
+            ])
+        })
+
         test('expect nested update to return matching paths', () => {
             const result = getPaths({
                 action: Actions.update,
@@ -280,12 +319,63 @@ describe('CLIENT #adapter', () => {
             expect(result).toEqual([
                 "/update/post/title",
                 "/update/post/author/username",
-                "/access/post/title",
-                "/access/post/comment/content",
-                "/access/post/comment/author/email",
-                "/access/post/comment/author/username",
-                "/access/post/comment/author/badges/label",
-                "/access/post/comment/author/badges/owners/email",
+                "/get/post/title",
+                "/get/post/comment/content",
+                "/get/post/comment/author/email",
+                "/get/post/comment/author/username",
+                "/get/post/comment/author/badges/label",
+                "/get/post/comment/author/badges/owners/email",
+            ])
+        })
+
+        test('expect nested createMany to return matching paths', () => {
+            const result = getPaths({
+                action: Actions.createMany,
+                subject: {
+                    actionAlias: ActionsAliases.batchCreate,
+                    model: Models.Post
+                },
+                args: getArgs({
+                    action: Actions.createMany,
+                    _arguments: {
+                        data: [
+                            {
+                                title: "New title",
+                                author: {
+                                    connect: {
+                                        username: "johndoe"
+                                    }
+                                }
+                            }
+                        ],
+                        info: {
+                            selectionSetList: [
+                                '__typename',
+                                'title',
+                                'comment',
+                                'comment/content',
+                                'comment/author',
+                                'comment/author/email',
+                                'comment/author/username',
+                                'comment/author/badges',
+                                'comment/author/badges/label',
+                                'comment/author/badges/owners',
+                                'comment/author/badges/owners/email',
+                            ]
+                        }
+                    },
+                    defaultPagination: false
+                })
+            })
+            expect(result).toEqual([
+                "/createmany/post/title",
+                "/createmany/post/author/username",
+                "/list/post/title",
+                "/list/post/comment/content",
+                "/list/post/comment/author/email",
+                "/list/post/comment/author/username",
+                "/list/post/comment/author/badges/label",
+                "/list/post/comment/author/badges/owners/email",
             ])
         })
     })
