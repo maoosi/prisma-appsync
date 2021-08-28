@@ -1,5 +1,5 @@
 import merge from 'lodash/merge'
-import { InternalError } from './_debug'
+import { InternalError } from './debug'
 import { dot } from 'dot-object'
 import {
     PrismaAppSyncOptions,
@@ -11,13 +11,12 @@ import {
     Args,
     ActionsAliasesList,
     ActionsAlias,
-    ActionsAliases,
     Subject,
     AuthIdentity,
     AuthModes,
     ReservedPrismaKeys,
     BatchActionsList
-} from './defs'
+} from '../defs'
 
 
 /**

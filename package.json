@@ -7,6 +7,7 @@
     "author": "maoosi <hello@sylvainsimao.fr>",
     "license": "BSD-2-Clause",
     "scripts": {
+        "preinstall": "npx only-allow pnpm",
         "install:boilerplate": "cd boilerplate/cdk && yarn install",
         "build": "pnpm build:cleanup && pnpm build:generator && pnpm build:client && pnpm build:copytemplates",
         "build:cleanup": "rm -rf dist && rm -rf test/generated",

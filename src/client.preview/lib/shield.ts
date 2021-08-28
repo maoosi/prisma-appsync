@@ -1,10 +1,25 @@
-import { Authorization, Shield } from './defs'
+import { Authorization, Shield } from '../defs'
 import micromatch from 'micromatch'
 import merge from 'lodash/merge'
+import xss from 'xss'
 
 
-export function sanitize() {
+export function sanitize(data: object):object {
+    const outputData = merge({}, data)
 
+    for (const prop in outputData) {
+        if (Object.prototype.hasOwnProperty.call(outputData, prop)) {
+            const value = outputData[prop]
+
+            if (typeof value === 'object') {
+                outputData[prop] = this.sanitize(value)
+            } else if (!['number', 'boolean', 'bigint'].includes(typeof value)) {
+                outputData[prop] = escape( xss(value) )
+            }
+        }
+    }
+
+    return outputData
 }
 
 export function getAuthorization(
@@ -54,4 +69,17 @@ export function getAuthorization(
     }
 
     return authorization
+}
+
+export function getDepth(
+    { paths }: { paths: string[] }
+):number {
+    let maxDepth = 0
+
+    paths.forEach((path:string) => {
+        const depth = path.split('/').length - 2
+        if (depth > maxDepth) maxDepth = depth
+    })
+
+    return maxDepth
 }

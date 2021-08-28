@@ -1,8 +1,8 @@
-import { ResolveParams, PrismaAppSyncOptions, ResolverQuery, PrismaClient, Shield, Authorization } from './defs'
-import { UnauthorizedError } from './_debug'
-import { parseEvent } from './_adapter'
-import { getAuthorization } from './_shield'
-import * as queries from './_queries'
+import { ResolveParams, PrismaAppSyncOptions, ResolverQuery, PrismaClient, Shield, Authorization } from '../defs'
+import { UnauthorizedError } from './debug'
+import { parseEvent } from './adapter'
+import { getAuthorization, getDepth } from './shield'
+import * as queries from './queries'
 
 
 export class PrismaAppSync {
@@ -66,6 +66,12 @@ export class PrismaAppSync {
         this.event = resolveParams.event
         this.resolverQuery = parseEvent(this.event, this.resolvers)
 
+        // Shield :: block queries with a depth > maxDepth
+        const depth = getDepth({ paths: this.resolverQuery.paths })
+        if (depth > this.options.maxDepth) {
+            new UnauthorizedError(`Query has depth of ${depth}, which exceeds max depth of ${this.options.maxDepth}.`)
+        }
+
         // Shield :: read shield from config
         const shield: Shield = await this.shield(this.resolverQuery)
 
@@ -99,22 +105,10 @@ export class PrismaAppSync {
             })
         }
 
-        // Hooks :: execute global beforeResolve hook
+        // Hooks: get and run all before hooks functions matching query
         // if (this.beforeResolve) {
         //     this.prismaClient.$use(async (params, next) => {
         //         await this.beforeResolve()
-        //         return next(params)
-        //     })
-        // }
-
-        // Shield :: execute local beforeResolve Shield hook
-        // const localBeforeResolve:ShieldDirectivePossibleTypes = this.shield
-        //     ? getDirectiveParam(
-        //         Shield, this.resolverQuery.subject, 'beforeResolve'
-        //     ) : null
-        // if (localBeforeResolve && typeof localBeforeResolve === 'function') {
-        //     this.prismaClient.$use(async (params, next) => {
-        //         await localBeforeResolve()
         //         return next(params)
         //     })
         // }
@@ -124,11 +118,7 @@ export class PrismaAppSync {
             ? this.resolverQuery
             : await queries[`${this.resolverQuery.action}Query`](this.prismaClient, this.resolverQuery)
 
-        // Shield :: execute local afterResolve Shield hook
-
-        // Shield :: filter out fields listed in directive
-
-        // Hooks :: execute global afterResolve hook
+        // Hooks: get and run all after hooks functions matching query
 
         // Core :: return results
         return results

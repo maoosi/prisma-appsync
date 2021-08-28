@@ -1,1 +1,1 @@
-export { PrismaAppSync } from './_client'
+export { PrismaAppSync } from './lib/client'

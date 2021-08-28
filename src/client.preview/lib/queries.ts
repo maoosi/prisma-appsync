@@ -1,4 +1,4 @@
-import { PrismaClient, ResolverQuery } from './defs'
+import { PrismaClient, ResolverQuery } from '../defs'
 
 
 /**

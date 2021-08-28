@@ -1,5 +1,5 @@
-import { getAction, getOperation, getModel, getFields, getType, getArgs, getPaths } from './_adapter'
-import { Actions, Action, Models, ActionsAliases } from './defs'
+import { getAction, getOperation, getModel, getFields, getType, getArgs, getPaths } from './adapter'
+import { Actions, Action, Models, ActionsAliases } from '../defs'
 
 
 describe('CLIENT #adapter', () => {
