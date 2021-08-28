@@ -1,7 +1,7 @@
 import { ResolveParams, PrismaAppSyncOptions, ResolverQuery, PrismaClient, Shield, Authorization } from '../defs'
-import { UnauthorizedError } from './debug'
+import { log, UnauthorizedError, InternalError } from '../logger'
 import { parseEvent } from './adapter'
-import { getAuthorization, getDepth } from './shield'
+import { getAuthorization, getDepth } from './guard'
 import * as queries from './queries'
 
 
@@ -23,7 +23,19 @@ export class PrismaAppSync {
     constructor(options:PrismaAppSyncOptions) {
         this.isFirstResolve = true
 
+        // Try parse auto-injected environment variable `PRISMA_APPSYNC_GENERATED_CONFIG`
+        let generatedConfig = {}
+        try {
+            if (typeof process.env.PRISMA_APPSYNC_GENERATED_CONFIG !== 'undefined') {
+                generatedConfig = JSON.parse(process.env.PRISMA_APPSYNC_GENERATED_CONFIG)
+            }
+        } catch (error) {
+            new InternalError('Issue parsing auto-injected environment variable `PRISMA_APPSYNC_GENERATED_CONFIG`.')
+        }
+
+        // Set client options using constructor options
         this.options = {
+            generatedConfig,
             connectionString: typeof options.connectionString !== 'undefined'
                 ? options.connectionString
                 : String(process.env.DATABASE_URL),
@@ -41,6 +53,13 @@ export class PrismaAppSync {
                 : 3,
         }
 
+        // Set ENV variable to indicate if debug logs should print
+        process.env.PRISMA_APPSYNC_DEBUG = this.options.debug ? 'true' : 'false'
+
+        // Debug logs
+        log(`Create new instance w/ options: ${JSON.stringify(this.options)}`)
+
+        // Create new Prisma Client
         this.prismaClient = new PrismaClient()
         
         return this
@@ -53,32 +72,36 @@ export class PrismaAppSync {
      * @returns Promise
      */
     public async resolve(resolveParams:ResolveParams):Promise<any> {
-        // Core :: only read params other than `event` on first .resolve() call
+        log(`Resolve API request w/ event: ${JSON.stringify(resolveParams.event)}`)
+
+        // Only read params other than `event` on first .resolve() call
         if (this.isFirstResolve) {
             this.shield = resolveParams.shield || null
             this.hooks = resolveParams.hooks || null
         }
 
-        // Core :: this is not anymore the first .resolve() call
+        // This is not anymore the first .resolve() call
         this.isFirstResolve = false
 
-        // Core :: parse appsync event
+        // Adapter :: parse appsync event
         this.event = resolveParams.event
         this.resolverQuery = parseEvent(this.event, this.resolvers)
+        log(`Parsed event: ${JSON.stringify(this.resolverQuery)}`)
 
-        // Shield :: block queries with a depth > maxDepth
+        // Guard :: block queries with a depth > maxDepth
         const depth = getDepth({ paths: this.resolverQuery.paths })
+        log(`Query has depth of ${depth} (max allowed is ${this.options.maxDepth}).`)
         if (depth > this.options.maxDepth) {
             new UnauthorizedError(`Query has depth of ${depth}, which exceeds max depth of ${this.options.maxDepth}.`)
         }
 
-        // Shield :: read shield from config
+        // Guard :: create shield from config
         const shield: Shield = await this.shield(this.resolverQuery)
 
-        // Shield :: get authorization object
+        // Guard :: get authorization object
         const authorization: Authorization = getAuthorization({ shield, paths: this.resolverQuery.paths })
 
-        // Shield :: if `canAccess` if equal to `false`, we reject the API call
+        // Guard :: if `canAccess` if equal to `false`, we reject the API call
         if (!authorization.canAccess) {
             const reason = typeof authorization.reason === 'string'
                 ? authorization.reason
@@ -87,7 +110,7 @@ export class PrismaAppSync {
             return;
         }
 
-        // Shield :: if `prismaFilter` is set, combine with current Prisma query
+        // Guard :: if `prismaFilter` is set, combine with current Prisma query
         if (authorization.prismaFilter) {
             this.prismaClient.$use(async (params, next) => {
                 if (typeof params.args.where !== 'undefined' && params.args.where.length > 0) {
@@ -105,22 +128,15 @@ export class PrismaAppSync {
             })
         }
 
-        // Hooks: get and run all before hooks functions matching query
-        // if (this.beforeResolve) {
-        //     this.prismaClient.$use(async (params, next) => {
-        //         await this.beforeResolve()
-        //         return next(params)
-        //     })
-        // }
+        // Guard: get and run all before hooks functions matching query
 
-        // Prisma :: resolve query with Prisma Client
+        // Resolver :: resolve query with Prisma Client
         const results = process.env.JEST_WORKER_ID
             ? this.resolverQuery
             : await queries[`${this.resolverQuery.action}Query`](this.prismaClient, this.resolverQuery)
 
-        // Hooks: get and run all after hooks functions matching query
+        // Guard: get and run all after hooks functions matching query
 
-        // Core :: return results
         return results
     }
 }

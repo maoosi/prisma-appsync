@@ -1,7 +1,11 @@
 import { CustomError } from 'ts-custom-error'
 
+// TODO: Comment code
+
 export function log(log:any) {
-    console.info(log)
+    if (process.env.PRISMA_APPSYNC_DEBUG === 'true') {
+        console.info(`◭ Prisma-AppSync :: ${log}`)
+    }
 }
 
 export class InternalError extends CustomError {

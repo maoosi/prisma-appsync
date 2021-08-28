@@ -1,6 +1,5 @@
-import merge from 'lodash/merge'
-import { InternalError } from './debug'
-import { dot } from 'dot-object'
+import { InternalError } from '../logger'
+import { merge, dotate } from '../helpers'
 import {
     PrismaAppSyncOptions,
     AppsyncEvent,
@@ -88,7 +87,7 @@ export function getAuthIdentity(
         !appsyncEvent.identity || 
         appsyncEvent.identity.length < 1
     ) {
-        authIdentity = merge({}, appsyncEvent.identity, {
+        authIdentity = merge(appsyncEvent.identity, {
             authorization: AuthModes.API_KEY,
             ...(
                 appsyncEvent.request && 
@@ -108,7 +107,7 @@ export function getAuthIdentity(
             )
         })
     } else if (typeof appsyncEvent.identity['sub'] !== 'undefined') {
-        authIdentity = merge({}, appsyncEvent.identity, {
+        authIdentity = merge(appsyncEvent.identity, {
             authorization: AuthModes.AMAZON_COGNITO_USER_POOLS
         })
     } else if (
@@ -117,7 +116,7 @@ export function getAuthIdentity(
         typeof appsyncEvent.identity['cognitoIdentityPoolId'] !== 'undefined' ||
         typeof appsyncEvent.identity['cognitoIdentityId'] !== 'undefined'
     ) {
-        authIdentity = merge({}, appsyncEvent.identity, {
+        authIdentity = merge(appsyncEvent.identity, {
             authorization: AuthModes.AWS_IAM
         })
     } else {
@@ -366,8 +365,8 @@ function parseSelectionList(selectionSetList:any): any {
         const parts = path.split('/')
 
         if (!parts.includes('__typename')) {
-            if (parts.length > 1) args = merge({}, args, getInclude(parts))
-            else args = merge({}, args, getSelect(parts))
+            if (parts.length > 1) args = merge(args, getInclude(parts))
+            else args = merge(args, getSelect(parts))
         }
     }
 
@@ -376,7 +375,7 @@ function parseSelectionList(selectionSetList:any): any {
             if (typeof args.select[include] !== 'undefined') delete args.select[include]
         }
 
-        args.select = merge({}, args.select, args.include)
+        args.select = merge(args.select, args.include)
         delete args.include
     }
     
@@ -402,8 +401,8 @@ export function getPaths(
     if (typeof args.data !== 'undefined') {
         const inputs:any[] = Array.isArray(args.data) ? args.data : [args.data]
 
-        inputs.forEach((input:string) => {
-            const objectPaths = dot(input)
+        inputs.forEach((input:any) => {
+            const objectPaths = dotate(input)
 
             for (const key in objectPaths) {
                 const item = key.split('.').filter((k) => !ReservedPrismaKeys.includes(k)).join('/')
@@ -414,7 +413,7 @@ export function getPaths(
     }
 
     if (typeof args.select !== 'undefined') {
-        const objectPaths = dot(args.select)
+        const objectPaths = dotate(args.select)
 
         for (const key in objectPaths) {
             const item = key.split('.').filter((k) => !ReservedPrismaKeys.includes(k)).join('/')

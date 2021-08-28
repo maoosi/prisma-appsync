@@ -1,1 +1,0 @@
-export { PrismaAppSync } from './lib/client'

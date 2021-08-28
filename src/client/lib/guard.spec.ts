@@ -1,8 +1,8 @@
 import { Shield } from '../defs'
-import { getAuthorization } from './shield'
+import { getAuthorization } from './guard'
 
 
-describe('CLIENT #shield', () => {
+describe('CLIENT #guard', () => {
 
     describe('.getAuthorization?', () => {
 

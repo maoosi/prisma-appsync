@@ -12,6 +12,7 @@ export type AppsyncEvent = {
 }
 
 export type PrismaAppSyncOptions = {
+    generatedConfig?: any,
     connectionString?: string,
     sanitize?: boolean,
     debug?: boolean,
@@ -141,8 +142,8 @@ for (const actionAlias in ActionsAliasesList) {
         actionsListSingle = actionsListSingle.concat(ActionsAliasesList[actionAlias])
     }
 }
-export const ActionsList = actionsListMultiple.filter((item, pos) => actionsListMultiple.indexOf(item) === pos)
-export const BatchActionsList = actionsListSingle.filter((item, pos) => actionsListSingle.indexOf(item) === pos)
+export const ActionsList = actionsListSingle.filter((item, pos) => actionsListSingle.indexOf(item) === pos)
+export const BatchActionsList = actionsListMultiple.filter((item, pos) => actionsListMultiple.indexOf(item) === pos)
 
 export type Action = typeof Actions[keyof typeof Actions] | string
 export type ActionsAlias = keyof typeof ActionsAliases

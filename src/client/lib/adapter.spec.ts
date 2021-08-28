@@ -43,6 +43,7 @@ describe('CLIENT #adapter', () => {
         )
     })
 
+    // TODO: Write more tests for `getFields`
     describe('.getFields?', () => {
         test('expect to extract all first level fields', () => {
             const result = getFields({
@@ -239,6 +240,7 @@ describe('CLIENT #adapter', () => {
         })
     })
 
+    // TODO: Write more tests for `getPaths` (cover more actions)
     describe('.getPaths?', () => {
         test('expect nested get to return matching paths', () => {
             const result = getPaths({

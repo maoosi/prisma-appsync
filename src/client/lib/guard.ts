@@ -1,11 +1,10 @@
 import { Authorization, Shield } from '../defs'
-import micromatch from 'micromatch'
-import merge from 'lodash/merge'
-import xss from 'xss'
+import { merge, clone, escapeHTML, filterXSS, isMatchingGlob } from '../helpers'
 
+// TODO: Comment code
 
 export function sanitize(data: object):object {
-    const outputData = merge({}, data)
+    const outputData = clone(data)
 
     for (const prop in outputData) {
         if (Object.prototype.hasOwnProperty.call(outputData, prop)) {
@@ -14,7 +13,7 @@ export function sanitize(data: object):object {
             if (typeof value === 'object') {
                 outputData[prop] = this.sanitize(value)
             } else if (!['number', 'boolean', 'bigint'].includes(typeof value)) {
-                outputData[prop] = escape( xss(value) )
+                outputData[prop] = escapeHTML( filterXSS(value) )
             }
         }
     }
@@ -36,7 +35,7 @@ export function getAuthorization(
         const path:string = paths[i]
         
         for (const globPattern in shield) {
-            if (micromatch.isMatch(path, globPattern)) {
+            if (isMatchingGlob(path, globPattern)) {
                 const shieldRule = shield[globPattern]
 
                 if (typeof shieldRule === 'boolean') {
@@ -53,9 +52,7 @@ export function getAuthorization(
                         if (!authorization.prismaFilter) {
                             authorization.prismaFilter = {}
                         }
-                        authorization.prismaFilter = merge(
-                            {}, authorization.prismaFilter, shieldRule.rule
-                        )
+                        authorization.prismaFilter = merge(authorization.prismaFilter, shieldRule.rule)
                     }
                 }
 

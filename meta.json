@@ -1,0 +1,559 @@
+{
+  "inputs": {
+    "src/client/defs.ts": {
+      "bytes": 4818,
+      "imports": []
+    },
+    "node_modules/.pnpm/ts-custom-error@3.2.0/node_modules/ts-custom-error/dist/custom-error.js": {
+      "bytes": 2775,
+      "imports": []
+    },
+    "src/client/lib/logger.ts": {
+      "bytes": 2225,
+      "imports": [
+        {
+          "path": "node_modules/.pnpm/ts-custom-error@3.2.0/node_modules/ts-custom-error/dist/custom-error.js",
+          "kind": "import-statement"
+        }
+      ]
+    },
+    "node_modules/.pnpm/dot-object@2.1.4/node_modules/dot-object/index.js": {
+      "bytes": 13287,
+      "imports": []
+    },
+    "node_modules/.pnpm/braces@3.0.2/node_modules/braces/lib/utils.js": {
+      "bytes": 2451,
+      "imports": []
+    },
+    "node_modules/.pnpm/braces@3.0.2/node_modules/braces/lib/stringify.js": {
+      "bytes": 700,
+      "imports": [
+        {
+          "path": "node_modules/.pnpm/braces@3.0.2/node_modules/braces/lib/utils.js",
+          "kind": "require-call"
+        }
+      ]
+    },
+    "node_modules/.pnpm/is-number@7.0.0/node_modules/is-number/index.js": {
+      "bytes": 411,
+      "imports": []
+    },
+    "node_modules/.pnpm/to-regex-range@5.0.1/node_modules/to-regex-range/index.js": {
+      "bytes": 6481,
+      "imports": [
+        {
+          "path": "node_modules/.pnpm/is-number@7.0.0/node_modules/is-number/index.js",
+          "kind": "require-call"
+        }
+      ]
+    },
+    "node_modules/.pnpm/fill-range@7.0.1/node_modules/fill-range/index.js": {
+      "bytes": 6315,
+      "imports": [
+        {
+          "path": "node_modules/.pnpm/to-regex-range@5.0.1/node_modules/to-regex-range/index.js",
+          "kind": "require-call"
+        }
+      ]
+    },
+    "node_modules/.pnpm/braces@3.0.2/node_modules/braces/lib/compile.js": {
+      "bytes": 1415,
+      "imports": [
+        {
+          "path": "node_modules/.pnpm/fill-range@7.0.1/node_modules/fill-range/index.js",
+          "kind": "require-call"
+        },
+        {
+          "path": "node_modules/.pnpm/braces@3.0.2/node_modules/braces/lib/utils.js",
+          "kind": "require-call"
+        }
+      ]
+    },
+    "node_modules/.pnpm/braces@3.0.2/node_modules/braces/lib/expand.js": {
+      "bytes": 2780,
+      "imports": [
+        {
+          "path": "node_modules/.pnpm/fill-range@7.0.1/node_modules/fill-range/index.js",
+          "kind": "require-call"
+        },
+        {
+          "path": "node_modules/.pnpm/braces@3.0.2/node_modules/braces/lib/stringify.js",
+          "kind": "require-call"
+        },
+        {
+          "path": "node_modules/.pnpm/braces@3.0.2/node_modules/braces/lib/utils.js",
+          "kind": "require-call"
+        }
+      ]
+    },
+    "node_modules/.pnpm/braces@3.0.2/node_modules/braces/lib/constants.js": {
+      "bytes": 1593,
+      "imports": []
+    },
+    "node_modules/.pnpm/braces@3.0.2/node_modules/braces/lib/parse.js": {
+      "bytes": 6913,
+      "imports": [
+        {
+          "path": "node_modules/.pnpm/braces@3.0.2/node_modules/braces/lib/stringify.js",
+          "kind": "require-call"
+        },
+        {
+          "path": "node_modules/.pnpm/braces@3.0.2/node_modules/braces/lib/constants.js",
+          "kind": "require-call"
+        }
+      ]
+    },
+    "node_modules/.pnpm/braces@3.0.2/node_modules/braces/index.js": {
+      "bytes": 4375,
+      "imports": [
+        {
+          "path": "node_modules/.pnpm/braces@3.0.2/node_modules/braces/lib/stringify.js",
+          "kind": "require-call"
+        },
+        {
+          "path": "node_modules/.pnpm/braces@3.0.2/node_modules/braces/lib/compile.js",
+          "kind": "require-call"
+        },
+        {
+          "path": "node_modules/.pnpm/braces@3.0.2/node_modules/braces/lib/expand.js",
+          "kind": "require-call"
+        },
+        {
+          "path": "node_modules/.pnpm/braces@3.0.2/node_modules/braces/lib/parse.js",
+          "kind": "require-call"
+        }
+      ]
+    },
+    "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/constants.js": {
+      "bytes": 4448,
+      "imports": []
+    },
+    "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/utils.js": {
+      "bytes": 1885,
+      "imports": [
+        {
+          "path": "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/constants.js",
+          "kind": "require-call"
+        }
+      ]
+    },
+    "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/scan.js": {
+      "bytes": 9189,
+      "imports": [
+        {
+          "path": "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/utils.js",
+          "kind": "require-call"
+        },
+        {
+          "path": "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/constants.js",
+          "kind": "require-call"
+        }
+      ]
+    },
+    "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/parse.js": {
+      "bytes": 27225,
+      "imports": [
+        {
+          "path": "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/constants.js",
+          "kind": "require-call"
+        },
+        {
+          "path": "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/utils.js",
+          "kind": "require-call"
+        }
+      ]
+    },
+    "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/picomatch.js": {
+      "bytes": 9956,
+      "imports": [
+        {
+          "path": "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/scan.js",
+          "kind": "require-call"
+        },
+        {
+          "path": "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/parse.js",
+          "kind": "require-call"
+        },
+        {
+          "path": "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/utils.js",
+          "kind": "require-call"
+        },
+        {
+          "path": "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/constants.js",
+          "kind": "require-call"
+        }
+      ]
+    },
+    "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/index.js": {
+      "bytes": 60,
+      "imports": [
+        {
+          "path": "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/picomatch.js",
+          "kind": "require-call"
+        }
+      ]
+    },
+    "node_modules/.pnpm/micromatch@4.0.4/node_modules/micromatch/index.js": {
+      "bytes": 13731,
+      "imports": [
+        {
+          "path": "node_modules/.pnpm/braces@3.0.2/node_modules/braces/index.js",
+          "kind": "require-call"
+        },
+        {
+          "path": "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/index.js",
+          "kind": "require-call"
+        },
+        {
+          "path": "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/utils.js",
+          "kind": "require-call"
+        }
+      ]
+    },
+    "node_modules/.pnpm/deepmerge@4.2.2/node_modules/deepmerge/dist/cjs.js": {
+      "bytes": 4035,
+      "imports": []
+    },
+    "node_modules/.pnpm/validator@13.5.2/node_modules/validator/lib/util/assertString.js": {
+      "bytes": 936,
+      "imports": []
+    },
+    "node_modules/.pnpm/validator@13.5.2/node_modules/validator/lib/escape.js": {
+      "bytes": 619,
+      "imports": [
+        {
+          "path": "node_modules/.pnpm/validator@13.5.2/node_modules/validator/lib/util/assertString.js",
+          "kind": "require-call"
+        }
+      ]
+    },
+    "node_modules/.pnpm/cssfilter@0.0.10/node_modules/cssfilter/lib/default.js": {
+      "bytes": 20889,
+      "imports": []
+    },
+    "node_modules/.pnpm/cssfilter@0.0.10/node_modules/cssfilter/lib/util.js": {
+      "bytes": 783,
+      "imports": []
+    },
+    "node_modules/.pnpm/cssfilter@0.0.10/node_modules/cssfilter/lib/parser.js": {
+      "bytes": 1852,
+      "imports": [
+        {
+          "path": "node_modules/.pnpm/cssfilter@0.0.10/node_modules/cssfilter/lib/util.js",
+          "kind": "require-call"
+        }
+      ]
+    },
+    "node_modules/.pnpm/cssfilter@0.0.10/node_modules/cssfilter/lib/css.js": {
+      "bytes": 2361,
+      "imports": [
+        {
+          "path": "node_modules/.pnpm/cssfilter@0.0.10/node_modules/cssfilter/lib/default.js",
+          "kind": "require-call"
+        },
+        {
+          "path": "node_modules/.pnpm/cssfilter@0.0.10/node_modules/cssfilter/lib/parser.js",
+          "kind": "require-call"
+        },
+        {
+          "path": "node_modules/.pnpm/cssfilter@0.0.10/node_modules/cssfilter/lib/util.js",
+          "kind": "require-call"
+        }
+      ]
+    },
+    "node_modules/.pnpm/cssfilter@0.0.10/node_modules/cssfilter/lib/index.js": {
+      "bytes": 628,
+      "imports": [
+        {
+          "path": "node_modules/.pnpm/cssfilter@0.0.10/node_modules/cssfilter/lib/default.js",
+          "kind": "require-call"
+        },
+        {
+          "path": "node_modules/.pnpm/cssfilter@0.0.10/node_modules/cssfilter/lib/css.js",
+          "kind": "require-call"
+        }
+      ]
+    },
+    "node_modules/.pnpm/xss@1.0.9/node_modules/xss/lib/util.js": {
+      "bytes": 766,
+      "imports": []
+    },
+    "node_modules/.pnpm/xss@1.0.9/node_modules/xss/lib/default.js": {
+      "bytes": 10221,
+      "imports": [
+        {
+          "path": "node_modules/.pnpm/cssfilter@0.0.10/node_modules/cssfilter/lib/index.js",
+          "kind": "require-call"
+        },
+        {
+          "path": "node_modules/.pnpm/cssfilter@0.0.10/node_modules/cssfilter/lib/index.js",
+          "kind": "require-call"
+        },
+        {
+          "path": "node_modules/.pnpm/xss@1.0.9/node_modules/xss/lib/util.js",
+          "kind": "require-call"
+        }
+      ]
+    },
+    "node_modules/.pnpm/xss@1.0.9/node_modules/xss/lib/parser.js": {
+      "bytes": 5670,
+      "imports": [
+        {
+          "path": "node_modules/.pnpm/xss@1.0.9/node_modules/xss/lib/util.js",
+          "kind": "require-call"
+        }
+      ]
+    },
+    "node_modules/.pnpm/xss@1.0.9/node_modules/xss/lib/xss.js": {
+      "bytes": 5396,
+      "imports": [
+        {
+          "path": "node_modules/.pnpm/cssfilter@0.0.10/node_modules/cssfilter/lib/index.js",
+          "kind": "require-call"
+        },
+        {
+          "path": "node_modules/.pnpm/xss@1.0.9/node_modules/xss/lib/default.js",
+          "kind": "require-call"
+        },
+        {
+          "path": "node_modules/.pnpm/xss@1.0.9/node_modules/xss/lib/parser.js",
+          "kind": "require-call"
+        },
+        {
+          "path": "node_modules/.pnpm/xss@1.0.9/node_modules/xss/lib/util.js",
+          "kind": "require-call"
+        }
+      ]
+    },
+    "node_modules/.pnpm/xss@1.0.9/node_modules/xss/lib/index.js": {
+      "bytes": 1110,
+      "imports": [
+        {
+          "path": "node_modules/.pnpm/xss@1.0.9/node_modules/xss/lib/default.js",
+          "kind": "require-call"
+        },
+        {
+          "path": "node_modules/.pnpm/xss@1.0.9/node_modules/xss/lib/parser.js",
+          "kind": "require-call"
+        },
+        {
+          "path": "node_modules/.pnpm/xss@1.0.9/node_modules/xss/lib/xss.js",
+          "kind": "require-call"
+        }
+      ]
+    },
+    "src/client/utils.ts": {
+      "bytes": 1315,
+      "imports": [
+        {
+          "path": "node_modules/.pnpm/dot-object@2.1.4/node_modules/dot-object/index.js",
+          "kind": "import-statement"
+        },
+        {
+          "path": "node_modules/.pnpm/micromatch@4.0.4/node_modules/micromatch/index.js",
+          "kind": "import-statement"
+        },
+        {
+          "path": "node_modules/.pnpm/deepmerge@4.2.2/node_modules/deepmerge/dist/cjs.js",
+          "kind": "import-statement"
+        },
+        {
+          "path": "node_modules/.pnpm/validator@13.5.2/node_modules/validator/lib/escape.js",
+          "kind": "import-statement"
+        },
+        {
+          "path": "node_modules/.pnpm/xss@1.0.9/node_modules/xss/lib/index.js",
+          "kind": "import-statement"
+        }
+      ]
+    },
+    "src/client/lib/adapter.ts": {
+      "bytes": 12535,
+      "imports": [
+        {
+          "path": "src/client/lib/logger.ts",
+          "kind": "import-statement"
+        },
+        {
+          "path": "src/client/utils.ts",
+          "kind": "import-statement"
+        },
+        {
+          "path": "src/client/defs.ts",
+          "kind": "import-statement"
+        }
+      ]
+    },
+    "src/client/lib/shield.ts": {
+      "bytes": 2586,
+      "imports": [
+        {
+          "path": "src/client/utils.ts",
+          "kind": "import-statement"
+        }
+      ]
+    },
+    "src/client/lib/queries.ts": {
+      "bytes": 5620,
+      "imports": []
+    },
+    "src/client/lib/client.ts": {
+      "bytes": 4432,
+      "imports": [
+        {
+          "path": "src/client/defs.ts",
+          "kind": "import-statement"
+        },
+        {
+          "path": "src/client/lib/logger.ts",
+          "kind": "import-statement"
+        },
+        {
+          "path": "src/client/lib/adapter.ts",
+          "kind": "import-statement"
+        },
+        {
+          "path": "src/client/lib/shield.ts",
+          "kind": "import-statement"
+        },
+        {
+          "path": "src/client/lib/queries.ts",
+          "kind": "import-statement"
+        }
+      ]
+    },
+    "src/client/index.ts": {
+      "bytes": 44,
+      "imports": [
+        {
+          "path": "src/client/lib/client.ts",
+          "kind": "import-statement"
+        }
+      ]
+    }
+  },
+  "outputs": {
+    "dist/prisma-appsync/index.js": {
+      "imports": [],
+      "exports": [],
+      "entryPoint": "src/client/index.ts",
+      "inputs": {
+        "node_modules/.pnpm/ts-custom-error@3.2.0/node_modules/ts-custom-error/dist/custom-error.js": {
+          "bytesInOutput": 1523
+        },
+        "node_modules/.pnpm/dot-object@2.1.4/node_modules/dot-object/index.js": {
+          "bytesInOutput": 5347
+        },
+        "node_modules/.pnpm/braces@3.0.2/node_modules/braces/lib/utils.js": {
+          "bytesInOutput": 1015
+        },
+        "node_modules/.pnpm/braces@3.0.2/node_modules/braces/lib/stringify.js": {
+          "bytesInOutput": 343
+        },
+        "node_modules/.pnpm/is-number@7.0.0/node_modules/is-number/index.js": {
+          "bytesInOutput": 177
+        },
+        "node_modules/.pnpm/to-regex-range@5.0.1/node_modules/to-regex-range/index.js": {
+          "bytesInOutput": 3119
+        },
+        "node_modules/.pnpm/fill-range@7.0.1/node_modules/fill-range/index.js": {
+          "bytesInOutput": 3050
+        },
+        "node_modules/.pnpm/braces@3.0.2/node_modules/braces/lib/compile.js": {
+          "bytesInOutput": 676
+        },
+        "node_modules/.pnpm/braces@3.0.2/node_modules/braces/lib/expand.js": {
+          "bytesInOutput": 1459
+        },
+        "node_modules/.pnpm/braces@3.0.2/node_modules/braces/lib/constants.js": {
+          "bytesInOutput": 986
+        },
+        "node_modules/.pnpm/braces@3.0.2/node_modules/braces/lib/parse.js": {
+          "bytesInOutput": 2900
+        },
+        "node_modules/.pnpm/braces@3.0.2/node_modules/braces/index.js": {
+          "bytesInOutput": 710
+        },
+        "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/constants.js": {
+          "bytesInOutput": 2668
+        },
+        "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/utils.js": {
+          "bytesInOutput": 1038
+        },
+        "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/scan.js": {
+          "bytesInOutput": 3110
+        },
+        "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/parse.js": {
+          "bytesInOutput": 12173
+        },
+        "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/picomatch.js": {
+          "bytesInOutput": 2310
+        },
+        "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/index.js": {
+          "bytesInOutput": 50
+        },
+        "node_modules/.pnpm/micromatch@4.0.4/node_modules/micromatch/index.js": {
+          "bytesInOutput": 2548
+        },
+        "node_modules/.pnpm/deepmerge@4.2.2/node_modules/deepmerge/dist/cjs.js": {
+          "bytesInOutput": 1990
+        },
+        "node_modules/.pnpm/cssfilter@0.0.10/node_modules/cssfilter/lib/default.js": {
+          "bytesInOutput": 7394
+        },
+        "node_modules/.pnpm/cssfilter@0.0.10/node_modules/cssfilter/lib/util.js": {
+          "bytesInOutput": 479
+        },
+        "node_modules/.pnpm/cssfilter@0.0.10/node_modules/cssfilter/lib/parser.js": {
+          "bytesInOutput": 551
+        },
+        "node_modules/.pnpm/cssfilter@0.0.10/node_modules/cssfilter/lib/css.js": {
+          "bytesInOutput": 871
+        },
+        "node_modules/.pnpm/cssfilter@0.0.10/node_modules/cssfilter/lib/index.js": {
+          "bytesInOutput": 234
+        },
+        "node_modules/.pnpm/xss@1.0.9/node_modules/xss/lib/util.js": {
+          "bytesInOutput": 457
+        },
+        "node_modules/.pnpm/xss@1.0.9/node_modules/xss/lib/default.js": {
+          "bytesInOutput": 4308
+        },
+        "node_modules/.pnpm/xss@1.0.9/node_modules/xss/lib/parser.js": {
+          "bytesInOutput": 2080
+        },
+        "node_modules/.pnpm/xss@1.0.9/node_modules/xss/lib/xss.js": {
+          "bytesInOutput": 1967
+        },
+        "node_modules/.pnpm/xss@1.0.9/node_modules/xss/lib/index.js": {
+          "bytesInOutput": 481
+        },
+        "src/client/index.ts": {
+          "bytesInOutput": 47
+        },
+        "src/client/defs.ts": {
+          "bytesInOutput": 1401
+        },
+        "src/client/lib/logger.ts": {
+          "bytesInOutput": 625
+        },
+        "src/client/utils.ts": {
+          "bytesInOutput": 229
+        },
+        "src/client/lib/adapter.ts": {
+          "bytesInOutput": 4697
+        },
+        "src/client/lib/shield.ts": {
+          "bytesInOutput": 631
+        },
+        "src/client/lib/queries.ts": {
+          "bytesInOutput": 2384
+        },
+        "src/client/lib/client.ts": {
+          "bytesInOutput": 1327
+        }
+      },
+      "bytes": 78567
+    }
+  }
+}
