@@ -2,7 +2,7 @@ import { ResolveParams, PrismaAppSyncOptions, ResolverQuery, PrismaClient, Shiel
 import { log, UnauthorizedError, InternalError } from '../logger'
 import { parseEvent } from './adapter'
 import { getAuthorization, getDepth } from './guard'
-import * as queries from './queries'
+import * as queries from './resolver'
 
 
 export class PrismaAppSync {

@@ -1,8 +1,98 @@
-import { getAction, getOperation, getModel, getFields, getType, getArgs, getPaths } from './adapter'
-import { Actions, Action, Models, ActionsAliases } from '../defs'
+import {
+    getAction,
+    getOperation,
+    getModel,
+    getFields,
+    getType,
+    getArgs,
+    getPaths,
+    getAuthIdentity
+} from './adapter'
+import { Actions, Action, Models, ActionsAliases, AuthModes } from '../defs'
 
 
 describe('CLIENT #adapter', () => {
+
+    describe('.getAuthIdentity?', () => {
+        test('expect to detect API_KEY authorization', () => {
+            const result = getAuthIdentity({
+                appsyncEvent: {}
+            })
+            expect(result.authorization).toEqual(AuthModes.API_KEY)
+        })
+
+        test('expect to detect AWS_LAMBDA authorization', () => {
+            const result = getAuthIdentity({
+                appsyncEvent: {
+                    "identity": {
+                        "resolverContext" : {}
+                    }
+                }
+            })
+            expect(result.authorization).toEqual(AuthModes.AWS_LAMBDA)
+        })
+
+        test('expect to detect AWS_IAM authorization', () => {
+            const result = getAuthIdentity({
+                appsyncEvent: {
+                    "identity": {
+                        "accountId" : "string",
+                        "cognitoIdentityPoolId" : "string",
+                        "cognitoIdentityId" : "string",
+                        "sourceIp" : ["string"],
+                        "username" : "string",
+                        "userArn" : "string",
+                        "cognitoIdentityAuthType" : "string",
+                        "cognitoIdentityAuthProvider" : "string"
+                    }
+                }
+            })
+            expect(result.authorization).toEqual(AuthModes.AWS_IAM)
+        })
+
+        test('expect to detect AMAZON_COGNITO_USER_POOLS authorization', () => {
+            const result = getAuthIdentity({
+                appsyncEvent: {
+                    "identity": {
+                        "sub" : "uuid",
+                        "issuer" : "string",
+                        "username" : "string",
+                        "claims" : {},
+                        "sourceIp" : ["x.x.x.x"],
+                        "defaultAuthStrategy" : "string"
+                    }
+                }
+            })
+            expect(result.authorization).toEqual(AuthModes.AMAZON_COGNITO_USER_POOLS)
+        })
+
+        test('expect to detect AWS_OIDC authorization', () => {
+            const result = getAuthIdentity({
+                appsyncEvent: {
+                    "identity": {
+                        "claims": {
+                            "sub": "string",
+                            "aud": "string",
+                            "azp": "string",
+                            "iss": "string",
+                            "exp": 1630923679,
+                            "iat": 1630837279,
+                            "gty": "string"
+                        },
+                        "issuer": "string",
+                        "sub": "string",
+                    }
+                }
+            })
+            expect(result.authorization).toEqual(AuthModes.AWS_OIDC)
+        })
+
+        test('expect to throw when no matching authorization', () => {
+            expect(() => getAuthIdentity({
+                appsyncEvent: { "identity": "string" }
+            })).toThrow(Error)
+        })
+    })
 
     describe('.getOperation?', () => {
         const cases = Object.keys(Actions).map((action:Action) => {

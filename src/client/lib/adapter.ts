@@ -82,12 +82,15 @@ export function getAuthIdentity(
 ):AuthIdentity {
     let authIdentity:AuthIdentity = null
 
+    // https://docs.aws.amazon.com/appsync/latest/devguide/resolver-context-reference.html#aws-appsync-resolver-context-reference-identity
+
+    // API_KEY authorization
     if (
         typeof appsyncEvent.identity === 'undefined' || 
         !appsyncEvent.identity || 
         appsyncEvent.identity.length < 1
     ) {
-        authIdentity = merge(appsyncEvent.identity, {
+        authIdentity = {
             authorization: AuthModes.API_KEY,
             ...(
                 appsyncEvent.request && 
@@ -105,21 +108,52 @@ export function getAuthIdentity(
                     requestUserAgent: appsyncEvent.request.headers['user-agent'],
                 }
             )
-        })
-    } else if (typeof appsyncEvent.identity['sub'] !== 'undefined') {
+        }
+    }
+    // AWS_LAMBDA authorization
+    else if (
+        typeof appsyncEvent.identity['resolverContext'] !== 'undefined'
+    ) {
         authIdentity = merge(appsyncEvent.identity, {
-            authorization: AuthModes.AMAZON_COGNITO_USER_POOLS
+            authorization: AuthModes.AWS_LAMBDA
         })
-    } else if (
-        typeof appsyncEvent.identity['cognitoIdentityAuthType'] !== 'undefined' ||
-        typeof appsyncEvent.identity['cognitoIdentityAuthProvider'] !== 'undefined' ||
-        typeof appsyncEvent.identity['cognitoIdentityPoolId'] !== 'undefined' ||
+    }
+    // AWS_IAM authorization
+    else if (
+        typeof appsyncEvent.identity['cognitoIdentityAuthType'] !== 'undefined' &&
+        typeof appsyncEvent.identity['cognitoIdentityAuthProvider'] !== 'undefined' &&
+        typeof appsyncEvent.identity['cognitoIdentityPoolId'] !== 'undefined' &&
         typeof appsyncEvent.identity['cognitoIdentityId'] !== 'undefined'
     ) {
         authIdentity = merge(appsyncEvent.identity, {
             authorization: AuthModes.AWS_IAM
         })
-    } else {
+    }
+    // AMAZON_COGNITO_USER_POOLS authorization
+    else if (
+        typeof appsyncEvent.identity['sub'] !== 'undefined' &&
+        typeof appsyncEvent.identity['issuer'] !== 'undefined' &&
+        typeof appsyncEvent.identity['username'] !== 'undefined' &&
+        typeof appsyncEvent.identity['claims'] !== 'undefined' &&
+        typeof appsyncEvent.identity['sourceIp'] !== 'undefined' &&
+        typeof appsyncEvent.identity['defaultAuthStrategy'] !== 'undefined'
+    ) {
+        authIdentity = merge(appsyncEvent.identity, {
+            authorization: AuthModes.AMAZON_COGNITO_USER_POOLS
+        })
+    } 
+    // AWS_OIDC authorization
+    else if (
+        typeof appsyncEvent.identity['sub'] !== 'undefined' &&
+        typeof appsyncEvent.identity['issuer'] !== 'undefined' &&
+        typeof appsyncEvent.identity['claims'] !== 'undefined'
+    ) {
+        authIdentity = merge(appsyncEvent.identity, {
+            authorization: AuthModes.AWS_OIDC
+        })
+    } 
+    // ERROR
+    else {
         throw new InternalError(
             `Couldn't detect caller identity from: ${JSON.stringify(appsyncEvent.identity)}`
         )

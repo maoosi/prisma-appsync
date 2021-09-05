@@ -169,7 +169,9 @@ export type ResolverQuery = {
 export const AuthModes = {
     API_KEY: 'API_KEY',
     AWS_IAM: 'AWS_IAM',
-    AMAZON_COGNITO_USER_POOLS: 'AMAZON_COGNITO_USER_POOLS'
+    AMAZON_COGNITO_USER_POOLS: 'AMAZON_COGNITO_USER_POOLS',
+    AWS_LAMBDA: 'AWS_LAMBDA',
+    AWS_OIDC: 'AWS_OIDC'
 } as const
 
 export type AuthIdentity = {

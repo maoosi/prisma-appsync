@@ -1,15 +1,15 @@
 {
   "inputs": {
     "src/client/defs.ts": {
-      "bytes": 4818,
+      "bytes": 4845,
       "imports": []
     },
     "node_modules/.pnpm/ts-custom-error@3.2.0/node_modules/ts-custom-error/dist/custom-error.js": {
       "bytes": 2775,
       "imports": []
     },
-    "src/client/lib/logger.ts": {
-      "bytes": 2225,
+    "src/client/logger.ts": {
+      "bytes": 2340,
       "imports": [
         {
           "path": "node_modules/.pnpm/ts-custom-error@3.2.0/node_modules/ts-custom-error/dist/custom-error.js",
@@ -342,7 +342,7 @@
         }
       ]
     },
-    "src/client/utils.ts": {
+    "src/client/helpers.ts": {
       "bytes": 1315,
       "imports": [
         {
@@ -368,14 +368,14 @@
       ]
     },
     "src/client/lib/adapter.ts": {
-      "bytes": 12535,
+      "bytes": 12538,
       "imports": [
         {
-          "path": "src/client/lib/logger.ts",
+          "path": "src/client/logger.ts",
           "kind": "import-statement"
         },
         {
-          "path": "src/client/utils.ts",
+          "path": "src/client/helpers.ts",
           "kind": "import-statement"
         },
         {
@@ -384,28 +384,28 @@
         }
       ]
     },
-    "src/client/lib/shield.ts": {
-      "bytes": 2586,
+    "src/client/lib/guard.ts": {
+      "bytes": 2610,
       "imports": [
         {
-          "path": "src/client/utils.ts",
+          "path": "src/client/helpers.ts",
           "kind": "import-statement"
         }
       ]
     },
-    "src/client/lib/queries.ts": {
+    "src/client/lib/resolver.ts": {
       "bytes": 5620,
       "imports": []
     },
-    "src/client/lib/client.ts": {
-      "bytes": 4432,
+    "src/client/lib/core.ts": {
+      "bytes": 5493,
       "imports": [
         {
           "path": "src/client/defs.ts",
           "kind": "import-statement"
         },
         {
-          "path": "src/client/lib/logger.ts",
+          "path": "src/client/logger.ts",
           "kind": "import-statement"
         },
         {
@@ -413,20 +413,20 @@
           "kind": "import-statement"
         },
         {
-          "path": "src/client/lib/shield.ts",
+          "path": "src/client/lib/guard.ts",
           "kind": "import-statement"
         },
         {
-          "path": "src/client/lib/queries.ts",
+          "path": "src/client/lib/resolver.ts",
           "kind": "import-statement"
         }
       ]
     },
     "src/client/index.ts": {
-      "bytes": 44,
+      "bytes": 259,
       "imports": [
         {
-          "path": "src/client/lib/client.ts",
+          "path": "src/client/lib/core.ts",
           "kind": "import-statement"
         }
       ]
@@ -534,26 +534,26 @@
         "src/client/defs.ts": {
           "bytesInOutput": 1401
         },
-        "src/client/lib/logger.ts": {
-          "bytesInOutput": 625
+        "src/client/logger.ts": {
+          "bytesInOutput": 741
         },
-        "src/client/utils.ts": {
+        "src/client/helpers.ts": {
           "bytesInOutput": 229
         },
         "src/client/lib/adapter.ts": {
           "bytesInOutput": 4697
         },
-        "src/client/lib/shield.ts": {
+        "src/client/lib/guard.ts": {
           "bytesInOutput": 631
         },
-        "src/client/lib/queries.ts": {
+        "src/client/lib/resolver.ts": {
           "bytesInOutput": 2384
         },
-        "src/client/lib/client.ts": {
-          "bytesInOutput": 1327
+        "src/client/lib/core.ts": {
+          "bytesInOutput": 1917
         }
       },
-      "bytes": 78567
+      "bytes": 79273
     }
   }
 }
