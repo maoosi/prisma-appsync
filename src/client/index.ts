@@ -1,4 +1,4 @@
-export { PrismaAppSync } from './lib/core'
+export { PrismaAppSync } from './core'
 
 /* TODO: 
 

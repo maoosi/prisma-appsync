@@ -1,0 +1,71 @@
+datasource db {
+    provider = "postgres"
+    url      = env("DATABASE_URL")
+}
+
+generator client {
+    provider = "prisma-client-js"
+    binaryTargets = ["native", "rhel-openssl-1.0.x"]
+}
+
+generator appsync {
+    provider = "../../dist/generator.js"
+    output = "./generated/prisma-appsync"
+    // customSchema = "./custom-schema.gql"
+    // customResolvers = "./custom-resolvers.yaml"
+    debug = true
+
+    // Can access: visitors / server / logged-in users from group "users" or "admins"
+    directiveAlias_default = "@aws_iam @aws_api_key @aws_cognito_user_pools(cognito_groups: [\"users\", \"admins\"])"
+
+    // Can access: server / logged-in users from group "users" or "admins"
+    directiveAlias_loggedInUsers = "@aws_api_key @aws_cognito_user_pools(cognito_groups: [\"users\", \"admins\"])"
+
+    // Can access: server / logged-in users from group "admins"
+    directiveAlias_adminUsers = "@aws_api_key @aws_cognito_user_pools(cognito_groups: [\"admins\"])"
+
+    // Can access: server
+    directiveAlias_serverOnly = "@aws_api_key"
+
+    //Test
+    directiveAlias_test = "@aws_api_key @aws_cognito_user_pools(cognito_groups: [\"test\"])"
+}
+
+/// @PrismaAppSync.type: '@@loggedInUsers'
+/// @PrismaAppSync.upsert: '@@serverOnly'
+/// @PrismaAppSync.mutation: '@@test'
+model User {
+    id              Int         @id @default(autoincrement())
+    username        String      @unique
+
+    /// @PrismaAppSync.field: '@@adminUsers'
+    email           String      @unique
+
+    /// @PrismaAppSync.ignore
+    hiddenField     String
+
+    role            Role        @default(USER)
+    posts           Post[]
+}
+
+/// @PrismaAppSync.type: '@@loggedInUsers'
+/// @PrismaAppSync.ignore
+/// @PrismaAppSync.upsert: '@@serverOnly'
+model hiddenModel {
+    id              Int         @id @default(autoincrement())
+}
+
+/// @PrismaAppSync.mutation: '@@loggedInUsers'
+model Post {
+    id              Int         @id @default(autoincrement())
+    title           String
+    author          User?       @relation(fields: [authorId], references: [id])
+    authorId        Int?
+    published       Boolean     @default(false)
+    lastSavedAt     DateTime    @default(now())
+}
+
+enum Role {
+    USER
+    ADMIN
+}

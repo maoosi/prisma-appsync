@@ -1,0 +1,1 @@
+export { PrismaAppSync } from './core';

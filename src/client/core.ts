@@ -1,7 +1,15 @@
-import { ResolveParams, PrismaAppSyncOptions, ResolverQuery, PrismaClient, Shield, Authorization } from '../defs'
-import { log, UnauthorizedError, InternalError } from '../logger'
+import { 
+    ResolveParams, 
+    PrismaAppSyncOptions, 
+    ResolverQuery, 
+    PrismaClient, 
+    Shield, 
+    Authorization 
+} from './defs'
+import { log, inspect, UnauthorizedError, InternalError } from './logger'
 import { parseEvent } from './adapter'
 import { getAuthorization, getDepth } from './guard'
+import { clone } from './utils'
 import * as queries from './resolver'
 
 
@@ -57,7 +65,7 @@ export class PrismaAppSync {
         process.env.PRISMA_APPSYNC_DEBUG = this.options.debug ? 'true' : 'false'
 
         // Debug logs
-        log(`Create new instance w/ options: ${JSON.stringify(this.options)}`)
+        log(`Create new instance w/ options: ${inspect(this.options)}`)
 
         // Create new Prisma Client
         this.prismaClient = new PrismaClient()
@@ -72,7 +80,11 @@ export class PrismaAppSync {
      * @returns Promise
      */
     public async resolve(resolveParams:ResolveParams):Promise<any> {
-        log(`Resolve API request w/ event: ${JSON.stringify(resolveParams.event)}`)
+        log(`Resolve API request w/ event (shortened): ${inspect({
+            arguments: resolveParams.event.arguments,
+            identity: resolveParams.event.identity,
+            info: resolveParams.event.info,
+        })}`)
 
         // Only read params other than `event` on first .resolve() call
         if (this.isFirstResolve) {
@@ -85,8 +97,8 @@ export class PrismaAppSync {
 
         // Adapter :: parse appsync event
         this.event = resolveParams.event
-        this.resolverQuery = parseEvent(this.event, this.resolvers)
-        log(`Parsed event: ${JSON.stringify(this.resolverQuery)}`)
+        this.resolverQuery = parseEvent(this.event, this.options, this.resolvers)
+        log(`Parsed event: ${inspect(this.resolverQuery)}`)
 
         // Guard :: block queries with a depth > maxDepth
         const depth = getDepth({ paths: this.resolverQuery.paths })

@@ -1,4 +1,4 @@
-import { PrismaClient, ResolverQuery } from '../defs'
+import { PrismaClient, ResolverQuery } from './defs'
 
 
 /**
@@ -25,6 +25,8 @@ export async function getQuery(prismaClient:PrismaClient, query:ResolverQuery) {
  */
 export async function listQuery(prismaClient:PrismaClient, query:ResolverQuery) {
     if (typeof query.subject === 'string') return;
+
+    console.log(query.subject)
 
     const results = await prismaClient[query.subject.model].findMany({
         ...(query.args.where && { where: query.args.where }),

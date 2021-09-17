@@ -4,6 +4,7 @@ import { getAuthorization } from './guard'
 
 describe('CLIENT #guard', () => {
 
+    // TODO: write more test cases
     describe('.getAuthorization?', () => {
 
         const paths = [

@@ -21,7 +21,10 @@
         "test:generate": "pnpm build && prisma generate --schema=./test/schema.prisma",
         "test:copydocs": "cp test/generated/prisma-appsync/docs/Post.md docs/demo/_post.md && cp test/generated/prisma-appsync/docs/User.md docs/demo/_user.md",
         "prepare": "pnpm test",
-        "test:preview": "jest src/client/lib/**.spec.ts --verbose --expand"
+        "test:preview": "jest src/client/lib/**.spec.ts --verbose --expand",
+        "dev": "concurrently --kill-others --names \"SRC,INTEGRATION\" -c \"bgBlue.black.bold,bgYellow.black.bold\" \"pnpm dev:watch\" \"pnpm dev:start\"",
+        "dev:watch": "nodemon --watch 'src/**/*' -e ts --exec 'pnpm build && cd tests/integration && npx prisma generate'",
+        "dev:start": "nodemon tests/integration/server.ts"
     },
     "engines": {
         "node": ">=12",
@@ -56,17 +59,22 @@
         "@vuepress/plugin-medium-zoom": "^1.8.2",
         "appsync-schema-converter": "^1.0.5",
         "babel-jest": "^26.6.3",
+        "concurrently": "^6.2.1",
         "deepmerge": "^4.2.2",
         "dot-object": "^2.1.4",
         "esbuild": "^0.11.23",
+        "express": "^4.17.1",
+        "express-graphql": "^0.12.0",
         "fs-extra": "^9.1.0",
         "graphql": "^15.5.0",
         "graphql-annotations": "^0.0.3",
+        "graphql-query-to-json": "^1.0.2",
         "jest": "^26.6.3",
         "jest-transform-graphql": "^2.1.0",
         "js-yaml": "^4.0.0",
         "lodash-es": "^4.17.21",
         "micromatch": "^4.0.4",
+        "nodemon": "^2.0.12",
         "nunjucks": "^3.2.3",
         "pluralize": "^8.0.0",
         "prettier": "^2.2.1",
@@ -76,6 +84,7 @@
         "typescript": "^4.2.3",
         "validator": "^13.5.2",
         "vuepress": "^1.8.2",
-        "xss": "^1.0.9"
+        "xss": "^1.0.9",
+        "zx": "^4.2.0"
     }
 }

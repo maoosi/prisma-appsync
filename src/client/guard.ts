@@ -1,5 +1,5 @@
-import { Authorization, Shield } from '../defs'
-import { merge, clone, escapeHTML, filterXSS, isMatchingGlob } from '../helpers'
+import { Authorization, Shield } from './defs'
+import { merge, clone, escapeHTML, filterXSS, isMatchingGlob } from './utils'
 
 // TODO: Comment code
 

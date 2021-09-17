@@ -1,4 +1,7 @@
 import { CustomError } from 'ts-custom-error'
+import { inspect } from 'util'
+
+export { inspect }
 
 // TODO: Comment code
 

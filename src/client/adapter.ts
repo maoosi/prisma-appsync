@@ -1,5 +1,5 @@
-import { InternalError } from '../logger'
-import { merge, dotate } from '../helpers'
+import { InternalError, inspect } from './logger'
+import { merge, dotate } from './utils'
 import {
     PrismaAppSyncOptions,
     AppsyncEvent,
@@ -15,7 +15,7 @@ import {
     AuthModes,
     ReservedPrismaKeys,
     BatchActionsList
-} from '../defs'
+} from './defs'
 
 
 /**
@@ -38,7 +38,7 @@ export function parseEvent(
         throw new Error(`Error reading required parameters from appsyncEvent.`)
     }
 
-    let action:Action, subject: Subject
+    let action:Action, model:Model, subject: Subject
     const operation = getOperation({ fieldName: appsyncEvent.info.fieldName })
 
     if (customResolvers && typeof customResolvers[operation] !== 'undefined') {
@@ -46,9 +46,20 @@ export function parseEvent(
         subject = operation
     } else {
         action = getAction({ operation })
+        model = getModel({ operation, action })
+
+        if (
+            options?.generatedConfig?.prismaClientModels && 
+            typeof options.generatedConfig.prismaClientModels[model] !== 'undefined'
+        ) {
+            model = options.generatedConfig.prismaClientModels[model]
+        } else {
+            throw new InternalError('Issue parsing prismaClientModels from auto-injected environment variable `PRISMA_APPSYNC_GENERATED_CONFIG`.')
+        }
+
         subject = {
             actionAlias: getActionAlias({ action }),
-            model: getModel({ operation, action })
+            model: model
         }
     }
     
@@ -155,7 +166,7 @@ export function getAuthIdentity(
     // ERROR
     else {
         throw new InternalError(
-            `Couldn't detect caller identity from: ${JSON.stringify(appsyncEvent.identity)}`
+            `Couldn't detect caller identity from: ${inspect(appsyncEvent.identity)}`
         )
     }
 
@@ -256,7 +267,9 @@ export function getFields(
 
     _selectionSetList.forEach((item:string) => {
         const field = item.split('/')[0]
-        if (!fields.includes(field) && !field.startsWith('__')) fields.push(item)
+        if (!fields.includes(field) && !field.startsWith('__')) {
+            fields.push(item)
+        }
     })
 
     return fields

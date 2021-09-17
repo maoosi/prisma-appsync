@@ -2,13 +2,55 @@ import { PrismaClient, Prisma } from '@prisma/client'
 
 export { PrismaClient }
 
+export type AppSyncIdentity = {
+    accountId: string,
+    cognitoIdentityPoolId: string,
+    cognitoIdentityId: string,
+    sourceIp: string[],
+    username: string,
+    userArn: string,
+    cognitoIdentityAuthType: string,
+    cognitoIdentityAuthProvider: string
+} | {
+    sub: string,
+    issuer: string,
+    username: string,
+    claims: any,
+    sourceIp: string[],
+    defaultAuthStrategy: string
+} | {
+    claims: {
+        sub: string,
+        aud: string,
+        azp: string,
+        iss: string,
+        exp: number,
+        iat: number,
+        gty: string
+    },
+    sourceIp: string[],
+    issuer: string,
+    sub: string,
+} | {
+    resolverContext: any
+} | null
+
 export type AppsyncEvent = {
-    arguments?: any,
-    info?: {
-        fieldName?: string
-        selectionSetList?: string[]
-        parentTypeName?: string
+    arguments: any
+    source: any
+    identity: AppSyncIdentity
+    request: any
+    info: {
+        fieldName: string
+        parentTypeName: string
+        variables: any
+        selectionSetList: string[]
+        selectionSetGraphQL: string
     }
+    prev: {
+        result: any
+    }
+    stash: any
 }
 
 export type PrismaAppSyncOptions = {
