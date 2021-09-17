@@ -80,74 +80,96 @@ export class PrismaAppSync {
      * @returns Promise
      */
     public async resolve(resolveParams:ResolveParams):Promise<any> {
-        log(`Resolve API request w/ event (shortened): ${inspect({
-            arguments: resolveParams.event.arguments,
-            identity: resolveParams.event.identity,
-            info: resolveParams.event.info,
-        })}`)
+        let results:any = null
 
-        // Only read params other than `event` on first .resolve() call
-        if (this.isFirstResolve) {
-            this.shield = resolveParams.shield || null
-            this.hooks = resolveParams.hooks || null
-        }
+        try {
+            log(`Resolve API request w/ event (shortened): ${inspect({
+                arguments: resolveParams.event.arguments,
+                identity: resolveParams.event.identity,
+                info: resolveParams.event.info,
+            })}`)
 
-        // This is not anymore the first .resolve() call
-        this.isFirstResolve = false
+            // Only read params other than `event` on first .resolve() call
+            if (this.isFirstResolve) {
+                this.shield = resolveParams.shield || null
+                this.hooks = resolveParams.hooks || null
+            }
 
-        // Adapter :: parse appsync event
-        this.event = resolveParams.event
-        this.resolverQuery = parseEvent(this.event, this.options, this.resolvers)
-        log(`Parsed event: ${inspect(this.resolverQuery)}`)
+            // This is not anymore the first .resolve() call
+            this.isFirstResolve = false
 
-        // Guard :: block queries with a depth > maxDepth
-        const depth = getDepth({ paths: this.resolverQuery.paths })
-        log(`Query has depth of ${depth} (max allowed is ${this.options.maxDepth}).`)
-        if (depth > this.options.maxDepth) {
-            new UnauthorizedError(`Query has depth of ${depth}, which exceeds max depth of ${this.options.maxDepth}.`)
-        }
+            // Adapter :: parse appsync event
+            this.event = resolveParams.event
+            this.resolverQuery = parseEvent(this.event, this.options, this.resolvers)
+            log(`Parsed event: ${inspect(this.resolverQuery)}`)
 
-        // Guard :: create shield from config
-        const shield: Shield = await this.shield(this.resolverQuery)
+            // Guard :: block queries with a depth > maxDepth
+            const depth = getDepth({ paths: this.resolverQuery.paths })
+            log(`Query has depth of ${depth} (max allowed is ${this.options.maxDepth}).`)
+            if (depth > this.options.maxDepth) {
+                throw new UnauthorizedError(`Query has depth of ${depth}, which exceeds max depth of ${this.options.maxDepth}.`)
+            }
 
-        // Guard :: get authorization object
-        const authorization: Authorization = getAuthorization({ shield, paths: this.resolverQuery.paths })
+            // Guard :: create shield from config
+            const shield: Shield = await this.shield(this.resolverQuery)
 
-        // Guard :: if `canAccess` if equal to `false`, we reject the API call
-        if (!authorization.canAccess) {
-            const reason = typeof authorization.reason === 'string'
-                ? authorization.reason
-                : authorization.reason()
-            new UnauthorizedError(reason)
-            return;
-        }
-
-        // Guard :: if `prismaFilter` is set, combine with current Prisma query
-        if (authorization.prismaFilter) {
-            this.prismaClient.$use(async (params, next) => {
-                if (typeof params.args.where !== 'undefined' && params.args.where.length > 0) {
-                    params.args.where = {
-                        AND: [
-                            params.args.where,
-                            authorization.prismaFilter
-                        ]
-                    }
-                } else {
-                    params.args.where = authorization.prismaFilter
-                }
-                
-                return next(params)
+            // Guard :: get authorization object
+            const authorization: Authorization = getAuthorization({ 
+                shield, paths: this.resolverQuery.paths
             })
+
+            // Guard :: if `canAccess` if equal to `false`, we reject the API call
+            if (!authorization.canAccess) {
+                const reason = typeof authorization.reason === 'string'
+                    ? authorization.reason
+                    : authorization.reason()
+                throw new UnauthorizedError(reason)
+                return;
+            }
+
+            // Guard :: if `prismaFilter` is set, combine with current Prisma query
+            if (authorization.prismaFilter) {
+                this.prismaClient.$use(async (params, next) => {
+                    if (typeof params.args.where !== 'undefined' && params.args.where.length > 0) {
+                        params.args.where = {
+                            AND: [
+                                params.args.where,
+                                authorization.prismaFilter
+                            ]
+                        }
+                    } else {
+                        params.args.where = authorization.prismaFilter
+                    }
+                    
+                    return next(params)
+                })
+            }
+
+            // Guard: get and run all before hooks functions matching query
+
+            // Resolver :: resolve query with Prisma Client
+            results = process.env.JEST_WORKER_ID
+                ? this.resolverQuery
+                : await queries[`${this.resolverQuery.action}Query`](
+                    this.prismaClient, this.resolverQuery
+                )
+
+            // Guard: get and run all after hooks functions matching query
+
+        } catch(error) {
+            // Try read private error
+            const privateError = typeof error.getLogs === 'function'
+                ? error.getLogs() : 'Internal error.'
+
+            // Log private error to CloudWatch
+            log(`API [${error?.errorType || 'Internal Server Error'}]: ${inspect(privateError)}`)
+
+            // Close database connection
+            this.prismaClient.$disconnect()
+
+            // Return error response
+            results = error
         }
-
-        // Guard: get and run all before hooks functions matching query
-
-        // Resolver :: resolve query with Prisma Client
-        const results = process.env.JEST_WORKER_ID
-            ? this.resolverQuery
-            : await queries[`${this.resolverQuery.action}Query`](this.prismaClient, this.resolverQuery)
-
-        // Guard: get and run all after hooks functions matching query
 
         return results
     }

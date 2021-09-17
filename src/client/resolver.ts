@@ -26,8 +26,6 @@ export async function getQuery(prismaClient:PrismaClient, query:ResolverQuery) {
 export async function listQuery(prismaClient:PrismaClient, query:ResolverQuery) {
     if (typeof query.subject === 'string') return;
 
-    console.log(query.subject)
-
     const results = await prismaClient[query.subject.model].findMany({
         ...(query.args.where && { where: query.args.where }),
         ...(query.args.orderBy && { orderBy: query.args.orderBy }),
@@ -71,6 +69,13 @@ export async function createQuery(prismaClient:PrismaClient, query:ResolverQuery
     const results = await prismaClient[query.subject.model].create({
         data: query.args.data,
         ...(query.args.select && { select: query.args.select }),
+    })
+
+    console.log({
+        model: query.subject.model,
+        data: query.args.data,
+        select: query.args.select,
+        results
     })
 
     return results

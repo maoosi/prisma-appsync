@@ -12,5 +12,5 @@ await $`cd tests/integration && npx prisma generate`
 // create a docker container in a detached state
 await $`cd tests/integration && docker-compose up -d`
 
-// run graphql server
-await $`cd tests/integration && pnpm start`
+// apply migrations
+await $`cd tests/integration && npx prisma db push`

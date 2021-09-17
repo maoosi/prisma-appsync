@@ -18,13 +18,20 @@ const app = express()
 
 
 const getRootValue = async (request, graphQLParams) => {
-    const res = mockAppSyncPayload({
+    const reponse = mockAppSyncPayload({
         request,
         graphQLParams,
         mockIdentity: 'AMAZON_COGNITO_USER_POOLS'
     })
 
-    return await main(res.payload, null)
+    const rootValue = {
+        [reponse.payload.info.fieldName]:
+            async () => await main(reponse.payload, null)
+    }
+
+    console.log({ rootValue })
+
+    return rootValue
 }
 
 

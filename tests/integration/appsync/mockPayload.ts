@@ -8,15 +8,13 @@ export function mockAppSyncPayload({ request, graphQLParams, mockIdentity }: {
     mockIdentity?: typeof identities[keyof typeof identities],
 }): $response {
     const selectionSetGraphQL = graphQLParams.query
-    const variables = graphQLParams.variables
-    const fieldName = graphQLParams.operationName
+    const variables = graphQLParams.variables || {}
     const headers = request?.headers || {}
 
-    const query:any = graphQlQueryToJson(selectionSetGraphQL, {
-        ...(variables && { variables })
-    })
+    const query:any = graphQlQueryToJson(selectionSetGraphQL, { variables })
 
     const parentType:string = Object.keys(query)[0]
+    const fieldName:string = Object.keys(query[parentType])[0]
     const parentTypeName = parentType.charAt(0).toUpperCase() + parentType.slice(1)
     const operation = isBatchInvokation(fieldName) ? 'BatchInvoke' : 'Invoke'
     const resolverContext = {}

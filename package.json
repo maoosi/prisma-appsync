@@ -22,9 +22,8 @@
         "test:copydocs": "cp test/generated/prisma-appsync/docs/Post.md docs/demo/_post.md && cp test/generated/prisma-appsync/docs/User.md docs/demo/_user.md",
         "prepare": "pnpm test",
         "test:preview": "jest src/client/lib/**.spec.ts --verbose --expand",
-        "dev": "concurrently --kill-others --names \"SRC,INTEGRATION\" -c \"bgBlue.black.bold,bgYellow.black.bold\" \"pnpm dev:watch\" \"pnpm dev:start\"",
-        "dev:watch": "nodemon --watch 'src/**/*' -e ts --exec 'pnpm build && cd tests/integration && npx prisma generate'",
-        "dev:start": "nodemon tests/integration/server.ts"
+        "local:setup": "zx local.setup.mjs",
+        "local:start": "zx local.start.mjs"
     },
     "engines": {
         "node": ">=12",

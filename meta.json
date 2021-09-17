@@ -394,11 +394,11 @@
       ]
     },
     "src/client/resolver.ts": {
-      "bytes": 5651,
+      "bytes": 5763,
       "imports": []
     },
     "src/client/core.ts": {
-      "bytes": 5710,
+      "bytes": 6552,
       "imports": [
         {
           "path": "src/client/defs.ts",
@@ -547,13 +547,13 @@
           "bytesInOutput": 631
         },
         "src/client/resolver.ts": {
-          "bytesInOutput": 2409
+          "bytesInOutput": 2480
         },
         "src/client/core.ts": {
-          "bytesInOutput": 2008
+          "bytesInOutput": 2219
         }
       },
-      "bytes": 80205
+      "bytes": 80487
     }
   }
 }
