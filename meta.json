@@ -1,7 +1,11 @@
 {
   "inputs": {
     "src/client/defs.ts": {
-      "bytes": 5748,
+      "bytes": 5986,
+      "imports": []
+    },
+    "src/client/debug.ts": {
+      "bytes": 2547,
       "imports": []
     },
     "node_modules/.pnpm/ts-custom-error@3.2.0/node_modules/ts-custom-error/dist/custom-error.js": {
@@ -9,7 +13,7 @@
       "imports": []
     },
     "src/client/logger.ts": {
-      "bytes": 2391,
+      "bytes": 3712,
       "imports": [
         {
           "path": "node_modules/.pnpm/ts-custom-error@3.2.0/node_modules/ts-custom-error/dist/custom-error.js",
@@ -368,7 +372,7 @@
       ]
     },
     "src/client/adapter.ts": {
-      "bytes": 14220,
+      "bytes": 14302,
       "imports": [
         {
           "path": "src/client/logger.ts",
@@ -385,7 +389,7 @@
       ]
     },
     "src/client/guard.ts": {
-      "bytes": 2606,
+      "bytes": 2626,
       "imports": [
         {
           "path": "src/client/utils.ts",
@@ -398,14 +402,14 @@
       "imports": []
     },
     "src/client/core.ts": {
-      "bytes": 6552,
+      "bytes": 6227,
       "imports": [
         {
           "path": "src/client/defs.ts",
           "kind": "import-statement"
         },
         {
-          "path": "src/client/logger.ts",
+          "path": "src/client/debug.ts",
           "kind": "import-statement"
         },
         {
@@ -423,10 +427,14 @@
       ]
     },
     "src/client/index.ts": {
-      "bytes": 255,
+      "bytes": 277,
       "imports": [
         {
           "path": "src/client/core.ts",
+          "kind": "import-statement"
+        },
+        {
+          "path": "src/client/defs.ts",
           "kind": "import-statement"
         }
       ]
@@ -529,19 +537,22 @@
           "bytesInOutput": 481
         },
         "src/client/index.ts": {
-          "bytesInOutput": 47
+          "bytesInOutput": 64
         },
         "src/client/defs.ts": {
           "bytesInOutput": 1445
         },
+        "src/client/debug.ts": {
+          "bytesInOutput": 1132
+        },
         "src/client/logger.ts": {
-          "bytesInOutput": 764
+          "bytesInOutput": 419
         },
         "src/client/utils.ts": {
           "bytesInOutput": 229
         },
         "src/client/adapter.ts": {
-          "bytesInOutput": 5446
+          "bytesInOutput": 5451
         },
         "src/client/guard.ts": {
           "bytesInOutput": 631
@@ -550,10 +561,10 @@
           "bytesInOutput": 2480
         },
         "src/client/core.ts": {
-          "bytesInOutput": 2219
+          "bytesInOutput": 2098
         }
       },
-      "bytes": 80487
+      "bytes": 81185
     }
   }
 }

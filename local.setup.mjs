@@ -13,4 +13,4 @@ await $`cd tests/integration && npx prisma generate`
 await $`cd tests/integration && docker-compose up -d`
 
 // apply migrations
-await $`cd tests/integration && npx prisma db push`
+await $`cd tests/integration && npx prisma db push --accept-data-loss`

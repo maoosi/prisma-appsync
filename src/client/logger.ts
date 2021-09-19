@@ -32,8 +32,15 @@ export class InternalError extends CustomError {
         Object.defineProperty(this, 'name', { value: 'InternalError' })
     }
 
-    public getLogs() {
+    public getCloudwatchError() {
         return this.privateMessage
+    }
+
+    public getReturnError() {
+        return {
+            error: this.errorInfo,
+            status: this.errorType,
+        }
     }
 }
 
@@ -58,8 +65,15 @@ export class UnauthorizedError extends CustomError {
         Object.defineProperty(this, 'name', { value: 'UnauthorizedError' })
     }
 
-    public getLogs() {
+    public getCloudwatchError() {
         return this.privateMessage
+    }
+
+    public getReturnError() {
+        return new Error(JSON.stringify({
+            error: this.errorInfo,
+            status: this.errorType,
+        }))
     }
 }
 
@@ -84,7 +98,47 @@ export class BadRequestError extends CustomError {
         Object.defineProperty(this, 'name', { value: 'BadRequestError' })
     }
 
-    public getLogs() {
+    public getCloudwatchError() {
         return this.privateMessage
+    }
+
+    public getReturnError() {
+        return {
+            error: this.errorInfo,
+            status: this.errorType,
+        }
+    }
+}
+
+export class PrismaAppSyncError extends CustomError {
+    private privateMessage:string
+    public errorType:string
+    public errorInfo:string
+    public data:any
+
+    constructor(message?: string) {
+        // Shortcut error message
+        const privateMessage = message
+        super('Wrong input parameters.')
+
+        // Customise error
+        this.errorType = '400'
+        this.errorInfo = 'Bad Request'
+        this.privateMessage = privateMessage
+        this.data = null
+        
+        // Set name explicitly as minification can mangle class names
+        Object.defineProperty(this, 'name', { value: 'BadRequestError' })
+    }
+
+    public getCloudwatchError() {
+        return this.privateMessage
+    }
+
+    public getReturnError() {
+        return {
+            error: this.errorInfo,
+            status: this.errorType,
+        }
     }
 }

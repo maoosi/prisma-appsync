@@ -1,5 +1,138 @@
 # Changelog
 
+## 🎉 Version 1.0.0-rc.0
+
+### Major improvements
+
+- Prisma-AppSync Client API rewritten from the ground to:
+  - Simplify usage by streamlining API and adopting a more opinionated approach. Provide a better TypeScript DX with cleaner naming conventions and closer to Prisma Client.
+  - Make fine-grained access control and custom resolvers easier to use and more flexible across all scopes, from small to larger size projects (see shield in the preview below).
+  - Adopt a TDD approach with full CI/CD integration. This will help to cover more edge cases and bring Prisma-AppSync to a stable version quicker.
+  - Refactor internal code structure, reduce external dependencies and improve execution performances. This should also make contributions to the project much easier for others.
+
+### Breaking changes
+
+#### Prisma-AppSync Client (usage within Lambda function)
+
+##### Default usage
+
+**Before:**
+
+```typescript
+// init prisma-appsync client
+const app = new PrismaAppSync({
+    connectionUrl: process.env.CONNECTION_URL
+})
+
+// direct lambda resolver for appsync
+export const main = async (event: any, context: any) => {
+    // parse the `event` from your Lambda function
+    app.parseEvent(event)
+
+    // handle CRUD operations / resolve query
+    const result = await app.resolve()
+
+    // close database connection
+    await app.prisma.$disconnect()
+
+    // return query result
+    return Promise.resolve(result)
+}
+```
+
+**After:**
+
+```typescript
+// init prisma-appsync client
+const prismaAppSync = new PrismaAppSync()
+
+// direct lambda resolver for appsync
+export const resolver = async (event: any, context: any) => {
+    return await prismaAppSync.resolve({
+        event: event, // AppSync event
+    })
+}
+```
+
+##### Hooks
+
+**Before:**
+
+```typescript
+// execute before resolve
+app.beforeResolve(async (props) => {
+    // custom business logic here
+})
+
+// execute after resolve
+app.afterResolve(async (props) => {
+    // custom business logic here
+})
+```
+
+**After:**
+
+```typescript
+return await prismaAppSync.resolve({
+    event: event, // AppSync event
+    hooks: () => {
+        return {
+            // execute before any query
+            'before:**': async (props) => {
+                // custom business logic here
+            },
+            // execute after any query
+            'after:**': async (props) => {
+                // custom business logic here
+            },
+            // execute after custom resolver query `likePost`
+            // (e.g. `query { likePost(postId: 3) }`)
+            'after:custom/likePost': async ({ prismaClient, authIdentity, args }) => {
+                await prismaClient.notification.create({
+                    data: {
+                        event: 'POST_LIKED',
+                        targetId: args.postId,
+                        userId: authIdentity.sub,
+                    }
+                })
+            },
+        }
+    }
+})
+```
+
+### Fixes and improvements
+
+- New: Improved errors with more detailed server logs and better message returned by the GraphQL API, which now include a stringified object such as `"{\"error\":\"Query has depth of 4, which exceeds max depth of 3.\",\"type\":\"FORBIDDEN\",\"code\":401}"`.
+- New: TypeScript types improved for better DX. Hovering on Prisma-AppSync types and Client methods using VS Code is now displaying better info, including examples.
+- New: Support for Atomic Operations (see example usage below).
+- New: Enabling the data sanitizer will now automatically "de-sanitize" data before sending it back to the client. Meaning client-side decoding is not anymore necessary, while your data will still be parsed for XSS before storage.
+- Fix: [Issue #26](https://github.com/maoosi/prisma-appsync/issues/26)
+
+#### New: Client options
+
+```typescript
+const prismaAppSync = new PrismaAppSync({
+    connectionString, // optional, DB connection string, default to env var `DATABASE_URL`
+    sanitize, // optional, enable data sanitizer for DB storage (incl. XSS parser), default to true
+    debug, // optional, enable debug server logs, default to false
+    defaultPagination, // optional, pagination for listQueries, default to 50
+    maxDepth, // optional, allowed graphql query depth, default to 3
+})
+```
+
+#### New: Support for Atomic Operations
+
+```graphql
+mutation {
+    updateManyPosts(
+        operations: {
+            views: { increment: 1 }
+        }
+    )
+}
+```
+
 ## 🎉 Version 1.0.0-beta.58
 
 ### ⚠️ (Breaking) Fix: Issue linked to Prisma models naming

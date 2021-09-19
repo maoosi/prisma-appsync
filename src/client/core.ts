@@ -6,10 +6,9 @@ import {
     Shield, 
     Authorization 
 } from './defs'
-import { log, inspect, UnauthorizedError, InternalError } from './logger'
+import { parseError, inspect, debug, CustomError } from './debug'
 import { parseEvent } from './adapter'
 import { getAuthorization, getDepth } from './guard'
-import { clone } from './utils'
 import * as queries from './resolver'
 
 
@@ -38,7 +37,7 @@ export class PrismaAppSync {
                 generatedConfig = JSON.parse(process.env.PRISMA_APPSYNC_GENERATED_CONFIG)
             }
         } catch (error) {
-            new InternalError('Issue parsing auto-injected environment variable `PRISMA_APPSYNC_GENERATED_CONFIG`.')
+            new CustomError('Issue parsing auto-injected environment variable `PRISMA_APPSYNC_GENERATED_CONFIG`.', { type: 'INTERNAL_SERVER_ERROR' })
         }
 
         // Set client options using constructor options
@@ -65,7 +64,7 @@ export class PrismaAppSync {
         process.env.PRISMA_APPSYNC_DEBUG = this.options.debug ? 'true' : 'false'
 
         // Debug logs
-        log(`Create new instance w/ options: ${inspect(this.options)}`)
+        debug(`New instance created using: ${inspect(this.options)}`)
 
         // Create new Prisma Client
         this.prismaClient = new PrismaClient()
@@ -83,7 +82,7 @@ export class PrismaAppSync {
         let results:any = null
 
         try {
-            log(`Resolve API request w/ event (shortened): ${inspect({
+            debug(`Resolving API request w/ event (shortened): ${inspect({
                 arguments: resolveParams.event.arguments,
                 identity: resolveParams.event.identity,
                 info: resolveParams.event.info,
@@ -101,13 +100,13 @@ export class PrismaAppSync {
             // Adapter :: parse appsync event
             this.event = resolveParams.event
             this.resolverQuery = parseEvent(this.event, this.options, this.resolvers)
-            log(`Parsed event: ${inspect(this.resolverQuery)}`)
+            debug(`Parsed event: ${inspect(this.resolverQuery)}`)
 
             // Guard :: block queries with a depth > maxDepth
             const depth = getDepth({ paths: this.resolverQuery.paths })
-            log(`Query has depth of ${depth} (max allowed is ${this.options.maxDepth}).`)
+            debug(`Query has depth of ${depth} (max allowed is ${this.options.maxDepth}).`)
             if (depth > this.options.maxDepth) {
-                throw new UnauthorizedError(`Query has depth of ${depth}, which exceeds max depth of ${this.options.maxDepth}.`)
+                throw new CustomError(`Query has depth of ${depth}, which exceeds max depth of ${this.options.maxDepth}.`, { type: 'FORBIDDEN' })
             }
 
             // Guard :: create shield from config
@@ -123,7 +122,7 @@ export class PrismaAppSync {
                 const reason = typeof authorization.reason === 'string'
                     ? authorization.reason
                     : authorization.reason()
-                throw new UnauthorizedError(reason)
+                throw new CustomError(reason, { type: 'FORBIDDEN' })
                 return;
             }
 
@@ -157,18 +156,10 @@ export class PrismaAppSync {
             // Guard: get and run all after hooks functions matching query
 
         } catch(error) {
-            // Try read private error
-            const privateError = typeof error.getLogs === 'function'
-                ? error.getLogs() : 'Internal error.'
+            
+            // Return error
+            results = Promise.reject( parseError(error) )
 
-            // Log private error to CloudWatch
-            log(`API [${error?.errorType || 'Internal Server Error'}]: ${inspect(privateError)}`)
-
-            // Close database connection
-            this.prismaClient.$disconnect()
-
-            // Return error response
-            results = error
         }
 
         return results

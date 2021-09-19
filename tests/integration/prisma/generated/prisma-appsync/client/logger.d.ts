@@ -8,7 +8,11 @@ export declare class InternalError extends CustomError {
     errorInfo: string;
     data: any;
     constructor(message?: string);
-    getLogs(): string;
+    getCloudwatchError(): string;
+    getReturnError(): {
+        error: string;
+        status: string;
+    };
 }
 export declare class UnauthorizedError extends CustomError {
     private privateMessage;
@@ -16,7 +20,8 @@ export declare class UnauthorizedError extends CustomError {
     errorInfo: string;
     data: any;
     constructor(message?: string);
-    getLogs(): string;
+    getCloudwatchError(): string;
+    getReturnError(): Error;
 }
 export declare class BadRequestError extends CustomError {
     private privateMessage;
@@ -24,5 +29,21 @@ export declare class BadRequestError extends CustomError {
     errorInfo: string;
     data: any;
     constructor(message?: string);
-    getLogs(): string;
+    getCloudwatchError(): string;
+    getReturnError(): {
+        error: string;
+        status: string;
+    };
+}
+export declare class PrismaAppSyncError extends CustomError {
+    private privateMessage;
+    errorType: string;
+    errorInfo: string;
+    data: any;
+    constructor(message?: string);
+    getCloudwatchError(): string;
+    getReturnError(): {
+        error: string;
+        status: string;
+    };
 }

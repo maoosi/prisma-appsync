@@ -1,4 +1,5 @@
 export { PrismaAppSync } from './core'
+export { ResolverQuery, AuthModes } from './defs'
 
 /* TODO: 
 
@@ -7,7 +8,6 @@ export { PrismaAppSync } from './core'
 - [ ] Hooks.
 - [ ] Test Models name mapping.
 - [ ] Test sanitize (only if enabled).
-- [ ] Test Auth identities.
 - [ ] Debug output.
 - [ ] ESLint.
 

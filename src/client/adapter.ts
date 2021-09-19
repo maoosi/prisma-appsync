@@ -70,7 +70,10 @@ export function parseEvent(
         _selectionSetList: appsyncEvent.info.selectionSetList
     })
     const args = getArgs({ 
-        action, _arguments: appsyncEvent.arguments, defaultPagination: options.defaultPagination
+        action, 
+        _arguments: appsyncEvent.arguments, 
+        _selectionSetList: appsyncEvent.info.selectionSetList, 
+        defaultPagination: options.defaultPagination
     })
     const type = getType({ 
         _parentTypeName: appsyncEvent.info.parentTypeName
@@ -101,7 +104,7 @@ export function getAuthIdentity(
         !appsyncEvent.identity || 
         appsyncEvent.identity.length < 1
     ) {
-        authIdentity = {
+        authIdentity = merge(appsyncEvent.identity, {
             authorization: AuthModes.API_KEY,
             ...(
                 appsyncEvent.request && 
@@ -119,7 +122,7 @@ export function getAuthIdentity(
                     requestUserAgent: appsyncEvent.request.headers['user-agent'],
                 }
             )
-        }
+        })
     }
     // AWS_LAMBDA authorization
     else if (
@@ -298,8 +301,8 @@ export function getType(
  * @returns Args
  */
 export function getArgs(
-    { action, _arguments, defaultPagination }: 
-    { action: Action, _arguments:any, defaultPagination:false|number }
+    { action, _arguments, _selectionSetList, defaultPagination }: 
+    { action: Action, _arguments:any, _selectionSetList:any, defaultPagination:false|number }
 ): Args {
     const args:Args = {}
 
@@ -308,8 +311,8 @@ export function getArgs(
     if (typeof _arguments.orderBy !== 'undefined') args.orderBy = parseOrderBy(_arguments.orderBy)
     if (typeof _arguments.skipDuplicates !== 'undefined') args.skipDuplicates = _arguments.skipDuplicates
 
-    if (typeof _arguments.info !== 'undefined' && typeof _arguments.info.selectionSetList !== 'undefined') {
-        args.select = parseSelectionList(_arguments.info.selectionSetList)
+    if (typeof _selectionSetList !== 'undefined') {
+        args.select = parseSelectionList(_selectionSetList)
     }
 
     if (typeof _arguments.skip !== 'undefined') args.skip = parseInt(_arguments.skip)

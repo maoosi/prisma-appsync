@@ -1,6 +1,10 @@
 import { PrismaClient } from '@prisma/client';
 export { PrismaClient };
-export declare type AppSyncIdentity = {
+export declare type API_KEY = null;
+export declare type AWS_LAMBDA = {
+    resolverContext: any;
+};
+export declare type AWS_IAM = {
     accountId: string;
     cognitoIdentityPoolId: string;
     cognitoIdentityId: string;
@@ -9,14 +13,17 @@ export declare type AppSyncIdentity = {
     userArn: string;
     cognitoIdentityAuthType: string;
     cognitoIdentityAuthProvider: string;
-} | {
+};
+export declare type AMAZON_COGNITO_USER_POOLS = {
     sub: string;
     issuer: string;
     username: string;
     claims: any;
     sourceIp: string[];
     defaultAuthStrategy: string;
-} | {
+    groups: string[];
+};
+export declare type AWS_OIDC = {
     claims: {
         sub: string;
         aud: string;
@@ -29,9 +36,8 @@ export declare type AppSyncIdentity = {
     sourceIp: string[];
     issuer: string;
     sub: string;
-} | {
-    resolverContext: any;
-} | null;
+};
+export declare type AppSyncIdentity = API_KEY | AWS_LAMBDA | AWS_IAM | AMAZON_COGNITO_USER_POOLS | AWS_OIDC;
 export declare type AppsyncEvent = {
     arguments: any;
     source: any;
@@ -141,7 +147,7 @@ export declare const AuthModes: {
     readonly AWS_LAMBDA: "AWS_LAMBDA";
     readonly AWS_OIDC: "AWS_OIDC";
 };
-export declare type AuthIdentity = {
+export declare type AuthIdentity = AppSyncIdentity & {
     authorization: typeof AuthModes[keyof typeof AuthModes];
     [key: string]: any;
 };

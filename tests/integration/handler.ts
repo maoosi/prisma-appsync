@@ -1,8 +1,9 @@
-// import PrismaAppSync client
-import { PrismaAppSync } from './prisma/generated/prisma-appsync/client'
+import { PrismaAppSync, AuthModes } from './prisma/generated/prisma-appsync/client'
 
 
-// init prisma-appsync client
+/**
+ * Init prisma-appsync client
+ */
 const prismaAppSync = new PrismaAppSync({
     connectionString: process.env.DATABASE_URL,
     debug: true
@@ -13,24 +14,30 @@ const prismaAppSync = new PrismaAppSync({
  * Direct lambda resolver for appsync
  */
  export const main = async (event: any, context: any) => {
+
     return await prismaAppSync.resolve({
-        event, // AppSync event
+        event,
         resolvers: {
-            // extend CRUD API with a custom query
-            myCustomQuery: async ({ prismaClient }) => {
-                return await prismaClient.post.count()
+
+            // extend CRUD API with a custom `notify` query
+            notify: async () => {
+                return { message: 'Hello!' }
             },
+
             // disabled one of the generated CRUD API query
             getComment: false
+
         },
         shield: ({ authIdentity }) => {
-            const isDefaultAllowed = true
-            const isAdmin = authIdentity.groups.includes('admin')
-            const isOwner = { owner: { cognitoSub: authIdentity.sub } }
+            const isCognitoAuth = authIdentity.authorization === AuthModes.AMAZON_COGNITO_USER_POOLS
+            const isAdmin = authIdentity?.groups?.includes('admin')
+            const isOwner = { owner: { cognitoSub: authIdentity?.sub } }
+
+            console.log({ authIdentity })
     
             return {
                 // default (overridden by specific rules)
-                '**': isDefaultAllowed,
+                '**': isCognitoAuth,
 
                 // can only be modified by owner
                 'modify/{post,comment}{,/**}': {
@@ -59,4 +66,5 @@ const prismaAppSync = new PrismaAppSync({
             }
         }
     })
+
 }

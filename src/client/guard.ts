@@ -1,4 +1,4 @@
-import { Authorization, Shield } from './defs'
+import { Authorization, Shield, ReservedPrismaKeys } from './defs'
 import { merge, clone, escapeHTML, filterXSS, isMatchingGlob } from './utils'
 
 // TODO: Comment code
@@ -71,12 +71,12 @@ export function getAuthorization(
 export function getDepth(
     { paths }: { paths: string[] }
 ):number {
-    let maxDepth = 0
+    let depth = 0
 
     paths.forEach((path:string) => {
-        const depth = path.split('/').length - 2
-        if (depth > maxDepth) maxDepth = depth
+        const pathDepth = path.split('/').length - 3
+        if (pathDepth > depth) depth = pathDepth
     })
 
-    return maxDepth
+    return depth
 }

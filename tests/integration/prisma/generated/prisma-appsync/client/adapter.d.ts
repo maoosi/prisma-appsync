@@ -69,9 +69,10 @@ export declare function getType({ _parentTypeName }: {
  * @param  {{action: Action, _arguments:any, defaultPagination:false|number}} { action, _arguments, defaultPagination }
  * @returns Args
  */
-export declare function getArgs({ action, _arguments, defaultPagination }: {
+export declare function getArgs({ action, _arguments, _selectionSetList, defaultPagination }: {
     action: Action;
     _arguments: any;
+    _selectionSetList: any;
     defaultPagination: false | number;
 }): Args;
 /**
