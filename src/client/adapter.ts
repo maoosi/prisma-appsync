@@ -14,7 +14,8 @@ import {
     AuthIdentity,
     AuthModes,
     ReservedPrismaKeys,
-    BatchActionsList
+    BatchActionsList,
+    Operation
 } from './defs'
 
 
@@ -184,8 +185,8 @@ export function getAuthIdentity(
  */
 export function getOperation(
     { fieldName }: { fieldName: string }
-):string {
-    const operation = fieldName
+):Operation {
+    const operation = fieldName as Operation
 
     if (! (operation.length > 0) )
         throw new Error(`Error parsing 'operation' from input event.`)

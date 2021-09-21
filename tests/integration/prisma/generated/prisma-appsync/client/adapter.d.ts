@@ -1,4 +1,4 @@
-import { PrismaAppSyncOptions, AppsyncEvent, ResolverQuery, Action, Model, Args, ActionsAlias, Subject, AuthIdentity } from './defs';
+import { PrismaAppSyncOptions, AppsyncEvent, ResolverQuery, Action, Model, Args, ActionsAlias, Subject, AuthIdentity, Operation } from './defs';
 /**
  * Return ResolverQuery from parse AppSync direct resolver event.
  * @param  {AppsyncEvent} appsyncEvent
@@ -22,7 +22,7 @@ export declare function getAuthIdentity({ appsyncEvent }: {
  */
 export declare function getOperation({ fieldName }: {
     fieldName: string;
-}): string;
+}): Operation;
 /**
  * Return action (`get`, `list`, `create`, ...) from parsed `operation`.
  * @param  {{operation:string}} {operation}

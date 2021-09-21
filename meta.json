@@ -1,7 +1,7 @@
 {
   "inputs": {
     "src/client/defs.ts": {
-      "bytes": 5986,
+      "bytes": 7340,
       "imports": []
     },
     "src/client/debug.ts": {
@@ -372,7 +372,7 @@
       ]
     },
     "src/client/adapter.ts": {
-      "bytes": 14302,
+      "bytes": 14333,
       "imports": [
         {
           "path": "src/client/logger.ts",
@@ -402,7 +402,7 @@
       "imports": []
     },
     "src/client/core.ts": {
-      "bytes": 6227,
+      "bytes": 6303,
       "imports": [
         {
           "path": "src/client/defs.ts",
@@ -427,7 +427,7 @@
       ]
     },
     "src/client/index.ts": {
-      "bytes": 277,
+      "bytes": 284,
       "imports": [
         {
           "path": "src/client/core.ts",

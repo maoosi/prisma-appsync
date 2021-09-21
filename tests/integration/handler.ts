@@ -15,7 +15,7 @@ const prismaAppSync = new PrismaAppSync({
  */
  export const main = async (event: any, context: any) => {
 
-    return await prismaAppSync.resolve({
+    return await prismaAppSync.resolve<'getComment' | 'notify'>({
         event,
         resolvers: {
 
@@ -29,11 +29,10 @@ const prismaAppSync = new PrismaAppSync({
 
         },
         shield: ({ authIdentity }) => {
-            const isCognitoAuth = authIdentity.authorization === AuthModes.AMAZON_COGNITO_USER_POOLS
             const isAdmin = authIdentity?.groups?.includes('admin')
             const isOwner = { owner: { cognitoSub: authIdentity?.sub } }
-
-            console.log({ authIdentity })
+            const isCognitoAuth = 
+                authIdentity.authorization === AuthModes.AMAZON_COGNITO_USER_POOLS
     
             return {
                 // default (overridden by specific rules)
@@ -59,10 +58,12 @@ const prismaAppSync = new PrismaAppSync({
         },
         hooks: () => {
             return {
-                'after:modify/comment': async ({ prismaClient, args, result }) => {
-                    await prismaClient.notification.create({ data: args.data })
-                    return result
+                'before:modify/post': async ({ prismaClient, args, operation }) => {
+                    await prismaClient.hiddenModel.create({ data: args.data })
+                    return operation
                 },
+                'after:getCommentss': async() => {},
+                // 'before:notify/postd': async() => {}
             }
         }
     })

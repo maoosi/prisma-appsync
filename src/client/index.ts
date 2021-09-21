@@ -1,5 +1,5 @@
 export { PrismaAppSync } from './core'
-export { ResolverQuery, AuthModes } from './defs'
+export { ResolverQuery, AuthModes, Hooks } from './defs'
 
 /* TODO: 
 

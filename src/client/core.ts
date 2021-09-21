@@ -3,7 +3,8 @@ import {
     PrismaAppSyncOptions, 
     ResolverQuery, 
     PrismaClient, 
-    Shield, 
+    Shield,
+    CustomResolveParams,
     Authorization 
 } from './defs'
 import { parseError, inspect, debug, CustomError } from './debug'
@@ -78,7 +79,9 @@ export class PrismaAppSync {
      * @param  {ResolveParams} resolveParams
      * @returns Promise
      */
-    public async resolve(resolveParams:ResolveParams):Promise<any> {
+    public async resolve<CustomResolvers extends string | null>(
+        resolveParams:CustomResolveParams<CustomResolvers>
+    ):Promise<any> {
         let results:any = null
 
         try {
@@ -123,7 +126,6 @@ export class PrismaAppSync {
                     ? authorization.reason
                     : authorization.reason()
                 throw new CustomError(reason, { type: 'FORBIDDEN' })
-                return;
             }
 
             // Guard :: if `prismaFilter` is set, combine with current Prisma query

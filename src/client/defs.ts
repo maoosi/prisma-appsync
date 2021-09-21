@@ -76,8 +76,8 @@ export type PrismaAppSyncOptions = {
 export type ResolveParams = {
     event: AppsyncEvent,
     resolvers?: object,
-    shield?: (ResolverQuery) => Shield
-    hooks?: (ResolverQuery) => Hooks
+    shield?: (props:ResolverQuery) => Shield
+    hooks?: () => Hooks
 }
 
 export const ReservedPrismaKeys = [
@@ -195,8 +195,10 @@ for (const actionAlias in ActionsAliasesList) {
         actionsListSingle = actionsListSingle.concat(ActionsAliasesList[actionAlias])
     }
 }
-export const ActionsList = actionsListSingle.filter((item, pos) => actionsListSingle.indexOf(item) === pos)
-export const BatchActionsList = actionsListMultiple.filter((item, pos) => actionsListMultiple.indexOf(item) === pos)
+export const ActionsList = 
+    actionsListSingle.filter((item, pos) => actionsListSingle.indexOf(item) === pos)
+export const BatchActionsList = 
+    actionsListMultiple.filter((item, pos) => actionsListMultiple.indexOf(item) === pos)
 
 export type Action = typeof Actions[keyof typeof Actions] | string
 export type ActionsAlias = keyof typeof ActionsAliases
@@ -209,7 +211,7 @@ export type Subject = {
 } | string
 
 export type ResolverQuery = {
-    operation: string
+    operation: Operation
     action: Action
     subject: Subject
     fields: string[]
@@ -217,6 +219,16 @@ export type ResolverQuery = {
     type: GraphQLType,
     authIdentity: AuthIdentity
     paths: string[]
+}
+
+export type Operation = `${ Action }${ Capitalize<Model> }` | string
+
+export type ResolverQueryBefore = ResolverQuery & {
+    prismaClient: PrismaClient
+}
+export type ResolverQueryAfter = ResolverQuery & {
+    prismaClient: PrismaClient
+    result: any | any[]
 }
 
 export const AuthModes = {
@@ -249,13 +261,42 @@ export type Shield = {
     } | boolean
 }
 
-export type Hooks = {
-    [matcher: string]: Function
+export interface HooksProps {
+    before: ResolverQueryBefore
+    after: ResolverQueryAfter
 }
+
+export type HookPath<CustomResolvers> = 
+    `${ Lowercase<ActionsAlias> }/${ Lowercase<Model> }` | CustomResolvers
+
+export type HooksParameter<HookType extends 'before' | 'after', CustomResolvers extends string | null> = `${ HookType }:${ HookPath<CustomResolvers> }`
+
+export type HooksParameters<
+    HookType extends 'before' | 'after',
+    CustomResolvers extends string | null
+> = {
+    [matcher in HooksParameter<HookType, CustomResolvers>]?: 
+        (props: HooksProps[HookType]) => Promise<any>
+}
+
+export type Hooks = HooksParameters<'after', null> | HooksParameters<'before', null>
+
+export type CustomHooks<CustomResolvers extends string | null> = 
+    HooksParameters<'before', CustomResolvers> | 
+    HooksParameters<'after', CustomResolvers>
 
 export type Authorization = {
     canAccess: boolean
     reason: string | Function
     prismaFilter: object
     matcher: string
+}
+
+export type CustomResolveParams<CustomResolvers extends string | null> = {
+    event: AppsyncEvent,
+    resolvers?: {
+        [resolver in CustomResolvers]: boolean | (() => Promise<any>)
+    },
+    shield?: (props:ResolverQuery) => Shield
+    hooks?: () => CustomHooks<CustomResolvers>
 }
