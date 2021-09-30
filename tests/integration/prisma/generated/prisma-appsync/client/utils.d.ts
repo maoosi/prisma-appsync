@@ -35,3 +35,9 @@ export declare function isMatchingGlob(path: string, globPatterns: string | stri
  * @returns string
  */
 export declare function filterXSS(str: string): string;
+/**
+ * Return true if element is Empty
+ * @param element any
+ * @returns boolean
+ */
+export declare function isEmpty(element: any): boolean;

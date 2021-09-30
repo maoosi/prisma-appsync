@@ -3,32 +3,33 @@ import { merge, dotate } from './utils'
 import {
     PrismaAppSyncOptions,
     AppsyncEvent,
-    ResolverQuery,
+    QueryParams,
     Action,
     Actions,
     Model,
-    Args,
+    Context,
+    PrismaArgs,
     ActionsAliasesList,
     ActionsAlias,
-    Subject,
-    AuthIdentity,
-    AuthModes,
     ReservedPrismaKeys,
     BatchActionsList,
-    Operation
+    Operation,
+    Identity,
+    Authorization,
+    Authorizations
 } from './defs'
 
 
 /**
- * Return ResolverQuery from parse AppSync direct resolver event.
- * @param  {AppsyncEvent} appsyncEvent
- * @param  {PrismaAppSyncOptions} options
- * @param  {any|null} customResolvers?
- * @returns ResolverQuery
+ * Parse AppSync direct resolver event and returns Query Params.
+ * @param  appsyncEvent AppSync event received in Lambda.
+ * @param  options PrismaAppSync Client options.
+ * @param  customResolvers Custom Resolvers.
+ * @returns `QueryParams`
  */
 export function parseEvent(
     appsyncEvent:AppsyncEvent, options:PrismaAppSyncOptions, customResolvers?:any|null
-):ResolverQuery {
+):QueryParams {
     if (!(
         appsyncEvent.info && 
         appsyncEvent.info.fieldName && 
@@ -39,39 +40,41 @@ export function parseEvent(
         throw new Error(`Error reading required parameters from appsyncEvent.`)
     }
 
-    let action:Action, model:Model, subject: Subject
+    const context:Context = {
+        action: null,
+        alias: null,
+        model: null
+    }
     const operation = getOperation({ fieldName: appsyncEvent.info.fieldName })
 
     if (customResolvers && typeof customResolvers[operation] !== 'undefined') {
-        action = operation
-        subject = operation
+        context.action = operation
+        context.alias = 'custom'
+        context.model = null
     } else {
-        action = getAction({ operation })
-        model = getModel({ operation, action })
+        context.action = getAction({ operation })
+        context.model = getModel({ operation, action: context.action })
 
         if (
             options?.generatedConfig?.prismaClientModels && 
-            typeof options.generatedConfig.prismaClientModels[model] !== 'undefined'
+            typeof options.generatedConfig.prismaClientModels[context.model] !== 'undefined'
         ) {
-            model = options.generatedConfig.prismaClientModels[model]
+            context.model = options.generatedConfig.prismaClientModels[context.model]
         } else {
             throw new InternalError('Issue parsing prismaClientModels from auto-injected environment variable `PRISMA_APPSYNC_GENERATED_CONFIG`.')
         }
 
-        subject = {
-            actionAlias: getActionAlias({ action }),
-            model: model
-        }
+        context.alias = getActionAlias({ action: context.action })
     }
     
-    const authIdentity = getAuthIdentity({ 
+    const { identity, authorization } = getAuthIdentity({ 
         appsyncEvent 
     })
     const fields = getFields({ 
         _selectionSetList: appsyncEvent.info.selectionSetList
     })
-    const args = getArgs({ 
-        action, 
+    const prismaArgs = getPrismaArgs({ 
+        action: context.action, 
         _arguments: appsyncEvent.arguments, 
         _selectionSetList: appsyncEvent.info.selectionSetList, 
         defaultPagination: options.defaultPagination
@@ -80,10 +83,10 @@ export function parseEvent(
         _parentTypeName: appsyncEvent.info.parentTypeName
     })
     const paths = getPaths({ 
-        action, subject, args
+        context, prismaArgs
     })
 
-    return { operation, action, subject, fields, args, type, authIdentity, paths }
+    return { operation, context, fields, args: appsyncEvent.arguments, prismaArgs, type, authorization, identity, paths }
 }
 
 
@@ -94,8 +97,9 @@ export function parseEvent(
  */
 export function getAuthIdentity(
     { appsyncEvent }: { appsyncEvent: any }
-):AuthIdentity {
-    let authIdentity:AuthIdentity = null
+):{ identity:Identity, authorization:Authorization } {
+    let authorization:Authorization = null
+    let identity:Identity = appsyncEvent.identity
 
     // https://docs.aws.amazon.com/appsync/latest/devguide/resolver-context-reference.html#aws-appsync-resolver-context-reference-identity
 
@@ -105,8 +109,8 @@ export function getAuthIdentity(
         !appsyncEvent.identity || 
         appsyncEvent.identity.length < 1
     ) {
-        authIdentity = merge(appsyncEvent.identity, {
-            authorization: AuthModes.API_KEY,
+        authorization = Authorizations.API_KEY
+        identity = merge(identity, {
             ...(
                 appsyncEvent.request && 
                 appsyncEvent.request.headers &&
@@ -129,9 +133,7 @@ export function getAuthIdentity(
     else if (
         typeof appsyncEvent.identity['resolverContext'] !== 'undefined'
     ) {
-        authIdentity = merge(appsyncEvent.identity, {
-            authorization: AuthModes.AWS_LAMBDA
-        })
+        authorization = Authorizations.AWS_LAMBDA
     }
     // AWS_IAM authorization
     else if (
@@ -140,9 +142,7 @@ export function getAuthIdentity(
         typeof appsyncEvent.identity['cognitoIdentityPoolId'] !== 'undefined' &&
         typeof appsyncEvent.identity['cognitoIdentityId'] !== 'undefined'
     ) {
-        authIdentity = merge(appsyncEvent.identity, {
-            authorization: AuthModes.AWS_IAM
-        })
+        authorization = Authorizations.AWS_IAM
     }
     // AMAZON_COGNITO_USER_POOLS authorization
     else if (
@@ -153,9 +153,7 @@ export function getAuthIdentity(
         typeof appsyncEvent.identity['sourceIp'] !== 'undefined' &&
         typeof appsyncEvent.identity['defaultAuthStrategy'] !== 'undefined'
     ) {
-        authIdentity = merge(appsyncEvent.identity, {
-            authorization: AuthModes.AMAZON_COGNITO_USER_POOLS
-        })
+        authorization = Authorizations.AMAZON_COGNITO_USER_POOLS
     } 
     // AWS_OIDC authorization
     else if (
@@ -163,9 +161,7 @@ export function getAuthIdentity(
         typeof appsyncEvent.identity['issuer'] !== 'undefined' &&
         typeof appsyncEvent.identity['claims'] !== 'undefined'
     ) {
-        authIdentity = merge(appsyncEvent.identity, {
-            authorization: AuthModes.AWS_OIDC
-        })
+        authorization = Authorizations.AWS_OIDC
     } 
     // ERROR
     else {
@@ -174,7 +170,7 @@ export function getAuthIdentity(
         )
     }
 
-    return authIdentity
+    return { authorization, identity }
 }
 
 
@@ -236,7 +232,7 @@ export function getActionAlias(
     }
 
     if (! (typeof action !== 'undefined' && action.length > 0) ) 
-        throw new Error(`Error parsing 'action' from input event.`)
+        throw new Error(`Error parsing 'actionAlias' from input event.`)
     
     return actionAlias
 }
@@ -301,32 +297,32 @@ export function getType(
  * @param  {{action: Action, _arguments:any, defaultPagination:false|number}} { action, _arguments, defaultPagination }
  * @returns Args
  */
-export function getArgs(
+export function getPrismaArgs(
     { action, _arguments, _selectionSetList, defaultPagination }: 
     { action: Action, _arguments:any, _selectionSetList:any, defaultPagination:false|number }
-): Args {
-    const args:Args = {}
+): PrismaArgs {
+    const prismaArgs:PrismaArgs = {}
 
-    if (typeof _arguments.data !== 'undefined') args.data = _arguments.data
-    if (typeof _arguments.where !== 'undefined') args.where = _arguments.where
-    if (typeof _arguments.orderBy !== 'undefined') args.orderBy = parseOrderBy(_arguments.orderBy)
-    if (typeof _arguments.skipDuplicates !== 'undefined') args.skipDuplicates = _arguments.skipDuplicates
+    if (typeof _arguments.data !== 'undefined') prismaArgs.data = _arguments.data
+    if (typeof _arguments.where !== 'undefined') prismaArgs.where = _arguments.where
+    if (typeof _arguments.orderBy !== 'undefined') prismaArgs.orderBy = parseOrderBy(_arguments.orderBy)
+    if (typeof _arguments.skipDuplicates !== 'undefined') prismaArgs.skipDuplicates = _arguments.skipDuplicates
 
     if (typeof _selectionSetList !== 'undefined') {
-        args.select = parseSelectionList(_selectionSetList)
+        prismaArgs.select = parseSelectionList(_selectionSetList)
     }
 
-    if (typeof _arguments.skip !== 'undefined') args.skip = parseInt(_arguments.skip)
+    if (typeof _arguments.skip !== 'undefined') prismaArgs.skip = parseInt(_arguments.skip)
     else if (defaultPagination !== false && action === Actions.list) {
-        args.skip = 0
+        prismaArgs.skip = 0
     }
 
-    if (typeof _arguments.take !== 'undefined') args.take = parseInt(_arguments.take)
+    if (typeof _arguments.take !== 'undefined') prismaArgs.take = parseInt(_arguments.take)
     else if (defaultPagination !== false && action === Actions.list) {
-        args.take = defaultPagination
+        prismaArgs.take = defaultPagination
     }
 
-    return args
+    return prismaArgs
 }
 
 
@@ -409,29 +405,29 @@ function getSelect(parts:any): any {
  * @returns any
  */
 function parseSelectionList(selectionSetList:any): any {
-    let args:any = {}
+    let prismaArgs:any = {}
 
     for (let i = 0; i < selectionSetList.length; i++) {
         const path = selectionSetList[i]
         const parts = path.split('/')
 
         if (!parts.includes('__typename')) {
-            if (parts.length > 1) args = merge(args, getInclude(parts))
-            else args = merge(args, getSelect(parts))
+            if (parts.length > 1) prismaArgs = merge(prismaArgs, getInclude(parts))
+            else prismaArgs = merge(prismaArgs, getSelect(parts))
         }
     }
 
-    if (args.include) {
-        for (const include in args.include) {
-            if (typeof args.select[include] !== 'undefined') delete args.select[include]
+    if (prismaArgs.include) {
+        for (const include in prismaArgs.include) {
+            if (typeof prismaArgs.select[include] !== 'undefined') delete prismaArgs.select[include]
         }
 
-        args.select = merge(args.select, args.include)
-        delete args.include
+        prismaArgs.select = merge(prismaArgs.select, prismaArgs.include)
+        delete prismaArgs.include
     }
     
-    return typeof args.select !== 'undefined'
-        ? args.select
+    return typeof prismaArgs.select !== 'undefined'
+        ? prismaArgs.select
         : {}
 }
 
@@ -442,34 +438,35 @@ function parseSelectionList(selectionSetList:any): any {
  * @returns string[]
  */
 export function getPaths(
-    { action, subject, args }:
-    { action:Action, subject:Subject, args:Args }
+    { context, prismaArgs }:
+    { context:Context, prismaArgs:PrismaArgs }
 ):string[] {
     const paths:string[] = []
-    const model = typeof subject === 'string' ? subject : subject.model
-    const isBatchAction:boolean = BatchActionsList.includes(action)
+    const pathRoot = context.model !== null 
+        ? `/${context.action}/${context.model}` : `/${context.action}`
+    const isBatchAction:boolean = BatchActionsList.includes(context.action)
 
-    if (typeof args.data !== 'undefined') {
-        const inputs:any[] = Array.isArray(args.data) ? args.data : [args.data]
+    if (typeof prismaArgs.data !== 'undefined') {
+        const inputs:any[] = Array.isArray(prismaArgs.data) ? prismaArgs.data : [prismaArgs.data]
 
         inputs.forEach((input:any) => {
             const objectPaths = dotate(input)
 
             for (const key in objectPaths) {
                 const item = key.split('.').filter((k) => !ReservedPrismaKeys.includes(k)).join('/')
-                const path = (`/${action}/${model}/${item}`).toLowerCase()
+                const path = (`${pathRoot}/${item}`).toLowerCase()
                 if (!paths.includes(path)) paths.push(path)
             }
         })
     }
 
-    if (typeof args.select !== 'undefined') {
-        const objectPaths = dotate(args.select)
+    if (typeof prismaArgs.select !== 'undefined' && context.model !== null) {
+        const objectPaths = dotate(prismaArgs.select)
 
         for (const key in objectPaths) {
             const item = key.split('.').filter((k) => !ReservedPrismaKeys.includes(k)).join('/')
             const selectAction = isBatchAction ? Actions.list : Actions.get
-            const path = (`/${selectAction}/${model}/${item}`).toLowerCase()
+            const path = (`/${selectAction}/${context.model}/${item}`).toLowerCase()
             if (!paths.includes(path)) paths.push(path)
         }
     }

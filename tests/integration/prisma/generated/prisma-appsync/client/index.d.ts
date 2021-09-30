@@ -1,2 +1,2 @@
 export { PrismaAppSync } from './core';
-export { ResolverQuery, AuthModes, Hooks } from './defs';
+export { QueryParams, Authorizations, Hooks } from './defs';

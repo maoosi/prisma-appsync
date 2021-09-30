@@ -1,9 +1,8 @@
 export { PrismaAppSync } from './core'
-export { ResolverQuery, AuthModes, Hooks } from './defs'
+export { QueryParams, Authorizations, Hooks } from './defs'
 
 /* TODO: 
 
-- [ ] Improve Error Handling.
 - [ ] Custom Resolvers.
 - [ ] Hooks.
 - [ ] Test Models name mapping.

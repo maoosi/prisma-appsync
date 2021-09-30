@@ -1,7 +1,7 @@
 {
   "inputs": {
     "src/client/defs.ts": {
-      "bytes": 7340,
+      "bytes": 7469,
       "imports": []
     },
     "src/client/debug.ts": {
@@ -347,7 +347,7 @@
       ]
     },
     "src/client/utils.ts": {
-      "bytes": 1315,
+      "bytes": 1866,
       "imports": [
         {
           "path": "node_modules/.pnpm/dot-object@2.1.4/node_modules/dot-object/index.js",
@@ -372,7 +372,7 @@
       ]
     },
     "src/client/adapter.ts": {
-      "bytes": 14333,
+      "bytes": 14694,
       "imports": [
         {
           "path": "src/client/logger.ts",
@@ -389,7 +389,7 @@
       ]
     },
     "src/client/guard.ts": {
-      "bytes": 2626,
+      "bytes": 2644,
       "imports": [
         {
           "path": "src/client/utils.ts",
@@ -398,11 +398,15 @@
       ]
     },
     "src/client/resolver.ts": {
-      "bytes": 5763,
+      "bytes": 5527,
+      "imports": []
+    },
+    "node_modules/.pnpm/lodash@4.17.21/node_modules/lodash/lodash.js": {
+      "bytes": 544098,
       "imports": []
     },
     "src/client/core.ts": {
-      "bytes": 6303,
+      "bytes": 6584,
       "imports": [
         {
           "path": "src/client/defs.ts",
@@ -423,11 +427,15 @@
         {
           "path": "src/client/resolver.ts",
           "kind": "import-statement"
+        },
+        {
+          "path": "node_modules/.pnpm/lodash@4.17.21/node_modules/lodash/lodash.js",
+          "kind": "import-statement"
         }
       ]
     },
     "src/client/index.ts": {
-      "bytes": 284,
+      "bytes": 257,
       "imports": [
         {
           "path": "src/client/core.ts",
@@ -447,100 +455,103 @@
       "entryPoint": "src/client/index.ts",
       "inputs": {
         "node_modules/.pnpm/ts-custom-error@3.2.0/node_modules/ts-custom-error/dist/custom-error.js": {
-          "bytesInOutput": 1523
+          "bytesInOutput": 1524
         },
         "node_modules/.pnpm/dot-object@2.1.4/node_modules/dot-object/index.js": {
-          "bytesInOutput": 5347
+          "bytesInOutput": 5384
         },
         "node_modules/.pnpm/braces@3.0.2/node_modules/braces/lib/utils.js": {
-          "bytesInOutput": 1015
+          "bytesInOutput": 1028
         },
         "node_modules/.pnpm/braces@3.0.2/node_modules/braces/lib/stringify.js": {
-          "bytesInOutput": 343
+          "bytesInOutput": 344
         },
         "node_modules/.pnpm/is-number@7.0.0/node_modules/is-number/index.js": {
-          "bytesInOutput": 177
+          "bytesInOutput": 178
         },
         "node_modules/.pnpm/to-regex-range@5.0.1/node_modules/to-regex-range/index.js": {
-          "bytesInOutput": 3119
+          "bytesInOutput": 3118
         },
         "node_modules/.pnpm/fill-range@7.0.1/node_modules/fill-range/index.js": {
-          "bytesInOutput": 3050
+          "bytesInOutput": 3054
         },
         "node_modules/.pnpm/braces@3.0.2/node_modules/braces/lib/compile.js": {
-          "bytesInOutput": 676
+          "bytesInOutput": 677
         },
         "node_modules/.pnpm/braces@3.0.2/node_modules/braces/lib/expand.js": {
-          "bytesInOutput": 1459
+          "bytesInOutput": 1460
         },
         "node_modules/.pnpm/braces@3.0.2/node_modules/braces/lib/constants.js": {
-          "bytesInOutput": 986
+          "bytesInOutput": 987
         },
         "node_modules/.pnpm/braces@3.0.2/node_modules/braces/lib/parse.js": {
-          "bytesInOutput": 2900
+          "bytesInOutput": 2910
         },
         "node_modules/.pnpm/braces@3.0.2/node_modules/braces/index.js": {
-          "bytesInOutput": 710
+          "bytesInOutput": 725
         },
         "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/constants.js": {
-          "bytesInOutput": 2668
+          "bytesInOutput": 2669
         },
         "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/utils.js": {
-          "bytesInOutput": 1038
+          "bytesInOutput": 1053
         },
         "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/scan.js": {
-          "bytesInOutput": 3110
+          "bytesInOutput": 3229
         },
         "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/parse.js": {
-          "bytesInOutput": 12173
+          "bytesInOutput": 12380
         },
         "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/picomatch.js": {
-          "bytesInOutput": 2310
+          "bytesInOutput": 2333
         },
         "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/index.js": {
-          "bytesInOutput": 50
+          "bytesInOutput": 51
         },
         "node_modules/.pnpm/micromatch@4.0.4/node_modules/micromatch/index.js": {
-          "bytesInOutput": 2548
+          "bytesInOutput": 2574
         },
         "node_modules/.pnpm/deepmerge@4.2.2/node_modules/deepmerge/dist/cjs.js": {
-          "bytesInOutput": 1990
+          "bytesInOutput": 1991
         },
         "node_modules/.pnpm/cssfilter@0.0.10/node_modules/cssfilter/lib/default.js": {
-          "bytesInOutput": 7394
+          "bytesInOutput": 7395
         },
         "node_modules/.pnpm/cssfilter@0.0.10/node_modules/cssfilter/lib/util.js": {
-          "bytesInOutput": 479
+          "bytesInOutput": 480
         },
         "node_modules/.pnpm/cssfilter@0.0.10/node_modules/cssfilter/lib/parser.js": {
-          "bytesInOutput": 551
+          "bytesInOutput": 552
         },
         "node_modules/.pnpm/cssfilter@0.0.10/node_modules/cssfilter/lib/css.js": {
-          "bytesInOutput": 871
+          "bytesInOutput": 872
         },
         "node_modules/.pnpm/cssfilter@0.0.10/node_modules/cssfilter/lib/index.js": {
-          "bytesInOutput": 234
+          "bytesInOutput": 235
         },
         "node_modules/.pnpm/xss@1.0.9/node_modules/xss/lib/util.js": {
-          "bytesInOutput": 457
+          "bytesInOutput": 458
         },
         "node_modules/.pnpm/xss@1.0.9/node_modules/xss/lib/default.js": {
-          "bytesInOutput": 4308
+          "bytesInOutput": 4331
         },
         "node_modules/.pnpm/xss@1.0.9/node_modules/xss/lib/parser.js": {
-          "bytesInOutput": 2080
+          "bytesInOutput": 2081
         },
         "node_modules/.pnpm/xss@1.0.9/node_modules/xss/lib/xss.js": {
-          "bytesInOutput": 1967
+          "bytesInOutput": 1992
         },
         "node_modules/.pnpm/xss@1.0.9/node_modules/xss/lib/index.js": {
-          "bytesInOutput": 481
+          "bytesInOutput": 482
+        },
+        "node_modules/.pnpm/lodash@4.17.21/node_modules/lodash/lodash.js": {
+          "bytesInOutput": 82238
         },
         "src/client/index.ts": {
-          "bytesInOutput": 64
+          "bytesInOutput": 69
         },
         "src/client/defs.ts": {
-          "bytesInOutput": 1445
+          "bytesInOutput": 1477
         },
         "src/client/debug.ts": {
           "bytesInOutput": 1132
@@ -552,19 +563,19 @@
           "bytesInOutput": 229
         },
         "src/client/adapter.ts": {
-          "bytesInOutput": 5451
+          "bytesInOutput": 5558
         },
         "src/client/guard.ts": {
           "bytesInOutput": 631
         },
         "src/client/resolver.ts": {
-          "bytesInOutput": 2480
+          "bytesInOutput": 2344
         },
         "src/client/core.ts": {
-          "bytesInOutput": 2098
+          "bytesInOutput": 2261
         }
       },
-      "bytes": 81185
+      "bytes": 164469
     }
   }
 }

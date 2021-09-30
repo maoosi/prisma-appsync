@@ -1,4 +1,4 @@
-import { Authorization, Shield, ReservedPrismaKeys } from './defs'
+import { ShieldAuthorization, Shield, ReservedPrismaKeys } from './defs'
 import { merge, clone, escapeHTML, filterXSS, isMatchingGlob } from './utils'
 
 // TODO: Comment code
@@ -23,8 +23,8 @@ export function sanitize(data: object):object {
 
 export function getAuthorization(
     { shield, paths }: { shield: Shield, paths: string[] }
-):Authorization {
-    const authorization:Authorization = {
+):ShieldAuthorization {
+    const authorization:ShieldAuthorization = {
         canAccess: true,
         reason: null,
         prismaFilter: null,

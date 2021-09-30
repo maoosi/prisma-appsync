@@ -1,13 +1,7 @@
-import { PrismaAppSyncOptions, PrismaClient, CustomResolveParams } from './defs';
+import { PrismaAppSyncOptions, ResolveParams } from './defs';
 export declare class PrismaAppSync {
     private options;
-    private event;
-    private resolverQuery;
-    private resolvers;
-    private shield;
-    private hooks;
-    private isFirstResolve;
-    prismaClient: PrismaClient;
+    private prismaClient;
     /**
      * Instantiate Prisma-AppSync Client.
      * @param  {PrismaAppSyncOptions} options
@@ -18,5 +12,5 @@ export declare class PrismaAppSync {
      * @param  {ResolveParams} resolveParams
      * @returns Promise
      */
-    resolve<CustomResolvers extends string | null>(resolveParams: CustomResolveParams<CustomResolvers>): Promise<any>;
+    resolve<CustomResolvers extends string | null>(resolveParams: ResolveParams<CustomResolvers>): Promise<any>;
 }

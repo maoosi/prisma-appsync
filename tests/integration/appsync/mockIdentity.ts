@@ -1,6 +1,6 @@
 import { 
     AppSyncIdentity, 
-    AuthModes, 
+    Authorizations, 
     API_KEY, 
     AWS_IAM,
     AMAZON_COGNITO_USER_POOLS,
@@ -10,11 +10,11 @@ import {
 
 
 export default function(
-    identity: typeof AuthModes[keyof typeof AuthModes],
+    identity: typeof Authorizations[keyof typeof Authorizations],
     opts: mockOptions
 ):AppSyncIdentity {
 
-    if (identity === AuthModes.AWS_IAM) {
+    if (identity === Authorizations.AWS_IAM) {
         const mock: AWS_IAM = {
             accountId: "string",
             cognitoIdentityPoolId: "string",
@@ -26,7 +26,7 @@ export default function(
             cognitoIdentityAuthProvider: "string"
         }
         return mock
-    } else if (identity === AuthModes.AMAZON_COGNITO_USER_POOLS) {
+    } else if (identity === Authorizations.AMAZON_COGNITO_USER_POOLS) {
         const mock: AMAZON_COGNITO_USER_POOLS = {
             sub: opts.sub,
             issuer: "string",
@@ -37,12 +37,12 @@ export default function(
             groups: ['admin', 'member'],
         }
         return mock
-    } else if (identity === AuthModes.AWS_LAMBDA) {
+    } else if (identity === Authorizations.AWS_LAMBDA) {
         const mock: AWS_LAMBDA = { 
             resolverContext: opts.resolverContext
         }
         return mock
-    } else if (identity === AuthModes.AWS_OIDC) {
+    } else if (identity === Authorizations.AWS_OIDC) {
         const mock: AWS_OIDC = {
             claims: {
                 sub: opts.sub,

@@ -11,8 +11,8 @@ generator client {
 generator appsync {
     provider = "../../dist/generator.js"
     output = "./generated/prisma-appsync"
-    // customSchema = "./custom-schema.gql"
-    // customResolvers = "./custom-resolvers.yaml"
+    customSchema = "./custom-schema.gql"
+    customResolvers = "./custom-resolvers.yaml"
     debug = true
 
     // Can access: visitors / server / logged-in users from group "users" or "admins"

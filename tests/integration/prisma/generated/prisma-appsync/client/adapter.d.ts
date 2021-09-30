@@ -1,12 +1,12 @@
-import { PrismaAppSyncOptions, AppsyncEvent, ResolverQuery, Action, Model, Args, ActionsAlias, Subject, AuthIdentity, Operation } from './defs';
+import { PrismaAppSyncOptions, AppsyncEvent, QueryParams, Action, Model, Context, PrismaArgs, ActionsAlias, Operation, Identity, Authorization } from './defs';
 /**
- * Return ResolverQuery from parse AppSync direct resolver event.
- * @param  {AppsyncEvent} appsyncEvent
- * @param  {PrismaAppSyncOptions} options
- * @param  {any|null} customResolvers?
- * @returns ResolverQuery
+ * Parse AppSync direct resolver event and returns Query Params.
+ * @param  appsyncEvent AppSync event received in Lambda.
+ * @param  options PrismaAppSync Client options.
+ * @param  customResolvers Custom Resolvers.
+ * @returns `QueryParams`
  */
-export declare function parseEvent(appsyncEvent: AppsyncEvent, options: PrismaAppSyncOptions, customResolvers?: any | null): ResolverQuery;
+export declare function parseEvent(appsyncEvent: AppsyncEvent, options: PrismaAppSyncOptions, customResolvers?: any | null): QueryParams;
 /**
  * Return auth. identity from parsed `event`.
  * @param  {{appsyncEvent:any}} {appsyncEvent}
@@ -14,7 +14,10 @@ export declare function parseEvent(appsyncEvent: AppsyncEvent, options: PrismaAp
  */
 export declare function getAuthIdentity({ appsyncEvent }: {
     appsyncEvent: any;
-}): AuthIdentity;
+}): {
+    identity: Identity;
+    authorization: Authorization;
+};
 /**
  * Return operation (`getPost`, `listUsers`, ...) from parsed `event.info.fieldName`.
  * @param  {{fieldName:string}} {fieldName}
@@ -69,19 +72,18 @@ export declare function getType({ _parentTypeName }: {
  * @param  {{action: Action, _arguments:any, defaultPagination:false|number}} { action, _arguments, defaultPagination }
  * @returns Args
  */
-export declare function getArgs({ action, _arguments, _selectionSetList, defaultPagination }: {
+export declare function getPrismaArgs({ action, _arguments, _selectionSetList, defaultPagination }: {
     action: Action;
     _arguments: any;
     _selectionSetList: any;
     defaultPagination: false | number;
-}): Args;
+}): PrismaArgs;
 /**
  * Return req and res paths (`/update/post/title`, `/get/post/date`, ...)
  * @param  {{action:Action, subject:Subject, args:Args}} {action, subject, args}
  * @returns string[]
  */
-export declare function getPaths({ action, subject, args }: {
-    action: Action;
-    subject: Subject;
-    args: Args;
+export declare function getPaths({ context, prismaArgs }: {
+    context: Context;
+    prismaArgs: PrismaArgs;
 }): string[];

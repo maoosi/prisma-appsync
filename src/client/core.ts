@@ -1,36 +1,26 @@
 import { 
-    ResolveParams, 
     PrismaAppSyncOptions, 
-    ResolverQuery, 
     PrismaClient, 
     Shield,
-    CustomResolveParams,
-    Authorization 
+    ShieldAuthorization,
+    ResolveParams
 } from './defs'
 import { parseError, inspect, debug, CustomError } from './debug'
 import { parseEvent } from './adapter'
 import { getAuthorization, getDepth } from './guard'
 import * as queries from './resolver'
+import { isEmpty } from 'lodash'
 
 
 export class PrismaAppSync {
     private options: PrismaAppSyncOptions
-    private event: ResolveParams['event']
-    private resolverQuery: ResolverQuery
-    private resolvers: {} | null
-    private shield: ResolveParams['shield'] | null
-    private hooks: ResolveParams['hooks'] | null
-    private isFirstResolve: boolean
-    public prismaClient:PrismaClient
-
+    private prismaClient:PrismaClient
 
     /**
      * Instantiate Prisma-AppSync Client.
      * @param  {PrismaAppSyncOptions} options
      */
     constructor(options:PrismaAppSyncOptions) {
-        this.isFirstResolve = true
-
         // Try parse auto-injected environment variable `PRISMA_APPSYNC_GENERATED_CONFIG`
         let generatedConfig = {}
         try {
@@ -80,7 +70,7 @@ export class PrismaAppSync {
      * @returns Promise
      */
     public async resolve<CustomResolvers extends string | null>(
-        resolveParams:CustomResolveParams<CustomResolvers>
+        resolveParams:ResolveParams<CustomResolvers>
     ):Promise<any> {
         let results:any = null
 
@@ -91,55 +81,45 @@ export class PrismaAppSync {
                 info: resolveParams.event.info,
             })}`)
 
-            // Only read params other than `event` on first .resolve() call
-            if (this.isFirstResolve) {
-                this.shield = resolveParams.shield || null
-                this.hooks = resolveParams.hooks || null
-            }
-
-            // This is not anymore the first .resolve() call
-            this.isFirstResolve = false
-
             // Adapter :: parse appsync event
-            this.event = resolveParams.event
-            this.resolverQuery = parseEvent(this.event, this.options, this.resolvers)
-            debug(`Parsed event: ${inspect(this.resolverQuery)}`)
+            const QueryParams = parseEvent(resolveParams.event, this.options, resolveParams.resolvers)
+            debug(`Parsed event: ${inspect(QueryParams)}`)
 
             // Guard :: block queries with a depth > maxDepth
-            const depth = getDepth({ paths: this.resolverQuery.paths })
+            const depth = getDepth({ paths: QueryParams.paths })
             debug(`Query has depth of ${depth} (max allowed is ${this.options.maxDepth}).`)
             if (depth > this.options.maxDepth) {
                 throw new CustomError(`Query has depth of ${depth}, which exceeds max depth of ${this.options.maxDepth}.`, { type: 'FORBIDDEN' })
             }
 
             // Guard :: create shield from config
-            const shield: Shield = await this.shield(this.resolverQuery)
+            const shield: Shield = await resolveParams.shield(QueryParams)
 
             // Guard :: get authorization object
-            const authorization: Authorization = getAuthorization({ 
-                shield, paths: this.resolverQuery.paths
+            const shieldAuth: ShieldAuthorization = getAuthorization({ 
+                shield, paths: QueryParams.paths
             })
 
             // Guard :: if `canAccess` if equal to `false`, we reject the API call
-            if (!authorization.canAccess) {
-                const reason = typeof authorization.reason === 'string'
-                    ? authorization.reason
-                    : authorization.reason()
+            if (!shieldAuth.canAccess) {
+                const reason = typeof shieldAuth.reason === 'string'
+                    ? shieldAuth.reason
+                    : shieldAuth.reason()
                 throw new CustomError(reason, { type: 'FORBIDDEN' })
             }
 
             // Guard :: if `prismaFilter` is set, combine with current Prisma query
-            if (authorization.prismaFilter) {
+            if (shieldAuth.prismaFilter) {
                 this.prismaClient.$use(async (params, next) => {
                     if (typeof params.args.where !== 'undefined' && params.args.where.length > 0) {
                         params.args.where = {
                             AND: [
                                 params.args.where,
-                                authorization.prismaFilter
+                                shieldAuth.prismaFilter
                             ]
                         }
                     } else {
-                        params.args.where = authorization.prismaFilter
+                        params.args.where = shieldAuth.prismaFilter
                     }
                     
                     return next(params)
@@ -147,13 +127,40 @@ export class PrismaAppSync {
             }
 
             // Guard: get and run all before hooks functions matching query
+            console.log(JSON.stringify(QueryParams, null, 4))
 
             // Resolver :: resolve query with Prisma Client
-            results = process.env.JEST_WORKER_ID
-                ? this.resolverQuery
-                : await queries[`${this.resolverQuery.action}Query`](
-                    this.prismaClient, this.resolverQuery
+            if (process.env.JEST_WORKER_ID) {
+
+                // Testing with Jest
+                results = QueryParams
+
+            } else if (
+                typeof resolveParams.resolvers[QueryParams.operation] === 'boolean' &&
+                resolveParams.resolvers[QueryParams.operation] === false
+            ) {
+
+                // Resolver is disabled
+                throw new CustomError(`Resolver ${QueryParams.operation} is disabled.`, { type: 'FORBIDDEN' })
+
+            } else if (typeof resolveParams.resolvers[QueryParams.operation] === 'function') {
+
+                // Call custom resolver
+                results = await resolveParams.resolvers[QueryParams.operation](QueryParams)
+
+            } else if (!isEmpty(QueryParams?.context?.model)) {
+
+                // Call CRUD resolver
+                results = await queries[`${QueryParams.context.action}Query`](
+                    this.prismaClient, QueryParams
                 )
+
+            } else {
+
+                // Resolver not found
+                throw new CustomError(`Resolver for ${QueryParams.operation} could not be found.`, { type: 'INTERNAL_SERVER_ERROR' })
+
+            }
 
             // Guard: get and run all after hooks functions matching query
 

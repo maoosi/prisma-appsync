@@ -58,3 +58,22 @@ export function isMatchingGlob(path: string, globPatterns: string|string[]): boo
 export function filterXSS(str: string):string {
     return xss(str)
 }
+
+/**
+ * Return true if element is Empty
+ * @param element any
+ * @returns boolean
+ */
+ export function isEmpty(element: any):boolean {
+    switch (element) {
+        case null:
+        case undefined:
+        case typeof element === 'undefined':
+        case typeof element === 'string' && element.trim() === '':
+        case Array.isArray(element) && element.length === 0:
+        case Object.getPrototypeOf(element) === Object.prototype && Object.keys(element).length === 0:
+            return true
+        default:
+            return false
+    }
+}

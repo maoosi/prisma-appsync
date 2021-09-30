@@ -1,4 +1,4 @@
-import { PrismaAppSync, AuthModes } from './prisma/generated/prisma-appsync/client'
+import { PrismaAppSync, Authorizations } from './prisma/generated/prisma-appsync/client'
 
 
 /**
@@ -15,24 +15,23 @@ const prismaAppSync = new PrismaAppSync({
  */
  export const main = async (event: any, context: any) => {
 
-    return await prismaAppSync.resolve<'getComment' | 'notify'>({
+    return await prismaAppSync.resolve<'listPosts' | 'notify'>({
         event,
         resolvers: {
 
             // extend CRUD API with a custom `notify` query
-            notify: async () => {
-                return { message: 'Hello!' }
+            notify: async ({ args }) => {
+                return { message: `${args.message} from notify` }
             },
 
-            // disabled one of the generated CRUD API query
-            getComment: false
+            // disable one of the generated CRUD API query
+            listPosts: false
 
         },
-        shield: ({ authIdentity }) => {
-            const isAdmin = authIdentity?.groups?.includes('admin')
-            const isOwner = { owner: { cognitoSub: authIdentity?.sub } }
-            const isCognitoAuth = 
-                authIdentity.authorization === AuthModes.AMAZON_COGNITO_USER_POOLS
+        shield: ({ authorization, identity }) => {
+            const isAdmin = identity?.groups?.includes('admin')
+            const isOwner = { owner: { cognitoSub: identity?.sub } }
+            const isCognitoAuth = authorization === Authorizations.AMAZON_COGNITO_USER_POOLS
     
             return {
                 // default (overridden by specific rules)
@@ -62,8 +61,6 @@ const prismaAppSync = new PrismaAppSync({
                     await prismaClient.hiddenModel.create({ data: args.data })
                     return operation
                 },
-                'after:getCommentss': async() => {},
-                // 'before:notify/postd': async() => {}
             }
         }
     })
