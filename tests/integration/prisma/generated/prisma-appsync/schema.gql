@@ -1,42 +1,38 @@
-input AWSDateTimeFilterInput {
-    equals: AWSDateTime
-    gt: AWSDateTime
-    gte: AWSDateTime
-    in: [AWSDateTime!]
-    lt: AWSDateTime
-    lte: AWSDateTime
-    not: AWSDateTimeFilterInput
-    notIn: [AWSDateTime!]
+type User
+    @aws_api_key
+    @aws_cognito_user_pools(
+        cognito_groups: ["users", "admins"]
+    ) {
+    id: Int!
+    username: String!
+    email: AWSEmail!
+        @aws_api_key
+        @aws_cognito_user_pools(cognito_groups: ["admins"])
+    role: Role!
+    posts: [Post!]
+        @aws_iam
+        @aws_api_key
+        @aws_cognito_user_pools(
+            cognito_groups: ["users", "admins"]
+        )
 }
 
-input AWSEmailFilterInput {
-    contains: String
-    endsWith: String
-    equals: AWSEmail
-    in: [AWSEmail!]
-    not: AWSEmailFilterInput
-    notIn: [AWSEmail!]
-    startsWith: String
-}
-
-input AWSJSONFilterInput {
-    contains: String
-    endsWith: String
-    equals: AWSJSON
-    in: [AWSJSON!]
-    not: AWSJSONFilterInput
-    notIn: [AWSJSON!]
-    startsWith: String
-}
-
-input AWSURLFilterInput {
-    contains: String
-    endsWith: String
-    equals: AWSURL
-    in: [AWSURL!]
-    not: AWSURLFilterInput
-    notIn: [AWSURL!]
-    startsWith: String
+type Post
+    @aws_iam
+    @aws_api_key
+    @aws_cognito_user_pools(
+        cognito_groups: ["users", "admins"]
+    ) {
+    id: Int!
+    title: String!
+    author: User
+        @aws_api_key
+        @aws_cognito_user_pools(
+            cognito_groups: ["users", "admins"]
+        )
+    authorId: Int
+    published: Boolean!
+    lastSavedAt: AWSDateTime!
 }
 
 type BatchPayload
@@ -48,9 +44,236 @@ type BatchPayload
     count: Int
 }
 
-input BooleanFilterInput {
-    equals: Boolean
-    not: BooleanFilterInput
+enum Role {
+    USER
+    ADMIN
+}
+
+input RoleEnumFilterInput {
+    equals: Role
+    in: [Role!]
+    not: RoleEnumFilterInput
+    notIn: [Role!]
+}
+
+enum OrderByArg {
+    ASC
+    DESC
+}
+
+input UserFilterRelationsInput {
+    every: UserWhereFilterInput
+    none: UserWhereFilterInput
+    some: UserWhereFilterInput
+}
+
+input UserWhereFilterInput {
+    OR: [UserWhereFilterInput]
+    NOT: [UserWhereFilterInput]
+    AND: [UserWhereFilterInput]
+    id: IntFilterInput
+    username: StringFilterInput
+    email: AWSEmailFilterInput
+    role: RoleEnumFilterInput
+    posts: PostFilterRelationsInput
+}
+
+input UserWhereUniqueInput {
+    id: Int
+    username: String
+    email: AWSEmail
+}
+
+input UserOrderByInput {
+    id: OrderByArg
+    username: OrderByArg
+    email: OrderByArg
+    role: OrderByArg
+}
+
+input UserCreateInput {
+    username: String!
+    email: AWSEmail!
+    role: Role!
+    posts: UserPostsCreateRelationsInput
+}
+
+input UserCreateManyInput {
+    username: String!
+    email: AWSEmail!
+    role: Role!
+}
+
+input UserUpdateInput {
+    username: String
+    email: AWSEmail
+    role: Role
+    posts: UserPostsUpdateRelationsInput
+}
+
+input UserUpdateUniqueInput {
+    data: UserUpdateInput!
+    where: UserWhereUniqueInput!
+}
+
+input UserUpdateManyInput {
+    where: UserWhereFilterInput!
+    data: UserUpdateInput!
+}
+
+input UserUpsertInput {
+    create: UserCreateInput!
+    update: UserUpdateInput!
+}
+
+input UserUpsertUniqueInput {
+    where: UserWhereUniqueInput!
+    create: UserCreateInput!
+    update: UserUpdateInput!
+}
+
+input UserDeleteUniqueInput {
+    where: UserWhereUniqueInput!
+}
+
+input UserDeleteManyInput {
+    where: UserWhereFilterInput!
+}
+
+input UserConnectOrCreateInput {
+    where: UserWhereUniqueInput!
+    create: UserCreateInput!
+}
+
+input UserPostsCreateRelationsInput {
+    create: [PostCreateInput]
+    connect: [PostWhereUniqueInput]
+    connectOrCreate: [PostConnectOrCreateInput]
+}
+
+input UserPostsUpdateRelationsInput {
+    create: [PostCreateInput]
+    connect: [PostWhereUniqueInput]
+    connectOrCreate: [PostConnectOrCreateInput]
+    update: [PostUpdateUniqueInput]
+    upsert: [PostUpsertUniqueInput]
+    delete: [PostDeleteUniqueInput]
+    disconnect: [PostWhereUniqueInput]
+    set: [PostWhereUniqueInput]
+    updateMany: [PostUpdateManyInput]
+    deleteMany: [PostDeleteManyInput]
+}
+
+input PostFilterRelationsInput {
+    every: PostWhereFilterInput
+    none: PostWhereFilterInput
+    some: PostWhereFilterInput
+}
+
+input PostWhereFilterInput {
+    OR: [PostWhereFilterInput]
+    NOT: [PostWhereFilterInput]
+    AND: [PostWhereFilterInput]
+    id: IntFilterInput
+    title: StringFilterInput
+    author: UserWhereFilterInput
+    authorId: IntFilterInput
+    published: BooleanFilterInput
+    lastSavedAt: AWSDateTimeFilterInput
+}
+
+input PostWhereUniqueInput {
+    id: Int
+    authorId: Int
+}
+
+input PostOrderByInput {
+    id: OrderByArg
+    title: OrderByArg
+    authorId: OrderByArg
+    published: OrderByArg
+    lastSavedAt: OrderByArg
+}
+
+input PostCreateInput {
+    title: String!
+    author: PostAuthorCreateRelationsInput
+    published: Boolean!
+    lastSavedAt: AWSDateTime!
+}
+
+input PostCreateManyInput {
+    title: String!
+    published: Boolean!
+    lastSavedAt: AWSDateTime!
+}
+
+input PostUpdateInput {
+    title: String
+    author: PostAuthorUpdateRelationsInput
+    published: Boolean
+    lastSavedAt: AWSDateTime
+}
+
+input PostUpdateUniqueInput {
+    data: PostUpdateInput!
+    where: PostWhereUniqueInput!
+}
+
+input PostUpdateManyInput {
+    where: PostWhereFilterInput!
+    data: PostUpdateInput!
+}
+
+input PostUpsertInput {
+    create: PostCreateInput!
+    update: PostUpdateInput!
+}
+
+input PostUpsertUniqueInput {
+    where: PostWhereUniqueInput!
+    create: PostCreateInput!
+    update: PostUpdateInput!
+}
+
+input PostDeleteUniqueInput {
+    where: PostWhereUniqueInput!
+}
+
+input PostDeleteManyInput {
+    where: PostWhereFilterInput!
+}
+
+input PostConnectOrCreateInput {
+    where: PostWhereUniqueInput!
+    create: PostCreateInput!
+}
+
+input PostAuthorCreateRelationsInput {
+    create: UserCreateInput
+    connect: UserWhereUniqueInput
+    connectOrCreate: UserConnectOrCreateInput
+}
+
+input PostAuthorUpdateRelationsInput {
+    create: UserCreateInput
+    connect: UserWhereUniqueInput
+    connectOrCreate: UserConnectOrCreateInput
+    update: UserUpdateInput
+    upsert: UserUpsertInput
+    delete: Boolean
+    disconnect: Boolean
+}
+
+input AWSDateTimeFilterInput {
+    equals: AWSDateTime
+    gt: AWSDateTime
+    gte: AWSDateTime
+    in: [AWSDateTime!]
+    lt: AWSDateTime
+    lte: AWSDateTime
+    not: AWSDateTimeFilterInput
+    notIn: [AWSDateTime!]
 }
 
 input FloatFilterInput {
@@ -73,6 +296,51 @@ input IntFilterInput {
     lte: Int
     not: IntFilterInput
     notIn: [Int!]
+}
+
+input AWSJSONFilterInput {
+    contains: String
+    endsWith: String
+    equals: AWSJSON
+    in: [AWSJSON!]
+    not: AWSJSONFilterInput
+    notIn: [AWSJSON!]
+    startsWith: String
+}
+
+input AWSEmailFilterInput {
+    contains: String
+    endsWith: String
+    equals: AWSEmail
+    in: [AWSEmail!]
+    not: AWSEmailFilterInput
+    notIn: [AWSEmail!]
+    startsWith: String
+}
+
+input AWSURLFilterInput {
+    contains: String
+    endsWith: String
+    equals: AWSURL
+    in: [AWSURL!]
+    not: AWSURLFilterInput
+    notIn: [AWSURL!]
+    startsWith: String
+}
+
+input StringFilterInput {
+    contains: String
+    endsWith: String
+    equals: String
+    in: [String!]
+    not: StringFilterInput
+    notIn: [String!]
+    startsWith: String
+}
+
+input BooleanFilterInput {
+    equals: Boolean
+    not: BooleanFilterInput
 }
 
 type Mutation {
@@ -188,134 +456,6 @@ type Mutation {
     notify(message: String!): PublishNotification
 }
 
-enum OrderByArg {
-    ASC
-    DESC
-}
-
-type Post
-    @aws_iam
-    @aws_api_key
-    @aws_cognito_user_pools(
-        cognito_groups: ["users", "admins"]
-    ) {
-    id: Int!
-    title: String!
-    author: User
-        @aws_api_key
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admins"]
-        )
-    authorId: Int
-    published: Boolean!
-    lastSavedAt: AWSDateTime!
-}
-
-input PostAuthorCreateRelationsInput {
-    create: UserCreateInput
-    connect: UserWhereUniqueInput
-    connectOrCreate: UserConnectOrCreateInput
-}
-
-input PostAuthorUpdateRelationsInput {
-    create: UserCreateInput
-    connect: UserWhereUniqueInput
-    connectOrCreate: UserConnectOrCreateInput
-    update: UserUpdateInput
-    upsert: UserUpsertInput
-    delete: Boolean
-    disconnect: Boolean
-}
-
-input PostConnectOrCreateInput {
-    where: PostWhereUniqueInput!
-    create: PostCreateInput!
-}
-
-input PostCreateInput {
-    title: String!
-    author: PostAuthorCreateRelationsInput
-    published: Boolean!
-    lastSavedAt: AWSDateTime!
-}
-
-input PostCreateManyInput {
-    title: String!
-    published: Boolean!
-    lastSavedAt: AWSDateTime!
-}
-
-input PostDeleteManyInput {
-    where: PostWhereFilterInput!
-}
-
-input PostDeleteUniqueInput {
-    where: PostWhereUniqueInput!
-}
-
-input PostFilterRelationsInput {
-    every: PostWhereFilterInput
-    none: PostWhereFilterInput
-    some: PostWhereFilterInput
-}
-
-input PostOrderByInput {
-    id: OrderByArg
-    title: OrderByArg
-    authorId: OrderByArg
-    published: OrderByArg
-    lastSavedAt: OrderByArg
-}
-
-input PostUpdateInput {
-    title: String
-    author: PostAuthorUpdateRelationsInput
-    published: Boolean
-    lastSavedAt: AWSDateTime
-}
-
-input PostUpdateManyInput {
-    where: PostWhereFilterInput!
-    data: PostUpdateInput!
-}
-
-input PostUpdateUniqueInput {
-    data: PostUpdateInput!
-    where: PostWhereUniqueInput!
-}
-
-input PostUpsertInput {
-    create: PostCreateInput!
-    update: PostUpdateInput!
-}
-
-input PostUpsertUniqueInput {
-    where: PostWhereUniqueInput!
-    create: PostCreateInput!
-    update: PostUpdateInput!
-}
-
-input PostWhereFilterInput {
-    OR: [PostWhereFilterInput]
-    NOT: [PostWhereFilterInput]
-    AND: [PostWhereFilterInput]
-    id: IntFilterInput
-    title: StringFilterInput
-    author: UserWhereFilterInput
-    authorId: IntFilterInput
-    published: BooleanFilterInput
-    lastSavedAt: AWSDateTimeFilterInput
-}
-
-input PostWhereUniqueInput {
-    id: Int
-    authorId: Int
-}
-
-type PublishNotification {
-    message: String!
-}
-
 type Query {
     # Find a single User record by unique identifier.
     getUser(where: UserWhereUniqueInput!): User
@@ -381,28 +521,6 @@ type Query {
         @aws_cognito_user_pools(
             cognito_groups: ["users", "admins"]
         )
-}
-
-enum Role {
-    USER
-    ADMIN
-}
-
-input RoleEnumFilterInput {
-    equals: Role
-    in: [Role!]
-    not: RoleEnumFilterInput
-    notIn: [Role!]
-}
-
-input StringFilterInput {
-    contains: String
-    endsWith: String
-    equals: String
-    in: [String!]
-    not: StringFilterInput
-    notIn: [String!]
-    startsWith: String
 }
 
 type Subscription {
@@ -608,124 +726,6 @@ type Subscription {
         @aws_subscribe(mutations: ["notify"])
 }
 
-type User
-    @aws_api_key
-    @aws_cognito_user_pools(
-        cognito_groups: ["users", "admins"]
-    ) {
-    id: Int!
-    username: String!
-    email: AWSEmail!
-        @aws_api_key
-        @aws_cognito_user_pools(cognito_groups: ["admins"])
-    role: Role!
-    posts: [Post!]
-        @aws_iam
-        @aws_api_key
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admins"]
-        )
-}
-
-input UserConnectOrCreateInput {
-    where: UserWhereUniqueInput!
-    create: UserCreateInput!
-}
-
-input UserCreateInput {
-    username: String!
-    email: AWSEmail!
-    role: Role!
-    posts: UserPostsCreateRelationsInput
-}
-
-input UserCreateManyInput {
-    username: String!
-    email: AWSEmail!
-    role: Role!
-}
-
-input UserDeleteManyInput {
-    where: UserWhereFilterInput!
-}
-
-input UserDeleteUniqueInput {
-    where: UserWhereUniqueInput!
-}
-
-input UserFilterRelationsInput {
-    every: UserWhereFilterInput
-    none: UserWhereFilterInput
-    some: UserWhereFilterInput
-}
-
-input UserOrderByInput {
-    id: OrderByArg
-    username: OrderByArg
-    email: OrderByArg
-    role: OrderByArg
-}
-
-input UserPostsCreateRelationsInput {
-    create: [PostCreateInput]
-    connect: [PostWhereUniqueInput]
-    connectOrCreate: [PostConnectOrCreateInput]
-}
-
-input UserPostsUpdateRelationsInput {
-    create: [PostCreateInput]
-    connect: [PostWhereUniqueInput]
-    connectOrCreate: [PostConnectOrCreateInput]
-    update: [PostUpdateUniqueInput]
-    upsert: [PostUpsertUniqueInput]
-    delete: [PostDeleteUniqueInput]
-    disconnect: [PostWhereUniqueInput]
-    set: [PostWhereUniqueInput]
-    updateMany: [PostUpdateManyInput]
-    deleteMany: [PostDeleteManyInput]
-}
-
-input UserUpdateInput {
-    username: String
-    email: AWSEmail
-    role: Role
-    posts: UserPostsUpdateRelationsInput
-}
-
-input UserUpdateManyInput {
-    where: UserWhereFilterInput!
-    data: UserUpdateInput!
-}
-
-input UserUpdateUniqueInput {
-    data: UserUpdateInput!
-    where: UserWhereUniqueInput!
-}
-
-input UserUpsertInput {
-    create: UserCreateInput!
-    update: UserUpdateInput!
-}
-
-input UserUpsertUniqueInput {
-    where: UserWhereUniqueInput!
-    create: UserCreateInput!
-    update: UserUpdateInput!
-}
-
-input UserWhereFilterInput {
-    OR: [UserWhereFilterInput]
-    NOT: [UserWhereFilterInput]
-    AND: [UserWhereFilterInput]
-    id: IntFilterInput
-    username: StringFilterInput
-    email: AWSEmailFilterInput
-    role: RoleEnumFilterInput
-    posts: PostFilterRelationsInput
-}
-
-input UserWhereUniqueInput {
-    id: Int
-    username: String
-    email: AWSEmail
+type PublishNotification {
+    message: String!
 }

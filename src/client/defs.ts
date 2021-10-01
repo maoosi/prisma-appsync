@@ -1,40 +1,38 @@
 import { PrismaClient, Prisma } from '@prisma/client'
 
-
 /**
- * 
+ *
  * TYPES
- * 
+ *
  */
-
 
 // Prisma-AppSync Client Types
 
-export type PrismaAppSyncOptions = {
-    generatedConfig?: any,
-    connectionString?: string,
-    sanitize?: boolean,
-    debug?: boolean,
+export interface PrismaAppSyncOptions {
+    generatedConfig?: any
+    connectionString?: string
+    sanitize?: boolean
+    debug?: boolean
     defaultPagination?: number | false
     maxDepth?: number
 }
 
 export type Action = typeof Actions[keyof typeof Actions] | string
 
-export type ActionsAlias = keyof typeof ActionsAliases
+export type ActionsAlias = keyof typeof ActionsAliases | null
 
-export type Operation = `${ Action }${ Capitalize<Model> }`
+export type Operation = `${Action}${Capitalize<Model>}`
 
-export type Context = {
+export interface Context {
     action: Action
-    alias: Action | 'custom'
+    alias: Action | 'custom' | null
     model: Model | null
 }
 
-export type QueryParams = {
-    type: GraphQLType,
+export interface QueryParams {
+    type: GraphQLType
     operation: Operation | string
-    context: Context,
+    context: Context
     fields: string[]
     paths: string[]
     args: any
@@ -43,7 +41,7 @@ export type QueryParams = {
     identity: Identity
 }
 
-export type Authorization = typeof Authorizations[keyof typeof Authorizations]
+export type Authorization = typeof Authorizations[keyof typeof Authorizations] | null
 
 export type QueryParamsCustom = QueryParams & {
     prismaClient: PrismaClient
@@ -58,50 +56,49 @@ export type QueryParamsAfter = QueryParams & {
     result: any | any[]
 }
 
-export type Shield = {
-    [matcher: string]: {
-        rule: boolean | object
-        reason?: string | Function
-    } | boolean
+export interface Shield {
+    [matcher: string]:
+        | boolean
+        | {
+              rule: boolean | object
+              reason?: string | Function
+          }
 }
 export interface HooksProps {
     before: QueryParamsBefore
     after: QueryParamsAfter
 }
 
-export type HookPath<CustomResolvers> = 
-    `${ Lowercase<ActionsAlias> }/${ Lowercase<Model> }` | CustomResolvers
+export type HookPath<CustomResolvers> = `${Lowercase<NonNullable<ActionsAlias>>}/${Lowercase<Model>}` | CustomResolvers
 
-export type HooksParameter<HookType extends 'before' | 'after', CustomResolvers extends string | null> = `${ HookType }:${ HookPath<CustomResolvers> }`
-
-export type HooksParameters<
+export type HooksParameter<
     HookType extends 'before' | 'after',
-    CustomResolvers extends string | null
-> = {
-    [matcher in HooksParameter<HookType, CustomResolvers>]?: 
-        (props: HooksProps[HookType]) => Promise<any>
+    CustomResolvers extends string,
+> = `${HookType}:${HookPath<CustomResolvers>}`
+
+export type HooksParameters<HookType extends 'before' | 'after', CustomResolvers extends string> = {
+    [matcher in HooksParameter<HookType, CustomResolvers>]?: (props: HooksProps[HookType]) => Promise<any>
 }
 
-export type Hooks<CustomResolvers extends string | null> = 
-    HooksParameters<'before', CustomResolvers> | 
-    HooksParameters<'after', CustomResolvers>
+export type Hooks<CustomResolvers extends string> =
+    | HooksParameters<'before', CustomResolvers>
+    | HooksParameters<'after', CustomResolvers>
 
-export type ShieldAuthorization = {
+export interface ShieldAuthorization {
     canAccess: boolean
     reason: string | Function
     prismaFilter: object
     matcher: string
 }
 
-export type ResolveParams<CustomResolvers extends string | null> = {
-    event: AppsyncEvent,
+export interface ResolveParams<CustomResolvers extends string> {
+    event: AppsyncEvent
     resolvers?: {
-        [resolver in CustomResolvers]: ((props:QueryParamsCustom) => Promise<any>) | boolean
-    },
-    shield?: (props:QueryParams) => Shield
+        [resolver in CustomResolvers]: ((props: QueryParamsCustom) => Promise<any>) | boolean
+    }
+    shield?: (props: QueryParams) => Shield
     hooks?: () => Hooks<CustomResolvers>
 }
-
 
 // Prisma-related Types
 
@@ -109,7 +106,7 @@ export { PrismaClient }
 
 export type Model = typeof Models[keyof typeof Models]
 
-export type PrismaArgs = {
+export interface PrismaArgs {
     where?: any
     data?: any
     orderBy?: any
@@ -119,10 +116,9 @@ export type PrismaArgs = {
     select?: any
 }
 
-
 // AppSync-related Types
 
-export type AppsyncEvent = {
+export interface AppsyncEvent {
     arguments: any
     source: any
     identity: AppSyncIdentity
@@ -144,68 +140,79 @@ export type GraphQLType = 'Query' | 'Mutation' | 'Subscription'
 
 export type API_KEY = null
 
-export type AWS_LAMBDA = {
+export interface AWS_LAMBDA {
     resolverContext: any
 }
 
-export type AWS_IAM = {
-    accountId: string,
-    cognitoIdentityPoolId: string,
-    cognitoIdentityId: string,
-    sourceIp: string[],
-    username: string,
-    userArn: string,
-    cognitoIdentityAuthType: string,
+export interface AWS_IAM {
+    accountId: string
+    cognitoIdentityPoolId: string
+    cognitoIdentityId: string
+    sourceIp: string[]
+    username: string
+    userArn: string
+    cognitoIdentityAuthType: string
     cognitoIdentityAuthProvider: string
 }
 
-export type AMAZON_COGNITO_USER_POOLS = {
-    sub: string,
-    issuer: string,
-    username: string,
-    claims: any,
-    sourceIp: string[],
+export interface AMAZON_COGNITO_USER_POOLS {
+    sub: string
+    issuer: string
+    username: string
+    claims: any
+    sourceIp: string[]
     defaultAuthStrategy: string
     groups: string[]
 }
 
-export type AWS_OIDC = {
+export interface AWS_OIDC {
     claims: {
-        sub: string,
-        aud: string,
-        azp: string,
-        iss: string,
-        exp: number,
-        iat: number,
+        sub: string
+        aud: string
+        azp: string
+        iss: string
+        exp: number
+        iat: number
         gty: string
-    },
-    sourceIp: string[],
-    issuer: string,
-    sub: string,
+    }
+    sourceIp: string[]
+    issuer: string
+    sub: string
 }
 
 export type AppSyncIdentity = API_KEY | AWS_LAMBDA | AWS_IAM | AMAZON_COGNITO_USER_POOLS | AWS_OIDC
 
 export type Identity = AppSyncIdentity & {
-    [key:string]: any
+    [key: string]: any
 }
 
-
 /**
- * 
+ *
  * CONSTS
- * 
+ *
  */
-
 
 // Prisma-related Constants
 
 export const Models = Prisma.ModelName
 
 export const ReservedPrismaKeys = [
-    'data', 'where', 'orderBy', 'create', 'connect', 'connectOrCreate', 'update', 'upsert', 'delete', 'disconnect', 'set', 'updateMany', 'deleteMany', 'select', 'include'
+    'data',
+    'where',
+    'orderBy',
+    'create',
+    'connect',
+    'connectOrCreate',
+    'update',
+    'upsert',
+    'delete',
+    'disconnect',
+    'set',
+    'updateMany',
+    'deleteMany',
+    'select',
+    'include',
 ]
-
 
 // Prisma-AppSync Client Constants
 
@@ -254,40 +261,14 @@ export const ActionsAliases = {
 } as const
 
 export const ActionsAliasesList = {
-    access: [
-        Actions.get, 
-        Actions.list,
-        Actions.count
-    ],
-    batchAccess: [
-        Actions.list,
-        Actions.count
-    ],
-    create: [
-        Actions.create,
-        Actions.createMany,
-    ],
-    batchCreate: [
-        Actions.createMany,
-    ],
-    modify: [
-        Actions.upsert,
-        Actions.update,
-        Actions.updateMany,
-        Actions.delete,
-        Actions.deleteMany,
-    ],
-    batchModify: [
-        Actions.updateMany,
-        Actions.deleteMany,
-    ],
-    delete: [
-        Actions.delete,
-        Actions.deleteMany,
-    ],
-    batchDelete: [
-        Actions.deleteMany,
-    ],
+    access: [Actions.get, Actions.list, Actions.count],
+    batchAccess: [Actions.list, Actions.count],
+    create: [Actions.create, Actions.createMany],
+    batchCreate: [Actions.createMany],
+    modify: [Actions.upsert, Actions.update, Actions.updateMany, Actions.delete, Actions.deleteMany],
+    batchModify: [Actions.updateMany, Actions.deleteMany],
+    delete: [Actions.delete, Actions.deleteMany],
+    batchDelete: [Actions.deleteMany],
     subscribe: [
         Actions.onCreatedMany,
         Actions.onUpdatedMany,
@@ -299,16 +280,11 @@ export const ActionsAliasesList = {
         Actions.onDeleted,
         Actions.onMutated,
     ],
-    batchSubscribe: [
-        Actions.onCreatedMany,
-        Actions.onUpdatedMany,
-        Actions.onDeletedMany,
-        Actions.onMutatedMany,
-    ]
+    batchSubscribe: [Actions.onCreatedMany, Actions.onUpdatedMany, Actions.onDeletedMany, Actions.onMutatedMany],
 } as const
 
-let actionsListMultiple:Action[] = []
-let actionsListSingle:Action[] = []
+let actionsListMultiple: Action[] = []
+let actionsListSingle: Action[] = []
 
 for (const actionAlias in ActionsAliasesList) {
     if (actionAlias.startsWith('batch')) {
@@ -318,16 +294,14 @@ for (const actionAlias in ActionsAliasesList) {
     }
 }
 
-export const ActionsList = 
-    actionsListSingle.filter((item, pos) => actionsListSingle.indexOf(item) === pos)
+export const ActionsList = actionsListSingle.filter((item, pos) => actionsListSingle.indexOf(item) === pos)
 
-export const BatchActionsList = 
-    actionsListMultiple.filter((item, pos) => actionsListMultiple.indexOf(item) === pos)
+export const BatchActionsList = actionsListMultiple.filter((item, pos) => actionsListMultiple.indexOf(item) === pos)
 
 export const Authorizations = {
     API_KEY: 'API_KEY',
     AWS_IAM: 'AWS_IAM',
     AMAZON_COGNITO_USER_POOLS: 'AMAZON_COGNITO_USER_POOLS',
     AWS_LAMBDA: 'AWS_LAMBDA',
-    AWS_OIDC: 'AWS_OIDC'
+    AWS_OIDC: 'AWS_OIDC',
 } as const

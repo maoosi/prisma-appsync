@@ -4,23 +4,23 @@ import { PrismaClient } from '@prisma/client';
  * TYPES
  *
  */
-export declare type PrismaAppSyncOptions = {
+export interface PrismaAppSyncOptions {
     generatedConfig?: any;
     connectionString?: string;
     sanitize?: boolean;
     debug?: boolean;
     defaultPagination?: number | false;
     maxDepth?: number;
-};
+}
 export declare type Action = typeof Actions[keyof typeof Actions] | string;
-export declare type ActionsAlias = keyof typeof ActionsAliases;
+export declare type ActionsAlias = keyof typeof ActionsAliases | null;
 export declare type Operation = `${Action}${Capitalize<Model>}`;
-export declare type Context = {
+export interface Context {
     action: Action;
-    alias: Action | 'custom';
+    alias: Action | 'custom' | null;
     model: Model | null;
-};
-export declare type QueryParams = {
+}
+export interface QueryParams {
     type: GraphQLType;
     operation: Operation | string;
     context: Context;
@@ -30,8 +30,8 @@ export declare type QueryParams = {
     prismaArgs: PrismaArgs;
     authorization: Authorization;
     identity: Identity;
-};
-export declare type Authorization = typeof Authorizations[keyof typeof Authorizations];
+}
+export declare type Authorization = typeof Authorizations[keyof typeof Authorizations] | null;
 export declare type QueryParamsCustom = QueryParams & {
     prismaClient: PrismaClient;
 };
@@ -42,39 +42,39 @@ export declare type QueryParamsAfter = QueryParams & {
     prismaClient: PrismaClient;
     result: any | any[];
 };
-export declare type Shield = {
-    [matcher: string]: {
+export interface Shield {
+    [matcher: string]: boolean | {
         rule: boolean | object;
         reason?: string | Function;
-    } | boolean;
-};
+    };
+}
 export interface HooksProps {
     before: QueryParamsBefore;
     after: QueryParamsAfter;
 }
-export declare type HookPath<CustomResolvers> = `${Lowercase<ActionsAlias>}/${Lowercase<Model>}` | CustomResolvers;
-export declare type HooksParameter<HookType extends 'before' | 'after', CustomResolvers extends string | null> = `${HookType}:${HookPath<CustomResolvers>}`;
-export declare type HooksParameters<HookType extends 'before' | 'after', CustomResolvers extends string | null> = {
+export declare type HookPath<CustomResolvers> = `${Lowercase<NonNullable<ActionsAlias>>}/${Lowercase<Model>}` | CustomResolvers;
+export declare type HooksParameter<HookType extends 'before' | 'after', CustomResolvers extends string> = `${HookType}:${HookPath<CustomResolvers>}`;
+export declare type HooksParameters<HookType extends 'before' | 'after', CustomResolvers extends string> = {
     [matcher in HooksParameter<HookType, CustomResolvers>]?: (props: HooksProps[HookType]) => Promise<any>;
 };
-export declare type Hooks<CustomResolvers extends string | null> = HooksParameters<'before', CustomResolvers> | HooksParameters<'after', CustomResolvers>;
-export declare type ShieldAuthorization = {
+export declare type Hooks<CustomResolvers extends string> = HooksParameters<'before', CustomResolvers> | HooksParameters<'after', CustomResolvers>;
+export interface ShieldAuthorization {
     canAccess: boolean;
     reason: string | Function;
     prismaFilter: object;
     matcher: string;
-};
-export declare type ResolveParams<CustomResolvers extends string | null> = {
+}
+export interface ResolveParams<CustomResolvers extends string> {
     event: AppsyncEvent;
     resolvers?: {
         [resolver in CustomResolvers]: ((props: QueryParamsCustom) => Promise<any>) | boolean;
     };
     shield?: (props: QueryParams) => Shield;
     hooks?: () => Hooks<CustomResolvers>;
-};
+}
 export { PrismaClient };
 export declare type Model = typeof Models[keyof typeof Models];
-export declare type PrismaArgs = {
+export interface PrismaArgs {
     where?: any;
     data?: any;
     orderBy?: any;
@@ -82,8 +82,8 @@ export declare type PrismaArgs = {
     take?: number;
     skipDuplicates?: boolean;
     select?: any;
-};
-export declare type AppsyncEvent = {
+}
+export interface AppsyncEvent {
     arguments: any;
     source: any;
     identity: AppSyncIdentity;
@@ -99,13 +99,13 @@ export declare type AppsyncEvent = {
         result: any;
     };
     stash: any;
-};
+}
 export declare type GraphQLType = 'Query' | 'Mutation' | 'Subscription';
 export declare type API_KEY = null;
-export declare type AWS_LAMBDA = {
+export interface AWS_LAMBDA {
     resolverContext: any;
-};
-export declare type AWS_IAM = {
+}
+export interface AWS_IAM {
     accountId: string;
     cognitoIdentityPoolId: string;
     cognitoIdentityId: string;
@@ -114,8 +114,8 @@ export declare type AWS_IAM = {
     userArn: string;
     cognitoIdentityAuthType: string;
     cognitoIdentityAuthProvider: string;
-};
-export declare type AMAZON_COGNITO_USER_POOLS = {
+}
+export interface AMAZON_COGNITO_USER_POOLS {
     sub: string;
     issuer: string;
     username: string;
@@ -123,8 +123,8 @@ export declare type AMAZON_COGNITO_USER_POOLS = {
     sourceIp: string[];
     defaultAuthStrategy: string;
     groups: string[];
-};
-export declare type AWS_OIDC = {
+}
+export interface AWS_OIDC {
     claims: {
         sub: string;
         aud: string;
@@ -137,7 +137,7 @@ export declare type AWS_OIDC = {
     sourceIp: string[];
     issuer: string;
     sub: string;
-};
+}
 export declare type AppSyncIdentity = API_KEY | AWS_LAMBDA | AWS_IAM | AMAZON_COGNITO_USER_POOLS | AWS_OIDC;
 export declare type Identity = AppSyncIdentity & {
     [key: string]: any;

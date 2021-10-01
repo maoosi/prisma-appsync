@@ -1,0 +1,6 @@
+/node_modules/**
+/dist/**
+/archives/**
+/.cache/**
+/dist/**
+**/.temp/**

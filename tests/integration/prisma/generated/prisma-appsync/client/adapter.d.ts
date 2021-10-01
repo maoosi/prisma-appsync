@@ -6,7 +6,7 @@ import { PrismaAppSyncOptions, AppsyncEvent, QueryParams, Action, Model, Context
  * @param  customResolvers Custom Resolvers.
  * @returns `QueryParams`
  */
-export declare function parseEvent(appsyncEvent: AppsyncEvent, options: PrismaAppSyncOptions, customResolvers?: any | null): QueryParams;
+export declare function parseEvent(appsyncEvent: AppsyncEvent, options: Required<PrismaAppSyncOptions>, customResolvers?: any | null): QueryParams;
 /**
  * Return auth. identity from parsed `event`.
  * @param  {{appsyncEvent:any}} {appsyncEvent}
@@ -72,7 +72,7 @@ export declare function getType({ _parentTypeName }: {
  * @param  {{action: Action, _arguments:any, defaultPagination:false|number}} { action, _arguments, defaultPagination }
  * @returns Args
  */
-export declare function getPrismaArgs({ action, _arguments, _selectionSetList, defaultPagination }: {
+export declare function getPrismaArgs({ action, _arguments, _selectionSetList, defaultPagination, }: {
     action: Action;
     _arguments: any;
     _selectionSetList: any;

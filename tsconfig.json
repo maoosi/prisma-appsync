@@ -1,6 +1,18 @@
 {
     "compilerOptions": {
+        "baseUrl": ".",
         "types": ["jest", "node", "lodash"],
-        "esModuleInterop": true
+        "esModuleInterop": true,
+        "moduleResolution": "node",
+        "resolveJsonModule": true,
+        "noUnusedLocals": true,
+        "allowJs": true,
+        "strictNullChecks": true,
+        "forceConsistentCasingInFileNames": true,
+        "noImplicitAny": false,
+        "paths": {
+            "~/*": ["src/*"]
+        }
     },
+    "exclude": ["dist", "node_modules"]
 }

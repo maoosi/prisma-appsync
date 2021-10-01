@@ -1,7 +1,7 @@
 import { dot } from 'dot-object'
 import { isMatch } from 'micromatch'
 import deepmerge from 'deepmerge'
-import escape from 'validator/lib/escape'
+import { decode as decodeHtml, encode as encodeHtml } from 'html-entities'
 import xss from 'xss'
 
 /**
@@ -9,7 +9,7 @@ import xss from 'xss'
  * @param sources object[]
  * @returns object
  */
-export function merge(...sources: object[]):any {
+export function merge(...sources: object[]): any {
     return deepmerge.all(sources)
 }
 
@@ -18,17 +18,29 @@ export function merge(...sources: object[]):any {
  * @param source object
  * @returns object
  */
-export function clone(source: object):any {
+export function clone(source: object): any {
     return deepmerge({}, source)
 }
 
 /**
- * Replace <, >, &, ', " and / with HTML entities.
- * @param str string
- * @returns string
+ * Returns decoded text, replacing HTML special characters
+ * @example decode('&lt; &gt; &quot; &apos; &amp; &#169; &#8710;')
+ * // returns '< > " \' & © ∆'
+ * @param {any} input - input
+ * @returns {boolean} `true` or `false`
  */
-export function escapeHTML(str: string):string {
-    return escape(str)
+export function decode(str: string): string {
+    return decodeHtml(str)
+}
+
+/**
+ * Returns encoded text, version of string.
+ * @example encode('<script>alert("xss");</scr' + "ipt>")
+ * @param {any} input - input
+ * @returns {boolean} `true` or `false`
+ */
+export function encode(str: string): string {
+    return encodeHtml(str)
 }
 
 /**
@@ -36,7 +48,7 @@ export function escapeHTML(str: string):string {
  * @param source object
  * @returns object
  */
-export function dotate(source: object):any {
+export function dotate(source: object): any {
     return dot(source)
 }
 
@@ -46,7 +58,7 @@ export function dotate(source: object):any {
  * @param globPatterns string|string[]
  * @returns boolean
  */
-export function isMatchingGlob(path: string, globPatterns: string|string[]): boolean {
+export function isMatchingGlob(path: string, globPatterns: string | string[]): boolean {
     return isMatch(path, globPatterns)
 }
 
@@ -55,7 +67,7 @@ export function isMatchingGlob(path: string, globPatterns: string|string[]): boo
  * @param str string
  * @returns string
  */
-export function filterXSS(str: string):string {
+export function filterXSS(str: string): string {
     return xss(str)
 }
 
@@ -64,7 +76,7 @@ export function filterXSS(str: string):string {
  * @param element any
  * @returns boolean
  */
- export function isEmpty(element: any):boolean {
+export function isEmpty(element: any): boolean {
     switch (element) {
         case null:
         case undefined:

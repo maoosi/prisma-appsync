@@ -1,15 +1,15 @@
 import { inspect as nodeInspect } from 'util'
 
 const errorCodes = {
-    'FORBIDDEN': 401,
-    'BAD_USER_INPUT': 400,
-    'INTERNAL_SERVER_ERROR': 500,
+    FORBIDDEN: 401,
+    BAD_USER_INPUT: 400,
+    INTERNAL_SERVER_ERROR: 500,
 }
 
 type ErrorExtensions = {
-    type: keyof typeof errorCodes,
+    type: keyof typeof errorCodes
     trace?: string[]
-    [key:string]: any
+    [key: string]: any
 }
 
 type ErrorDetails = {
@@ -32,8 +32,8 @@ export class CustomError extends Error {
         this.error = message
         this.type = extensions.type
         this.trace = extensions?.trace || []
-        this.code = typeof errorCodes[this.type] !== 'undefined'
-            ? errorCodes[this.type] : errorCodes['INTERNAL_SERVER_ERROR']
+        this.code =
+            typeof errorCodes[this.type] !== 'undefined' ? errorCodes[this.type] : errorCodes['INTERNAL_SERVER_ERROR']
 
         if (this.stack && this.stack.length > 0) this.trace.unshift(this.stack)
 
@@ -54,33 +54,33 @@ export class CustomError extends Error {
     }
 }
 
-export function parseError(error:Error):CustomError {
+export function parseError(error: Error): CustomError {
     if (error instanceof CustomError) {
         return error
     } else {
         return new CustomError(error.message, {
             type: 'INTERNAL_SERVER_ERROR',
-            trace: [error?.stack]
+            trace: error?.stack ? [error.stack] : [],
         })
     }
 }
 
-export function inspect(data:any):string {
+export function inspect(data: any): string {
     return nodeInspect(data, { compact: true, depth: 5, breakLength: 80, colors: true })
 }
 
-export function debug(...data):void {
+export function debug(...data): void {
     if (process.env.PRISMA_APPSYNC_DEBUG === 'true') {
         log([...data])
     }
 }
 
-export function log(data: any, level?: 'ERROR' | 'WARN' | 'INFO'):void {
+export function log(data: any, level?: 'ERROR' | 'WARN' | 'INFO'): void {
     const logLevel = typeof level !== 'undefined' ? level : 'INFO'
     const logPrefix = `◭ Prisma-AppSync :: <<${logLevel}>>`
     const dataList = Array.isArray(data) ? data : []
 
-    dataList.forEach((d:any) => {
+    dataList.forEach((d: any) => {
         const logMessage = typeof d === 'string' ? d : inspect(d)
 
         if (level === 'ERROR') {

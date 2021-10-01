@@ -11,11 +11,20 @@ export declare function merge(...sources: object[]): any;
  */
 export declare function clone(source: object): any;
 /**
- * Replace <, >, &, ', " and / with HTML entities.
- * @param str string
- * @returns string
+ * Returns decoded text, replacing HTML special characters
+ * @example decode('&lt; &gt; &quot; &apos; &amp; &#169; &#8710;')
+ * // returns '< > " \' & © ∆'
+ * @param {any} input - input
+ * @returns {boolean} `true` or `false`
  */
-export declare function escapeHTML(str: string): string;
+export declare function decode(str: string): string;
+/**
+ * Returns encoded text, version of string.
+ * @example encode('<script>alert("xss");</scr' + "ipt>")
+ * @param {any} input - input
+ * @returns {boolean} `true` or `false`
+ */
+export declare function encode(str: string): string;
 /**
  * Transform an object to a dotted-key/value pair
  * @param source object
