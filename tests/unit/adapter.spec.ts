@@ -4,133 +4,124 @@ import {
     getModel,
     getFields,
     getType,
-    getArgs,
+    getPrismaArgs,
     getPaths,
-    getAuthIdentity
-} from './adapter'
-import { Actions, Action, Models, ActionsAliases, AuthModes } from '../defs'
-
+    getAuthIdentity,
+} from '../../src/client/adapter'
+import { Actions, Action, Models, ActionsAliases, Authorizations } from '../../src/client/defs'
 
 describe('CLIENT #adapter', () => {
-
     describe('.getAuthIdentity?', () => {
         test('expect to detect API_KEY authorization', () => {
             const result = getAuthIdentity({
-                appsyncEvent: {}
+                appsyncEvent: {},
             })
-            expect(result.authorization).toEqual(AuthModes.API_KEY)
+            expect(result.authorization).toEqual(Authorizations.API_KEY)
         })
 
         test('expect to detect AWS_LAMBDA authorization', () => {
             const result = getAuthIdentity({
                 appsyncEvent: {
-                    "identity": {
-                        "resolverContext" : {}
-                    }
-                }
+                    identity: {
+                        resolverContext: {},
+                    },
+                },
             })
-            expect(result.authorization).toEqual(AuthModes.AWS_LAMBDA)
+            expect(result.authorization).toEqual(Authorizations.AWS_LAMBDA)
         })
 
         test('expect to detect AWS_IAM authorization', () => {
             const result = getAuthIdentity({
                 appsyncEvent: {
-                    "identity": {
-                        "accountId" : "string",
-                        "cognitoIdentityPoolId" : "string",
-                        "cognitoIdentityId" : "string",
-                        "sourceIp" : ["string"],
-                        "username" : "string",
-                        "userArn" : "string",
-                        "cognitoIdentityAuthType" : "string",
-                        "cognitoIdentityAuthProvider" : "string"
-                    }
-                }
+                    identity: {
+                        accountId: 'string',
+                        cognitoIdentityPoolId: 'string',
+                        cognitoIdentityId: 'string',
+                        sourceIp: ['string'],
+                        username: 'string',
+                        userArn: 'string',
+                        cognitoIdentityAuthType: 'string',
+                        cognitoIdentityAuthProvider: 'string',
+                    },
+                },
             })
-            expect(result.authorization).toEqual(AuthModes.AWS_IAM)
+            expect(result.authorization).toEqual(Authorizations.AWS_IAM)
         })
 
         test('expect to detect AMAZON_COGNITO_USER_POOLS authorization', () => {
             const result = getAuthIdentity({
                 appsyncEvent: {
-                    "identity": {
-                        "sub" : "uuid",
-                        "issuer" : "string",
-                        "username" : "string",
-                        "claims" : {},
-                        "sourceIp" : ["x.x.x.x"],
-                        "defaultAuthStrategy" : "string"
-                    }
-                }
+                    identity: {
+                        sub: 'uuid',
+                        issuer: 'string',
+                        username: 'string',
+                        claims: {},
+                        sourceIp: ['x.x.x.x'],
+                        defaultAuthStrategy: 'string',
+                    },
+                },
             })
-            expect(result.authorization).toEqual(AuthModes.AMAZON_COGNITO_USER_POOLS)
+            expect(result.authorization).toEqual(Authorizations.AMAZON_COGNITO_USER_POOLS)
         })
 
         test('expect to detect AWS_OIDC authorization', () => {
             const result = getAuthIdentity({
                 appsyncEvent: {
-                    "identity": {
-                        "claims": {
-                            "sub": "string",
-                            "aud": "string",
-                            "azp": "string",
-                            "iss": "string",
-                            "exp": 1630923679,
-                            "iat": 1630837279,
-                            "gty": "string"
+                    identity: {
+                        claims: {
+                            sub: 'string',
+                            aud: 'string',
+                            azp: 'string',
+                            iss: 'string',
+                            exp: 1630923679,
+                            iat: 1630837279,
+                            gty: 'string',
                         },
-                        "issuer": "string",
-                        "sub": "string",
-                    }
-                }
+                        issuer: 'string',
+                        sub: 'string',
+                    },
+                },
             })
-            expect(result.authorization).toEqual(AuthModes.AWS_OIDC)
+            expect(result.authorization).toEqual(Authorizations.AWS_OIDC)
         })
 
         test('expect to throw when no matching authorization', () => {
-            expect(() => getAuthIdentity({
-                appsyncEvent: { "identity": "string" }
-            })).toThrow(Error)
+            expect(() =>
+                getAuthIdentity({
+                    appsyncEvent: { identity: 'string' },
+                }),
+            ).toThrow(Error)
         })
     })
 
     describe('.getOperation?', () => {
-        const cases = Object.keys(Actions).map((action:Action) => {
+        const cases = Object.keys(Actions).map((action: Action) => {
             return [`${action}People`, `${action}People`]
         })
-        test.each(cases)(
-            'when fieldName is "%s", expect operation to equal "%s"',
-            (fieldName, expected) => {
-                const result = getOperation({ fieldName })
-                expect(result).toEqual(expected)
-            }
-        )
+        test.each(cases)('when fieldName is "%s", expect operation to equal "%s"', (fieldName, expected) => {
+            const result = getOperation({ fieldName })
+            expect(result).toEqual(expected)
+        })
     })
 
     describe('.getAction?', () => {
-        const cases = Object.keys(Actions).map((action:Action) => {
+        const cases = Object.keys(Actions).map((action: Action) => {
             return [`${action}People`, action]
         })
-        test.each(cases)(
-            'when operation is "%s", expect action to equal "%s"',
-            (operation, expected) => {
-                const result = getAction({ operation })
-                expect(result).toEqual(expected)
-            }
-        )
+        test.each(cases)('when operation is "%s", expect action to equal "%s"', (operation, expected) => {
+            const result = getAction({ operation })
+            expect(result).toEqual(expected)
+        })
     })
 
     describe('.getModel?', () => {
-        const cases = Object.keys(Actions).map((action:Action) => {
+        const cases = Object.keys(Actions).map((action: Action) => {
             return [action, 'People']
         })
-        test.each(cases)(
-            'when operation is "%sPeople", expect model to equal "%s"',
-            (action: Action, expected) => {
-                const result = getModel({ operation: `${action}People`, action: action })
-                expect(result).toEqual(expected)
-            }
-        )
+        test.each(cases)('when operation is "%sPeople", expect model to equal "%s"', (action: Action, expected) => {
+            const result = getModel({ operation: `${action}People`, action: action })
+            expect(result).toEqual(expected)
+        })
     })
 
     // TODO: Write more tests for `getFields`
@@ -149,13 +140,9 @@ describe('CLIENT #adapter', () => {
                     'author/comments/likes',
                     'author/comments/likes/user',
                     'author/comments/likes/user/username',
-                ]
+                ],
             })
-            expect(result).toEqual([
-                'title',
-                'description',
-                'author'
-            ])
+            expect(result).toEqual(['title', 'description', 'author'])
         })
     })
 
@@ -177,45 +164,41 @@ describe('CLIENT #adapter', () => {
         })
     })
 
-    describe('.getArgs?', () => {
+    describe('.getPrismaArgs?', () => {
         test('expect selectionSetList to be converted to prisma syntax', () => {
-            const result = getArgs({
+            const result = getPrismaArgs({
                 action: Actions.get,
-                _arguments: { 
+                _arguments: {
                     info: {
-                        selectionSetList: [
-                            "title",
-                            "createdAt",
-                            "status",
-                        ]
-                    }
+                        selectionSetList: ['title', 'createdAt', 'status'],
+                    },
                 },
-                defaultPagination: false
+                defaultPagination: false,
             })
             expect(result).toStrictEqual({
                 select: {
                     title: true,
                     createdAt: true,
                     status: true,
-                }
+                },
             })
         })
         test('expect nested selectionSetList to be converted to prisma syntax', () => {
-            const result = getArgs({
+            const result = getPrismaArgs({
                 action: Actions.list,
-                _arguments: { 
+                _arguments: {
                     info: {
                         selectionSetList: [
-                            "title",
-                            "createdAt",
-                            "comments",
-                            "comments/post",
-                            "comments/author",
-                            "comments/author/email"
-                        ]
-                    }
+                            'title',
+                            'createdAt',
+                            'comments',
+                            'comments/post',
+                            'comments/author',
+                            'comments/author/email',
+                        ],
+                    },
                 },
-                defaultPagination: false
+                defaultPagination: false,
             })
             expect(result).toEqual({
                 select: {
@@ -226,105 +209,98 @@ describe('CLIENT #adapter', () => {
                             post: true,
                             author: {
                                 select: {
-                                    email: true
-                                }
-                            }
-                        }
-                    }
-                }
+                                    email: true,
+                                },
+                            },
+                        },
+                    },
+                },
             })
         })
         test('expect "where" to be converted to prisma syntax', () => {
-            const result = getArgs({
+            const result = getPrismaArgs({
                 action: Actions.count,
-                _arguments: { 
-                    where: { title: { startsWith: 'Hello' } }
+                _arguments: {
+                    where: { title: { startsWith: 'Hello' } },
                 },
-                defaultPagination: false
+                defaultPagination: false,
             })
             expect(result).toStrictEqual({
-                where: { title: { startsWith: 'Hello' } }
+                where: { title: { startsWith: 'Hello' } },
             })
         })
         test('expect "data" to be converted to prisma syntax', () => {
-            const result = getArgs({
+            const result = getPrismaArgs({
                 action: Actions.create,
-                _arguments: { 
-                    data: { title: 'Hello', content: 'World' }
+                _arguments: {
+                    data: { title: 'Hello', content: 'World' },
                 },
-                defaultPagination: false
+                defaultPagination: false,
             })
             expect(result).toStrictEqual({
-                data: { title: 'Hello', content: 'World' }
+                data: { title: 'Hello', content: 'World' },
             })
         })
         test('expect "orderBy" to be converted to prisma syntax', () => {
-            const result = getArgs({
+            const result = getPrismaArgs({
                 action: Actions.list,
-                _arguments: { 
-                    orderBy: [
-                        { title: 'ASC' },
-                        { postedAt: 'DESC' }
-                    ]
+                _arguments: {
+                    orderBy: [{ title: 'ASC' }, { postedAt: 'DESC' }],
                 },
-                defaultPagination: false
+                defaultPagination: false,
             })
             expect(result).toStrictEqual({
-                orderBy: [
-                    { title: 'asc' },
-                    { postedAt: 'desc' }
-                ]
+                orderBy: [{ title: 'asc' }, { postedAt: 'desc' }],
             })
         })
         test('expect "orderBy" to throw an error when using wrong format', () => {
-            expect(() => getArgs({
-                action: Actions.list,
-                _arguments: { 
-                    orderBy: [
-                        { title: 'ASC', content: 'DESC' },
-                        { postedAt: 'DESC' }
-                    ]
-                },
-                defaultPagination: false
-            })).toThrow(Error)
+            expect(() =>
+                getPrismaArgs({
+                    action: Actions.list,
+                    _arguments: {
+                        orderBy: [{ title: 'ASC', content: 'DESC' }, { postedAt: 'DESC' }],
+                    },
+                    defaultPagination: false,
+                }),
+            ).toThrow(Error)
         })
         test('expect "skip" to be converted to prisma syntax', () => {
-            const result = getArgs({
+            const result = getPrismaArgs({
                 action: Actions.list,
                 _arguments: { skip: '5' },
-                defaultPagination: false
+                defaultPagination: false,
             })
             expect(result).toStrictEqual({ skip: 5 })
         })
         test('expect "take" to be converted to prisma syntax', () => {
-            const result = getArgs({
+            const result = getPrismaArgs({
                 action: Actions.list,
                 _arguments: { take: '3' },
-                defaultPagination: false
+                defaultPagination: false,
             })
             expect(result).toStrictEqual({ take: 3 })
         })
         test('expect "skipDuplicates" to be converted to prisma syntax', () => {
-            const result = getArgs({
+            const result = getPrismaArgs({
                 action: Actions.list,
                 _arguments: { skipDuplicates: true },
-                defaultPagination: false
+                defaultPagination: false,
             })
             expect(result).toStrictEqual({ skipDuplicates: true })
         })
         test('expect default pagination to do nothing when "take" is specified', () => {
-            const result = getArgs({
+            const result = getPrismaArgs({
                 defaultPagination: 50,
                 action: Actions.list,
-                _arguments: { take: '3' }
+                _arguments: { take: '3' },
             })
             expect(result).toStrictEqual({ skip: 0, take: 3 })
         })
         test('expect default pagination to apply default take value', () => {
-            const result = getArgs({
+            const result = getPrismaArgs({
                 defaultPagination: 50,
                 action: Actions.list,
-                _arguments: {}
+                _arguments: {},
             })
             expect(result).toStrictEqual({ skip: 0, take: 50 })
         })
@@ -337,9 +313,9 @@ describe('CLIENT #adapter', () => {
                 action: Actions.get,
                 subject: {
                     actionAlias: ActionsAliases.access,
-                    model: Models.Post
+                    model: Models.Post,
                 },
-                args: getArgs({
+                args: getPrismaArgs({
                     action: Actions.get,
                     _arguments: {
                         info: {
@@ -355,19 +331,19 @@ describe('CLIENT #adapter', () => {
                                 'comment/author/badges/label',
                                 'comment/author/badges/owners',
                                 'comment/author/badges/owners/email',
-                            ]
-                        }
+                            ],
+                        },
                     },
-                    defaultPagination: false
-                })
+                    defaultPagination: false,
+                }),
             })
             expect(result).toEqual([
-                "/get/post/title",
-                "/get/post/comment/content",
-                "/get/post/comment/author/email",
-                "/get/post/comment/author/username",
-                "/get/post/comment/author/badges/label",
-                "/get/post/comment/author/badges/owners/email",
+                '/get/post/title',
+                '/get/post/comment/content',
+                '/get/post/comment/author/email',
+                '/get/post/comment/author/username',
+                '/get/post/comment/author/badges/label',
+                '/get/post/comment/author/badges/owners/email',
             ])
         })
 
@@ -376,18 +352,18 @@ describe('CLIENT #adapter', () => {
                 action: Actions.update,
                 subject: {
                     actionAlias: ActionsAliases.modify,
-                    model: Models.Post
+                    model: Models.Post,
                 },
-                args: getArgs({
+                args: getPrismaArgs({
                     action: Actions.update,
                     _arguments: {
                         data: {
-                            title: "New title",
+                            title: 'New title',
                             author: {
                                 connect: {
-                                    username: "other user"
-                                }
-                            }
+                                    username: 'other user',
+                                },
+                            },
                         },
                         info: {
                             selectionSetList: [
@@ -402,21 +378,21 @@ describe('CLIENT #adapter', () => {
                                 'comment/author/badges/label',
                                 'comment/author/badges/owners',
                                 'comment/author/badges/owners/email',
-                            ]
-                        }
+                            ],
+                        },
                     },
-                    defaultPagination: false
-                })
+                    defaultPagination: false,
+                }),
             })
             expect(result).toEqual([
-                "/update/post/title",
-                "/update/post/author/username",
-                "/get/post/title",
-                "/get/post/comment/content",
-                "/get/post/comment/author/email",
-                "/get/post/comment/author/username",
-                "/get/post/comment/author/badges/label",
-                "/get/post/comment/author/badges/owners/email",
+                '/update/post/title',
+                '/update/post/author/username',
+                '/get/post/title',
+                '/get/post/comment/content',
+                '/get/post/comment/author/email',
+                '/get/post/comment/author/username',
+                '/get/post/comment/author/badges/label',
+                '/get/post/comment/author/badges/owners/email',
             ])
         })
 
@@ -425,20 +401,20 @@ describe('CLIENT #adapter', () => {
                 action: Actions.createMany,
                 subject: {
                     actionAlias: ActionsAliases.batchCreate,
-                    model: Models.Post
+                    model: Models.Post,
                 },
-                args: getArgs({
+                args: getPrismaArgs({
                     action: Actions.createMany,
                     _arguments: {
                         data: [
                             {
-                                title: "New title",
+                                title: 'New title',
                                 author: {
                                     connect: {
-                                        username: "johndoe"
-                                    }
-                                }
-                            }
+                                        username: 'johndoe',
+                                    },
+                                },
+                            },
                         ],
                         info: {
                             selectionSetList: [
@@ -453,23 +429,22 @@ describe('CLIENT #adapter', () => {
                                 'comment/author/badges/label',
                                 'comment/author/badges/owners',
                                 'comment/author/badges/owners/email',
-                            ]
-                        }
+                            ],
+                        },
                     },
-                    defaultPagination: false
-                })
+                    defaultPagination: false,
+                }),
             })
             expect(result).toEqual([
-                "/createmany/post/title",
-                "/createmany/post/author/username",
-                "/list/post/title",
-                "/list/post/comment/content",
-                "/list/post/comment/author/email",
-                "/list/post/comment/author/username",
-                "/list/post/comment/author/badges/label",
-                "/list/post/comment/author/badges/owners/email",
+                '/createmany/post/title',
+                '/createmany/post/author/username',
+                '/list/post/title',
+                '/list/post/comment/content',
+                '/list/post/comment/author/email',
+                '/list/post/comment/author/username',
+                '/list/post/comment/author/badges/label',
+                '/list/post/comment/author/badges/owners/email',
             ])
         })
     })
-    
 })

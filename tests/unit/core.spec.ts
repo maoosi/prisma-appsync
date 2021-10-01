@@ -1,6 +1,5 @@
 // TODO: Write tests
 describe('CLIENT #core', () => {
-    
     describe('.connectionString?', () => {
         test('todo', () => {
             expect(true).toEqual(true)
@@ -30,5 +29,4 @@ describe('CLIENT #core', () => {
             expect(true).toEqual(true)
         })
     })
-
 })

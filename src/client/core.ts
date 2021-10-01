@@ -1,17 +1,60 @@
-import { PrismaAppSyncOptions, PrismaClient, Shield, ShieldAuthorization, ResolveParams } from './defs'
+import { PrismaAppSyncOptions, Options, PrismaClient, Shield, ShieldAuthorization, ResolveParams } from './defs'
 import { parseError, inspect, debug, CustomError } from './inspector'
-import { parseEvent } from './adapter'
 import { getAuthorization, getDepth } from './guard'
-import * as queries from './resolver'
+import { parseEvent } from './adapter'
 import { isEmpty } from './utils'
+import * as queries from './resolver'
 
+/**
+ * ##  Prisma-AppSync Client ʲˢ
+ *
+ * Type-safe Prisma AppSync client for TypeScript & Node.js
+ * @example
+ * ```
+ * const prismaAppSync = new PrismaAppSync()
+ *
+ * // lambda handler (AppSync Direct Lambda Resolver)
+ * export const resolver = async (event: any, context: any) => {
+ *     return await prismaAppSync.resolve({ event })
+ * }
+ * ```
+ *
+ *
+ * Read more in our [docs](https://prisma-appsync.vercel.app).
+ */
 export class PrismaAppSync {
-    private options: Required<PrismaAppSyncOptions>
+    private options: Options
     private prismaClient: PrismaClient
 
     /**
+     * ### Client Constructor
+     *
      * Instantiate Prisma-AppSync Client.
-     * @param  {PrismaAppSyncOptions} options
+     * @example
+     * ```
+     * const prismaAppSync = new PrismaAppSync()
+     * ```
+     *
+     * @param {PrismaAppSyncOptions} options
+     * @param {string} options.connectionString? - Prisma connection string (database connection URL).
+     * @param {boolean} options.sanitize? - Enable sanitize inputs (parse xss + encode html).
+     * @param {boolean} options.debug? - Enable debug logs (visible in CloudWatch).
+     * @param {number|false} options.defaultPagination? - Default pagination for list Query (items per page).
+     * @param {number} options.maxDepth? - Maximum allowed GraphQL query depth.
+     *
+     * @default
+     * ```
+     * {
+     *   connectionString: process.env.DATABASE_URL,
+     *   sanitize: true,
+     *   debug: true,
+     *   defaultPagination: 50,
+     *   maxDepth: 3,
+     * }
+     * ```
+     *
+     *
+     * Read more in our [docs](https://prisma-appsync.vercel.app).
      */
     constructor(options: PrismaAppSyncOptions) {
         // Set client options using constructor options
@@ -52,10 +95,35 @@ export class PrismaAppSync {
     }
 
     /**
+     * ###  Resolver
+     *
      * Resolve the API request, based on the AppSync `event` received by the Direct Lambda Resolver.
-     * @example return await prismaAppSync.resolve({ event })
-     * @param  {ResolveParams} resolveParams
-     * @returns Promise
+     * @example
+     * ```
+     * await prismaAppSync.resolve({ event })
+     *
+     * // custom resolvers
+     * await prismaAppSync.resolve<'notify'|'listPosts'>(
+     *     event,
+     *     resolvers: {
+     *         // extend CRUD API with a custom `notify` query
+     *         notify: async ({ args }) => { return { message: args.message } },
+     *
+     *         // disable one of the generated CRUD API query
+     *         listPosts: false,
+     *     }
+     * })
+     * ```
+     *
+     * @param {ResolveParams} resolveParams
+     * @param {any} resolveParams.event - AppSync event received by the Direct Lambda Resolver.
+     * @param {object} resolveParams.resolvers? - Custom resolvers (to extend the CRUD API).
+     * @param {function} resolveParams.shield? - Shield configuration (to protect your API).
+     * @param {function} resolveParams.hooks? - Hooks (to trigger functions based on events).
+     * @returns Promise<result>
+     *
+     *
+     * Read more in our [docs](https://prisma-appsync.vercel.app).
      */
     public async resolve<CustomResolvers extends string>(resolveParams: ResolveParams<CustomResolvers>): Promise<any> {
         let results: any = null
@@ -118,29 +186,29 @@ export class PrismaAppSync {
             // Guard: get and run all before hooks functions matching query
             console.log(JSON.stringify(QueryParams, null, 4))
 
-            // Resolver :: resolve query with Prisma Client
+            // Resolver :: resolve query for JEST
             if (process.env.JEST_WORKER_ID) {
-                // Testing with Jest
                 results = QueryParams
-            } else if (
+            }
+            // Resolver :: query is disabled
+            else if (
                 resolveParams?.resolvers &&
                 typeof resolveParams.resolvers[QueryParams.operation] === 'boolean' &&
                 resolveParams.resolvers[QueryParams.operation] === false
             ) {
-                // Resolver is disabled
-                throw new CustomError(`Resolver ${QueryParams.operation} is disabled.`, { type: 'FORBIDDEN' })
-            } else if (
-                resolveParams?.resolvers &&
-                typeof resolveParams.resolvers[QueryParams.operation] === 'function'
-            ) {
-                // Call custom resolver
+                throw new CustomError(`Query resolver for ${QueryParams.operation} is disabled.`, { type: 'FORBIDDEN' })
+            }
+            // Resolver :: resolve query with Custom Resolver
+            else if (resolveParams?.resolvers && typeof resolveParams.resolvers[QueryParams.operation] === 'function') {
                 results = await resolveParams.resolvers[QueryParams.operation](QueryParams)
-            } else if (!isEmpty(QueryParams?.context?.model)) {
-                // Call CRUD resolver
+            }
+            // Resolver :: resolve query with built-in CRUD
+            else if (!isEmpty(QueryParams?.context?.model)) {
                 results = await queries[`${QueryParams.context.action}Query`](this.prismaClient, QueryParams)
-            } else {
-                // Resolver not found
-                throw new CustomError(`Resolver for ${QueryParams.operation} could not be found.`, {
+            }
+            // Resolver :: query resolver not found
+            else {
+                throw new CustomError(`Query resolver for ${QueryParams.operation} could not be found.`, {
                     type: 'INTERNAL_SERVER_ERROR',
                 })
             }

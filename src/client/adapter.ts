@@ -1,7 +1,7 @@
 import { CustomError, inspect } from './inspector'
-import { merge, dotate } from './utils'
+import { merge, dotate, isEmpty } from './utils'
 import {
-    PrismaAppSyncOptions,
+    Options,
     AppsyncEvent,
     QueryParams,
     Action,
@@ -17,38 +17,170 @@ import {
     Identity,
     Authorization,
     Authorizations,
+    GraphQLType,
 } from './defs'
 
 /**
- * Parse AppSync direct resolver event and returns Query Params.
- * @param  appsyncEvent AppSync event received in Lambda.
- * @param  options PrismaAppSync Client options.
- * @param  customResolvers Custom Resolvers.
- * @returns `QueryParams`
+ * #### Parse AppSync direct resolver `event` and returns Query Params.
+ *
+ * @param  {AppsyncEvent} appsyncEvent - AppSync event received in Lambda.
+ * @param  {Required<PrismaAppSyncOptions>} options - PrismaAppSync Client options.
+ * @param  {any|null} customResolvers? - Custom Resolvers.
+ * @returns `{ type, operation, context, fields, paths, args, prismaArgs, authorization, identity }` - QueryParams
  */
-export function parseEvent(
-    appsyncEvent: AppsyncEvent,
-    options: Required<PrismaAppSyncOptions>,
-    customResolvers?: any | null,
-): QueryParams {
+export function parseEvent(appsyncEvent: AppsyncEvent, options: Options, customResolvers?: any | null): QueryParams {
     if (
-        !(
-            appsyncEvent.info &&
-            appsyncEvent.info.fieldName &&
-            appsyncEvent.info.selectionSetList &&
-            appsyncEvent.info.parentTypeName &&
-            appsyncEvent.arguments
-        )
+        isEmpty(appsyncEvent?.info?.fieldName) ||
+        isEmpty(appsyncEvent?.info?.selectionSetList) ||
+        isEmpty(appsyncEvent?.info?.parentTypeName) ||
+        isEmpty(appsyncEvent?.arguments)
     ) {
         throw new Error(`Error reading required parameters from appsyncEvent.`)
     }
 
+    const operation = getOperation({ fieldName: appsyncEvent.info.fieldName })
+
+    const context = getContext({ customResolvers, options, operation })
+
+    const { identity, authorization } = getAuthIdentity({
+        appsyncEvent,
+    })
+
+    const fields = getFields({
+        _selectionSetList: appsyncEvent.info.selectionSetList,
+    })
+
+    const args = appsyncEvent.arguments
+
+    const prismaArgs = getPrismaArgs({
+        action: context.action,
+        defaultPagination: options.defaultPagination,
+        _arguments: appsyncEvent.arguments,
+        _selectionSetList: appsyncEvent.info.selectionSetList,
+    })
+
+    const type = getType({
+        _parentTypeName: appsyncEvent.info.parentTypeName,
+    })
+
+    const paths = getPaths({
+        context,
+        prismaArgs,
+    })
+
+    return {
+        operation,
+        context,
+        fields,
+        args,
+        prismaArgs,
+        type,
+        authorization,
+        identity,
+        paths,
+    }
+}
+
+/**
+ * #### Returns authorization and identity.
+ *
+ * @param {any} options
+ * @param {AppsyncEvent} options.appsyncEvent - AppSync event received in Lambda.
+ * @returns `{ authorization, identity }`
+ *
+ * https://docs.aws.amazon.com/appsync/latest/devguide/resolver-context-reference.html#aws-appsync-resolver-context-reference-identity
+ */
+export function getAuthIdentity({ appsyncEvent }: { appsyncEvent: AppsyncEvent }): {
+    identity: Identity
+    authorization: Authorization
+} {
+    let authorization: Authorization = null
+    let identity: Identity = appsyncEvent?.identity ? appsyncEvent.identity : null
+
+    // API_KEY authorization
+    if (typeof appsyncEvent.identity === 'undefined' || isEmpty(appsyncEvent.identity)) {
+        authorization = Authorizations.API_KEY
+        identity = {
+            ...(appsyncEvent.request &&
+                appsyncEvent.request.headers &&
+                typeof appsyncEvent.request.headers['x-api-key'] !== 'undefined' && {
+                    requestApiKey: appsyncEvent.request.headers['x-api-key'],
+                }),
+            ...(appsyncEvent.request &&
+                appsyncEvent.request.headers &&
+                typeof appsyncEvent.request.headers['user-agent'] !== 'undefined' && {
+                    requestUserAgent: appsyncEvent.request.headers['user-agent'],
+                }),
+        }
+    }
+    // AWS_LAMBDA authorization
+    else if (appsyncEvent?.identity && typeof appsyncEvent.identity['resolverContext'] !== 'undefined') {
+        authorization = Authorizations.AWS_LAMBDA
+    }
+    // AWS_IAM authorization
+    else if (
+        appsyncEvent?.identity &&
+        typeof appsyncEvent.identity['cognitoIdentityAuthType'] !== 'undefined' &&
+        typeof appsyncEvent.identity['cognitoIdentityAuthProvider'] !== 'undefined' &&
+        typeof appsyncEvent.identity['cognitoIdentityPoolId'] !== 'undefined' &&
+        typeof appsyncEvent.identity['cognitoIdentityId'] !== 'undefined'
+    ) {
+        authorization = Authorizations.AWS_IAM
+    }
+    // AMAZON_COGNITO_USER_POOLS authorization
+    else if (
+        appsyncEvent?.identity &&
+        typeof appsyncEvent.identity['sub'] !== 'undefined' &&
+        typeof appsyncEvent.identity['issuer'] !== 'undefined' &&
+        typeof appsyncEvent.identity['username'] !== 'undefined' &&
+        typeof appsyncEvent.identity['claims'] !== 'undefined' &&
+        typeof appsyncEvent.identity['sourceIp'] !== 'undefined' &&
+        typeof appsyncEvent.identity['defaultAuthStrategy'] !== 'undefined'
+    ) {
+        authorization = Authorizations.AMAZON_COGNITO_USER_POOLS
+    }
+    // AWS_OIDC authorization
+    else if (
+        appsyncEvent?.identity &&
+        typeof appsyncEvent.identity['sub'] !== 'undefined' &&
+        typeof appsyncEvent.identity['issuer'] !== 'undefined' &&
+        typeof appsyncEvent.identity['claims'] !== 'undefined'
+    ) {
+        authorization = Authorizations.AWS_OIDC
+    }
+    // ERROR
+    else {
+        throw new CustomError(`Couldn't detect caller identity from: ${inspect(appsyncEvent.identity)}`, {
+            type: 'BAD_USER_INPUT',
+        })
+    }
+
+    return { authorization, identity }
+}
+
+/**
+ * #### Returns context (`action`, `alias` and `model`).
+ *
+ * @param  {any} options
+ * @param  {any|null} options.customResolvers
+ * @param  {Operation} options.operation
+ * @param  {Options} options.options
+ * @returns Context
+ */
+export function getContext({
+    customResolvers,
+    operation,
+    options,
+}: {
+    customResolvers?: any | null
+    operation: Operation
+    options: Options
+}): Context {
     const context: Context = {
         action: String(),
         alias: String(),
         model: null,
     }
-    const operation = getOperation({ fieldName: appsyncEvent.info.fieldName })
 
     if (customResolvers && typeof customResolvers[operation] !== 'undefined') {
         context.action = operation
@@ -73,115 +205,15 @@ export function parseEvent(
         context.alias = getActionAlias({ action: context.action })
     }
 
-    const { identity, authorization } = getAuthIdentity({
-        appsyncEvent,
-    })
-    const fields = getFields({
-        _selectionSetList: appsyncEvent.info.selectionSetList,
-    })
-    const prismaArgs = getPrismaArgs({
-        action: context.action,
-        _arguments: appsyncEvent.arguments,
-        _selectionSetList: appsyncEvent.info.selectionSetList,
-        defaultPagination: options.defaultPagination,
-    })
-    const type = getType({
-        _parentTypeName: appsyncEvent.info.parentTypeName,
-    })
-    const paths = getPaths({
-        context,
-        prismaArgs,
-    })
-
-    return {
-        operation,
-        context,
-        fields,
-        args: appsyncEvent.arguments,
-        prismaArgs,
-        type,
-        authorization,
-        identity,
-        paths,
-    }
+    return context
 }
 
 /**
- * Return auth. identity from parsed `event`.
- * @param  {{appsyncEvent:any}} {appsyncEvent}
- * @returns AuthIdentity
- */
-export function getAuthIdentity({ appsyncEvent }: { appsyncEvent: any }): {
-    identity: Identity
-    authorization: Authorization
-} {
-    let authorization: Authorization = null
-    let identity: Identity = appsyncEvent.identity
-
-    // https://docs.aws.amazon.com/appsync/latest/devguide/resolver-context-reference.html#aws-appsync-resolver-context-reference-identity
-
-    // API_KEY authorization
-    if (typeof appsyncEvent.identity === 'undefined' || !appsyncEvent.identity || appsyncEvent.identity.length < 1) {
-        authorization = Authorizations.API_KEY
-        identity = merge(identity, {
-            ...(appsyncEvent.request &&
-                appsyncEvent.request.headers &&
-                typeof appsyncEvent.request.headers['x-api-key'] !== 'undefined' && {
-                    requestApiKey: appsyncEvent.request.headers['x-api-key'],
-                }),
-            ...(appsyncEvent.request &&
-                appsyncEvent.request.headers &&
-                typeof appsyncEvent.request.headers['user-agent'] !== 'undefined' && {
-                    requestUserAgent: appsyncEvent.request.headers['user-agent'],
-                }),
-        })
-    }
-    // AWS_LAMBDA authorization
-    else if (typeof appsyncEvent.identity['resolverContext'] !== 'undefined') {
-        authorization = Authorizations.AWS_LAMBDA
-    }
-    // AWS_IAM authorization
-    else if (
-        typeof appsyncEvent.identity['cognitoIdentityAuthType'] !== 'undefined' &&
-        typeof appsyncEvent.identity['cognitoIdentityAuthProvider'] !== 'undefined' &&
-        typeof appsyncEvent.identity['cognitoIdentityPoolId'] !== 'undefined' &&
-        typeof appsyncEvent.identity['cognitoIdentityId'] !== 'undefined'
-    ) {
-        authorization = Authorizations.AWS_IAM
-    }
-    // AMAZON_COGNITO_USER_POOLS authorization
-    else if (
-        typeof appsyncEvent.identity['sub'] !== 'undefined' &&
-        typeof appsyncEvent.identity['issuer'] !== 'undefined' &&
-        typeof appsyncEvent.identity['username'] !== 'undefined' &&
-        typeof appsyncEvent.identity['claims'] !== 'undefined' &&
-        typeof appsyncEvent.identity['sourceIp'] !== 'undefined' &&
-        typeof appsyncEvent.identity['defaultAuthStrategy'] !== 'undefined'
-    ) {
-        authorization = Authorizations.AMAZON_COGNITO_USER_POOLS
-    }
-    // AWS_OIDC authorization
-    else if (
-        typeof appsyncEvent.identity['sub'] !== 'undefined' &&
-        typeof appsyncEvent.identity['issuer'] !== 'undefined' &&
-        typeof appsyncEvent.identity['claims'] !== 'undefined'
-    ) {
-        authorization = Authorizations.AWS_OIDC
-    }
-    // ERROR
-    else {
-        throw new CustomError(`Couldn't detect caller identity from: ${inspect(appsyncEvent.identity)}`, {
-            type: 'BAD_USER_INPUT',
-        })
-    }
-
-    return { authorization, identity }
-}
-
-/**
- * Return operation (`getPost`, `listUsers`, ...) from parsed `event.info.fieldName`.
- * @param  {{fieldName:string}} {fieldName}
- * @returns string
+ * #### Returns operation (`getPost`, `listUsers`, ..).
+ *
+ * @param  {any} options
+ * @param  {string} options.fieldName
+ * @returns Operation
  */
 export function getOperation({ fieldName }: { fieldName: string }): Operation {
     const operation = fieldName as Operation
@@ -192,8 +224,10 @@ export function getOperation({ fieldName }: { fieldName: string }): Operation {
 }
 
 /**
- * Return action (`get`, `list`, `create`, ...) from parsed `operation`.
- * @param  {{operation:string}} {operation}
+ * #### Returns action (`get`, `list`, `create`, ...).
+ *
+ * @param  {any} options
+ * @param  {string} options.operation
  * @returns Action
  */
 export function getAction({ operation }: { operation: string }): Action {
@@ -210,8 +244,10 @@ export function getAction({ operation }: { operation: string }): Action {
 }
 
 /**
- * Return action alias (`access`, `create`, `modify`, `subscribe`) from parsed `action`.
- * @param  {{action:string}} {action}
+ * #### Returns action alias (`access`, `create`, `modify`, `subscribe`).
+ *
+ * @param  {any} options
+ * @param  {Action} options.action
  * @returns ActionsAlias
  */
 export function getActionAlias({ action }: { action: Action }): ActionsAlias {
@@ -233,8 +269,11 @@ export function getActionAlias({ action }: { action: Action }): ActionsAlias {
 }
 
 /**
- *  Return model (`Post`, `User`, ...) from parsed `operation` and `action`.
- * @param  {{operation:string, action:Action}} {operation, action}
+ * #### Returns model (`Post`, `User`, ...).
+ *
+ * @param  {any} options
+ * @param  {string} options.operation
+ * @param  {Action} options.action
  * @returns Model
  */
 export function getModel({ operation, action }: { operation: string; action: Action }): Model {
@@ -246,8 +285,10 @@ export function getModel({ operation, action }: { operation: string; action: Act
 }
 
 /**
- * Return fields (`title`, `author`, ...) from parsed `event.info.selectionSetList`.
- * @param  {{_selectionSetList:string[]}} {_selectionSetList}
+ * #### Returns fields (`title`, `author`, ...).
+ *
+ * @param  {any} options
+ * @param  {string[]} options._selectionSetList
  * @returns string[]
  */
 export function getFields({ _selectionSetList }: { _selectionSetList: string[] }): string[] {
@@ -264,33 +305,42 @@ export function getFields({ _selectionSetList }: { _selectionSetList: string[] }
 }
 
 /**
- * Return GraphQL type (`Query`, `Mutation` or `Subscription`) from parsed `event.info.parentTypeName`.
- * @param  {{_parentTypeName:string}} {_parentTypeName}
- * @returns 'Query' | 'Mutation' | 'Subscription'
+ * #### Returns GraphQL type (`Query`, `Mutation` or `Subscription`).
+ *
+ * @param {any} options
+ * @param {string} options._parentTypeName
+ * @returns GraphQLType
  */
-export function getType({ _parentTypeName }: { _parentTypeName: string }): 'Query' | 'Mutation' | 'Subscription' {
+export function getType({ _parentTypeName }: { _parentTypeName: string }): GraphQLType {
     const type = _parentTypeName
 
-    if (!['Query', 'Mutation', 'Subscription'].includes(type)) throw new Error(`Error parsing 'type' from input event.`)
+    if (!['Query', 'Mutation', 'Subscription'].includes(type)) {
+        throw new Error(`Error parsing 'type' from input event.`)
+    }
 
-    return type as 'Query' | 'Mutation' | 'Subscription'
+    return type as GraphQLType
 }
 
 /**
- * Return Prisma args (`where`, `data`, `orderBy`, ...) from parsed `action` and `event.arguments`.
- * @param  {{action: Action, _arguments:any, defaultPagination:false|number}} { action, _arguments, defaultPagination }
- * @returns Args
+ * #### Returns Prisma args (`where`, `data`, `orderBy`, ...).
+ *
+ * @param {any} options
+ * @param {Action} options.action
+ * @param {Options['defaultPagination']} options.defaultPagination
+ * @param {any} options._arguments
+ * @param {any} options._selectionSetList
+ * @returns PrismaArgs
  */
 export function getPrismaArgs({
     action,
+    defaultPagination,
     _arguments,
     _selectionSetList,
-    defaultPagination,
 }: {
     action: Action
+    defaultPagination: Options['defaultPagination']
     _arguments: any
     _selectionSetList: any
-    defaultPagination: false | number
 }): PrismaArgs {
     const prismaArgs: PrismaArgs = {}
 
@@ -317,8 +367,9 @@ export function getPrismaArgs({
 }
 
 /**
- * Return individual `orderBy` record formatted for Prisma.
- * @param  {any} sortObj
+ * #### Returns individual `orderBy` record formatted for Prisma.
+ *
+ * @param {any} sortObj
  * @returns any
  */
 function getOrderBy(sortObj: any): any {
@@ -331,8 +382,9 @@ function getOrderBy(sortObj: any): any {
 }
 
 /**
- * Return Prisma `orderBy` from parsed `event.arguments.orderBy`.
- * @param  {any} orderByInputs
+ * #### Returns Prisma `orderBy` from parsed `event.arguments.orderBy`.
+ *
+ * @param {any} orderByInputs
  * @returns any[]
  */
 function parseOrderBy(orderByInputs: any): any[] {
@@ -346,8 +398,9 @@ function parseOrderBy(orderByInputs: any): any[] {
 }
 
 /**
- * Return individual `include` field formatted for Prisma.
- * @param  {any} parts
+ * #### Returns individual `include` field formatted for Prisma.
+ *
+ * @param {any} parts
  * @returns any
  */
 function getInclude(parts: any): any {
@@ -362,8 +415,9 @@ function getInclude(parts: any): any {
 }
 
 /**
- * Return individual `select` field formatted for Prisma.
- * @param  {any} parts
+ * #### Returns individual `select` field formatted for Prisma.
+ *
+ * @param {any} parts
  * @returns any
  */
 function getSelect(parts: any): any {
@@ -378,8 +432,9 @@ function getSelect(parts: any): any {
 }
 
 /**
- * Return Prisma `select` from parsed `event.arguments.info.selectionSetList`.
- * @param  {any} selectionSetList
+ * #### Return Prisma `select` from parsed `event.arguments.info.selectionSetList`.
+ *
+ * @param {any} selectionSetList
  * @returns any
  */
 function parseSelectionList(selectionSetList: any): any {
@@ -408,8 +463,11 @@ function parseSelectionList(selectionSetList: any): any {
 }
 
 /**
- * Return req and res paths (`/update/post/title`, `/get/post/date`, ...)
- * @param  {{action:Action, subject:Subject, args:Args}} {action, subject, args}
+ * #### Returns req and res paths (`/update/post/title`, `/get/post/date`, ..).
+ *
+ * @param {any} options
+ * @param {Context} options.context
+ * @param {PrismaArgs} options.prismaArgs
  * @returns string[]
  */
 export function getPaths({ context, prismaArgs }: { context: Context; prismaArgs: PrismaArgs }): string[] {

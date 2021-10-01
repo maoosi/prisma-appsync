@@ -1,20 +1,17 @@
 import { PrismaClient, Prisma } from '@prisma/client'
 
-/**
- *
- * TYPES
- *
- */
-
 // Prisma-AppSync Client Types
 
-export interface PrismaAppSyncOptions {
-    generatedConfig?: any
+export type PrismaAppSyncOptions = {
     connectionString?: string
     sanitize?: boolean
     debug?: boolean
     defaultPagination?: number | false
     maxDepth?: number
+}
+
+export type Options = Required<PrismaAppSyncOptions> & {
+    generatedConfig: any
 }
 
 export type Action = typeof Actions[keyof typeof Actions] | string
@@ -29,7 +26,7 @@ export interface Context {
     model: Model | null
 }
 
-export interface QueryParams {
+export type QueryParams = {
     type: GraphQLType
     operation: Operation | string
     context: Context
@@ -91,7 +88,7 @@ export interface ShieldAuthorization {
     matcher: string
 }
 
-export interface ResolveParams<CustomResolvers extends string> {
+export type ResolveParams<CustomResolvers extends string> = {
     event: AppsyncEvent
     resolvers?: {
         [resolver in CustomResolvers]: ((props: QueryParamsCustom) => Promise<any>) | boolean
@@ -118,7 +115,7 @@ export interface PrismaArgs {
 
 // AppSync-related Types
 
-export interface AppsyncEvent {
+export type AppsyncEvent = {
     arguments: any
     source: any
     identity: AppSyncIdentity
@@ -182,15 +179,11 @@ export interface AWS_OIDC {
 
 export type AppSyncIdentity = API_KEY | AWS_LAMBDA | AWS_IAM | AMAZON_COGNITO_USER_POOLS | AWS_OIDC
 
-export type Identity = AppSyncIdentity & {
-    [key: string]: any
-}
-
-/**
- *
- * CONSTS
- *
- */
+export type Identity =
+    | (AppSyncIdentity & {
+          [key: string]: any
+      })
+    | null
 
 // Prisma-related Constants
 

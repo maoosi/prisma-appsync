@@ -1,11 +1,11 @@
-import * as queries from '../lib/resolver'
-import { ResolverQuery } from '../defs'
+import * as queries from '../../src/client/resolver'
+import { QueryParams } from '../../src/client/defs'
 
 describe('CLIENT #queries', () => {
-    const query:ResolverQuery = {
+    const query: QueryParams = {
         subject: {
             model: 'Post',
-            actionAlias: 'access'
+            actionAlias: 'access',
         },
         args: {
             data: { title: 'Hello World' },
@@ -14,127 +14,124 @@ describe('CLIENT #queries', () => {
             orderBy: { title: 'DESC' },
             skip: 2,
             take: 1,
-            skipDuplicates: true
+            skipDuplicates: true,
         },
         operation: null,
         action: null,
         fields: null,
         type: null,
         authIdentity: null,
-        paths: null
+        paths: null,
     }
 
-    const createPrismaClient:any = (model:string, prismaQuery: string) => {
+    const createPrismaClient: any = (model: string, prismaQuery: string) => {
         return {
             [model]: {
                 [prismaQuery]: (queryObject: any) => {
                     return queryObject
-                }
-            }
+                },
+            },
         }
     }
 
     const tests = [
         {
-            name: 'getQuery', 
-            prismaQuery: 'findUnique', 
-            expectedResult: { 
+            name: 'getQuery',
+            prismaQuery: 'findUnique',
+            expectedResult: {
                 where: query.args.where,
                 select: query.args.select,
-            }
+            },
         },
         {
-            name: 'listQuery', 
-            prismaQuery: 'findMany', 
+            name: 'listQuery',
+            prismaQuery: 'findMany',
             expectedResult: {
                 where: query.args.where,
                 select: query.args.select,
                 orderBy: query.args.orderBy,
                 skip: query.args.skip,
                 take: query.args.take,
-            }
+            },
         },
         {
-            name: 'countQuery', 
-            prismaQuery: 'count', 
+            name: 'countQuery',
+            prismaQuery: 'count',
             expectedResult: {
                 where: query.args.where,
                 select: query.args.select,
                 orderBy: query.args.orderBy,
                 skip: query.args.skip,
                 take: query.args.take,
-            }
+            },
         },
         {
-            name: 'createQuery', 
-            prismaQuery: 'create', 
+            name: 'createQuery',
+            prismaQuery: 'create',
             expectedResult: {
                 data: query.args.data,
                 select: query.args.select,
-            }
+            },
         },
         {
-            name: 'createManyQuery', 
+            name: 'createManyQuery',
             prismaQuery: 'createMany',
             expectedResult: {
                 data: query.args.data,
                 skipDuplicates: query.args.skipDuplicates,
-            }
+            },
         },
         {
-            name: 'updateQuery', 
-            prismaQuery: 'update', 
+            name: 'updateQuery',
+            prismaQuery: 'update',
             expectedResult: {
                 data: query.args.data,
                 where: query.args.where,
                 select: query.args.select,
-            }
+            },
         },
         {
-            name: 'updateManyQuery', 
-            prismaQuery: 'updateMany', 
+            name: 'updateManyQuery',
+            prismaQuery: 'updateMany',
             expectedResult: {
                 data: query.args.data,
                 where: query.args.where,
-            }
+            },
         },
         {
-            name: 'upsertQuery', 
-            prismaQuery: 'upsert', 
+            name: 'upsertQuery',
+            prismaQuery: 'upsert',
             expectedResult: {
                 update: query.args.data,
                 create: query.args.data,
                 where: query.args.where,
                 select: query.args.select,
-            }
+            },
         },
         {
-            name: 'deleteQuery', 
-            prismaQuery: 'delete', 
+            name: 'deleteQuery',
+            prismaQuery: 'delete',
             expectedResult: {
                 where: query.args.where,
                 select: query.args.select,
-            }
+            },
         },
         {
-            name: 'deleteManyQuery', 
-            prismaQuery: 'deleteMany', 
+            name: 'deleteManyQuery',
+            prismaQuery: 'deleteMany',
             expectedResult: {
                 where: query.args.where,
-            }
+            },
         },
     ]
 
-    const cases = tests.map((test:any) => {
+    const cases = tests.map((test: any) => {
         return [test.name, test.prismaQuery, test.expectedResult]
     })
 
-    test.each(cases)(
-        'expect "%s" to call "%s" Prisma Query',
-        async (name, prismaQuery, expectedResult) => {
-            const model = typeof query.subject !== 'string' ? query.subject.model : String()
-            const result = await queries[name](createPrismaClient(model, prismaQuery), query)
-            expect(result).toEqual(expectedResult)
-        }
-    )
+    test.each(cases)('expect "%s" to call "%s" Prisma Query', async (name, prismaQuery, expectedResult) => {
+        const model = typeof query.subject !== 'string' ? query.subject.model : String()
+        const result = await queries[name](createPrismaClient(model, prismaQuery), query)
+        expect(result).toEqual(expectedResult)
+    })
 })
