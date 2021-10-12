@@ -1,52 +1,75 @@
 /**
- * Deep merge objects (without mutating the target object).
- * @param sources object[]
- * @returns object
+ * #### Deep merge objects (without mutating the target object).
+ *
+ * @example const newObj = merge(obj1, obj2, obj3)
+ *
+ * @param {any[]} sources
+ * @returns any
  */
-export declare function merge(...sources: object[]): any;
+export declare function merge(...sources: any[]): any;
 /**
- * Deep clone object.
- * @param source object
- * @returns object
+ * #### Deep clone object.
+ *
+ * @example const newObj = clone(sourceObj)
+ *
+ * @param {any} source
+ * @returns any
  */
-export declare function clone(source: object): any;
+export declare function clone(source: any): any;
 /**
- * Returns decoded text, replacing HTML special characters
+ * #### Returns decoded text, replacing HTML special characters.
+ *
  * @example decode('&lt; &gt; &quot; &apos; &amp; &#169; &#8710;')
  * // returns '< > " \' & © ∆'
- * @param {any} input - input
- * @returns {boolean} `true` or `false`
+ *
+ * @param {string} str
+ * @returns string
  */
 export declare function decode(str: string): string;
 /**
- * Returns encoded text, version of string.
+ * #### Returns encoded text, version of string.
+ *
  * @example encode('<script>alert("xss");</scr' + "ipt>")
- * @param {any} input - input
- * @returns {boolean} `true` or `false`
+ *
+ * @param {string} str
+ * @returns string
  */
 export declare function encode(str: string): string;
 /**
- * Transform an object to a dotted-key/value pair
- * @param source object
- * @returns object
+ * #### Transform an object to a dotted-key/value pair.
+ *
+ * @example dotate({ data: { title: "glut" } })
+ * // returns { 'data.title': 'glut' }
+ *
+ * @param {any} source
+ * @returns any
  */
-export declare function dotate(source: object): any;
+export declare function dotate(source: any): any;
 /**
- * Returns true if specified path matches any of the glob patterns.
- * @param path string
- * @param globPatterns string|string[]
+ * #### Returns true if specified path matches any of the glob patterns.
+ *
+ * @example isMatchingGlob('get/post/title', ['get/post{,/**}'])
+ *
+ * @param {string} path
+ * @param {string|string[]} globPatterns
  * @returns boolean
  */
 export declare function isMatchingGlob(path: string, globPatterns: string | string[]): boolean;
 /**
- * Sanitize untrusted HTML to prevent XSS.
- * @param str string
+ * #### Sanitize untrusted HTML to prevent XSS.
+ *
+ * @example filterXSS('<script>alert("xss");</scr' + "ipt>")
+ *
+ * @param {string} str
  * @returns string
  */
 export declare function filterXSS(str: string): string;
 /**
- * Return true if element is Empty
- * @param element any
+ * #### Return true if element is Empty.
+ *
+ * @example isEmpty(prismaArgs?.data?.title)
+ *
+ * @param {any} element
  * @returns boolean
  */
 export declare function isEmpty(element: any): boolean;

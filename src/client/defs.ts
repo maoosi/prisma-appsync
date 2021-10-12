@@ -20,12 +20,33 @@ export type ActionsAlias = keyof typeof ActionsAliases | null
 
 export type Operation = `${Action}${Capitalize<Model>}`
 
-export interface Context {
+export type Context = {
     action: Action
     alias: Action | 'custom' | null
     model: Model | null
 }
 
+/**
+ * ### QueryParams
+ *
+ * @example
+ * ```
+ * {
+ *     type: 'Query',
+ *     operation: 'getPost',
+ *     context: { action: 'get', alias: 'access', model: 'Post' },
+ *     fields: ['title', 'status'],
+ *     paths: ['get/post/title', 'get/post/status'],
+ *     args: { where: { id: 5 } },
+ *     prismaArgs: {
+ *         where: { id: 5 },
+ *         select: { title: true, status: true },
+ *     },
+ *     authorization: 'API_KEY',
+ *     identity: { ... },
+ * }
+ * ```
+ */
 export type QueryParams = {
     type: GraphQLType
     operation: Operation | string
@@ -44,26 +65,49 @@ export type QueryParamsCustom = QueryParams & {
     prismaClient: PrismaClient
 }
 
-export type QueryParamsBefore = QueryParams & {
+export type BeforeHookParams = QueryParams & {
     prismaClient: PrismaClient
 }
 
-export type QueryParamsAfter = QueryParams & {
+/**
+ * ### AfterHookParams
+ *
+ * @example
+ * ```
+ * {
+ *     type: 'Query',
+ *     operation: 'getPost',
+ *     context: { action: 'get', alias: 'access', model: 'Post' },
+ *     fields: ['title', 'status'],
+ *     paths: ['get/post/title', 'get/post/status'],
+ *     args: { where: { id: 5 } },
+ *     prismaArgs: {
+ *         where: { id: 5 },
+ *         select: { title: true, status: true },
+ *     },
+ *     authorization: 'API_KEY',
+ *     identity: { ... },
+ *     result: { title: 'Hello World', status: 'PUBLISHED' }
+ * }
+ * ```
+ */
+export type AfterHookParams = QueryParams & {
     prismaClient: PrismaClient
     result: any | any[]
 }
 
-export interface Shield {
+export type Shield = {
     [matcher: string]:
         | boolean
         | {
-              rule: boolean | object
+              rule: boolean | any
               reason?: string | Function
           }
 }
-export interface HooksProps {
-    before: QueryParamsBefore
-    after: QueryParamsAfter
+
+export type HooksProps = {
+    before: BeforeHookParams
+    after: AfterHookParams
 }
 
 export type HookPath<CustomResolvers> = `${Lowercase<NonNullable<ActionsAlias>>}/${Lowercase<Model>}` | CustomResolvers
@@ -81,10 +125,10 @@ export type Hooks<CustomResolvers extends string> =
     | HooksParameters<'before', CustomResolvers>
     | HooksParameters<'after', CustomResolvers>
 
-export interface ShieldAuthorization {
+export type ShieldAuthorization = {
     canAccess: boolean
     reason: string | Function
-    prismaFilter: object
+    prismaFilter: any
     matcher: string
 }
 
@@ -103,7 +147,7 @@ export { PrismaClient }
 
 export type Model = typeof Models[keyof typeof Models]
 
-export interface PrismaArgs {
+export type PrismaArgs = {
     where?: any
     data?: any
     orderBy?: any
@@ -118,7 +162,7 @@ export interface PrismaArgs {
 export type AppsyncEvent = {
     arguments: any
     source: any
-    identity: AppSyncIdentity
+    identity: Identity
     request: any
     info: {
         fieldName: string
@@ -135,13 +179,16 @@ export type AppsyncEvent = {
 
 export type GraphQLType = 'Query' | 'Mutation' | 'Subscription'
 
-export type API_KEY = null
-
-export interface AWS_LAMBDA {
-    resolverContext: any
+export type API_KEY = null | {
+    [key: string]: any
 }
 
-export interface AWS_IAM {
+export type AWS_LAMBDA = {
+    resolverContext: any
+    [key: string]: any
+}
+
+export type AWS_IAM = {
     accountId: string
     cognitoIdentityPoolId: string
     cognitoIdentityId: string
@@ -150,9 +197,10 @@ export interface AWS_IAM {
     userArn: string
     cognitoIdentityAuthType: string
     cognitoIdentityAuthProvider: string
+    [key: string]: any
 }
 
-export interface AMAZON_COGNITO_USER_POOLS {
+export type AMAZON_COGNITO_USER_POOLS = {
     sub: string
     issuer: string
     username: string
@@ -160,9 +208,10 @@ export interface AMAZON_COGNITO_USER_POOLS {
     sourceIp: string[]
     defaultAuthStrategy: string
     groups: string[]
+    [key: string]: any
 }
 
-export interface AWS_OIDC {
+export type OPENID_CONNECT = {
     claims: {
         sub: string
         aud: string
@@ -175,15 +224,10 @@ export interface AWS_OIDC {
     sourceIp: string[]
     issuer: string
     sub: string
+    [key: string]: any
 }
 
-export type AppSyncIdentity = API_KEY | AWS_LAMBDA | AWS_IAM | AMAZON_COGNITO_USER_POOLS | AWS_OIDC
-
-export type Identity =
-    | (AppSyncIdentity & {
-          [key: string]: any
-      })
-    | null
+export type Identity = API_KEY | AWS_LAMBDA | AWS_IAM | AMAZON_COGNITO_USER_POOLS | OPENID_CONNECT
 
 // Prisma-related Constants
 
@@ -291,10 +335,21 @@ export const ActionsList = actionsListSingle.filter((item, pos) => actionsListSi
 
 export const BatchActionsList = actionsListMultiple.filter((item, pos) => actionsListMultiple.indexOf(item) === pos)
 
+/**
+ * ### Authorizations
+ *
+ * - `API_KEY`: Via hard-coded API key passed into `x-api-key` header.
+ * - `AWS_IAM`: Via IAM identity and associated IAM policy rules.
+ * - `AMAZON_COGNITO_USER_POOLS`: Via Amazon Cognito user token.
+ * - `AWS_LAMBDA`: Via an AWS Lambda function.
+ * - `OPENID_CONNECT`: Via Open ID connect such as Auth0.
+ *
+ * https://docs.aws.amazon.com/appsync/latest/devguide/security-authz.html
+ */
 export const Authorizations = {
     API_KEY: 'API_KEY',
     AWS_IAM: 'AWS_IAM',
     AMAZON_COGNITO_USER_POOLS: 'AMAZON_COGNITO_USER_POOLS',
     AWS_LAMBDA: 'AWS_LAMBDA',
-    AWS_OIDC: 'AWS_OIDC',
+    OPENID_CONNECT: 'OPENID_CONNECT',
 } as const

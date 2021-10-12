@@ -1,6 +1,8 @@
 import { PrismaClient, QueryParams } from './defs'
 
 /**
+ *  #### Query :: Find Unique
+ *
  * https://www.prisma.io/docs/reference/api-reference/prisma-client-reference#findunique
  * @param  {PrismaClient} prismaClient
  * @param  {QueryParams} query
@@ -17,6 +19,8 @@ export async function getQuery(prismaClient: PrismaClient, query: QueryParams) {
 }
 
 /**
+ * #### Query :: Find Many
+ *
  * https://www.prisma.io/docs/reference/api-reference/prisma-client-reference#findmany
  * @param  {PrismaClient} prismaClient
  * @param  {QueryParams} query
@@ -36,6 +40,8 @@ export async function listQuery(prismaClient: PrismaClient, query: QueryParams) 
 }
 
 /**
+ * #### Query :: Count
+ *
  * https://www.prisma.io/docs/reference/api-reference/prisma-client-reference#count
  * @param  {PrismaClient} prismaClient
  * @param  {QueryParams} query
@@ -55,6 +61,8 @@ export async function countQuery(prismaClient: PrismaClient, query: QueryParams)
 }
 
 /**
+ * #### Mutation :: Create
+ *
  * https://www.prisma.io/docs/reference/api-reference/prisma-client-reference#create
  * @param  {PrismaClient} prismaClient
  * @param  {QueryParams} query
@@ -71,6 +79,8 @@ export async function createQuery(prismaClient: PrismaClient, query: QueryParams
 }
 
 /**
+ * #### Mutation :: Create Many
+ *
  * https://www.prisma.io/docs/reference/api-reference/prisma-client-reference#createmany
  * @param  {PrismaClient} prismaClient
  * @param  {QueryParams} query
@@ -87,6 +97,8 @@ export async function createManyQuery(prismaClient: PrismaClient, query: QueryPa
 }
 
 /**
+ * #### Mutation :: Update
+ *
  * https://www.prisma.io/docs/reference/api-reference/prisma-client-reference#update
  * @param  {PrismaClient} prismaClient
  * @param  {QueryParams} query
@@ -104,6 +116,8 @@ export async function updateQuery(prismaClient: PrismaClient, query: QueryParams
 }
 
 /**
+ * #### Mutation :: Update Many
+ *
  * https://www.prisma.io/docs/reference/api-reference/prisma-client-reference#updatemany
  * @param  {PrismaClient} prismaClient
  * @param  {QueryParams} query
@@ -120,6 +134,8 @@ export async function updateManyQuery(prismaClient: PrismaClient, query: QueryPa
 }
 
 /**
+ * #### Mutation :: Upsert
+ *
  * https://www.prisma.io/docs/reference/api-reference/prisma-client-reference#upsert
  * @param  {PrismaClient} prismaClient
  * @param  {QueryParams} query
@@ -138,6 +154,8 @@ export async function upsertQuery(prismaClient: PrismaClient, query: QueryParams
 }
 
 /**
+ * #### Mutation :: Delete
+ *
  * https://www.prisma.io/docs/reference/api-reference/prisma-client-reference#delete
  * @param  {PrismaClient} prismaClient
  * @param  {QueryParams} query
@@ -154,6 +172,8 @@ export async function deleteQuery(prismaClient: PrismaClient, query: QueryParams
 }
 
 /**
+ * #### Mutation :: Delete Many
+ *
  * https://www.prisma.io/docs/reference/api-reference/prisma-client-reference#deletemany
  * @param  {PrismaClient} prismaClient
  * @param  {QueryParams} query

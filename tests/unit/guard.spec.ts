@@ -1,9 +1,9 @@
-import { Shield } from '../../src/client/defs'
-import { getAuthorization } from '../../src/client/guard'
+import { Shield } from 'src/client/defs'
+import { getShieldAuthorization } from 'src/client/guard'
 
 describe('CLIENT #guard', () => {
     // TODO: write more test cases
-    describe('.getAuthorization?', () => {
+    describe('.getShieldAuthorization?', () => {
         const paths = [
             '/update/post/title',
             '/update/post/author/username',
@@ -37,7 +37,7 @@ describe('CLIENT #guard', () => {
         }
 
         test('expect query to be _denied_ by default', () => {
-            const authorization = getAuthorization({
+            const authorization = getShieldAuthorization({
                 shield: createShield({ isOwner: false, isAdmin: false }),
                 paths: paths,
             })

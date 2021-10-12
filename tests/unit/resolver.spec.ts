@@ -1,5 +1,5 @@
-import * as queries from '../../src/client/resolver'
-import { QueryParams } from '../../src/client/defs'
+import * as queries from 'src/client/resolver'
+import { QueryParams } from 'src/client/defs'
 
 describe('CLIENT #queries', () => {
     const query: QueryParams = {

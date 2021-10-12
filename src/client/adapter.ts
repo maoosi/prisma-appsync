@@ -35,7 +35,7 @@ export function parseEvent(appsyncEvent: AppsyncEvent, options: Options, customR
         isEmpty(appsyncEvent?.info?.parentTypeName) ||
         isEmpty(appsyncEvent?.arguments)
     ) {
-        throw new Error(`Error reading required parameters from appsyncEvent.`)
+        throw new CustomError(`Error reading required parameters from appsyncEvent.`, { type: 'INTERNAL_SERVER_ERROR' })
     }
 
     const operation = getOperation({ fieldName: appsyncEvent.info.fieldName })
@@ -95,19 +95,17 @@ export function getAuthIdentity({ appsyncEvent }: { appsyncEvent: AppsyncEvent }
     authorization: Authorization
 } {
     let authorization: Authorization = null
-    let identity: Identity = appsyncEvent?.identity ? appsyncEvent.identity : null
+    let identity: Identity = null
 
     // API_KEY authorization
-    if (typeof appsyncEvent.identity === 'undefined' || isEmpty(appsyncEvent.identity)) {
+    if (isEmpty(appsyncEvent?.identity)) {
         authorization = Authorizations.API_KEY
         identity = {
-            ...(appsyncEvent.request &&
-                appsyncEvent.request.headers &&
+            ...(appsyncEvent?.request?.headers &&
                 typeof appsyncEvent.request.headers['x-api-key'] !== 'undefined' && {
                     requestApiKey: appsyncEvent.request.headers['x-api-key'],
                 }),
-            ...(appsyncEvent.request &&
-                appsyncEvent.request.headers &&
+            ...(appsyncEvent?.request?.headers &&
                 typeof appsyncEvent.request.headers['user-agent'] !== 'undefined' && {
                     requestUserAgent: appsyncEvent.request.headers['user-agent'],
                 }),
@@ -116,6 +114,7 @@ export function getAuthIdentity({ appsyncEvent }: { appsyncEvent: AppsyncEvent }
     // AWS_LAMBDA authorization
     else if (appsyncEvent?.identity && typeof appsyncEvent.identity['resolverContext'] !== 'undefined') {
         authorization = Authorizations.AWS_LAMBDA
+        identity = appsyncEvent.identity
     }
     // AWS_IAM authorization
     else if (
@@ -126,6 +125,7 @@ export function getAuthIdentity({ appsyncEvent }: { appsyncEvent: AppsyncEvent }
         typeof appsyncEvent.identity['cognitoIdentityId'] !== 'undefined'
     ) {
         authorization = Authorizations.AWS_IAM
+        identity = appsyncEvent.identity
     }
     // AMAZON_COGNITO_USER_POOLS authorization
     else if (
@@ -138,20 +138,22 @@ export function getAuthIdentity({ appsyncEvent }: { appsyncEvent: AppsyncEvent }
         typeof appsyncEvent.identity['defaultAuthStrategy'] !== 'undefined'
     ) {
         authorization = Authorizations.AMAZON_COGNITO_USER_POOLS
+        identity = appsyncEvent.identity
     }
-    // AWS_OIDC authorization
+    // OPENID_CONNECT authorization
     else if (
         appsyncEvent?.identity &&
         typeof appsyncEvent.identity['sub'] !== 'undefined' &&
         typeof appsyncEvent.identity['issuer'] !== 'undefined' &&
         typeof appsyncEvent.identity['claims'] !== 'undefined'
     ) {
-        authorization = Authorizations.AWS_OIDC
+        authorization = Authorizations.OPENID_CONNECT
+        identity = appsyncEvent.identity
     }
     // ERROR
     else {
         throw new CustomError(`Couldn't detect caller identity from: ${inspect(appsyncEvent.identity)}`, {
-            type: 'BAD_USER_INPUT',
+            type: 'INTERNAL_SERVER_ERROR',
         })
     }
 
@@ -218,7 +220,8 @@ export function getContext({
 export function getOperation({ fieldName }: { fieldName: string }): Operation {
     const operation = fieldName as Operation
 
-    if (!(operation.length > 0)) throw new Error(`Error parsing 'operation' from input event.`)
+    if (!(operation.length > 0))
+        throw new CustomError(`Error parsing 'operation' from input event.`, { type: 'INTERNAL_SERVER_ERROR' })
 
     return operation
 }
@@ -238,7 +241,7 @@ export function getAction({ operation }: { operation: string }): Action {
     }) as Action
 
     if (!(typeof action !== 'undefined' && action.length > 0))
-        throw new Error(`Error parsing 'action' from input event.`)
+        throw new CustomError(`Error parsing 'action' from input event.`, { type: 'INTERNAL_SERVER_ERROR' })
 
     return action
 }
@@ -262,8 +265,9 @@ export function getActionAlias({ action }: { action: Action }): ActionsAlias {
         }
     }
 
-    if (!(typeof action !== 'undefined' && action.length > 0))
-        throw new Error(`Error parsing 'actionAlias' from input event.`)
+    if (!(typeof action !== 'undefined' && action.length > 0)) {
+        throw new CustomError(`Error parsing 'actionAlias' from input event.`, { type: 'INTERNAL_SERVER_ERROR' })
+    }
 
     return actionAlias
 }
@@ -279,7 +283,8 @@ export function getActionAlias({ action }: { action: Action }): ActionsAlias {
 export function getModel({ operation, action }: { operation: string; action: Action }): Model {
     const model = operation.replace(action, '') as Model
 
-    if (!(model.length > 0)) throw new Error(`Error parsing 'model' from input event.`)
+    if (!(model.length > 0))
+        throw new CustomError(`Error parsing 'model' from input event.`, { type: 'INTERNAL_SERVER_ERROR' })
 
     return model
 }
@@ -315,7 +320,7 @@ export function getType({ _parentTypeName }: { _parentTypeName: string }): Graph
     const type = _parentTypeName
 
     if (!['Query', 'Mutation', 'Subscription'].includes(type)) {
-        throw new Error(`Error parsing 'type' from input event.`)
+        throw new CustomError(`Error parsing 'type' from input event.`, { type: 'INTERNAL_SERVER_ERROR' })
     }
 
     return type as GraphQLType
@@ -373,7 +378,9 @@ export function getPrismaArgs({
  * @returns any
  */
 function getOrderBy(sortObj: any): any {
-    if (Object.keys(sortObj).length > 1) throw new Error(`Wrong 'orderBy' input format.`)
+    if (Object.keys(sortObj).length > 1) {
+        throw new CustomError(`Wrong 'orderBy' input format.`, { type: 'BAD_USER_INPUT' })
+    }
 
     const key: any = Object.keys(sortObj)[0]
     const value = typeof sortObj[key] === 'object' ? getOrderBy(sortObj[key]) : sortObj[key].toLowerCase()

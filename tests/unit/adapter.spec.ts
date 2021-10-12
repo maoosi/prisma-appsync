@@ -7,88 +7,69 @@ import {
     getPrismaArgs,
     getPaths,
     getAuthIdentity,
-} from '../../src/client/adapter'
-import { Actions, Action, Models, ActionsAliases, Authorizations } from '../../src/client/defs'
+} from 'src/client/adapter'
+import { Actions, Action, Models, ActionsAliases, Authorization, Authorizations } from 'src/client/defs'
+import { mockLambdaEvent, mockIdentity } from '../integration/appsync'
+
+function mockAppSyncEvent(identity: NonNullable<Authorization>) {
+    return mockLambdaEvent({
+        request: {},
+        graphQLParams: {
+            query: String(),
+            variables: {},
+            operationName: String(),
+            raw: {},
+        },
+        identity: mockIdentity(identity, {
+            sourceIp: 'xxx.xxx.xxx.xxx',
+            username: 'johndoe',
+            sub: 'xxxxxx',
+            resolverContext: {},
+        }),
+    })
+}
 
 describe('CLIENT #adapter', () => {
     describe('.getAuthIdentity?', () => {
         test('expect to detect API_KEY authorization', () => {
             const result = getAuthIdentity({
-                appsyncEvent: {},
+                appsyncEvent: mockAppSyncEvent(Authorizations.API_KEY),
             })
             expect(result.authorization).toEqual(Authorizations.API_KEY)
         })
 
         test('expect to detect AWS_LAMBDA authorization', () => {
             const result = getAuthIdentity({
-                appsyncEvent: {
-                    identity: {
-                        resolverContext: {},
-                    },
-                },
+                appsyncEvent: mockAppSyncEvent(Authorizations.AWS_LAMBDA),
             })
             expect(result.authorization).toEqual(Authorizations.AWS_LAMBDA)
         })
 
         test('expect to detect AWS_IAM authorization', () => {
             const result = getAuthIdentity({
-                appsyncEvent: {
-                    identity: {
-                        accountId: 'string',
-                        cognitoIdentityPoolId: 'string',
-                        cognitoIdentityId: 'string',
-                        sourceIp: ['string'],
-                        username: 'string',
-                        userArn: 'string',
-                        cognitoIdentityAuthType: 'string',
-                        cognitoIdentityAuthProvider: 'string',
-                    },
-                },
+                appsyncEvent: mockAppSyncEvent(Authorizations.AWS_IAM),
             })
             expect(result.authorization).toEqual(Authorizations.AWS_IAM)
         })
 
         test('expect to detect AMAZON_COGNITO_USER_POOLS authorization', () => {
             const result = getAuthIdentity({
-                appsyncEvent: {
-                    identity: {
-                        sub: 'uuid',
-                        issuer: 'string',
-                        username: 'string',
-                        claims: {},
-                        sourceIp: ['x.x.x.x'],
-                        defaultAuthStrategy: 'string',
-                    },
-                },
+                appsyncEvent: mockAppSyncEvent(Authorizations.AMAZON_COGNITO_USER_POOLS),
             })
             expect(result.authorization).toEqual(Authorizations.AMAZON_COGNITO_USER_POOLS)
         })
 
-        test('expect to detect AWS_OIDC authorization', () => {
+        test('expect to detect OPENID_CONNECT authorization', () => {
             const result = getAuthIdentity({
-                appsyncEvent: {
-                    identity: {
-                        claims: {
-                            sub: 'string',
-                            aud: 'string',
-                            azp: 'string',
-                            iss: 'string',
-                            exp: 1630923679,
-                            iat: 1630837279,
-                            gty: 'string',
-                        },
-                        issuer: 'string',
-                        sub: 'string',
-                    },
-                },
+                appsyncEvent: mockAppSyncEvent(Authorizations.OPENID_CONNECT),
             })
-            expect(result.authorization).toEqual(Authorizations.AWS_OIDC)
+            expect(result.authorization).toEqual(Authorizations.OPENID_CONNECT)
         })
 
         test('expect to throw when no matching authorization', () => {
             expect(() =>
                 getAuthIdentity({
-                    appsyncEvent: { identity: 'string' },
+                    appsyncEvent: { identity: 'string' } as any,
                 }),
             ).toThrow(Error)
         })

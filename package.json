@@ -8,22 +8,12 @@
     "license": "BSD-2-Clause",
     "scripts": {
         "preinstall": "npx only-allow pnpm",
-        "install:boilerplate": "cd boilerplate/cdk && yarn install",
-        "build": "pnpm build:cleanup && pnpm build:generator && pnpm build:client && pnpm build:copytemplates",
-        "build:cleanup": "rm -rf dist && rm -rf test/generated",
-        "build:copytemplates": "cp -R src/generator/templates dist/templates && chmod -R 755 dist",
-        "build:generator": "esbuild src/generator.ts --bundle --platform=node --external:fsevents --external:_http_common --outfile=dist/generator.js",
-        "build:client": "esbuild src/client/index.ts --bundle --define:process.env.NODE_ENV=\\\"production\\\" --format=cjs --minify --keep-names --metafile=meta.json --platform=node --external:fsevents --external:@prisma/client --outfile=dist/prisma-appsync/index.js && tsc src/client/*.ts --outDir dist/prisma-appsync/ --declaration --emitDeclarationOnly  --esModuleInterop",
-        "build:client:before": "esbuild src/client.before/index.ts --bundle --minify --keep-names --platform=node --external:fsevents --external:@prisma/client --outfile=dist/prisma-appsync.before/index.js && tsc src/client.before/*.ts --outDir dist/prisma-appsync.before/ --declaration --emitDeclarationOnly --esModuleInterop",
+        "postinstall": "zx scripts/postinstall.mjs",
+        "build": "zx scripts/build.mjs",
+        "serve": "zx scripts/serve.mjs",
+        "test": "zx scripts/test.mjs",
         "docs:dev": "vuepress dev docs --host localhost",
-        "docs:build": "vuepress build docs",
-        "test": "pnpm test:generate && jest test/ -e && pnpm test:copydocs",
-        "test:generate": "pnpm build && prisma generate --schema=./test/schema.prisma",
-        "test:copydocs": "cp test/generated/prisma-appsync/docs/Post.md docs/demo/_post.md && cp test/generated/prisma-appsync/docs/User.md docs/demo/_user.md",
-        "prepare": "pnpm test",
-        "test:preview": "jest src/client/lib/**.spec.ts --verbose --expand",
-        "local:setup": "zx local.setup.mjs",
-        "local:start": "zx local.start.mjs"
+        "docs:build": "vuepress build docs"
     },
     "engines": {
         "node": ">=12",

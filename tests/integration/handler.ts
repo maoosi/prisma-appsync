@@ -1,7 +1,7 @@
-import { PrismaAppSync, Authorizations } from './prisma/generated/prisma-appsync/client'
+import { PrismaAppSync, Authorizations, QueryParams, AfterHookParams } from './prisma/generated/prisma-appsync/client'
 
 /**
- * Init prisma-appsync client
+ * Instantiate Prisma-AppSync Client
  */
 const prismaAppSync = new PrismaAppSync({
     connectionString: process.env.DATABASE_URL,
@@ -9,51 +9,56 @@ const prismaAppSync = new PrismaAppSync({
 })
 
 /**
- * Direct lambda resolver for appsync
+ * Lambda handler (AppSync Direct Lambda Resolver)
  */
 export const main = async (event: any, context: any) => {
     return await prismaAppSync.resolve<'listPosts' | 'notify'>({
         event,
         resolvers: {
-            // extend CRUD API with a custom `notify` query
-            notify: async ({ args }) => {
-                return { message: `${args.message} from notify` }
+            // Extend the generated CRUD API with a custom Query
+            notify: async ({ args }: QueryParams) => {
+                return {
+                    message: `${args.message} from notify`,
+                }
             },
 
-            // disable one of the generated CRUD API query
+            // Disable, or override, a generated CRUD operation
             listPosts: false,
         },
-        shield: ({ authorization, identity }) => {
+        shield: ({ authorization, identity }: QueryParams) => {
             const isAdmin = identity?.groups?.includes('admin')
             const isOwner = { owner: { cognitoSub: identity?.sub } }
             const isCognitoAuth = authorization === Authorizations.AMAZON_COGNITO_USER_POOLS
 
             return {
-                // default (overridden by specific rules)
+                // By default, access is limited to logged-in Cognito users
                 '**': isCognitoAuth,
 
-                // can only be modified by owner
+                // Posts and Comments can only be modified by their owner
                 'modify/{post,comment}{,/**}': {
                     rule: isOwner,
                     reason: ({ model }) => `${model} can only be modified by their owner.`,
                 },
 
-                // protected field
+                // Password field is protected
                 '**/*password{,/**}': {
                     rule: false,
                     reason: () => 'Field password is not accessible.',
                 },
 
-                // run code before calling custom resolver
-                '**/*myCustomQuery{,/**}': {
+                // Custom resolver `notify` is restricted to admins
+                'notify{,/**}': {
                     rule: isAdmin,
                 },
             }
         },
         hooks: () => {
             return {
-                'after:modify/post': async ({ prismaClient, prismaArgs, result }) => {
-                    await prismaClient.hiddenModel.create({ data: prismaArgs.data })
+                // Triggered after a Post is modified
+                'after:modify/post': async ({ prismaClient, prismaArgs, result }: AfterHookParams) => {
+                    await prismaClient.hiddenModel.create({
+                        data: prismaArgs.data,
+                    })
                     return result
                 },
             }

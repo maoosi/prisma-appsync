@@ -5,57 +5,74 @@ import { decode as decodeHtml, encode as encodeHtml } from 'html-entities'
 import xss from 'xss'
 
 /**
- * Deep merge objects (without mutating the target object).
- * @param sources object[]
- * @returns object
+ * #### Deep merge objects (without mutating the target object).
+ *
+ * @example const newObj = merge(obj1, obj2, obj3)
+ *
+ * @param {any[]} sources
+ * @returns any
  */
-export function merge(...sources: object[]): any {
+export function merge(...sources: any[]): any {
     return deepmerge.all(sources)
 }
 
 /**
- * Deep clone object.
- * @param source object
- * @returns object
+ * #### Deep clone object.
+ *
+ * @example const newObj = clone(sourceObj)
+ *
+ * @param {any} source
+ * @returns any
  */
-export function clone(source: object): any {
+export function clone(source: any): any {
     return deepmerge({}, source)
 }
 
 /**
- * Returns decoded text, replacing HTML special characters
+ * #### Returns decoded text, replacing HTML special characters.
+ *
  * @example decode('&lt; &gt; &quot; &apos; &amp; &#169; &#8710;')
  * // returns '< > " \' & © ∆'
- * @param {any} input - input
- * @returns {boolean} `true` or `false`
+ *
+ * @param {string} str
+ * @returns string
  */
 export function decode(str: string): string {
     return decodeHtml(str)
 }
 
 /**
- * Returns encoded text, version of string.
+ * #### Returns encoded text, version of string.
+ *
  * @example encode('<script>alert("xss");</scr' + "ipt>")
- * @param {any} input - input
- * @returns {boolean} `true` or `false`
+ *
+ * @param {string} str
+ * @returns string
  */
 export function encode(str: string): string {
     return encodeHtml(str)
 }
 
 /**
- * Transform an object to a dotted-key/value pair
- * @param source object
- * @returns object
+ * #### Transform an object to a dotted-key/value pair.
+ *
+ * @example dotate({ data: { title: "glut" } })
+ * // returns { 'data.title': 'glut' }
+ *
+ * @param {any} source
+ * @returns any
  */
-export function dotate(source: object): any {
+export function dotate(source: any): any {
     return dot(source)
 }
 
 /**
- * Returns true if specified path matches any of the glob patterns.
- * @param path string
- * @param globPatterns string|string[]
+ * #### Returns true if specified path matches any of the glob patterns.
+ *
+ * @example isMatchingGlob('get/post/title', ['get/post{,/**}'])
+ *
+ * @param {string} path
+ * @param {string|string[]} globPatterns
  * @returns boolean
  */
 export function isMatchingGlob(path: string, globPatterns: string | string[]): boolean {
@@ -63,8 +80,11 @@ export function isMatchingGlob(path: string, globPatterns: string | string[]): b
 }
 
 /**
- * Sanitize untrusted HTML to prevent XSS.
- * @param str string
+ * #### Sanitize untrusted HTML to prevent XSS.
+ *
+ * @example filterXSS('<script>alert("xss");</scr' + "ipt>")
+ *
+ * @param {string} str
  * @returns string
  */
 export function filterXSS(str: string): string {
@@ -72,8 +92,11 @@ export function filterXSS(str: string): string {
 }
 
 /**
- * Return true if element is Empty
- * @param element any
+ * #### Return true if element is Empty.
+ *
+ * @example isEmpty(prismaArgs?.data?.title)
+ *
+ * @param {any} element
  * @returns boolean
  */
 export function isEmpty(element: any): boolean {

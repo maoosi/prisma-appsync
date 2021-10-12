@@ -1,9 +1,13 @@
-import { ShieldAuthorization, Shield } from './defs'
-import { merge, clone, decode, filterXSS, isMatchingGlob } from './utils'
+import { ShieldAuthorization, Shield, Context } from './defs'
+import { merge, clone, encode, filterXSS, isMatchingGlob } from './utils'
 
-// TODO: Comment code
-
-export function sanitize(data: object): object {
+/**
+ * #### Sanitize data inside object (parse xss + encode html).
+ *
+ * @param {any} data
+ * @returns any
+ */
+export function sanitize(data: any): any {
     const outputData = clone(data)
 
     for (const prop in outputData) {
@@ -11,7 +15,7 @@ export function sanitize(data: object): object {
             const value = outputData[prop]
 
             if (typeof value === 'string') {
-                outputData[prop] = decode(filterXSS(value))
+                outputData[prop] = encode(filterXSS(value))
             } else if (
                 typeof value === 'object' &&
                 !Array.isArray(value) &&
@@ -26,7 +30,15 @@ export function sanitize(data: object): object {
     return outputData
 }
 
-export function getAuthorization({ shield, paths }: { shield: Shield; paths: string[] }): ShieldAuthorization {
+/**
+ * #### Returns an authorization object from a Shield configuration passed as input.
+ *
+ * @param {any} options
+ * @param {Shield} options.shield
+ * @param {string[]} options.paths
+ * @returns ShieldAuthorization
+ */
+export function getShieldAuthorization({ shield, paths }: { shield: Shield; paths: string[] }): ShieldAuthorization {
     const authorization: ShieldAuthorization = {
         canAccess: true,
         reason: String(),
@@ -71,13 +83,23 @@ export function getAuthorization({ shield, paths }: { shield: Shield; paths: str
     return authorization
 }
 
-export function getDepth({ paths }: { paths: string[] }): number {
+/**
+ * #### Returns GraphQL query depth for any given Query.
+ *
+ * @param {any} options
+ * @param {string[]} options.paths
+ * @param {Context} options.context
+ * @returns number
+ */
+export function getDepth({ paths, context }: { paths: string[]; context: Context }): number {
     let depth = 0
 
     paths.forEach((path: string) => {
         const pathDepth = path.split('/').length - 3
         if (pathDepth > depth) depth = pathDepth
     })
+
+    if (context.model === null) depth += 1
 
     return depth
 }

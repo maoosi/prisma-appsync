@@ -1,6 +1,6 @@
 import { PrismaAppSyncOptions, Options, PrismaClient, Shield, ShieldAuthorization, ResolveParams } from './defs'
 import { parseError, inspect, debug, CustomError } from './inspector'
-import { getAuthorization, getDepth } from './guard'
+import { getShieldAuthorization, getDepth } from './guard'
 import { parseEvent } from './adapter'
 import { isEmpty } from './utils'
 import * as queries from './resolver'
@@ -23,8 +23,8 @@ import * as queries from './resolver'
  * Read more in our [docs](https://prisma-appsync.vercel.app).
  */
 export class PrismaAppSync {
-    private options: Options
-    private prismaClient: PrismaClient
+    public options: Options
+    public prismaClient: PrismaClient
 
     /**
      * ### Client Constructor
@@ -56,18 +56,18 @@ export class PrismaAppSync {
      *
      * Read more in our [docs](https://prisma-appsync.vercel.app).
      */
-    constructor(options: PrismaAppSyncOptions) {
+    constructor(options?: PrismaAppSyncOptions) {
         // Set client options using constructor options
         this.options = {
             generatedConfig: {},
             connectionString:
-                typeof options.connectionString !== 'undefined'
+                typeof options?.connectionString !== 'undefined'
                     ? options.connectionString
                     : String(process.env.DATABASE_URL),
-            sanitize: typeof options.sanitize !== 'undefined' ? options.sanitize : true,
-            debug: typeof options.debug !== 'undefined' ? options.debug : true,
-            defaultPagination: typeof options.defaultPagination !== 'undefined' ? options.defaultPagination : 50,
-            maxDepth: typeof options.maxDepth !== 'undefined' ? options.maxDepth : 3,
+            sanitize: typeof options?.sanitize !== 'undefined' ? options.sanitize : true,
+            debug: typeof options?.debug !== 'undefined' ? options.debug : true,
+            defaultPagination: typeof options?.defaultPagination !== 'undefined' ? options.defaultPagination : 50,
+            maxDepth: typeof options?.maxDepth !== 'undefined' ? options.maxDepth : 3,
         }
 
         // Try parse auto-injected ENV variable `PRISMA_APPSYNC_GENERATED_CONFIG`
@@ -117,7 +117,7 @@ export class PrismaAppSync {
      *
      * @param {ResolveParams} resolveParams
      * @param {any} resolveParams.event - AppSync event received by the Direct Lambda Resolver.
-     * @param {object} resolveParams.resolvers? - Custom resolvers (to extend the CRUD API).
+     * @param {any} resolveParams.resolvers? - Custom resolvers (to extend the CRUD API).
      * @param {function} resolveParams.shield? - Shield configuration (to protect your API).
      * @param {function} resolveParams.hooks? - Hooks (to trigger functions based on events).
      * @returns Promise<result>
@@ -142,7 +142,7 @@ export class PrismaAppSync {
             debug(`Parsed event: ${inspect(QueryParams)}`)
 
             // Guard :: block queries with a depth > maxDepth
-            const depth = getDepth({ paths: QueryParams.paths })
+            const depth = getDepth({ paths: QueryParams.paths, context: QueryParams.context })
             debug(`Query has depth of ${depth} (max allowed is ${this.options.maxDepth}).`)
             if (depth > this.options.maxDepth) {
                 throw new CustomError(
@@ -156,8 +156,8 @@ export class PrismaAppSync {
             // Guard :: create shield from config
             const shield: Shield = resolveParams?.shield ? await resolveParams.shield(QueryParams) : {}
 
-            // Guard :: get authorization object
-            const shieldAuth: ShieldAuthorization = getAuthorization({
+            // Guard :: get shield authorization config
+            const shieldAuth: ShieldAuthorization = getShieldAuthorization({
                 shield,
                 paths: QueryParams.paths,
             })
@@ -184,10 +184,13 @@ export class PrismaAppSync {
             }
 
             // Guard: get and run all before hooks functions matching query
-            console.log(JSON.stringify(QueryParams, null, 4))
+            if (resolveParams?.hooks) {
+                await runHooks('before', resolveParams.hooks, QueryParams)
+            }
 
             // Resolver :: resolve query for JEST
             if (process.env.JEST_WORKER_ID) {
+                debug(`Resolving query for JEST.`)
                 results = QueryParams
             }
             // Resolver :: query is disabled
@@ -200,10 +203,12 @@ export class PrismaAppSync {
             }
             // Resolver :: resolve query with Custom Resolver
             else if (resolveParams?.resolvers && typeof resolveParams.resolvers[QueryParams.operation] === 'function') {
+                debug(`Resolving query for Custom Resolver "${QueryParams.operation}".`)
                 results = await resolveParams.resolvers[QueryParams.operation](QueryParams)
             }
             // Resolver :: resolve query with built-in CRUD
             else if (!isEmpty(QueryParams?.context?.model)) {
+                debug(`Resolving query for built-in CRUD operation "${QueryParams.operation}".`)
                 results = await queries[`${QueryParams.context.action}Query`](this.prismaClient, QueryParams)
             }
             // Resolver :: query resolver not found
@@ -214,11 +219,15 @@ export class PrismaAppSync {
             }
 
             // Guard: get and run all after hooks functions matching query
+            if (resolveParams?.hooks) {
+                results = await runHooks('after', resolveParams.hooks, QueryParams)
+            }
         } catch (error) {
             // Return error
             results = Promise.reject(parseError(error))
         }
 
+        debug(`Returning response to API request w/ results: ${inspect(results)}`)
         return results
     }
 }

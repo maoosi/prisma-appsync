@@ -4,16 +4,14 @@ import { graphqlHTTP } from 'express-graphql'
 import { readFileSync } from 'fs'
 import { join } from 'path'
 import { mockLambdaEvent, mockIdentity } from './appsync'
-import { main as lambdaHandler } from './handler' 
+import { main as lambdaHandler } from './handler'
 
-const scalars = 
-    readFileSync(join(__dirname, 'appsync/scalars.gql'), { encoding: 'utf-8' })
-const directives = 
-    readFileSync(join(__dirname, 'appsync/directives.gql'), { encoding: 'utf-8' })
-const generatedSchema = 
-    readFileSync(join(__dirname, 'prisma/generated/prisma-appsync/schema.gql'), { encoding: 'utf-8' })
-const schema = 
-    buildSchema(`${scalars}\n${directives}\n${generatedSchema}`)
+const scalars = readFileSync(join(__dirname, 'appsync/scalars.gql'), { encoding: 'utf-8' })
+const directives = readFileSync(join(__dirname, 'appsync/directives.gql'), { encoding: 'utf-8' })
+const generatedSchema = readFileSync(join(__dirname, 'prisma/generated/prisma-appsync/schema.gql'), {
+    encoding: 'utf-8',
+})
+const schema = buildSchema(`${scalars}\n${directives}\n${generatedSchema}`)
 
 const app = express()
 
@@ -27,17 +25,17 @@ app.use(
 )
 
 app.listen(4000)
-console.log('Running a GraphQL API server at http://localhost:4000/graphql');
+console.log('Running a GraphQL API server at http://localhost:4000/graphql')
 
 const getRootValue = async (request, response, graphQLParams) => {
-    let rootValue:any = {}
+    let rootValue: any = {}
 
     if (graphQLParams.query && graphQLParams.operationName !== 'IntrospectionQuery') {
-          const identity = mockIdentity('AMAZON_COGNITO_USER_POOLS', {
+        const identity = mockIdentity('AMAZON_COGNITO_USER_POOLS', {
             sourceIp: request?.headers['x-forwarded-for'] || request?.socket?.remoteAddress,
             username: 'johndoe',
             sub: 'xxxxxx',
-            resolverContext: {}
+            resolverContext: {},
         })
 
         const event = mockLambdaEvent({
