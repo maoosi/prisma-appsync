@@ -126,18 +126,18 @@ async function init() {
 
     userConfig.clones = [
         {
-            from: path.join(userConfig.root, '.prisma-appsync', 'packages/cli/cdk'),
+            from: path.join(userConfig.root, '.prisma-appsync', 'boilerplate/cdk'),
             to: path.join(userConfig.root, 'cdk'),
         },
         {
-            from: path.join(userConfig.root, '.prisma-appsync', 'packages/cli/kit/handler.ts'),
+            from: path.join(userConfig.root, '.prisma-appsync', 'boilerplate/handler.ts'),
             to: path.join(userConfig.root, 'handler.ts'),
         },
     ]
 
     if (userConfig.generateSchema) {
         userConfig.clones.push({
-            from: path.join(userConfig.root, '.prisma-appsync', 'packages/cli/kit/schema.prisma'),
+            from: path.join(userConfig.root, '.prisma-appsync', 'boilerplate/prisma/schema.prisma'),
             to: path.join(userConfig.root, userConfig.targetSchema),
         })
     } else {
