@@ -1,4 +1,4 @@
-import { PrismaAppSyncOptions, ResolveParams } from './defs';
+import { PrismaAppSyncOptions, Options, PrismaClient, ResolveParams } from './defs';
 /**
  * ##  Prisma-AppSync Client ʲˢ
  *
@@ -17,8 +17,8 @@ import { PrismaAppSyncOptions, ResolveParams } from './defs';
  * Read more in our [docs](https://prisma-appsync.vercel.app).
  */
 export declare class PrismaAppSync {
-    private options;
-    private prismaClient;
+    options: Options;
+    prismaClient: PrismaClient;
     /**
      * ### Client Constructor
      *
@@ -49,7 +49,7 @@ export declare class PrismaAppSync {
      *
      * Read more in our [docs](https://prisma-appsync.vercel.app).
      */
-    constructor(options: PrismaAppSyncOptions);
+    constructor(options?: PrismaAppSyncOptions);
     /**
      * ###  Resolver
      *

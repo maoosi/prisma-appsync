@@ -53,11 +53,11 @@ export declare type Authorization = typeof Authorizations[keyof typeof Authoriza
 export declare type QueryParamsCustom = QueryParams & {
     prismaClient: PrismaClient;
 };
-export declare type QueryParamsBefore = QueryParams & {
+export declare type BeforeHookParams = QueryParams & {
     prismaClient: PrismaClient;
 };
 /**
- * ### QueryParamsAfter
+ * ### AfterHookParams
  *
  * @example
  * ```
@@ -78,7 +78,7 @@ export declare type QueryParamsBefore = QueryParams & {
  * }
  * ```
  */
-export declare type QueryParamsAfter = QueryParams & {
+export declare type AfterHookParams = QueryParams & {
     prismaClient: PrismaClient;
     result: any | any[];
 };
@@ -89,8 +89,8 @@ export declare type Shield = {
     };
 };
 export declare type HooksProps = {
-    before: QueryParamsBefore;
-    after: QueryParamsAfter;
+    before: BeforeHookParams;
+    after: AfterHookParams;
 };
 export declare type HookPath<CustomResolvers> = `${Lowercase<NonNullable<ActionsAlias>>}/${Lowercase<Model>}` | CustomResolvers;
 export declare type HooksParameter<HookType extends 'before' | 'after', CustomResolvers extends string> = `${HookType}:${HookPath<CustomResolvers>}`;
@@ -191,53 +191,53 @@ export declare const Models: {
     Post: "Post";
 };
 export declare const ReservedPrismaKeys: string[];
-export declare const Actions: {
-    readonly get: "get";
-    readonly list: "list";
-    readonly count: "count";
-    readonly createMany: "createMany";
-    readonly updateMany: "updateMany";
-    readonly deleteMany: "deleteMany";
-    readonly create: "create";
-    readonly update: "update";
-    readonly upsert: "upsert";
-    readonly delete: "delete";
-    readonly onCreatedMany: "onCreatedMany";
-    readonly onUpdatedMany: "onUpdatedMany";
-    readonly onDeletedMany: "onDeletedMany";
-    readonly onMutatedMany: "onMutatedMany";
-    readonly onCreated: "onCreated";
-    readonly onUpdated: "onUpdated";
-    readonly onUpserted: "onUpserted";
-    readonly onDeleted: "onDeleted";
-    readonly onMutated: "onMutated";
-};
-export declare const ActionsAliases: {
-    readonly access: "access";
-    readonly batchAccess: "batchAccess";
-    readonly create: "create";
-    readonly batchCreate: "batchCreate";
-    readonly delete: "delete";
-    readonly batchDelete: "batchDelete";
-    readonly modify: "modify";
-    readonly batchModify: "modify";
-    readonly subscribe: "subscribe";
-    readonly batchSubscribe: "subscribe";
-};
+export declare enum Actions {
+    get = 0,
+    list = 1,
+    count = 2,
+    createMany = 3,
+    updateMany = 4,
+    deleteMany = 5,
+    create = 6,
+    update = 7,
+    upsert = 8,
+    delete = 9,
+    onCreatedMany = 10,
+    onUpdatedMany = 11,
+    onDeletedMany = 12,
+    onMutatedMany = 13,
+    onCreated = 14,
+    onUpdated = 15,
+    onUpserted = 16,
+    onDeleted = 17,
+    onMutated = 18
+}
+export declare enum ActionsAliases {
+    access = 0,
+    batchAccess = 1,
+    create = 2,
+    batchCreate = 3,
+    delete = 4,
+    batchDelete = 5,
+    modify = 6,
+    batchModify = 7,
+    subscribe = 8,
+    batchSubscribe = 9
+}
 export declare const ActionsAliasesList: {
-    readonly access: readonly ["get", "list", "count"];
-    readonly batchAccess: readonly ["list", "count"];
-    readonly create: readonly ["create", "createMany"];
-    readonly batchCreate: readonly ["createMany"];
-    readonly modify: readonly ["upsert", "update", "updateMany", "delete", "deleteMany"];
-    readonly batchModify: readonly ["updateMany", "deleteMany"];
-    readonly delete: readonly ["delete", "deleteMany"];
-    readonly batchDelete: readonly ["deleteMany"];
-    readonly subscribe: readonly ["onCreatedMany", "onUpdatedMany", "onDeletedMany", "onMutatedMany", "onCreated", "onUpdated", "onUpserted", "onDeleted", "onMutated"];
-    readonly batchSubscribe: readonly ["onCreatedMany", "onUpdatedMany", "onDeletedMany", "onMutatedMany"];
+    readonly access: readonly [Actions.get, Actions.list, Actions.count];
+    readonly batchAccess: readonly [Actions.list, Actions.count];
+    readonly create: readonly [Actions.create, Actions.createMany];
+    readonly batchCreate: readonly [Actions.createMany];
+    readonly modify: readonly [Actions.upsert, Actions.update, Actions.updateMany, Actions.delete, Actions.deleteMany];
+    readonly batchModify: readonly [Actions.updateMany, Actions.deleteMany];
+    readonly delete: readonly [Actions.delete, Actions.deleteMany];
+    readonly batchDelete: readonly [Actions.deleteMany];
+    readonly subscribe: readonly [Actions.onCreatedMany, Actions.onUpdatedMany, Actions.onDeletedMany, Actions.onMutatedMany, Actions.onCreated, Actions.onUpdated, Actions.onUpserted, Actions.onDeleted, Actions.onMutated];
+    readonly batchSubscribe: readonly [Actions.onCreatedMany, Actions.onUpdatedMany, Actions.onDeletedMany, Actions.onMutatedMany];
 };
-export declare const ActionsList: string[];
-export declare const BatchActionsList: string[];
+export declare const ActionsList: Action[];
+export declare const BatchActionsList: Action[];
 /**
  * ### Authorizations
  *
@@ -249,10 +249,10 @@ export declare const BatchActionsList: string[];
  *
  * https://docs.aws.amazon.com/appsync/latest/devguide/security-authz.html
  */
-export declare const Authorizations: {
-    readonly API_KEY: "API_KEY";
-    readonly AWS_IAM: "AWS_IAM";
-    readonly AMAZON_COGNITO_USER_POOLS: "AMAZON_COGNITO_USER_POOLS";
-    readonly AWS_LAMBDA: "AWS_LAMBDA";
-    readonly OPENID_CONNECT: "OPENID_CONNECT";
-};
+export declare enum Authorizations {
+    API_KEY = 0,
+    AWS_IAM = 1,
+    AMAZON_COGNITO_USER_POOLS = 2,
+    AWS_LAMBDA = 3,
+    OPENID_CONNECT = 4
+}

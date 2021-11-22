@@ -1,6 +1,7 @@
 import {
     Identity,
     Authorizations,
+    Authorization,
     API_KEY,
     AWS_IAM,
     AMAZON_COGNITO_USER_POOLS,
@@ -8,7 +9,7 @@ import {
     OPENID_CONNECT,
 } from '../../../src/client/defs'
 
-export default function (identity: typeof Authorizations[keyof typeof Authorizations], opts: mockOptions): Identity {
+export default function (identity: Authorization, opts: mockOptions): Identity {
     if (identity === Authorizations.AWS_IAM) {
         const mock: AWS_IAM = {
             accountId: 'string',

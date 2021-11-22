@@ -1,3 +1,9 @@
+import { dot } from 'dot-object'
+import { isMatch } from 'micromatch'
+import deepmerge from 'deepmerge'
+import { decode as decodeHtml, encode as encodeHtml } from 'html-entities'
+import xss from 'xss'
+
 /**
  * #### Deep merge objects (without mutating the target object).
  *
@@ -6,7 +12,10 @@
  * @param {any[]} sources
  * @returns any
  */
-export declare function merge(...sources: any[]): any;
+export function merge(...sources: any[]): any {
+    return deepmerge.all(sources)
+}
+
 /**
  * #### Deep clone object.
  *
@@ -15,7 +24,10 @@ export declare function merge(...sources: any[]): any;
  * @param {any} source
  * @returns any
  */
-export declare function clone(source: any): any;
+export function clone(source: any): any {
+    return deepmerge({}, source)
+}
+
 /**
  * #### Returns decoded text, replacing HTML special characters.
  *
@@ -25,7 +37,10 @@ export declare function clone(source: any): any;
  * @param {string} str
  * @returns string
  */
-export declare function decode(str: string): string;
+export function decode(str: string): string {
+    return decodeHtml(str)
+}
+
 /**
  * #### Returns encoded text, version of string.
  *
@@ -34,7 +49,10 @@ export declare function decode(str: string): string;
  * @param {string} str
  * @returns string
  */
-export declare function encode(str: string): string;
+export function encode(str: string): string {
+    return encodeHtml(str)
+}
+
 /**
  * #### Transform an object to a dotted-key/value pair.
  *
@@ -44,7 +62,10 @@ export declare function encode(str: string): string;
  * @param {any} source
  * @returns any
  */
-export declare function dotate(source: any): any;
+export function dotate(source: any): any {
+    return dot(source)
+}
+
 /**
  * #### Returns true if specified path matches any of the glob patterns.
  *
@@ -54,7 +75,10 @@ export declare function dotate(source: any): any;
  * @param {string|string[]} globPatterns
  * @returns boolean
  */
-export declare function isMatchingGlob(path: string, globPatterns: string | string[]): boolean;
+export function isMatchingGlob(path: string, globPatterns: string | string[]): boolean {
+    return isMatch(path, globPatterns)
+}
+
 /**
  * #### Sanitize untrusted HTML to prevent XSS.
  *
@@ -63,7 +87,10 @@ export declare function isMatchingGlob(path: string, globPatterns: string | stri
  * @param {string} str
  * @returns string
  */
-export declare function filterXSS(str: string): string;
+export function filterXSS(str: string): string {
+    return xss(str)
+}
+
 /**
  * #### Return true if element is Empty.
  *
@@ -72,7 +99,17 @@ export declare function filterXSS(str: string): string;
  * @param {any} element
  * @returns boolean
  */
-export declare function isEmpty(element: any): boolean;
+export function isEmpty(element: any): boolean {
+    return (
+        element === null ||
+        element === undefined ||
+        typeof element === 'undefined' ||
+        (typeof element === 'string' && element.trim() === '') ||
+        (Array.isArray(element) && element.length === 0) ||
+        (Object.getPrototypeOf(element) === Object.prototype && Object.keys(element).length === 0)
+    )
+}
+
 /**
  * #### Return true if element is Undefined.
  *
@@ -81,4 +118,6 @@ export declare function isEmpty(element: any): boolean;
  * @param {any} element
  * @returns boolean
  */
-export declare function isUndefined(element: any): boolean;
+export function isUndefined(element: any): boolean {
+    return element === undefined || typeof element === 'undefined'
+}

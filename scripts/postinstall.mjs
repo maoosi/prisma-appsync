@@ -4,8 +4,12 @@
 process.env.DATABASE_URL = 'postgresql://prisma:prisma@localhost:5433/tests'
 
 // install boilerplate dependencies using Yarn
-console.log(chalk.blue('Post Install :: Boilerplate\n'))
-await $`cd boilerplate/cdk && yarn install`
+console.log(chalk.blue('Post Install :: CDK\n'))
+await $`cd packages/cdk && yarn install`
+
+// install boilerplate dependencies using Yarn
+console.log(chalk.blue('Post Install :: CLI\n'))
+await $`cd packages/cli && yarn install`
 
 // build local version of Prisma-AppSync
 import './build.mjs'

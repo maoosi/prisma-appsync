@@ -1,2 +1,2 @@
 export { PrismaAppSync } from './core';
-export { QueryParams, QueryParamsAfter, Authorizations } from './defs';
+export { QueryParams, BeforeHookParams, AfterHookParams, Authorizations } from './defs';

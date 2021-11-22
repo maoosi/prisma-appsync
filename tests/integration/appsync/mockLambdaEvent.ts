@@ -1,5 +1,5 @@
 import { AppsyncEvent, Identity } from '../../../src/client/defs'
-import { graphQlQueryToJson } from 'graphql-query-to-json'
+import { graphQlQueryToJson } from './gqlQueryToJson'
 import { dot } from 'dot-object'
 
 export default function ({
@@ -13,7 +13,8 @@ export default function ({
 }): AppsyncEvent {
     const selectionSetGraphQL = graphQLParams.query
     const variables = graphQLParams.variables || {}
-    const query: any = graphQlQueryToJson(selectionSetGraphQL, { variables })
+    const operationName = graphQLParams.operationName
+    const query: any = graphQlQueryToJson(selectionSetGraphQL, { variables, operationName })
 
     const parentType: string = Object.keys(query)[0]
     const fieldName: string = Object.keys(query[parentType])[0]

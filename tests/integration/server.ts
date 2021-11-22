@@ -5,6 +5,7 @@ import { readFileSync } from 'fs'
 import { join } from 'path'
 import { mockLambdaEvent, mockIdentity } from './appsync'
 import { main as lambdaHandler } from './handler'
+import { Authorizations } from '../../src/client/defs'
 
 const scalars = readFileSync(join(__dirname, 'appsync/scalars.gql'), { encoding: 'utf-8' })
 const directives = readFileSync(join(__dirname, 'appsync/directives.gql'), { encoding: 'utf-8' })
@@ -15,12 +16,21 @@ const schema = buildSchema(`${scalars}\n${directives}\n${generatedSchema}`)
 
 const app = express()
 
+let defaultQuery = `mutation notify {\n`
+defaultQuery += `\tnotify(message: "Glut") {\n`
+defaultQuery += `\t\tmessage\n`
+defaultQuery += `\t}\n`
+defaultQuery += `}\n`
+
 app.use(
     '/graphql',
     graphqlHTTP(async (request, response, graphQLParams) => ({
         schema,
         rootValue: await getRootValue(request, response, graphQLParams),
-        graphiql: { headerEditorEnabled: true },
+        graphiql: {
+            headerEditorEnabled: true,
+            defaultQuery,
+        },
     })),
 )
 
@@ -31,7 +41,7 @@ const getRootValue = async (request, response, graphQLParams) => {
     let rootValue: any = {}
 
     if (graphQLParams.query && graphQLParams.operationName !== 'IntrospectionQuery') {
-        const identity = mockIdentity('AMAZON_COGNITO_USER_POOLS', {
+        const identity = mockIdentity(Authorizations.AMAZON_COGNITO_USER_POOLS, {
             sourceIp: request?.headers['x-forwarded-for'] || request?.socket?.remoteAddress,
             username: 'johndoe',
             sub: 'xxxxxx',

@@ -1,4 +1,4 @@
-import { PrismaAppSync, Authorizations, QueryParams, AfterHookParams } from './prisma/generated/prisma-appsync/client'
+import { PrismaAppSync, QueryParams, Authorizations, AfterHookParams } from './prisma/generated/prisma-appsync/client'
 
 /**
  * Instantiate Prisma-AppSync Client
@@ -12,7 +12,7 @@ const prismaAppSync = new PrismaAppSync({
  * Lambda handler (AppSync Direct Lambda Resolver)
  */
 export const main = async (event: any, context: any) => {
-    return await prismaAppSync.resolve<'listPosts' | 'notify'>({
+    return await prismaAppSync.resolve<'notify'>({
         event,
         resolvers: {
             // Extend the generated CRUD API with a custom Query
@@ -21,9 +21,6 @@ export const main = async (event: any, context: any) => {
                     message: `${args.message} from notify`,
                 }
             },
-
-            // Disable, or override, a generated CRUD operation
-            listPosts: false,
         },
         shield: ({ authorization, identity }: QueryParams) => {
             const isAdmin = identity?.groups?.includes('admin')
