@@ -9,13 +9,14 @@
 
 List of fields available in the `User` type.
 
-| Field    | Scalar Type          | Unique  | Required (create) |
-| -------- | -------------------- | ------- | ----------------- |
-| id       | Int                  | true    | true              |
-| username | String               | true    | true              |
-| email    | AWSEmail             | true    | true              |
-| role     | Role                 | _false_ | true              |
-| posts    | [[Post!]](./Post.md) | _false_ | _false_           |
+| Field       | Scalar Type          | Unique  | Required (create) |
+| ----------- | -------------------- | ------- | ----------------- |
+| uuid        | String               | true    | true              |
+| username    | String               | true    | true              |
+| email       | AWSEmail             | true    | true              |
+| hiddenField | String               | _false_ | true              |
+| role        | Role                 | _false_ | true              |
+| posts       | [[Post!]](./Post.md) | _false_ | _false_           |
 
 ## Queries
 
@@ -31,16 +32,17 @@ The generated queries are:
 
 Single User queries take one input:
 
--   `where`: `UserWhereUniqueInput!` A required object type specifying a field with a unique constraint (like id).
+-   `where`: `UserWhereUniqueInput!` A required object type specifying a field with a unique constraint (like uuid).
 
 **Standard query**
 
 ```graphql
 query {
-    getUser(where: { id: 2 }) {
-        id
+    getUser(where: { uuid: "Foo" }) {
+        uuid
         username
         email
+        hiddenField
         role
 
         posts # Relation to many
@@ -62,9 +64,10 @@ Multiple Users queries can take four inputs:
 ```graphql
 query {
     listUsers {
-        id
+        uuid
         username
         email
+        hiddenField
         role
 
         posts # Relation to many
@@ -77,9 +80,10 @@ query {
 ```graphql
 query {
     listUsers(skip: 0, take: 25) {
-        id
+        uuid
         username
         email
+        hiddenField
         role
 
         posts # Relation to many
@@ -91,10 +95,11 @@ query {
 
 ```graphql
 query {
-    listUsers(where: { role: { equals: Role } }) {
-        id
+    listUsers(where: { hiddenField: { equals: "Foo" } }) {
+        uuid
         username
         email
+        hiddenField
         role
 
         posts # Relation to many
@@ -106,10 +111,13 @@ query {
 
 ```graphql
 query {
-    listUsers(where: { role: { not: { equals: Role } } }) {
-        id
+    listUsers(
+        where: { hiddenField: { not: { equals: "Foo" } } }
+    ) {
+        uuid
         username
         email
+        hiddenField
         role
 
         posts # Relation to many
@@ -121,10 +129,13 @@ query {
 
 ```graphql
 query {
-    listUsers(orderBy: [{ role: DESC }]) {
-        id
+    listUsers(
+        orderBy: [{ hiddenField: DESC }, { role: ASC }]
+    ) {
+        uuid
         username
         email
+        hiddenField
         role
 
         posts # Relation to many
@@ -176,11 +187,18 @@ Single User create mutations take one input:
 ```graphql
 mutation {
     createUser(
-        data: { username: "Foo", email: "Foo", role: Role }
+        data: {
+            uuid: "Foo"
+            username: "Foo"
+            email: "Foo"
+            hiddenField: "Foo"
+            role: Role
+        }
     ) {
-        id
+        uuid
         username
         email
+        hiddenField
         role
     }
 }
@@ -216,7 +234,7 @@ mutation {
             }
         }
     ) {
-        id
+        uuid
     }
 }
 ```
@@ -225,7 +243,7 @@ mutation {
 
 Single User update mutations take two inputs:
 
--   `where`: `UserWhereUniqueInput!` A required object type specifying a field with a unique constraint (like id).
+-   `where`: `UserWhereUniqueInput!` A required object type specifying a field with a unique constraint (like uuid).
 -   `data`: `UserUpdateInput!` A required object type specifying the data to update.
 
 **Standard update mutation**
@@ -233,12 +251,19 @@ Single User update mutations take two inputs:
 ```graphql
 mutation {
     updateUser(
-        where: { id: 2 }
-        data: { username: "Foo", email: "Foo", role: Role }
+        where: { uuid: "Foo" }
+        data: {
+            uuid: "Foo"
+            username: "Foo"
+            email: "Foo"
+            hiddenField: "Foo"
+            role: Role
+        }
     ) {
-        id
+        uuid
         username
         email
+        hiddenField
         role
     }
 }
@@ -281,7 +306,7 @@ mutation {
             }
         }
     ) {
-        id
+        uuid
     }
 }
 ```
@@ -290,16 +315,17 @@ mutation {
 
 Single User delete mutations take one input:
 
--   `where`: `UserWhereUniqueInput!` A required object type specifying a field with a unique constraint (like id).
+-   `where`: `UserWhereUniqueInput!` A required object type specifying a field with a unique constraint (like uuid).
 
 **Standard delete mutation**
 
 ```graphql
 mutation {
-    deleteUser(where: { id: 2 }) {
-        id
+    deleteUser(where: { uuid: "Foo" }) {
+        uuid
         username
         email
+        hiddenField
         role
     }
 }
@@ -318,9 +344,9 @@ Multiple Users create mutations take one input:
 mutation {
     createManyUsers(
         data: [
-            { role: Role }
-            { role: Role }
-            { role: Role }
+            { hiddenField: "Foo" }
+            { hiddenField: "Foo" }
+            { hiddenField: "Foo" }
         ]
         skipDuplicates: true
     ) {
@@ -343,8 +369,8 @@ Multiple Users update mutations take two inputs:
 ```graphql
 mutation {
     updateManyUsers(
-        where: { role: Role }
-        data: { role: Role }
+        where: { hiddenField: "Foo" }
+        data: { hiddenField: "Foo" }
     ) {
         count
     }
@@ -363,7 +389,7 @@ Multiple Users delete mutations can take one input:
 
 ```graphql
 mutation {
-    deleteManyUsers(where: { role: Role }) {
+    deleteManyUsers(where: { hiddenField: "Foo" }) {
         count
     }
 }
@@ -382,9 +408,10 @@ Triggered from `createUser` mutation (excl. `createManyUsers` and `upsertUser`).
 ```graphql
 subscription {
     onCreatedUser {
-        id
+        uuid
         username
         email
+        hiddenField
         role
     }
 }
@@ -397,9 +424,10 @@ Triggered from `updateUser` mutation (excl. `updateManyUsers` and `upsertUser`).
 ```graphql
 subscription {
     onUpdatedUser {
-        id
+        uuid
         username
         email
+        hiddenField
         role
     }
 }
@@ -412,9 +440,10 @@ Triggered from `upsertUser` mutation.
 ```graphql
 subscription {
     onUpsertedUser {
-        id
+        uuid
         username
         email
+        hiddenField
         role
     }
 }
@@ -427,9 +456,10 @@ Triggered from `deleteUser` mutation (excl. `deleteManyUsers`).
 ```graphql
 subscription {
     onDeletedUser {
-        id
+        uuid
         username
         email
+        hiddenField
         role
     }
 }
@@ -442,9 +472,10 @@ Triggered from ANY SINGLE record mutation (excl. `on*ManyUsers`).
 ```graphql
 subscription {
     onMutatedUser {
-        id
+        uuid
         username
         email
+        hiddenField
         role
     }
 }

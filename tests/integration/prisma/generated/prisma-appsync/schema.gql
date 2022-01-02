@@ -1,46 +1,26 @@
-type User
-    @aws_api_key
-    @aws_cognito_user_pools(
-        cognito_groups: ["users", "admins"]
-    ) {
-    id: Int!
+type User {
+    uuid: String!
     username: String!
     email: AWSEmail!
-        @aws_api_key
-        @aws_cognito_user_pools(cognito_groups: ["admins"])
+    hiddenField: String!
     role: Role!
     posts: [Post!]
-        @aws_iam
-        @aws_api_key
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admins"]
-        )
 }
 
-type Post
-    @aws_iam
-    @aws_api_key
-    @aws_cognito_user_pools(
-        cognito_groups: ["users", "admins"]
-    ) {
+type HiddenModel {
+    id: Int!
+}
+
+type Post {
     id: Int!
     title: String!
     author: User
-        @aws_api_key
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admins"]
-        )
-    authorId: Int
+    authorUuid: String
     published: Boolean!
     lastSavedAt: AWSDateTime!
 }
 
-type BatchPayload
-    @aws_iam
-    @aws_api_key
-    @aws_cognito_user_pools(
-        cognito_groups: ["users", "admins"]
-    ) {
+type BatchPayload {
     count: Int
 }
 
@@ -71,42 +51,50 @@ input UserWhereFilterInput {
     OR: [UserWhereFilterInput]
     NOT: [UserWhereFilterInput]
     AND: [UserWhereFilterInput]
-    id: IntFilterInput
+    uuid: StringFilterInput
     username: StringFilterInput
     email: AWSEmailFilterInput
+    hiddenField: StringFilterInput
     role: RoleEnumFilterInput
     posts: PostFilterRelationsInput
 }
 
 input UserWhereUniqueInput {
-    id: Int
+    uuid: String
     username: String
     email: AWSEmail
 }
 
 input UserOrderByInput {
-    id: OrderByArg
+    uuid: OrderByArg
     username: OrderByArg
     email: OrderByArg
+    hiddenField: OrderByArg
     role: OrderByArg
 }
 
 input UserCreateInput {
+    uuid: String!
     username: String!
     email: AWSEmail!
+    hiddenField: String!
     role: Role!
     posts: UserPostsCreateRelationsInput
 }
 
 input UserCreateManyInput {
+    uuid: String!
     username: String!
     email: AWSEmail!
+    hiddenField: String!
     role: Role!
 }
 
 input UserUpdateInput {
+    uuid: String
     username: String
     email: AWSEmail
+    hiddenField: String
     role: Role
     posts: UserPostsUpdateRelationsInput
 }
@@ -132,17 +120,17 @@ input UserUpsertUniqueInput {
     update: UserUpdateInput!
 }
 
+input UserConnectOrCreateInput {
+    where: UserWhereUniqueInput!
+    create: UserCreateInput!
+}
+
 input UserDeleteUniqueInput {
     where: UserWhereUniqueInput!
 }
 
 input UserDeleteManyInput {
     where: UserWhereFilterInput!
-}
-
-input UserConnectOrCreateInput {
-    where: UserWhereUniqueInput!
-    create: UserCreateInput!
 }
 
 input UserPostsCreateRelationsInput {
@@ -152,8 +140,8 @@ input UserPostsCreateRelationsInput {
 }
 
 input UserPostsUpdateRelationsInput {
-    create: [PostCreateInput]
     connect: [PostWhereUniqueInput]
+    create: [PostCreateInput]
     connectOrCreate: [PostConnectOrCreateInput]
     update: [PostUpdateUniqueInput]
     upsert: [PostUpsertUniqueInput]
@@ -162,6 +150,35 @@ input UserPostsUpdateRelationsInput {
     set: [PostWhereUniqueInput]
     updateMany: [PostUpdateManyInput]
     deleteMany: [PostDeleteManyInput]
+}
+
+input HiddenModelFilterRelationsInput {
+    every: HiddenModelWhereFilterInput
+    none: HiddenModelWhereFilterInput
+    some: HiddenModelWhereFilterInput
+}
+
+input HiddenModelWhereFilterInput {
+    OR: [HiddenModelWhereFilterInput]
+    NOT: [HiddenModelWhereFilterInput]
+    AND: [HiddenModelWhereFilterInput]
+    id: IntFilterInput
+}
+
+input HiddenModelWhereUniqueInput {
+    id: Int
+}
+
+input HiddenModelOrderByInput {
+    id: OrderByArg
+}
+
+input HiddenModelDeleteUniqueInput {
+    where: HiddenModelWhereUniqueInput!
+}
+
+input HiddenModelDeleteManyInput {
+    where: HiddenModelWhereFilterInput!
 }
 
 input PostFilterRelationsInput {
@@ -177,20 +194,20 @@ input PostWhereFilterInput {
     id: IntFilterInput
     title: StringFilterInput
     author: UserWhereFilterInput
-    authorId: IntFilterInput
+    authorUuid: StringFilterInput
     published: BooleanFilterInput
     lastSavedAt: AWSDateTimeFilterInput
 }
 
 input PostWhereUniqueInput {
     id: Int
-    authorId: Int
+    authorUuid: String
 }
 
 input PostOrderByInput {
     id: OrderByArg
     title: OrderByArg
-    authorId: OrderByArg
+    authorUuid: OrderByArg
     published: OrderByArg
     lastSavedAt: OrderByArg
 }
@@ -236,17 +253,17 @@ input PostUpsertUniqueInput {
     update: PostUpdateInput!
 }
 
+input PostConnectOrCreateInput {
+    where: PostWhereUniqueInput!
+    create: PostCreateInput!
+}
+
 input PostDeleteUniqueInput {
     where: PostWhereUniqueInput!
 }
 
 input PostDeleteManyInput {
     where: PostWhereFilterInput!
-}
-
-input PostConnectOrCreateInput {
-    where: PostWhereUniqueInput!
-    create: PostCreateInput!
 }
 
 input PostAuthorCreateRelationsInput {
@@ -256,8 +273,8 @@ input PostAuthorCreateRelationsInput {
 }
 
 input PostAuthorUpdateRelationsInput {
-    create: UserCreateInput
     connect: UserWhereUniqueInput
+    create: UserCreateInput
     connectOrCreate: UserConnectOrCreateInput
     update: UserUpdateInput
     upsert: UserUpsertInput
@@ -344,237 +361,217 @@ input BooleanFilterInput {
 }
 
 type Mutation {
-    # Create a new single User record.
+    """
+    Create a new single User record.
+    """
     createUser(data: UserCreateInput!): User
-        @aws_api_key
-        @aws_cognito_user_pools(cognito_groups: ["test"])
-
-    # Create multiple new User records.
+    """
+    Create multiple new User records.
+    """
     createManyUsers(
         data: [UserCreateManyInput!]
         skipDuplicates: Boolean
     ): BatchPayload
-        @aws_api_key
-        @aws_cognito_user_pools(cognito_groups: ["test"])
-
-    # Update an existing single User record.
+    """
+    Update an existing single User record.
+    """
     updateUser(
         where: UserWhereUniqueInput!
         data: UserUpdateInput!
     ): User
-        @aws_api_key
-        @aws_cognito_user_pools(cognito_groups: ["test"])
-
-    # Update multiple existing User records.
+    """
+    Update multiple existing User records.
+    """
     updateManyUsers(
         where: UserWhereFilterInput!
         data: UserUpdateInput!
     ): BatchPayload
-        @aws_api_key
-        @aws_cognito_user_pools(cognito_groups: ["test"])
-
-    # Update an existing or create a new single User record.
+    """
+    Update an existing or create a new single User record.
+    """
     upsertUser(
         data: UserUpdateInput!
         where: UserWhereUniqueInput!
-    ): User @aws_api_key
-
-    # Delete a single User record.
+    ): User
+    """
+    Delete a single User record.
+    """
     deleteUser(where: UserWhereUniqueInput!): User
-        @aws_api_key
-        @aws_cognito_user_pools(cognito_groups: ["test"])
-
-    # Delete multiple User records.
+    """
+    Delete multiple User records.
+    """
     deleteManyUsers(
         where: UserWhereFilterInput!
     ): BatchPayload
-        @aws_api_key
-        @aws_cognito_user_pools(cognito_groups: ["test"])
 
-    # Create a new single Post record.
+    """
+    Delete a single HiddenModel record.
+    """
+    deleteHiddenModel(
+        where: HiddenModelWhereUniqueInput!
+    ): HiddenModel
+    """
+    Delete multiple HiddenModel records.
+    """
+    deleteManyHiddenModels(
+        where: HiddenModelWhereFilterInput!
+    ): BatchPayload
+
+    """
+    Create a new single Post record.
+    """
     createPost(data: PostCreateInput!): Post
-        @aws_api_key
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admins"]
-        )
-
-    # Create multiple new Post records.
+    """
+    Create multiple new Post records.
+    """
     createManyPosts(
         data: [PostCreateManyInput!]
         skipDuplicates: Boolean
     ): BatchPayload
-        @aws_api_key
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admins"]
-        )
-
-    # Update an existing single Post record.
+    """
+    Update an existing single Post record.
+    """
     updatePost(
         where: PostWhereUniqueInput!
         data: PostUpdateInput!
     ): Post
-        @aws_api_key
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admins"]
-        )
-
-    # Update multiple existing Post records.
+    """
+    Update multiple existing Post records.
+    """
     updateManyPosts(
         where: PostWhereFilterInput!
         data: PostUpdateInput!
     ): BatchPayload
-        @aws_api_key
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admins"]
-        )
-
-    # Update an existing or create a new single Post record.
+    """
+    Update an existing or create a new single Post record.
+    """
     upsertPost(
         data: PostUpdateInput!
         where: PostWhereUniqueInput!
     ): Post
-        @aws_api_key
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admins"]
-        )
-
-    # Delete a single Post record.
+    """
+    Delete a single Post record.
+    """
     deletePost(where: PostWhereUniqueInput!): Post
-        @aws_api_key
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admins"]
-        )
-
-    # Delete multiple Post records.
+    """
+    Delete multiple Post records.
+    """
     deleteManyPosts(
         where: PostWhereFilterInput!
     ): BatchPayload
-        @aws_api_key
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admins"]
-        )
-    notify(message: String!): PublishNotification
 }
 
 type Query {
-    # Find a single User record by unique identifier.
+    """
+    Find a single User record by unique identifier.
+    """
     getUser(where: UserWhereUniqueInput!): User
-        @aws_api_key
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admins"]
-        )
-
-    # Find many User records (optional query filters).
+    """
+    Find many User records (optional query filters).
+    """
     listUsers(
         where: UserWhereFilterInput
         orderBy: [UserOrderByInput]
         skip: Int
         take: Int
     ): [User]
-        @aws_api_key
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admins"]
-        )
-
-    # Count all User records (optional query filters).
+    """
+    Count all User records (optional query filters).
+    """
     countUsers(
         where: UserWhereFilterInput
         orderBy: [UserOrderByInput]
         skip: Int
         take: Int
     ): Int
-        @aws_api_key
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admins"]
-        )
 
-    # Find a single Post record by unique identifier.
+    """
+    Find a single HiddenModel record by unique identifier.
+    """
+    getHiddenModel(
+        where: HiddenModelWhereUniqueInput!
+    ): HiddenModel
+    """
+    Find many HiddenModel records (optional query filters).
+    """
+    listHiddenModels(
+        where: HiddenModelWhereFilterInput
+        orderBy: [HiddenModelOrderByInput]
+        skip: Int
+        take: Int
+    ): [HiddenModel]
+    """
+    Count all HiddenModel records (optional query filters).
+    """
+    countHiddenModels(
+        where: HiddenModelWhereFilterInput
+        orderBy: [HiddenModelOrderByInput]
+        skip: Int
+        take: Int
+    ): Int
+
+    """
+    Find a single Post record by unique identifier.
+    """
     getPost(where: PostWhereUniqueInput!): Post
-        @aws_iam
-        @aws_api_key
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admins"]
-        )
-
-    # Find many Post records (optional query filters).
+    """
+    Find many Post records (optional query filters).
+    """
     listPosts(
         where: PostWhereFilterInput
         orderBy: [PostOrderByInput]
         skip: Int
         take: Int
     ): [Post]
-        @aws_iam
-        @aws_api_key
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admins"]
-        )
-
-    # Count all Post records (optional query filters).
+    """
+    Count all Post records (optional query filters).
+    """
     countPosts(
         where: PostWhereFilterInput
         orderBy: [PostOrderByInput]
         skip: Int
         take: Int
     ): Int
-        @aws_iam
-        @aws_api_key
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admins"]
-        )
 }
 
 type Subscription {
-    # Triggered from `createUser` mutation (excl. `createManyUsers` and `upsertUser`).
+    """
+    Triggered from `createUser` mutation (excl. `createManyUsers` and `upsertUser`).
+    """
     onCreatedUser(
-        id: Int
+        uuid: String
         username: String
         email: AWSEmail
-    ): User
-        @aws_subscribe(mutations: ["createUser"])
-        @aws_api_key
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admins"]
-        )
-
-    # Triggered from `updateUser` mutation (excl. `updateManyUsers` and `upsertUser`).
+    ): User @aws_subscribe(mutations: ["createUser"])
+    """
+    Triggered from `updateUser` mutation (excl. `updateManyUsers` and `upsertUser`).
+    """
     onUpdatedUser(
-        id: Int
+        uuid: String
         username: String
         email: AWSEmail
-    ): User
-        @aws_subscribe(mutations: ["updateUser"])
-        @aws_api_key
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admins"]
-        )
-
-    # Triggered from `upsertUser` mutation.
+    ): User @aws_subscribe(mutations: ["updateUser"])
+    """
+    Triggered from `upsertUser` mutation.
+    """
     onUpsertedUser(
-        id: Int
+        uuid: String
         username: String
         email: AWSEmail
-    ): User
-        @aws_subscribe(mutations: ["upsertUser"])
-        @aws_api_key
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admins"]
-        )
-
-    # Triggered from `deleteUser` mutation (excl. `deleteManyUsers`).
+    ): User @aws_subscribe(mutations: ["upsertUser"])
+    """
+    Triggered from `deleteUser` mutation (excl. `deleteManyUsers`).
+    """
     onDeletedUser(
-        id: Int
+        uuid: String
         username: String
         email: AWSEmail
-    ): User
-        @aws_subscribe(mutations: ["deleteUser"])
-        @aws_api_key
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admins"]
-        )
-
-    # Triggered from ANY SINGLE record mutation (excl. `on*ManyUsers`).
+    ): User @aws_subscribe(mutations: ["deleteUser"])
+    """
+    Triggered from ANY SINGLE record mutation (excl. `on*ManyUsers`).
+    """
     onMutatedUser(
-        id: Int
+        uuid: String
         username: String
         email: AWSEmail
     ): User
@@ -586,36 +583,19 @@ type Subscription {
                 "deleteUser"
             ]
         )
-        @aws_api_key
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admins"]
-        )
-
-    # Triggered from `createManyUsers` mutation.
+    """
+    Triggered from `createManyUsers` mutation.
+    """
     onCreatedManyUsers: BatchPayload
         @aws_subscribe(mutations: ["createManyUsers"])
-        @aws_api_key
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admins"]
-        )
-
-    # Triggered from `updateManyUsers` mutation.
+    """
+    Triggered from `updateManyUsers` mutation.
+    """
     onUpdatedManyUsers: BatchPayload
         @aws_subscribe(mutations: ["updateManyUsers"])
-        @aws_api_key
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admins"]
-        )
-
-    # Triggered from `deleteManyUsers` mutation.
-    onDeletedManyUsers: BatchPayload
-        @aws_subscribe(mutations: ["deleteManyUsers"])
-        @aws_api_key
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admins"]
-        )
-
-    # Triggered from ANY MULTIPLE records mutation (excl. single record mutations).
+    """
+    Triggered from ANY MULTIPLE records mutation (excl. single record mutations).
+    """
     onMutatedManyUsers: BatchPayload
         @aws_subscribe(
             mutations: [
@@ -624,49 +604,49 @@ type Subscription {
                 "deleteManyUsers"
             ]
         )
-        @aws_api_key
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admins"]
+    """
+    Triggered from `deleteManyUsers` mutation.
+    """
+    onDeletedManyUsers: BatchPayload
+        @aws_subscribe(mutations: ["deleteManyUsers"])
+
+    """
+    Triggered from `deleteHiddenModel` mutation (excl. `deleteManyHiddenModels`).
+    """
+    onDeletedHiddenModel(id: Int): HiddenModel
+        @aws_subscribe(mutations: ["deleteHiddenModel"])
+    """
+    Triggered from `deleteManyHiddenModels` mutation.
+    """
+    onDeletedManyHiddenModels: BatchPayload
+        @aws_subscribe(
+            mutations: ["deleteManyHiddenModels"]
         )
 
-    # Triggered from `createPost` mutation (excl. `createManyPosts` and `upsertPost`).
-    onCreatedPost(id: Int, authorId: Int): Post
+    """
+    Triggered from `createPost` mutation (excl. `createManyPosts` and `upsertPost`).
+    """
+    onCreatedPost(id: Int, authorUuid: String): Post
         @aws_subscribe(mutations: ["createPost"])
-        @aws_iam
-        @aws_api_key
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admins"]
-        )
-
-    # Triggered from `updatePost` mutation (excl. `updateManyPosts` and `upsertPost`).
-    onUpdatedPost(id: Int, authorId: Int): Post
+    """
+    Triggered from `updatePost` mutation (excl. `updateManyPosts` and `upsertPost`).
+    """
+    onUpdatedPost(id: Int, authorUuid: String): Post
         @aws_subscribe(mutations: ["updatePost"])
-        @aws_iam
-        @aws_api_key
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admins"]
-        )
-
-    # Triggered from `upsertPost` mutation.
-    onUpsertedPost(id: Int, authorId: Int): Post
+    """
+    Triggered from `upsertPost` mutation.
+    """
+    onUpsertedPost(id: Int, authorUuid: String): Post
         @aws_subscribe(mutations: ["upsertPost"])
-        @aws_iam
-        @aws_api_key
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admins"]
-        )
-
-    # Triggered from `deletePost` mutation (excl. `deleteManyPosts`).
-    onDeletedPost(id: Int, authorId: Int): Post
+    """
+    Triggered from `deletePost` mutation (excl. `deleteManyPosts`).
+    """
+    onDeletedPost(id: Int, authorUuid: String): Post
         @aws_subscribe(mutations: ["deletePost"])
-        @aws_iam
-        @aws_api_key
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admins"]
-        )
-
-    # Triggered from ANY SINGLE record mutation (excl. `on*ManyPosts`).
-    onMutatedPost(id: Int, authorId: Int): Post
+    """
+    Triggered from ANY SINGLE record mutation (excl. `on*ManyPosts`).
+    """
+    onMutatedPost(id: Int, authorUuid: String): Post
         @aws_subscribe(
             mutations: [
                 "createPost"
@@ -675,40 +655,19 @@ type Subscription {
                 "deletePost"
             ]
         )
-        @aws_iam
-        @aws_api_key
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admins"]
-        )
-
-    # Triggered from `createManyPosts` mutation.
+    """
+    Triggered from `createManyPosts` mutation.
+    """
     onCreatedManyPosts: BatchPayload
         @aws_subscribe(mutations: ["createManyPosts"])
-        @aws_iam
-        @aws_api_key
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admins"]
-        )
-
-    # Triggered from `updateManyPosts` mutation.
+    """
+    Triggered from `updateManyPosts` mutation.
+    """
     onUpdatedManyPosts: BatchPayload
         @aws_subscribe(mutations: ["updateManyPosts"])
-        @aws_iam
-        @aws_api_key
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admins"]
-        )
-
-    # Triggered from `deleteManyPosts` mutation.
-    onDeletedManyPosts: BatchPayload
-        @aws_subscribe(mutations: ["deleteManyPosts"])
-        @aws_iam
-        @aws_api_key
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admins"]
-        )
-
-    # Triggered from ANY MULTIPLE records mutation (excl. single record mutations).
+    """
+    Triggered from ANY MULTIPLE records mutation (excl. single record mutations).
+    """
     onMutatedManyPosts: BatchPayload
         @aws_subscribe(
             mutations: [
@@ -717,15 +676,9 @@ type Subscription {
                 "deleteManyPosts"
             ]
         )
-        @aws_iam
-        @aws_api_key
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admins"]
-        )
-    onNotification: PublishNotification
-        @aws_subscribe(mutations: ["notify"])
-}
-
-type PublishNotification {
-    message: String!
+    """
+    Triggered from `deleteManyPosts` mutation.
+    """
+    onDeletedManyPosts: BatchPayload
+        @aws_subscribe(mutations: ["deleteManyPosts"])
 }

@@ -19,6 +19,7 @@ export type DMMFPAS_Model = {
     prismaRef: string
     fields: DMMFPAS_Field[]
     directives?: DMMFPAS_Directives
+    isEditable: boolean
     idFields: string[]
     subscriptionFields: DMMFPAS_Field[]
 }

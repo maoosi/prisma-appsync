@@ -243,10 +243,10 @@ export function getAction({ operation }: { operation: string }): Action {
     const actionsList = Object.keys(Actions).sort().reverse()
 
     const action = actionsList.find((action: Action) => {
-        return operation.toLowerCase().startsWith(action.toLowerCase())
+        return operation.toLowerCase().startsWith(String(action).toLowerCase())
     }) as Action
 
-    if (!(typeof action !== 'undefined' && action.length > 0))
+    if (!(typeof action !== 'undefined' && String(action).length > 0))
         throw new CustomError(`Error parsing 'action' from input event.`, { type: 'INTERNAL_SERVER_ERROR' })
 
     return action
@@ -271,7 +271,7 @@ export function getActionAlias({ action }: { action: Action }): ActionsAlias {
         }
     }
 
-    if (!(typeof action !== 'undefined' && action.length > 0)) {
+    if (!(typeof action !== 'undefined' && String(action).length > 0)) {
         throw new CustomError(`Error parsing 'actionAlias' from input event.`, { type: 'INTERNAL_SERVER_ERROR' })
     }
 
@@ -287,7 +287,7 @@ export function getActionAlias({ action }: { action: Action }): ActionsAlias {
  * @returns Model
  */
 export function getModel({ operation, action }: { operation: string; action: Action }): Model {
-    const model = operation.replace(action, '') as Model
+    const model = operation.replace(String(action), '') as Model
 
     if (!(model.length > 0))
         throw new CustomError(`Error parsing 'model' from input event.`, { type: 'INTERNAL_SERVER_ERROR' })

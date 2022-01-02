@@ -20,7 +20,7 @@ generator appsync {
 /// @gql(fields: { hiddenField: null }, subscriptions: null)
 /// @auth(model: [{ allow: apiKey }, { allow: userPools, groups: ["users", "admins"] }])
 model User {
-    id       Int    @id @default(autoincrement())
+    uuid     String    @id @default(uuid()) @db.VarChar(200)
     username String @unique
     email String @unique
     hiddenField String
@@ -38,8 +38,8 @@ model hiddenModel {
 model Post {
     id          Int      @id @default(autoincrement())
     title       String
-    author      User?    @relation(fields: [authorId], references: [id])
-    authorId    Int?
+    author      User?    @relation(fields: [authorUuid], references: [uuid])
+    authorUuid  String?  @db.VarChar(200)
     published   Boolean  @default(false)
     lastSavedAt DateTime @default(now())
 }

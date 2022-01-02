@@ -29,6 +29,36 @@
   fieldName: deleteManyUsers
   dataSource: prisma-appsync
 - typeName: Query
+  fieldName: getHiddenModel
+  dataSource: prisma-appsync
+- typeName: Query
+  fieldName: listHiddenModels
+  dataSource: prisma-appsync
+- typeName: Query
+  fieldName: countHiddenModels
+  dataSource: prisma-appsync
+- typeName: Mutation
+  fieldName: createHiddenModel
+  dataSource: prisma-appsync
+- typeName: Mutation
+  fieldName: updateHiddenModel
+  dataSource: prisma-appsync
+- typeName: Mutation
+  fieldName: upsertHiddenModel
+  dataSource: prisma-appsync
+- typeName: Mutation
+  fieldName: deleteHiddenModel
+  dataSource: prisma-appsync
+- typeName: Mutation
+  fieldName: createManyHiddenModels
+  dataSource: prisma-appsync
+- typeName: Mutation
+  fieldName: updateManyHiddenModels
+  dataSource: prisma-appsync
+- typeName: Mutation
+  fieldName: deleteManyHiddenModels
+  dataSource: prisma-appsync
+- typeName: Query
   fieldName: getPost
   dataSource: prisma-appsync
 - typeName: Query
@@ -58,16 +88,3 @@
 - typeName: Mutation
   fieldName: deleteManyPosts
   dataSource: prisma-appsync
-- typeName: Mutation
-  fieldName: notify
-  requestMappingTemplate: >-
-      {
-          "version": "2017-02-28",
-          "payload": {
-              "identity": $util.toJson($context.identity),
-              "arguments": $util.toJson($context.arguments)
-          }
-      }
-  responseMappingTemplate: >-
-      $util.toJson($context.arguments)
-  dataSource: none

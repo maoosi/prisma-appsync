@@ -14,7 +14,7 @@ List of fields available in the `Post` type.
 | id          | Int               | true    | true              |
 | title       | String            | _false_ | true              |
 | author      | [User](./User.md) | _false_ | _false_           |
-| authorId    | Int               | true    | _false_           |
+| authorUuid  | String            | true    | _false_           |
 | published   | Boolean           | _false_ | true              |
 | lastSavedAt | AWSDateTime       | _false_ | true              |
 
@@ -42,7 +42,7 @@ query {
         id
         title
         author # Relation to one
-        authorId
+        authorUuid
         published
         lastSavedAt
     }
@@ -66,7 +66,7 @@ query {
         id
         title
         author # Relation to one
-        authorId
+        authorUuid
         published
         lastSavedAt
     }
@@ -81,7 +81,7 @@ query {
         id
         title
         author # Relation to one
-        authorId
+        authorUuid
         published
         lastSavedAt
     }
@@ -96,7 +96,7 @@ query {
         id
         title
         author # Relation to one
-        authorId
+        authorUuid
         published
         lastSavedAt
     }
@@ -113,7 +113,7 @@ query {
         id
         title
         author # Relation to one
-        authorId
+        authorUuid
         published
         lastSavedAt
     }
@@ -130,7 +130,7 @@ query {
         id
         title
         author # Relation to one
-        authorId
+        authorUuid
         published
         lastSavedAt
     }
@@ -183,14 +183,14 @@ mutation {
     createPost(
         data: {
             title: "Foo"
-            authorId: 2
+            authorUuid: "Foo"
             published: false
             lastSavedAt: "dd/mm/YYYY"
         }
     ) {
         id
         title
-        authorId
+        authorUuid
         published
         lastSavedAt
     }
@@ -245,14 +245,14 @@ mutation {
         where: { id: 2 }
         data: {
             title: "Foo"
-            authorId: 2
+            authorUuid: "Foo"
             published: false
             lastSavedAt: "dd/mm/YYYY"
         }
     ) {
         id
         title
-        authorId
+        authorUuid
         published
         lastSavedAt
     }
@@ -309,7 +309,7 @@ mutation {
     deletePost(where: { id: 2 }) {
         id
         title
-        authorId
+        authorUuid
         published
         lastSavedAt
     }
@@ -395,7 +395,7 @@ subscription {
     onCreatedPost {
         id
         title
-        authorId
+        authorUuid
         published
         lastSavedAt
     }
@@ -411,7 +411,7 @@ subscription {
     onUpdatedPost {
         id
         title
-        authorId
+        authorUuid
         published
         lastSavedAt
     }
@@ -427,7 +427,7 @@ subscription {
     onUpsertedPost {
         id
         title
-        authorId
+        authorUuid
         published
         lastSavedAt
     }
@@ -443,7 +443,7 @@ subscription {
     onDeletedPost {
         id
         title
-        authorId
+        authorUuid
         published
         lastSavedAt
     }
@@ -459,7 +459,7 @@ subscription {
     onMutatedPost {
         id
         title
-        authorId
+        authorUuid
         published
         lastSavedAt
     }

@@ -1,4 +1,4 @@
-import { AppsyncEvent, Identity } from '../../../src/client/defs'
+import { AppsyncEvent, Identity } from '../../../packages/client/defs'
 import { graphQlQueryToJson } from './gqlQueryToJson'
 import { dot } from 'dot-object'
 

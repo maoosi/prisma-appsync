@@ -1,10 +1,10 @@
 {
   "inputs": {
-    "src/client/defs.ts": {
+    "packages/client/defs.ts": {
       "bytes": 8278,
       "imports": []
     },
-    "src/client/inspector.ts": {
+    "packages/client/inspector.ts": {
       "bytes": 2568,
       "imports": []
     },
@@ -349,7 +349,7 @@
         }
       ]
     },
-    "src/client/utils.ts": {
+    "packages/client/utils.ts": {
       "bytes": 2885,
       "imports": [
         {
@@ -374,74 +374,74 @@
         }
       ]
     },
-    "src/client/guard.ts": {
+    "packages/client/guard.ts": {
       "bytes": 3300,
       "imports": [
         {
-          "path": "src/client/utils.ts",
+          "path": "packages/client/utils.ts",
           "kind": "import-statement"
         }
       ]
     },
-    "src/client/adapter.ts": {
-      "bytes": 16267,
+    "packages/client/adapter.ts": {
+      "bytes": 16299,
       "imports": [
         {
-          "path": "src/client/inspector.ts",
+          "path": "packages/client/inspector.ts",
           "kind": "import-statement"
         },
         {
-          "path": "src/client/utils.ts",
+          "path": "packages/client/utils.ts",
           "kind": "import-statement"
         },
         {
-          "path": "src/client/defs.ts",
+          "path": "packages/client/defs.ts",
           "kind": "import-statement"
         }
       ]
     },
-    "src/client/resolver.ts": {
+    "packages/client/resolver.ts": {
       "bytes": 5845,
       "imports": []
     },
-    "src/client/core.ts": {
+    "packages/client/core.ts": {
       "bytes": 9534,
       "imports": [
         {
-          "path": "src/client/defs.ts",
+          "path": "packages/client/defs.ts",
           "kind": "import-statement"
         },
         {
-          "path": "src/client/inspector.ts",
+          "path": "packages/client/inspector.ts",
           "kind": "import-statement"
         },
         {
-          "path": "src/client/guard.ts",
+          "path": "packages/client/guard.ts",
           "kind": "import-statement"
         },
         {
-          "path": "src/client/adapter.ts",
+          "path": "packages/client/adapter.ts",
           "kind": "import-statement"
         },
         {
-          "path": "src/client/utils.ts",
+          "path": "packages/client/utils.ts",
           "kind": "import-statement"
         },
         {
-          "path": "src/client/resolver.ts",
+          "path": "packages/client/resolver.ts",
           "kind": "import-statement"
         }
       ]
     },
-    "src/client/index.ts": {
+    "packages/client/index.ts": {
       "bytes": 253,
       "imports": [
         {
-          "path": "src/client/core.ts",
+          "path": "packages/client/core.ts",
           "kind": "import-statement"
         },
         {
-          "path": "src/client/defs.ts",
+          "path": "packages/client/defs.ts",
           "kind": "import-statement"
         }
       ]
@@ -451,7 +451,7 @@
     "dist/prisma-appsync/index.js": {
       "imports": [],
       "exports": [],
-      "entryPoint": "src/client/index.ts",
+      "entryPoint": "packages/client/index.ts",
       "inputs": {
         "node_modules/.pnpm/dot-object@2.1.4/node_modules/dot-object/index.js": {
           "bytesInOutput": 5347
@@ -552,32 +552,32 @@
         "node_modules/.pnpm/xss@1.0.9/node_modules/xss/lib/index.js": {
           "bytesInOutput": 487
         },
-        "src/client/index.ts": {
+        "packages/client/index.ts": {
           "bytesInOutput": 57
         },
-        "src/client/defs.ts": {
+        "packages/client/defs.ts": {
           "bytesInOutput": 1712
         },
-        "src/client/inspector.ts": {
+        "packages/client/inspector.ts": {
           "bytesInOutput": 1139
         },
-        "src/client/utils.ts": {
+        "packages/client/utils.ts": {
           "bytesInOutput": 521
         },
-        "src/client/guard.ts": {
+        "packages/client/guard.ts": {
           "bytesInOutput": 676
         },
-        "src/client/adapter.ts": {
-          "bytesInOutput": 6124
+        "packages/client/adapter.ts": {
+          "bytesInOutput": 6156
         },
-        "src/client/resolver.ts": {
+        "packages/client/resolver.ts": {
           "bytesInOutput": 2344
         },
-        "src/client/core.ts": {
+        "packages/client/core.ts": {
           "bytesInOutput": 2525
         }
       },
-      "bytes": 172248
+      "bytes": 172280
     }
   }
 }

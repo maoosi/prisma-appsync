@@ -90,57 +90,64 @@ enum OrderByArg {
         {% endfor %}
     }
 
-    input {{ model.name }}CreateInput {
-        {% for field in model.fields -%}
-            {% if field.isEditable and not field.relation -%}
-                {{ field.name }}: 
-                    {{ field.scalar }}{% if field.isRequired -%}!{% endif %}
-            {% elseif field.isEditable and field.relation -%}
-                {{ field.name }}: 
-                    {{ field.relation.name }}CreateRelationsInput{% if field.isRequired -%}!{% endif %}
-            {% endif -%}
-        {% endfor %}
-    }
-    
-    input {{ model.name }}CreateManyInput {
-        {% for field in model.fields -%}
-            {% if field.isEditable and not field.relation -%}
-                {{ field.name }}: 
-                    {{ field.scalar }}{% if field.isRequired -%}!{% endif %}
-            {% endif -%}
-        {% endfor %}
-    }
+    {% if model.isEditable -%}
+        input {{ model.name }}CreateInput {
+            {% for field in model.fields -%}
+                {% if field.isEditable and not field.relation -%}
+                    {{ field.name }}: 
+                        {{ field.scalar }}{% if field.isRequired -%}!{% endif %}
+                {% elseif field.isEditable and field.relation -%}
+                    {{ field.name }}: 
+                        {{ field.relation.name }}CreateRelationsInput{% if field.isRequired -%}!{% endif %}
+                {% endif -%}
+            {% endfor %}
+        }
 
-    input {{ model.name }}UpdateInput {
-        {% for field in model.fields -%}
-            {% if field.isEditable and not field.relation -%}
-                {{ field.name }}: {{ field.scalar }}
-            {% elseif field.isEditable and field.relation -%}
-                {{ field.name }}: {{ field.relation.name }}UpdateRelationsInput
-            {% endif -%}
-        {% endfor %}
-    }
+        input {{ model.name }}CreateManyInput {
+            {% for field in model.fields -%}
+                {% if field.isEditable and not field.relation -%}
+                    {{ field.name }}: 
+                        {{ field.scalar }}{% if field.isRequired -%}!{% endif %}
+                {% endif -%}
+            {% endfor %}
+        }
 
-    input {{ model.name }}UpdateUniqueInput {
-        data: {{ model.name }}UpdateInput!
-        where: {{ model.name }}WhereUniqueInput!
-    }
+        input {{ model.name }}UpdateInput {
+            {% for field in model.fields -%}
+                {% if field.isEditable and not field.relation -%}
+                    {{ field.name }}: {{ field.scalar }}
+                {% elseif field.isEditable and field.relation -%}
+                    {{ field.name }}: {{ field.relation.name }}UpdateRelationsInput
+                {% endif -%}
+            {% endfor %}
+        }
 
-    input {{ model.name }}UpdateManyInput {
-        where: {{ model.name }}WhereFilterInput!
-        data: {{ model.name }}UpdateInput!
-    }
+        input {{ model.name }}UpdateUniqueInput {
+            data: {{ model.name }}UpdateInput!
+            where: {{ model.name }}WhereUniqueInput!
+        }
 
-    input {{ model.name }}UpsertInput {
-        create: {{ model.name }}CreateInput!
-        update: {{ model.name }}UpdateInput!
-    }
+        input {{ model.name }}UpdateManyInput {
+            where: {{ model.name }}WhereFilterInput!
+            data: {{ model.name }}UpdateInput!
+        }
 
-    input {{ model.name }}UpsertUniqueInput {
-        where: {{ model.name }}WhereUniqueInput!
-        create: {{ model.name }}CreateInput!
-        update: {{ model.name }}UpdateInput!
-    }
+        input {{ model.name }}UpsertInput {
+            create: {{ model.name }}CreateInput!
+            update: {{ model.name }}UpdateInput!
+        }
+
+        input {{ model.name }}UpsertUniqueInput {
+            where: {{ model.name }}WhereUniqueInput!
+            create: {{ model.name }}CreateInput!
+            update: {{ model.name }}UpdateInput!
+        }
+
+        input {{ model.name }}ConnectOrCreateInput {
+            where: {{ model.name }}WhereUniqueInput!
+            create: {{ model.name }}CreateInput!
+        }
+    {% endif %}
 
     input {{ model.name }}DeleteUniqueInput {
         where: {{ model.name }}WhereUniqueInput!
@@ -148,11 +155,6 @@ enum OrderByArg {
 
     input {{ model.name }}DeleteManyInput {
         where: {{ model.name }}WhereFilterInput!
-    }
-
-    input {{ model.name }}ConnectOrCreateInput {
-        where: {{ model.name }}WhereUniqueInput!
-        create: {{ model.name }}CreateInput!
     }
 
     {% for field in model.fields -%}
@@ -171,16 +173,16 @@ enum OrderByArg {
 
             input {{ field.relation.name }}UpdateRelationsInput {
                 {% if field.relation.kind === "one" -%}
-                create: {{ field.relation.type }}CreateInput
                 connect: {{ field.relation.type }}WhereUniqueInput
+                create: {{ field.relation.type }}CreateInput
                 connectOrCreate: {{ field.relation.type }}ConnectOrCreateInput
                 update: {{ field.relation.type }}UpdateInput
                 upsert: {{ field.relation.type }}UpsertInput
                 delete: Boolean
                 disconnect: Boolean
                 {% else  -%}
-                create: [{{ field.relation.type }}CreateInput]
                 connect: [{{ field.relation.type }}WhereUniqueInput]
+                create: [{{ field.relation.type }}CreateInput]
                 connectOrCreate: [{{ field.relation.type }}ConnectOrCreateInput]
                 update: [{{ field.relation.type }}UpdateUniqueInput]
                 upsert: [{{ field.relation.type }}UpsertUniqueInput]
@@ -275,6 +277,7 @@ input BooleanFilterInput {
 
 type Mutation {
     {% for model in models %}
+        {% if model.isEditable -%}
         """
         Create a new single {{ model.name }} record.
         """
@@ -309,6 +312,7 @@ type Mutation {
             data: {{ model.name }}UpdateInput!,
             where: {{ model.name }}WhereUniqueInput!
         ): {{ model.name }} {{ model.directives.upsert | safe }}
+        {% endif -%}
         """
         Delete a single {{ model.name }} record.
         """
@@ -355,6 +359,7 @@ type Query {
 
 type Subscription {
     {% for model in models %}
+        {% if model.isEditable -%}
         """
         Triggered from `create{{ model.name }}` mutation (excl. `createMany{{ model.pluralizedName }}` and `upsert{{ model.name }}`).
         """
@@ -394,6 +399,7 @@ type Subscription {
             {% endfor %}
         ): {{ model.name }}
             @aws_subscribe(mutations: ["upsert{{ model.name }}"]) {{ model.directives.subscription | safe }}
+        {% endif -%}
         """
         Triggered from `delete{{ model.name }}` mutation (excl. `deleteMany{{ model.pluralizedName }}`).
         """
@@ -407,6 +413,7 @@ type Subscription {
             {% endfor %}
         ): {{ model.name }}
             @aws_subscribe(mutations: ["delete{{ model.name }}"]) {{ model.directives.subscription | safe }}
+        {% if model.isEditable -%}
         """
         Triggered from ANY SINGLE record mutation (excl. `on*Many{{ model.pluralizedName }}`).
         """
@@ -431,14 +438,15 @@ type Subscription {
         onUpdatedMany{{ model.pluralizedName }}: BatchPayload
             @aws_subscribe(mutations: ["updateMany{{ model.pluralizedName }}"]) {{ model.directives.subscription | safe }}
         """
-        Triggered from `deleteMany{{ model.pluralizedName }}` mutation.
-        """
-        onDeletedMany{{ model.pluralizedName }}: BatchPayload
-            @aws_subscribe(mutations: ["deleteMany{{ model.pluralizedName }}"]) {{ model.directives.subscription | safe }}
-        """
         Triggered from ANY MULTIPLE records mutation (excl. single record mutations).
         """
         onMutatedMany{{ model.pluralizedName }}: BatchPayload
             @aws_subscribe(mutations: ["createMany{{ model.pluralizedName }}", "updateMany{{ model.pluralizedName }}", "deleteMany{{ model.pluralizedName }}"]) {{ model.directives.subscription | safe }}
+        {% endif -%}
+        """
+        Triggered from `deleteMany{{ model.pluralizedName }}` mutation.
+        """
+        onDeletedMany{{ model.pluralizedName }}: BatchPayload
+            @aws_subscribe(mutations: ["deleteMany{{ model.pluralizedName }}"]) {{ model.directives.subscription | safe }}
     {% endfor %}
 }

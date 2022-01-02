@@ -7,7 +7,7 @@ import {
     AMAZON_COGNITO_USER_POOLS,
     AWS_LAMBDA,
     OPENID_CONNECT,
-} from '../../../src/client/defs'
+} from '../../../packages/client/defs'
 
 export default function (identity: Authorization, opts: mockOptions): Identity {
     if (identity === Authorizations.AWS_IAM) {
