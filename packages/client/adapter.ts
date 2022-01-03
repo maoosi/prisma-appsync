@@ -1,5 +1,5 @@
 import { CustomError, inspect } from './inspector'
-import { merge, dotate, isEmpty, isUndefined } from './utils'
+import { merge, dotate, isEmpty, isUndefined, lowerFirst } from './utils'
 import {
     Options,
     AppsyncEvent,
@@ -486,8 +486,8 @@ function parseSelectionList(selectionSetList: any): any {
 export function getPaths({ context, prismaArgs }: { context: Context; prismaArgs: PrismaArgs }): string[] {
     const paths: string[] = []
     const pathRoot = context.model !== null 
-        ? `/${context.action}/${context.model}` 
-        : `/${context.action}`
+        ? `/${lowerFirst(context.action)}/${lowerFirst(context.model)}` 
+        : `/${lowerFirst(context.action)}`
     const isBatchAction: boolean = BatchActionsList.includes(context.action)
 
     if (typeof prismaArgs.data !== 'undefined') {
@@ -503,7 +503,7 @@ export function getPaths({ context, prismaArgs }: { context: Context; prismaArgs
                     .split('.')
                     .filter((k) => !ReservedPrismaKeys.includes(k))
                     .join('/')
-                const path = `${pathRoot}/${item}`.toLowerCase()
+                const path = `${pathRoot}/${lowerFirst(item)}`
                 if (!paths.includes(path)) paths.push(path)
             }
         })
@@ -520,7 +520,7 @@ export function getPaths({ context, prismaArgs }: { context: Context; prismaArgs
             const selectAction = isBatchAction 
                 ? Actions.list
                 : Actions.get
-            const path = `/${selectAction}/${context.model}/${item}`.toLowerCase()
+            const path = `/${lowerFirst(selectAction)}/${lowerFirst(context.model)}/${lowerFirst(item)}`
             if (!paths.includes(path)) paths.push(path)
         }
     }

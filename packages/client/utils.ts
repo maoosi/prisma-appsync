@@ -121,3 +121,16 @@ export function isEmpty(element: any): boolean {
 export function isUndefined(element: any): boolean {
     return element === undefined || typeof element === 'undefined'
 }
+
+/**
+ * #### Return string with first letter lowercase.
+ *
+ * @example lowerFirst("PostOffice")
+ * // returns 'postOffice'
+ *
+ * @param {string} str
+ * @returns string
+ */
+export function lowerFirst(str: string): string {
+    return str.charAt(0).toLowerCase() + str.slice(1)
+}
