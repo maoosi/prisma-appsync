@@ -1,4 +1,4 @@
-import { PrismaAppSync } from 'src/client'
+import { PrismaAppSync } from 'packages/client'
 
 // TODO: write more test cases
 describe('CLIENT #core', () => {

@@ -10,11 +10,12 @@ export declare type Options = Required<PrismaAppSyncOptions> & {
     generatedConfig: any;
 };
 export declare type Action = typeof Actions[keyof typeof Actions] | string;
-export declare type ActionsAlias = keyof typeof ActionsAliases | null;
+export declare type ActionsAlias = typeof ActionsAliases[keyof typeof ActionsAliases] | 'custom';
+export declare type ActionsAliasStr = keyof typeof ActionsAliases
 export declare type Operation = `${Action}${Capitalize<Model>}`;
 export declare type Context = {
     action: Action;
-    alias: Action | 'custom' | null;
+    alias: ActionsAlias | null;
     model: Model | null;
 };
 /**
@@ -92,7 +93,7 @@ export declare type HooksProps = {
     before: BeforeHookParams;
     after: AfterHookParams;
 };
-export declare type HookPath<CustomResolvers> = `${Lowercase<NonNullable<ActionsAlias>>}/${Lowercase<Model>}` | CustomResolvers;
+export declare type HookPath<CustomResolvers> = `${ActionsAliasStr}/${Uncapitalize<Model>}` | CustomResolvers;
 export declare type HooksParameter<HookType extends 'before' | 'after', CustomResolvers extends string> = `${HookType}:${HookPath<CustomResolvers>}`;
 export declare type HooksParameters<HookType extends 'before' | 'after', CustomResolvers extends string> = {
     [matcher in HooksParameter<HookType, CustomResolvers>]?: (props: HooksProps[HookType]) => Promise<any>;

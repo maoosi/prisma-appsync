@@ -239,7 +239,7 @@ export function getOperation({ fieldName }: { fieldName: string }): Operation {
  * @param  {string} options.operation
  * @returns Action
  */
-export function getAction({ operation }: { operation: string }): Action {
+export function getAction({ operation }: { operation: Operation }): Action {
     const actionsList = Object.keys(Actions).sort().reverse()
 
     const action = actionsList.find((action: Action) => {

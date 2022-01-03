@@ -1,13 +1,23 @@
-import * as queries from 'src/client/resolver'
-import { QueryParams } from 'src/client/defs'
+import * as queries from 'packages/client/resolver'
+import { QueryParams, Authorizations, Actions, ActionsAliases, Models } from 'packages/client/defs'
+import { mockIdentity } from 'tests/integration/appsync'
+
+const identity = mockIdentity(Authorizations.AMAZON_COGNITO_USER_POOLS, {
+    sourceIp: 'xxx.xxx.xxx.x',
+    username: 'johndoe',
+    sub: 'xxxxxx',
+    resolverContext: {},
+})
 
 describe('CLIENT #queries', () => {
     const query: QueryParams = {
-        subject: {
-            model: 'Post',
-            actionAlias: 'access',
+        args: {},
+        context: {
+            action: Actions.get,
+            alias: ActionsAliases.access,
+            model: Models.Post,
         },
-        args: {
+        prismaArgs: {
             data: { title: 'Hello World' },
             select: { title: true },
             where: { id: 2 },
@@ -16,12 +26,12 @@ describe('CLIENT #queries', () => {
             take: 1,
             skipDuplicates: true,
         },
-        operation: null,
-        action: null,
-        fields: null,
-        type: null,
-        authIdentity: null,
-        paths: null,
+        authorization: Authorizations.AMAZON_COGNITO_USER_POOLS,
+        identity,
+        operation: 'getPost',
+        fields: ['title'],
+        type: 'Query',
+        paths: [],
     }
 
     const createPrismaClient: any = (model: string, prismaQuery: string) => {
@@ -39,88 +49,88 @@ describe('CLIENT #queries', () => {
             name: 'getQuery',
             prismaQuery: 'findUnique',
             expectedResult: {
-                where: query.args.where,
-                select: query.args.select,
+                where: query.prismaArgs.where,
+                select: query.prismaArgs.select,
             },
         },
         {
             name: 'listQuery',
             prismaQuery: 'findMany',
             expectedResult: {
-                where: query.args.where,
-                select: query.args.select,
-                orderBy: query.args.orderBy,
-                skip: query.args.skip,
-                take: query.args.take,
+                where: query.prismaArgs.where,
+                select: query.prismaArgs.select,
+                orderBy: query.prismaArgs.orderBy,
+                skip: query.prismaArgs.skip,
+                take: query.prismaArgs.take,
             },
         },
         {
             name: 'countQuery',
             prismaQuery: 'count',
             expectedResult: {
-                where: query.args.where,
-                select: query.args.select,
-                orderBy: query.args.orderBy,
-                skip: query.args.skip,
-                take: query.args.take,
+                where: query.prismaArgs.where,
+                select: query.prismaArgs.select,
+                orderBy: query.prismaArgs.orderBy,
+                skip: query.prismaArgs.skip,
+                take: query.prismaArgs.take,
             },
         },
         {
             name: 'createQuery',
             prismaQuery: 'create',
             expectedResult: {
-                data: query.args.data,
-                select: query.args.select,
+                data: query.prismaArgs.data,
+                select: query.prismaArgs.select,
             },
         },
         {
             name: 'createManyQuery',
             prismaQuery: 'createMany',
             expectedResult: {
-                data: query.args.data,
-                skipDuplicates: query.args.skipDuplicates,
+                data: query.prismaArgs.data,
+                skipDuplicates: query.prismaArgs.skipDuplicates,
             },
         },
         {
             name: 'updateQuery',
             prismaQuery: 'update',
             expectedResult: {
-                data: query.args.data,
-                where: query.args.where,
-                select: query.args.select,
+                data: query.prismaArgs.data,
+                where: query.prismaArgs.where,
+                select: query.prismaArgs.select,
             },
         },
         {
             name: 'updateManyQuery',
             prismaQuery: 'updateMany',
             expectedResult: {
-                data: query.args.data,
-                where: query.args.where,
+                data: query.prismaArgs.data,
+                where: query.prismaArgs.where,
             },
         },
         {
             name: 'upsertQuery',
             prismaQuery: 'upsert',
             expectedResult: {
-                update: query.args.data,
-                create: query.args.data,
-                where: query.args.where,
-                select: query.args.select,
+                update: query.prismaArgs.data,
+                create: query.prismaArgs.data,
+                where: query.prismaArgs.where,
+                select: query.prismaArgs.select,
             },
         },
         {
             name: 'deleteQuery',
             prismaQuery: 'delete',
             expectedResult: {
-                where: query.args.where,
-                select: query.args.select,
+                where: query.prismaArgs.where,
+                select: query.prismaArgs.select,
             },
         },
         {
             name: 'deleteManyQuery',
             prismaQuery: 'deleteMany',
             expectedResult: {
-                where: query.args.where,
+                where: query.prismaArgs.where,
             },
         },
     ]
@@ -129,9 +139,13 @@ describe('CLIENT #queries', () => {
         return [test.name, test.prismaQuery, test.expectedResult]
     })
 
-    test.each(cases)('expect "%s" to call "%s" Prisma Query', async (name, prismaQuery, expectedResult) => {
-        const model = typeof query.subject !== 'string' ? query.subject.model : String()
-        const result = await queries[name](createPrismaClient(model, prismaQuery), query)
-        expect(result).toEqual(expectedResult)
-    })
+    test.each(cases)(
+        'expect "%s" to call "%s" Prisma Query', 
+        async (name, prismaQuery, expectedResult) => {
+            const result = await queries[name](
+                createPrismaClient(query.context.model, prismaQuery), query
+            )
+            expect(result).toEqual(expectedResult)
+        }
+    )
 })

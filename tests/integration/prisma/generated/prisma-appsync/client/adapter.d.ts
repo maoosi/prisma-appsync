@@ -55,7 +55,7 @@ export declare function getOperation({ fieldName }: {
  * @returns Action
  */
 export declare function getAction({ operation }: {
-    operation: string;
+    operation: Operation;
 }): Action;
 /**
  * #### Returns action alias (`access`, `create`, `modify`, `subscribe`).

@@ -1,7 +1,7 @@
 {
   "inputs": {
     "packages/client/defs.ts": {
-      "bytes": 8278,
+      "bytes": 8276,
       "imports": []
     },
     "packages/client/inspector.ts": {
@@ -384,7 +384,7 @@
       ]
     },
     "packages/client/adapter.ts": {
-      "bytes": 16299,
+      "bytes": 16302,
       "imports": [
         {
           "path": "packages/client/inspector.ts",

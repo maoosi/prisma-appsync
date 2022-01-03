@@ -1,5 +1,5 @@
-import { Shield } from 'src/client/defs'
-import { getShieldAuthorization } from 'src/client/guard'
+import { Shield } from 'packages/client/defs'
+import { getShieldAuthorization } from 'packages/client/guard'
 
 describe('CLIENT #guard', () => {
     // TODO: write more test cases

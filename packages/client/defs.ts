@@ -16,13 +16,13 @@ export type Options = Required<PrismaAppSyncOptions> & {
 
 export type Action = typeof Actions[keyof typeof Actions] | string
 
-export type ActionsAlias = keyof typeof ActionsAliases | null
+export type ActionsAlias = typeof ActionsAliases[keyof typeof ActionsAliases] | 'custom'
 
 export type Operation = `${Action}${Capitalize<Model>}`
 
 export type Context = {
     action: Action
-    alias: Action | 'custom' | null
+    alias: ActionsAlias | null
     model: Model | null
 }
 
@@ -110,7 +110,7 @@ export type HooksProps = {
     after: AfterHookParams
 }
 
-export type HookPath<CustomResolvers> = `${Lowercase<NonNullable<ActionsAlias>>}/${Lowercase<Model>}` | CustomResolvers
+export type HookPath<CustomResolvers> = `${ActionsAlias}/${Lowercase<Model>}` | CustomResolvers
 
 export type HooksParameter<
     HookType extends 'before' | 'after',

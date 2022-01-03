@@ -7,8 +7,8 @@ import {
     getPrismaArgs,
     getPaths,
     getAuthIdentity,
-} from 'src/client/adapter'
-import { Actions, Action, Models, ActionsAliases, Authorization, Authorizations } from 'src/client/defs'
+} from 'packages/client/adapter'
+import { Actions, Action, Models, ActionsAliases, Authorization, Authorizations } from 'packages/client/defs'
 import { mockLambdaEvent, mockIdentity } from '../integration/appsync'
 
 function mockAppSyncEvent(identity: NonNullable<Authorization>) {
@@ -89,7 +89,7 @@ describe('CLIENT #adapter', () => {
         const cases = Object.keys(Actions).map((action: Action) => {
             return [`${action}People`, action]
         })
-        test.each(cases)('when operation is "%s", expect action to equal "%s"', (operation, expected) => {
+        test.each(cases)('when operation is "%s", expect action to equal "%s"', (operation: any, expected) => {
             const result = getAction({ operation })
             expect(result).toEqual(expected)
         })
@@ -149,11 +149,8 @@ describe('CLIENT #adapter', () => {
         test('expect selectionSetList to be converted to prisma syntax', () => {
             const result = getPrismaArgs({
                 action: Actions.get,
-                _arguments: {
-                    info: {
-                        selectionSetList: ['title', 'createdAt', 'status'],
-                    },
-                },
+                _arguments: {},
+                _selectionSetList: ['title', 'createdAt', 'status'],
                 defaultPagination: false,
             })
             expect(result).toStrictEqual({
@@ -167,18 +164,15 @@ describe('CLIENT #adapter', () => {
         test('expect nested selectionSetList to be converted to prisma syntax', () => {
             const result = getPrismaArgs({
                 action: Actions.list,
-                _arguments: {
-                    info: {
-                        selectionSetList: [
-                            'title',
-                            'createdAt',
-                            'comments',
-                            'comments/post',
-                            'comments/author',
-                            'comments/author/email',
-                        ],
-                    },
-                },
+                _arguments: {},
+                _selectionSetList: [
+                    'title',
+                    'createdAt',
+                    'comments',
+                    'comments/post',
+                    'comments/author',
+                    'comments/author/email',
+                ],
                 defaultPagination: false,
             })
             expect(result).toEqual({
@@ -204,6 +198,7 @@ describe('CLIENT #adapter', () => {
                 _arguments: {
                     where: { title: { startsWith: 'Hello' } },
                 },
+                _selectionSetList: [],
                 defaultPagination: false,
             })
             expect(result).toStrictEqual({
@@ -216,6 +211,7 @@ describe('CLIENT #adapter', () => {
                 _arguments: {
                     data: { title: 'Hello', content: 'World' },
                 },
+                _selectionSetList: [],
                 defaultPagination: false,
             })
             expect(result).toStrictEqual({
@@ -228,6 +224,7 @@ describe('CLIENT #adapter', () => {
                 _arguments: {
                     orderBy: [{ title: 'ASC' }, { postedAt: 'DESC' }],
                 },
+                _selectionSetList: [],
                 defaultPagination: false,
             })
             expect(result).toStrictEqual({
@@ -241,6 +238,7 @@ describe('CLIENT #adapter', () => {
                     _arguments: {
                         orderBy: [{ title: 'ASC', content: 'DESC' }, { postedAt: 'DESC' }],
                     },
+                    _selectionSetList: [],
                     defaultPagination: false,
                 }),
             ).toThrow(Error)
@@ -249,6 +247,7 @@ describe('CLIENT #adapter', () => {
             const result = getPrismaArgs({
                 action: Actions.list,
                 _arguments: { skip: '5' },
+                _selectionSetList: [],
                 defaultPagination: false,
             })
             expect(result).toStrictEqual({ skip: 5 })
@@ -257,6 +256,7 @@ describe('CLIENT #adapter', () => {
             const result = getPrismaArgs({
                 action: Actions.list,
                 _arguments: { take: '3' },
+                _selectionSetList: [],
                 defaultPagination: false,
             })
             expect(result).toStrictEqual({ take: 3 })
@@ -265,6 +265,7 @@ describe('CLIENT #adapter', () => {
             const result = getPrismaArgs({
                 action: Actions.list,
                 _arguments: { skipDuplicates: true },
+                _selectionSetList: [],
                 defaultPagination: false,
             })
             expect(result).toStrictEqual({ skipDuplicates: true })
@@ -274,6 +275,7 @@ describe('CLIENT #adapter', () => {
                 defaultPagination: 50,
                 action: Actions.list,
                 _arguments: { take: '3' },
+                _selectionSetList: [],
             })
             expect(result).toStrictEqual({ skip: 0, take: 3 })
         })
@@ -282,6 +284,7 @@ describe('CLIENT #adapter', () => {
                 defaultPagination: 50,
                 action: Actions.list,
                 _arguments: {},
+                _selectionSetList: [],
             })
             expect(result).toStrictEqual({ skip: 0, take: 50 })
         })
@@ -291,30 +294,27 @@ describe('CLIENT #adapter', () => {
     describe('.getPaths?', () => {
         test('expect nested get to return matching paths', () => {
             const result = getPaths({
-                action: Actions.get,
-                subject: {
-                    actionAlias: ActionsAliases.access,
-                    model: Models.Post,
-                },
-                args: getPrismaArgs({
+                context: {
                     action: Actions.get,
-                    _arguments: {
-                        info: {
-                            selectionSetList: [
-                                '__typename',
-                                'title',
-                                'comment',
-                                'comment/content',
-                                'comment/author',
-                                'comment/author/email',
-                                'comment/author/username',
-                                'comment/author/badges',
-                                'comment/author/badges/label',
-                                'comment/author/badges/owners',
-                                'comment/author/badges/owners/email',
-                            ],
-                        },
-                    },
+                    alias: ActionsAliases.access,
+                    model: Models.Post
+                },
+                prismaArgs: getPrismaArgs({
+                    action: Actions.get,
+                    _selectionSetList: [
+                        '__typename',
+                        'title',
+                        'comment',
+                        'comment/content',
+                        'comment/author',
+                        'comment/author/email',
+                        'comment/author/username',
+                        'comment/author/badges',
+                        'comment/author/badges/label',
+                        'comment/author/badges/owners',
+                        'comment/author/badges/owners/email',
+                    ],
+                    _arguments: {},
                     defaultPagination: false,
                 }),
             })
@@ -330,13 +330,26 @@ describe('CLIENT #adapter', () => {
 
         test('expect nested update to return matching paths', () => {
             const result = getPaths({
-                action: Actions.update,
-                subject: {
-                    actionAlias: ActionsAliases.modify,
+                context: {
+                    action:Actions.update,
+                    alias: ActionsAliases.modify,
                     model: Models.Post,
                 },
-                args: getPrismaArgs({
+                prismaArgs: getPrismaArgs({
                     action: Actions.update,
+                    _selectionSetList: [
+                        '__typename',
+                        'title',
+                        'comment',
+                        'comment/content',
+                        'comment/author',
+                        'comment/author/email',
+                        'comment/author/username',
+                        'comment/author/badges',
+                        'comment/author/badges/label',
+                        'comment/author/badges/owners',
+                        'comment/author/badges/owners/email',
+                    ],
                     _arguments: {
                         data: {
                             title: 'New title',
@@ -345,21 +358,6 @@ describe('CLIENT #adapter', () => {
                                     username: 'other user',
                                 },
                             },
-                        },
-                        info: {
-                            selectionSetList: [
-                                '__typename',
-                                'title',
-                                'comment',
-                                'comment/content',
-                                'comment/author',
-                                'comment/author/email',
-                                'comment/author/username',
-                                'comment/author/badges',
-                                'comment/author/badges/label',
-                                'comment/author/badges/owners',
-                                'comment/author/badges/owners/email',
-                            ],
                         },
                     },
                     defaultPagination: false,
@@ -379,12 +377,12 @@ describe('CLIENT #adapter', () => {
 
         test('expect nested createMany to return matching paths', () => {
             const result = getPaths({
-                action: Actions.createMany,
-                subject: {
-                    actionAlias: ActionsAliases.batchCreate,
+                context: {
+                    action:Actions.createMany,
+                    alias: ActionsAliases.batchCreate,
                     model: Models.Post,
                 },
-                args: getPrismaArgs({
+                prismaArgs: getPrismaArgs({
                     action: Actions.createMany,
                     _arguments: {
                         data: [
@@ -397,22 +395,20 @@ describe('CLIENT #adapter', () => {
                                 },
                             },
                         ],
-                        info: {
-                            selectionSetList: [
-                                '__typename',
-                                'title',
-                                'comment',
-                                'comment/content',
-                                'comment/author',
-                                'comment/author/email',
-                                'comment/author/username',
-                                'comment/author/badges',
-                                'comment/author/badges/label',
-                                'comment/author/badges/owners',
-                                'comment/author/badges/owners/email',
-                            ],
-                        },
                     },
+                    _selectionSetList: [
+                        '__typename',
+                        'title',
+                        'comment',
+                        'comment/content',
+                        'comment/author',
+                        'comment/author/email',
+                        'comment/author/username',
+                        'comment/author/badges',
+                        'comment/author/badges/label',
+                        'comment/author/badges/owners',
+                        'comment/author/badges/owners/email',
+                    ],
                     defaultPagination: false,
                 }),
             })
