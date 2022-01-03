@@ -1,4 +1,4 @@
-import { PrismaAppSyncOptions, Options, PrismaClient, ResolveParams } from './defs';
+import { PrismaAppSyncOptionsType, Options, PrismaClient, ResolveParams } from './defs';
 /**
  * ##  Prisma-AppSync Client ʲˢ
  *
@@ -28,7 +28,7 @@ export declare class PrismaAppSync {
      * const prismaAppSync = new PrismaAppSync()
      * ```
      *
-     * @param {PrismaAppSyncOptions} options
+     * @param {PrismaAppSyncOptionsType} options
      * @param {string} options.connectionString? - Prisma connection string (database connection URL).
      * @param {boolean} options.sanitize? - Enable sanitize inputs (parse xss + encode html).
      * @param {boolean} options.debug? - Enable debug logs (visible in CloudWatch).
@@ -49,7 +49,7 @@ export declare class PrismaAppSync {
      *
      * Read more in our [docs](https://prisma-appsync.vercel.app).
      */
-    constructor(options?: PrismaAppSyncOptions);
+    constructor(options?: PrismaAppSyncOptionsType);
     /**
      * ###  Resolver
      *

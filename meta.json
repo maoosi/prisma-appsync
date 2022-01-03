@@ -1,11 +1,11 @@
 {
   "inputs": {
     "packages/client/defs.ts": {
-      "bytes": 8276,
+      "bytes": 8608,
       "imports": []
     },
     "packages/client/inspector.ts": {
-      "bytes": 2568,
+      "bytes": 2725,
       "imports": []
     },
     "node_modules/.pnpm/dot-object@2.1.4/node_modules/dot-object/index.js": {
@@ -384,7 +384,7 @@
       ]
     },
     "packages/client/adapter.ts": {
-      "bytes": 16302,
+      "bytes": 16379,
       "imports": [
         {
           "path": "packages/client/inspector.ts",
@@ -401,11 +401,11 @@
       ]
     },
     "packages/client/resolver.ts": {
-      "bytes": 5845,
+      "bytes": 6109,
       "imports": []
     },
     "packages/client/core.ts": {
-      "bytes": 9534,
+      "bytes": 9779,
       "imports": [
         {
           "path": "packages/client/defs.ts",
@@ -556,10 +556,10 @@
           "bytesInOutput": 57
         },
         "packages/client/defs.ts": {
-          "bytesInOutput": 1712
+          "bytesInOutput": 1907
         },
         "packages/client/inspector.ts": {
-          "bytesInOutput": 1139
+          "bytesInOutput": 1233
         },
         "packages/client/utils.ts": {
           "bytesInOutput": 521
@@ -568,16 +568,16 @@
           "bytesInOutput": 676
         },
         "packages/client/adapter.ts": {
-          "bytesInOutput": 6156
+          "bytesInOutput": 6152
         },
         "packages/client/resolver.ts": {
-          "bytesInOutput": 2344
+          "bytesInOutput": 2608
         },
         "packages/client/core.ts": {
-          "bytesInOutput": 2525
+          "bytesInOutput": 2653
         }
       },
-      "bytes": 172280
+      "bytes": 172957
     }
   }
 }

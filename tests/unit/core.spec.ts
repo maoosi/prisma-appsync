@@ -1,15 +1,17 @@
-import { PrismaAppSync } from 'packages/client'
+import { PrismaAppSync } from '../../packages/client'
+
+process.env.PRISMA_APPSYNC_TESTING = 'true'
 
 // TODO: write more test cases
 describe('CLIENT #core', () => {
     describe('.connectionString?', () => {
         test('expect Connection String to be configurable via Class options', () => {
-            const connectionString = (+new Date()).toString(36).slice(-5)
+            const connectionString = 'postgres://' + (+new Date()).toString(36).slice(-5)
             new PrismaAppSync({ connectionString })
             expect(process.env.DATABASE_URL).toEqual(connectionString)
         })
         test('expect Connection String to be configurable via DATABASE_URL env var', () => {
-            process.env.DATABASE_URL = (+new Date()).toString(36).slice(-5)
+            process.env.DATABASE_URL = 'postgres://' + (+new Date()).toString(36).slice(-5)
             const prismaAppSync = new PrismaAppSync()
             expect(prismaAppSync.options.connectionString).toEqual(process.env.DATABASE_URL)
         })
@@ -29,11 +31,11 @@ describe('CLIENT #core', () => {
     describe('.debug?', () => {
         test('expect Debug Logs to be TRUE by default', () => {
             new PrismaAppSync()
-            expect(process.env.PRISMA_APPSYNC_DEBUG).toEqual(true)
+            expect(process.env.PRISMA_APPSYNC_DEBUG).toEqual(String(true))
         })
         test('expect Debug Logs to be configurable via Class options', () => {
             new PrismaAppSync({ debug: false })
-            expect(process.env.PRISMA_APPSYNC_DEBUG).toEqual(false)
+            expect(process.env.PRISMA_APPSYNC_DEBUG).toEqual(String(false))
         })
     })
 

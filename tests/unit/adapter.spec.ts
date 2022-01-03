@@ -7,17 +7,19 @@ import {
     getPrismaArgs,
     getPaths,
     getAuthIdentity,
-} from 'packages/client/adapter'
-import { Actions, Action, Models, ActionsAliases, Authorization, Authorizations } from 'packages/client/defs'
+} from '../../packages/client/adapter'
+import { Actions, Action, Models, ActionsAliases, Authorization, Authorizations } from '../../packages/client/defs'
 import { mockLambdaEvent, mockIdentity } from '../integration/appsync'
+
+process.env.PRISMA_APPSYNC_TESTING = 'true'
 
 function mockAppSyncEvent(identity: NonNullable<Authorization>) {
     return mockLambdaEvent({
         request: {},
         graphQLParams: {
-            query: String(),
+            query: `query getPost { getPost { title } }`,
             variables: {},
-            operationName: String(),
+            operationName: 'getPost',
             raw: {},
         },
         identity: mockIdentity(identity, {
@@ -76,7 +78,7 @@ describe('CLIENT #adapter', () => {
     })
 
     describe('.getOperation?', () => {
-        const cases = Object.keys(Actions).map((action: Action) => {
+        const cases = Object.values(Actions).map((action: Action) => {
             return [`${action}People`, `${action}People`]
         })
         test.each(cases)('when fieldName is "%s", expect operation to equal "%s"', (fieldName, expected) => {
@@ -86,7 +88,7 @@ describe('CLIENT #adapter', () => {
     })
 
     describe('.getAction?', () => {
-        const cases = Object.keys(Actions).map((action: Action) => {
+        const cases = Object.values(Actions).map((action: Action) => {
             return [`${action}People`, action]
         })
         test.each(cases)('when operation is "%s", expect action to equal "%s"', (operation: any, expected) => {
@@ -96,7 +98,7 @@ describe('CLIENT #adapter', () => {
     })
 
     describe('.getModel?', () => {
-        const cases = Object.keys(Actions).map((action: Action) => {
+        const cases = Object.values(Actions).map((action: Action) => {
             return [action, 'People']
         })
         test.each(cases)('when operation is "%sPeople", expect model to equal "%s"', (action: Action, expected) => {
@@ -202,6 +204,7 @@ describe('CLIENT #adapter', () => {
                 defaultPagination: false,
             })
             expect(result).toStrictEqual({
+                select: {},
                 where: { title: { startsWith: 'Hello' } },
             })
         })
@@ -215,6 +218,7 @@ describe('CLIENT #adapter', () => {
                 defaultPagination: false,
             })
             expect(result).toStrictEqual({
+                select: {},
                 data: { title: 'Hello', content: 'World' },
             })
         })
@@ -228,6 +232,7 @@ describe('CLIENT #adapter', () => {
                 defaultPagination: false,
             })
             expect(result).toStrictEqual({
+                select: {},
                 orderBy: [{ title: 'asc' }, { postedAt: 'desc' }],
             })
         })
@@ -250,7 +255,7 @@ describe('CLIENT #adapter', () => {
                 _selectionSetList: [],
                 defaultPagination: false,
             })
-            expect(result).toStrictEqual({ skip: 5 })
+            expect(result).toStrictEqual({ select: {}, skip: 5 })
         })
         test('expect "take" to be converted to prisma syntax', () => {
             const result = getPrismaArgs({
@@ -259,7 +264,7 @@ describe('CLIENT #adapter', () => {
                 _selectionSetList: [],
                 defaultPagination: false,
             })
-            expect(result).toStrictEqual({ take: 3 })
+            expect(result).toStrictEqual({ select: {}, take: 3 })
         })
         test('expect "skipDuplicates" to be converted to prisma syntax', () => {
             const result = getPrismaArgs({
@@ -268,7 +273,7 @@ describe('CLIENT #adapter', () => {
                 _selectionSetList: [],
                 defaultPagination: false,
             })
-            expect(result).toStrictEqual({ skipDuplicates: true })
+            expect(result).toStrictEqual({ select: {}, skipDuplicates: true })
         })
         test('expect default pagination to do nothing when "take" is specified', () => {
             const result = getPrismaArgs({
@@ -277,7 +282,7 @@ describe('CLIENT #adapter', () => {
                 _arguments: { take: '3' },
                 _selectionSetList: [],
             })
-            expect(result).toStrictEqual({ skip: 0, take: 3 })
+            expect(result).toStrictEqual({ select: {}, skip: 0, take: 3 })
         })
         test('expect default pagination to apply default take value', () => {
             const result = getPrismaArgs({
@@ -286,7 +291,7 @@ describe('CLIENT #adapter', () => {
                 _arguments: {},
                 _selectionSetList: [],
             })
-            expect(result).toStrictEqual({ skip: 0, take: 50 })
+            expect(result).toStrictEqual({ select: {}, skip: 0, take: 50 })
         })
     })
 

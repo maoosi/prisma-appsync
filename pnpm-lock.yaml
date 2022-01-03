@@ -32,7 +32,6 @@ specifiers:
   graphql-annotations: ^0.0.3
   html-entities: ^2.3.2
   jest: ^27.2.4
-  jest-transform-graphql: ^2.1.0
   js-yaml: ^4.1.0
   json-to-graphql-query: ^2.1.0
   lodash: ^4.17.21
@@ -80,7 +79,6 @@ devDependencies:
   graphql-annotations: 0.0.3
   html-entities: 2.3.2
   jest: 27.2.4
-  jest-transform-graphql: 2.1.0
   js-yaml: 4.1.0
   json-to-graphql-query: 2.1.0
   lodash: 4.17.21
@@ -7316,12 +7314,6 @@ packages:
       semver: 7.3.5
     transitivePeerDependencies:
       - supports-color
-    dev: true
-
-  /jest-transform-graphql/2.1.0:
-    resolution: {integrity: sha1-kDy2a7J7wncv0+XdT36bVyMPWCk=}
-    peerDependencies:
-      graphql-tag: ^2.0.0
     dev: true
 
   /jest-util/27.2.4:

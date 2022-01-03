@@ -1,6 +1,8 @@
-import * as queries from 'packages/client/resolver'
-import { QueryParams, Authorizations, Actions, ActionsAliases, Models } from 'packages/client/defs'
-import { mockIdentity } from 'tests/integration/appsync'
+import * as queries from '../../packages/client/resolver'
+import { QueryParams, Authorizations, Actions, ActionsAliases, Models } from '../../packages/client/defs'
+import { mockIdentity } from '../integration/appsync'
+
+process.env.PRISMA_APPSYNC_TESTING = 'true'
 
 const identity = mockIdentity(Authorizations.AMAZON_COGNITO_USER_POOLS, {
     sourceIp: 'xxx.xxx.xxx.x',

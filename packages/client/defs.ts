@@ -2,7 +2,7 @@ import { PrismaClient, Prisma } from '@prisma/client'
 
 // Prisma-AppSync Client Types
 
-export type PrismaAppSyncOptions = {
+export type PrismaAppSyncOptionsType = {
     connectionString?: string
     sanitize?: boolean
     debug?: boolean
@@ -10,19 +10,21 @@ export type PrismaAppSyncOptions = {
     maxDepth?: number
 }
 
-export type Options = Required<PrismaAppSyncOptions> & {
+export type Options = Required<PrismaAppSyncOptionsType> & {
     generatedConfig: any
 }
 
 export type Action = typeof Actions[keyof typeof Actions] | string
 
-export type ActionsAlias = typeof ActionsAliases[keyof typeof ActionsAliases] | 'custom'
+export type ActionsAlias = typeof ActionsAliases[keyof typeof ActionsAliases] | 'custom' | null
+
+export type ActionsAliasStr = keyof typeof ActionsAliases
 
 export type Operation = `${Action}${Capitalize<Model>}`
 
 export type Context = {
     action: Action
-    alias: ActionsAlias | null
+    alias: ActionsAlias
     model: Model | null
 }
 
@@ -110,7 +112,7 @@ export type HooksProps = {
     after: AfterHookParams
 }
 
-export type HookPath<CustomResolvers> = `${ActionsAlias}/${Lowercase<Model>}` | CustomResolvers
+export type HookPath<CustomResolvers> = `${ActionsAliasStr}/${Uncapitalize<Model>}` | CustomResolvers
 
 export type HooksParameter<
     HookType extends 'before' | 'after',
@@ -255,33 +257,33 @@ export const ReservedPrismaKeys = [
 
 export enum Actions {
     // queries
-    get,
-    list,
-    count,
+    get = 'get',
+    list = 'list',
+    count = 'count',
 
     // mutations (multiple)
-    createMany,
-    updateMany,
-    deleteMany,
+    createMany = 'createMany',
+    updateMany = 'updateMany',
+    deleteMany = 'deleteMany',
 
     // mutations (single)
-    create,
-    update,
-    upsert,
-    delete,
+    create = 'create',
+    update = 'update',
+    upsert = 'upsert',
+    delete = 'delete',
 
     // subscriptions (multiple)
-    onCreatedMany,
-    onUpdatedMany,
-    onDeletedMany,
-    onMutatedMany,
+    onCreatedMany = 'onCreatedMany',
+    onUpdatedMany = 'onUpdatedMany',
+    onDeletedMany = 'onDeletedMany',
+    onMutatedMany = 'onMutatedMany',
 
     // subscriptions (single)
-    onCreated,
-    onUpdated,
-    onUpserted,
-    onDeleted,
-    onMutated,
+    onCreated = 'onCreated',
+    onUpdated = 'onUpdated',
+    onUpserted = 'onUpserted',
+    onDeleted = 'onDeleted',
+    onMutated = 'onMutated',
 }
 
 export enum ActionsAliases {

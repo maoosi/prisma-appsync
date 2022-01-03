@@ -50,7 +50,9 @@ export class CustomError extends Error {
             trace: this.trace,
         }
 
-        log([this.details], 'ERROR')
+        if (!(process?.env?.PRISMA_APPSYNC_TESTING === 'true')) {
+            log([this.details], 'ERROR')
+        }
     }
 }
 
@@ -70,7 +72,10 @@ export function inspect(data: any): string {
 }
 
 export function debug(...data): void {
-    if (process.env.PRISMA_APPSYNC_DEBUG === 'true') {
+    if (
+        process.env.PRISMA_APPSYNC_DEBUG === 'true' && 
+        !(process?.env?.PRISMA_APPSYNC_TESTING === 'true')
+    ) {
         log([...data])
     }
 }

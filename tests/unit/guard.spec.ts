@@ -1,5 +1,7 @@
-import { Shield } from 'packages/client/defs'
-import { getShieldAuthorization } from 'packages/client/guard'
+import { Shield } from '../../packages/client/defs'
+import { getShieldAuthorization } from '../../packages/client/guard'
+
+process.env.PRISMA_APPSYNC_TESTING = 'true'
 
 describe('CLIENT #guard', () => {
     // TODO: write more test cases
@@ -46,7 +48,7 @@ describe('CLIENT #guard', () => {
                 canAccess: false,
                 reason: 'Matcher: **',
                 matcher: '**',
-                prismaFilter: null,
+                prismaFilter: {},
             })
         })
     })

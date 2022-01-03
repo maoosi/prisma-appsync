@@ -3,7 +3,7 @@ import { Options, AppsyncEvent, QueryParams, Action, Model, Context, PrismaArgs,
  * #### Parse AppSync direct resolver `event` and returns Query Params.
  *
  * @param  {AppsyncEvent} appsyncEvent - AppSync event received in Lambda.
- * @param  {Required<PrismaAppSyncOptions>} options - PrismaAppSync Client options.
+ * @param  {Required<PrismaAppSyncOptionsType>} options - PrismaAppSync Client options.
  * @param  {any|null} customResolvers? - Custom Resolvers.
  * @returns `{ type, operation, context, fields, paths, args, prismaArgs, authorization, identity }` - QueryParams
  */

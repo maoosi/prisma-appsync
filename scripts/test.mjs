@@ -4,8 +4,8 @@
 import './build.mjs'
 
 // unit tests
-console.log(chalk.blue('Test :: Unit\n'))
-// await $`jest src/client/lib/**.spec.ts --verbose --expand`
+console.log(chalk.blue('\nTest :: Unit\n'))
+await $`jest tests/unit/*.spec.ts --verbose --expand`
 
 // integration tests
 console.log(chalk.blue('Test :: Integration\n'))

@@ -24,7 +24,7 @@ import {
  * #### Parse AppSync direct resolver `event` and returns Query Params.
  *
  * @param  {AppsyncEvent} appsyncEvent - AppSync event received in Lambda.
- * @param  {Required<PrismaAppSyncOptions>} options - PrismaAppSync Client options.
+ * @param  {Required<PrismaAppSyncOptionsType>} options - PrismaAppSync Client options.
  * @param  {any|null} customResolvers? - Custom Resolvers.
  * @returns `{ type, operation, context, fields, paths, args, prismaArgs, authorization, identity }` - QueryParams
  */
@@ -186,7 +186,7 @@ export function getContext({
 }): Context {
     const context: Context = {
         action: String(),
-        alias: String(),
+        alias: null,
         model: null,
     }
 
@@ -485,11 +485,15 @@ function parseSelectionList(selectionSetList: any): any {
  */
 export function getPaths({ context, prismaArgs }: { context: Context; prismaArgs: PrismaArgs }): string[] {
     const paths: string[] = []
-    const pathRoot = context.model !== null ? `/${context.action}/${context.model}` : `/${context.action}`
+    const pathRoot = context.model !== null 
+        ? `/${context.action}/${context.model}` 
+        : `/${context.action}`
     const isBatchAction: boolean = BatchActionsList.includes(context.action)
 
     if (typeof prismaArgs.data !== 'undefined') {
-        const inputs: any[] = Array.isArray(prismaArgs.data) ? prismaArgs.data : [prismaArgs.data]
+        const inputs: any[] = Array.isArray(prismaArgs.data) 
+            ? prismaArgs.data 
+            : [prismaArgs.data]
 
         inputs.forEach((input: any) => {
             const objectPaths = dotate(input)
@@ -513,7 +517,9 @@ export function getPaths({ context, prismaArgs }: { context: Context; prismaArgs
                 .split('.')
                 .filter((k) => !ReservedPrismaKeys.includes(k))
                 .join('/')
-            const selectAction = isBatchAction ? Actions.list : Actions.get
+            const selectAction = isBatchAction 
+                ? Actions.list
+                : Actions.get
             const path = `/${selectAction}/${context.model}/${item}`.toLowerCase()
             if (!paths.includes(path)) paths.push(path)
         }

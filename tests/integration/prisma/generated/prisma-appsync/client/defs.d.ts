@@ -1,21 +1,21 @@
 import { PrismaClient } from '@prisma/client';
-export declare type PrismaAppSyncOptions = {
+export declare type PrismaAppSyncOptionsType = {
     connectionString?: string;
     sanitize?: boolean;
     debug?: boolean;
     defaultPagination?: number | false;
     maxDepth?: number;
 };
-export declare type Options = Required<PrismaAppSyncOptions> & {
+export declare type Options = Required<PrismaAppSyncOptionsType> & {
     generatedConfig: any;
 };
 export declare type Action = typeof Actions[keyof typeof Actions] | string;
-export declare type ActionsAlias = typeof ActionsAliases[keyof typeof ActionsAliases] | 'custom';
+export declare type ActionsAlias = typeof ActionsAliases[keyof typeof ActionsAliases] | 'custom' | null;
 export declare type ActionsAliasStr = keyof typeof ActionsAliases
 export declare type Operation = `${Action}${Capitalize<Model>}`;
 export declare type Context = {
     action: Action;
-    alias: ActionsAlias | null;
+    alias: ActionsAlias;
     model: Model | null;
 };
 /**

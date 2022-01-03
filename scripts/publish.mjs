@@ -4,5 +4,5 @@
 import './test.mjs'
 
 // publish NPM package
-console.log(chalk.blue('Publish :: NPM package\n'))
+console.log(chalk.blue('\nPublish :: NPM package\n'))
 // await $`npm publish`

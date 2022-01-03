@@ -1,4 +1,4 @@
-import { PrismaAppSyncOptions, Options, PrismaClient, Shield, ShieldAuthorization, ResolveParams } from './defs'
+import { PrismaAppSyncOptionsType, Options, PrismaClient, Shield, ShieldAuthorization, ResolveParams } from './defs'
 import { parseError, inspect, debug, CustomError } from './inspector'
 import { getShieldAuthorization, getDepth } from './guard'
 import { parseEvent } from './adapter'
@@ -35,7 +35,7 @@ export class PrismaAppSync {
      * const prismaAppSync = new PrismaAppSync()
      * ```
      *
-     * @param {PrismaAppSyncOptions} options
+     * @param {PrismaAppSyncOptionsType} options
      * @param {string} options.connectionString? - Prisma connection string (database connection URL).
      * @param {boolean} options.sanitize? - Enable sanitize inputs (parse xss + encode html).
      * @param {boolean} options.debug? - Enable debug logs (visible in CloudWatch).
@@ -56,7 +56,7 @@ export class PrismaAppSync {
      *
      * Read more in our [docs](https://prisma-appsync.vercel.app).
      */
-    constructor(options?: PrismaAppSyncOptions) {
+    constructor(options?: PrismaAppSyncOptionsType) {
         // Set client options using constructor options
         this.options = {
             generatedConfig: {},
@@ -82,6 +82,11 @@ export class PrismaAppSync {
                     type: 'INTERNAL_SERVER_ERROR',
                 },
             )
+        }
+
+        // Set ENV variable DATABASE_URL if non existing
+        if (typeof process.env.DATABASE_URL === 'undefined') {
+            process.env.DATABASE_URL = this.options.connectionString
         }
 
         // Set ENV variable to indicate if debug logs should print
@@ -188,9 +193,9 @@ export class PrismaAppSync {
                 // await runHooks('before', resolveParams.hooks, QueryParams)
             }
 
-            // Resolver :: resolve query for JEST
-            if (process.env.JEST_WORKER_ID) {
-                debug(`Resolving query for JEST.`)
+            // Resolver :: resolve query for UNIT TESTS
+            if (process?.env?.PRISMA_APPSYNC_TESTING === 'true') {
+                debug(`Resolving query for UNIT TESTS.`)
                 results = QueryParams
             }
             // Resolver :: query is disabled
