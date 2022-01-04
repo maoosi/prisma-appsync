@@ -485,15 +485,14 @@ function parseSelectionList(selectionSetList: any): any {
  */
 export function getPaths({ context, prismaArgs }: { context: Context; prismaArgs: PrismaArgs }): string[] {
     const paths: string[] = []
-    const pathRoot = context.model !== null 
-        ? `/${lowerFirst(context.action)}/${lowerFirst(context.model)}` 
-        : `/${lowerFirst(context.action)}`
+    const pathRoot =
+        context.model !== null
+            ? `/${lowerFirst(context.action)}/${lowerFirst(context.model)}`
+            : `/${lowerFirst(context.action)}`
     const isBatchAction: boolean = BatchActionsList.includes(context.action)
 
     if (typeof prismaArgs.data !== 'undefined') {
-        const inputs: any[] = Array.isArray(prismaArgs.data) 
-            ? prismaArgs.data 
-            : [prismaArgs.data]
+        const inputs: any[] = Array.isArray(prismaArgs.data) ? prismaArgs.data : [prismaArgs.data]
 
         inputs.forEach((input: any) => {
             const objectPaths = dotate(input)
@@ -517,9 +516,7 @@ export function getPaths({ context, prismaArgs }: { context: Context; prismaArgs
                 .split('.')
                 .filter((k) => !ReservedPrismaKeys.includes(k))
                 .join('/')
-            const selectAction = isBatchAction 
-                ? Actions.list
-                : Actions.get
+            const selectAction = isBatchAction ? Actions.list : Actions.get
             const path = `/${lowerFirst(selectAction)}/${lowerFirst(context.model)}/${lowerFirst(item)}`
             if (!paths.includes(path)) paths.push(path)
         }

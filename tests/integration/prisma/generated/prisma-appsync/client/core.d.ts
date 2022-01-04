@@ -81,5 +81,5 @@ export declare class PrismaAppSync {
      *
      * Read more in our [docs](https://prisma-appsync.vercel.app).
      */
-    resolve<CustomResolvers extends string>(resolveParams: ResolveParams<CustomResolvers>): Promise<any>;
+    resolve<Models extends string, CustomResolvers extends string>(resolveParams: ResolveParams<Models, CustomResolvers>): Promise<any>;
 }

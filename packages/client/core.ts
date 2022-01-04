@@ -130,7 +130,9 @@ export class PrismaAppSync {
      *
      * Read more in our [docs](https://prisma-appsync.vercel.app).
      */
-    public async resolve<CustomResolvers extends string>(resolveParams: ResolveParams<CustomResolvers>): Promise<any> {
+    public async resolve<Models extends string, CustomResolvers extends string>(
+        resolveParams: ResolveParams<Models, CustomResolvers>,
+    ): Promise<any> {
         let results: any = null
 
         try {

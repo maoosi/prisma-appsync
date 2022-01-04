@@ -8,10 +8,13 @@ import {
     getPaths,
     getAuthIdentity,
 } from '../../packages/client/adapter'
-import { Actions, Action, Models, ActionsAliases, Authorization, Authorizations } from '../../packages/client/defs'
+import { Actions, Action, ActionsAliases, Authorization, Authorizations } from '../../packages/client/defs'
+import { Prisma } from '@prisma/client'
 import { mockLambdaEvent, mockIdentity } from '../integration/appsync'
 
 process.env.PRISMA_APPSYNC_TESTING = 'true'
+
+const Models = Prisma.ModelName
 
 function mockAppSyncEvent(identity: NonNullable<Authorization>) {
     return mockLambdaEvent({
@@ -300,7 +303,7 @@ describe('CLIENT #adapter', () => {
                 context: {
                     action: Actions.get,
                     alias: ActionsAliases.access,
-                    model: Models.Post
+                    model: Models.Post,
                 },
                 prismaArgs: getPrismaArgs({
                     action: Actions.get,
@@ -334,7 +337,7 @@ describe('CLIENT #adapter', () => {
         test('expect nested update to return matching paths', () => {
             const result = getPaths({
                 context: {
-                    action:Actions.update,
+                    action: Actions.update,
                     alias: ActionsAliases.modify,
                     model: Models.Post,
                 },
@@ -381,7 +384,7 @@ describe('CLIENT #adapter', () => {
         test('expect nested createMany to return matching paths', () => {
             const result = getPaths({
                 context: {
-                    action:Actions.createMany,
+                    action: Actions.createMany,
                     alias: ActionsAliases.batchCreate,
                     model: Models.Post,
                 },

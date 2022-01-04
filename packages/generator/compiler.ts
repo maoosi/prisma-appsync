@@ -70,7 +70,9 @@ export class PrismaAppSyncCompiler {
             customResolvers: [],
         }
 
-        this.parseDMMF()
+        if (!(process?.env?.PRISMA_APPSYNC === 'false')) {
+            this.parseDMMF()
+        }
 
         return this
     }

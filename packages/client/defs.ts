@@ -1,4 +1,4 @@
-import { PrismaClient, Prisma } from '@prisma/client'
+import { PrismaClient } from '@prisma/client'
 
 // Prisma-AppSync Client Types
 
@@ -112,20 +112,27 @@ export type HooksProps = {
     after: AfterHookParams
 }
 
-export type HookPath<CustomResolvers> = `${ActionsAliasStr}/${Uncapitalize<Model>}` | CustomResolvers
+export type HookPath<Models extends string, CustomResolvers> =
+    | `${ActionsAliasStr}/${Uncapitalize<Models>}`
+    | CustomResolvers
 
 export type HooksParameter<
     HookType extends 'before' | 'after',
+    Models extends string,
     CustomResolvers extends string,
-> = `${HookType}:${HookPath<CustomResolvers>}`
+> = `${HookType}:${HookPath<Models, CustomResolvers>}`
 
-export type HooksParameters<HookType extends 'before' | 'after', CustomResolvers extends string> = {
-    [matcher in HooksParameter<HookType, CustomResolvers>]?: (props: HooksProps[HookType]) => Promise<any>
+export type HooksParameters<
+    HookType extends 'before' | 'after',
+    Models extends string,
+    CustomResolvers extends string,
+> = {
+    [matcher in HooksParameter<HookType, Models, CustomResolvers>]?: (props: HooksProps[HookType]) => Promise<any>
 }
 
-export type Hooks<CustomResolvers extends string> =
-    | HooksParameters<'before', CustomResolvers>
-    | HooksParameters<'after', CustomResolvers>
+export type Hooks<Models extends string, CustomResolvers extends string> =
+    | HooksParameters<'before', Models, CustomResolvers>
+    | HooksParameters<'after', Models, CustomResolvers>
 
 export type ShieldAuthorization = {
     canAccess: boolean
@@ -134,20 +141,20 @@ export type ShieldAuthorization = {
     matcher: string
 }
 
-export type ResolveParams<CustomResolvers extends string> = {
+export type ResolveParams<Models extends string, CustomResolvers extends string> = {
     event: AppsyncEvent
     resolvers?: {
         [resolver in CustomResolvers]: ((props: QueryParamsCustom) => Promise<any>) | boolean
     }
     shield?: (props: QueryParams) => Shield
-    hooks?: () => Hooks<CustomResolvers>
+    hooks?: () => Hooks<Models, CustomResolvers>
 }
 
 // Prisma-related Types
 
 export { PrismaClient }
 
-export type Model = typeof Models[keyof typeof Models]
+export type Model = string
 
 export type PrismaArgs = {
     where?: any
@@ -232,8 +239,6 @@ export type OPENID_CONNECT = {
 export type Identity = API_KEY | AWS_LAMBDA | AWS_IAM | AMAZON_COGNITO_USER_POOLS | OPENID_CONNECT
 
 // Prisma-related Constants
-
-export const Models = Prisma.ModelName
 
 export const ReservedPrismaKeys = [
     'data',

@@ -72,10 +72,7 @@ export function inspect(data: any): string {
 }
 
 export function debug(...data): void {
-    if (
-        process.env.PRISMA_APPSYNC_DEBUG === 'true' && 
-        !(process?.env?.PRISMA_APPSYNC_TESTING === 'true')
-    ) {
+    if (process.env.PRISMA_APPSYNC_DEBUG === 'true' && !(process?.env?.PRISMA_APPSYNC_TESTING === 'true')) {
         log([...data])
     }
 }

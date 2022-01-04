@@ -132,5 +132,6 @@ export function isUndefined(element: any): boolean {
  * @returns string
  */
 export function lowerFirst(str: string): string {
-    return str.charAt(0).toLowerCase() + str.slice(1)
+    if (str) return str.charAt(0).toLowerCase() + str.slice(1)
+    else return String()
 }

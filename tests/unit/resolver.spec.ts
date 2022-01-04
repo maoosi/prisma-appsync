@@ -1,6 +1,9 @@
 import * as queries from '../../packages/client/resolver'
-import { QueryParams, Authorizations, Actions, ActionsAliases, Models } from '../../packages/client/defs'
+import { QueryParams, Authorizations, Actions, ActionsAliases } from '../../packages/client/defs'
 import { mockIdentity } from '../integration/appsync'
+import { Prisma } from '@prisma/client'
+
+const Models = Prisma.ModelName
 
 process.env.PRISMA_APPSYNC_TESTING = 'true'
 
@@ -141,13 +144,8 @@ describe('CLIENT #queries', () => {
         return [test.name, test.prismaQuery, test.expectedResult]
     })
 
-    test.each(cases)(
-        'expect "%s" to call "%s" Prisma Query', 
-        async (name, prismaQuery, expectedResult) => {
-            const result = await queries[name](
-                createPrismaClient(query.context.model, prismaQuery), query
-            )
-            expect(result).toEqual(expectedResult)
-        }
-    )
+    test.each(cases)('expect "%s" to call "%s" Prisma Query', async (name, prismaQuery, expectedResult) => {
+        const result = await queries[name](createPrismaClient(query.context.model, prismaQuery), query)
+        expect(result).toEqual(expectedResult)
+    })
 })

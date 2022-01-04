@@ -11,7 +11,7 @@ export declare type Options = Required<PrismaAppSyncOptionsType> & {
 };
 export declare type Action = typeof Actions[keyof typeof Actions] | string;
 export declare type ActionsAlias = typeof ActionsAliases[keyof typeof ActionsAliases] | 'custom' | null;
-export declare type ActionsAliasStr = keyof typeof ActionsAliases
+export declare type ActionsAliasStr = keyof typeof ActionsAliases;
 export declare type Operation = `${Action}${Capitalize<Model>}`;
 export declare type Context = {
     action: Action;
@@ -93,28 +93,28 @@ export declare type HooksProps = {
     before: BeforeHookParams;
     after: AfterHookParams;
 };
-export declare type HookPath<CustomResolvers> = `${ActionsAliasStr}/${Uncapitalize<Model>}` | CustomResolvers;
-export declare type HooksParameter<HookType extends 'before' | 'after', CustomResolvers extends string> = `${HookType}:${HookPath<CustomResolvers>}`;
-export declare type HooksParameters<HookType extends 'before' | 'after', CustomResolvers extends string> = {
-    [matcher in HooksParameter<HookType, CustomResolvers>]?: (props: HooksProps[HookType]) => Promise<any>;
+export declare type HookPath<Models extends string, CustomResolvers> = `${ActionsAliasStr}/${Uncapitalize<Models>}` | CustomResolvers;
+export declare type HooksParameter<HookType extends 'before' | 'after', Models extends string, CustomResolvers extends string> = `${HookType}:${HookPath<Models, CustomResolvers>}`;
+export declare type HooksParameters<HookType extends 'before' | 'after', Models extends string, CustomResolvers extends string> = {
+    [matcher in HooksParameter<HookType, Models, CustomResolvers>]?: (props: HooksProps[HookType]) => Promise<any>;
 };
-export declare type Hooks<CustomResolvers extends string> = HooksParameters<'before', CustomResolvers> | HooksParameters<'after', CustomResolvers>;
+export declare type Hooks<Models extends string, CustomResolvers extends string> = HooksParameters<'before', Models, CustomResolvers> | HooksParameters<'after', Models, CustomResolvers>;
 export declare type ShieldAuthorization = {
     canAccess: boolean;
     reason: string | Function;
     prismaFilter: any;
     matcher: string;
 };
-export declare type ResolveParams<CustomResolvers extends string> = {
+export declare type ResolveParams<Models extends string, CustomResolvers extends string> = {
     event: AppsyncEvent;
     resolvers?: {
         [resolver in CustomResolvers]: ((props: QueryParamsCustom) => Promise<any>) | boolean;
     };
     shield?: (props: QueryParams) => Shield;
-    hooks?: () => Hooks<CustomResolvers>;
+    hooks?: () => Hooks<Models, CustomResolvers>;
 };
 export { PrismaClient };
-export declare type Model = typeof Models[keyof typeof Models];
+export declare type Model = string;
 export declare type PrismaArgs = {
     where?: any;
     data?: any;
@@ -186,32 +186,27 @@ export declare type OPENID_CONNECT = {
     [key: string]: any;
 };
 export declare type Identity = API_KEY | AWS_LAMBDA | AWS_IAM | AMAZON_COGNITO_USER_POOLS | OPENID_CONNECT;
-export declare const Models: {
-    User: "User";
-    hiddenModel: "hiddenModel";
-    Post: "Post";
-};
 export declare const ReservedPrismaKeys: string[];
 export declare enum Actions {
-    get = 0,
-    list = 1,
-    count = 2,
-    createMany = 3,
-    updateMany = 4,
-    deleteMany = 5,
-    create = 6,
-    update = 7,
-    upsert = 8,
-    delete = 9,
-    onCreatedMany = 10,
-    onUpdatedMany = 11,
-    onDeletedMany = 12,
-    onMutatedMany = 13,
-    onCreated = 14,
-    onUpdated = 15,
-    onUpserted = 16,
-    onDeleted = 17,
-    onMutated = 18
+    get = "get",
+    list = "list",
+    count = "count",
+    createMany = "createMany",
+    updateMany = "updateMany",
+    deleteMany = "deleteMany",
+    create = "create",
+    update = "update",
+    upsert = "upsert",
+    delete = "delete",
+    onCreatedMany = "onCreatedMany",
+    onUpdatedMany = "onUpdatedMany",
+    onDeletedMany = "onDeletedMany",
+    onMutatedMany = "onMutatedMany",
+    onCreated = "onCreated",
+    onUpdated = "onUpdated",
+    onUpserted = "onUpserted",
+    onDeleted = "onDeleted",
+    onMutated = "onMutated"
 }
 export declare enum ActionsAliases {
     access = 0,
@@ -237,8 +232,8 @@ export declare const ActionsAliasesList: {
     readonly subscribe: readonly [Actions.onCreatedMany, Actions.onUpdatedMany, Actions.onDeletedMany, Actions.onMutatedMany, Actions.onCreated, Actions.onUpdated, Actions.onUpserted, Actions.onDeleted, Actions.onMutated];
     readonly batchSubscribe: readonly [Actions.onCreatedMany, Actions.onUpdatedMany, Actions.onDeletedMany, Actions.onMutatedMany];
 };
-export declare const ActionsList: Action[];
-export declare const BatchActionsList: Action[];
+export declare const ActionsList: string[];
+export declare const BatchActionsList: string[];
 /**
  * ### Authorizations
  *

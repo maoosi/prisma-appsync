@@ -82,3 +82,13 @@ export declare function isEmpty(element: any): boolean;
  * @returns boolean
  */
 export declare function isUndefined(element: any): boolean;
+/**
+ * #### Return string with first letter lowercase.
+ *
+ * @example lowerFirst("PostOffice")
+ * // returns 'postOffice'
+ *
+ * @param {string} str
+ * @returns string
+ */
+export declare function lowerFirst(str: string): string;

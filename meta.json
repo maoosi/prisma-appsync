@@ -1,7 +1,7 @@
 {
   "inputs": {
     "packages/client/defs.ts": {
-      "bytes": 8608,
+      "bytes": 8706,
       "imports": []
     },
     "packages/client/inspector.ts": {
@@ -115,71 +115,71 @@
         }
       ]
     },
-    "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/constants.js": {
+    "node_modules/.pnpm/picomatch@2.3.1/node_modules/picomatch/lib/constants.js": {
       "bytes": 4448,
       "imports": []
     },
-    "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/utils.js": {
+    "node_modules/.pnpm/picomatch@2.3.1/node_modules/picomatch/lib/utils.js": {
       "bytes": 1885,
       "imports": [
         {
-          "path": "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/constants.js",
+          "path": "node_modules/.pnpm/picomatch@2.3.1/node_modules/picomatch/lib/constants.js",
           "kind": "require-call"
         }
       ]
     },
-    "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/scan.js": {
+    "node_modules/.pnpm/picomatch@2.3.1/node_modules/picomatch/lib/scan.js": {
       "bytes": 9189,
       "imports": [
         {
-          "path": "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/utils.js",
+          "path": "node_modules/.pnpm/picomatch@2.3.1/node_modules/picomatch/lib/utils.js",
           "kind": "require-call"
         },
         {
-          "path": "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/constants.js",
+          "path": "node_modules/.pnpm/picomatch@2.3.1/node_modules/picomatch/lib/constants.js",
           "kind": "require-call"
         }
       ]
     },
-    "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/parse.js": {
-      "bytes": 27225,
+    "node_modules/.pnpm/picomatch@2.3.1/node_modules/picomatch/lib/parse.js": {
+      "bytes": 27763,
       "imports": [
         {
-          "path": "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/constants.js",
+          "path": "node_modules/.pnpm/picomatch@2.3.1/node_modules/picomatch/lib/constants.js",
           "kind": "require-call"
         },
         {
-          "path": "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/utils.js",
+          "path": "node_modules/.pnpm/picomatch@2.3.1/node_modules/picomatch/lib/utils.js",
           "kind": "require-call"
         }
       ]
     },
-    "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/picomatch.js": {
+    "node_modules/.pnpm/picomatch@2.3.1/node_modules/picomatch/lib/picomatch.js": {
       "bytes": 9956,
       "imports": [
         {
-          "path": "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/scan.js",
+          "path": "node_modules/.pnpm/picomatch@2.3.1/node_modules/picomatch/lib/scan.js",
           "kind": "require-call"
         },
         {
-          "path": "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/parse.js",
+          "path": "node_modules/.pnpm/picomatch@2.3.1/node_modules/picomatch/lib/parse.js",
           "kind": "require-call"
         },
         {
-          "path": "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/utils.js",
+          "path": "node_modules/.pnpm/picomatch@2.3.1/node_modules/picomatch/lib/utils.js",
           "kind": "require-call"
         },
         {
-          "path": "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/constants.js",
+          "path": "node_modules/.pnpm/picomatch@2.3.1/node_modules/picomatch/lib/constants.js",
           "kind": "require-call"
         }
       ]
     },
-    "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/index.js": {
+    "node_modules/.pnpm/picomatch@2.3.1/node_modules/picomatch/index.js": {
       "bytes": 60,
       "imports": [
         {
-          "path": "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/picomatch.js",
+          "path": "node_modules/.pnpm/picomatch@2.3.1/node_modules/picomatch/lib/picomatch.js",
           "kind": "require-call"
         }
       ]
@@ -192,11 +192,11 @@
           "kind": "require-call"
         },
         {
-          "path": "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/index.js",
+          "path": "node_modules/.pnpm/picomatch@2.3.1/node_modules/picomatch/index.js",
           "kind": "require-call"
         },
         {
-          "path": "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/utils.js",
+          "path": "node_modules/.pnpm/picomatch@2.3.1/node_modules/picomatch/lib/utils.js",
           "kind": "require-call"
         }
       ]
@@ -281,12 +281,12 @@
         }
       ]
     },
-    "node_modules/.pnpm/xss@1.0.9/node_modules/xss/lib/util.js": {
+    "node_modules/.pnpm/xss@1.0.10/node_modules/xss/lib/util.js": {
       "bytes": 766,
       "imports": []
     },
-    "node_modules/.pnpm/xss@1.0.9/node_modules/xss/lib/default.js": {
-      "bytes": 10221,
+    "node_modules/.pnpm/xss@1.0.10/node_modules/xss/lib/default.js": {
+      "bytes": 10471,
       "imports": [
         {
           "path": "node_modules/.pnpm/cssfilter@0.0.10/node_modules/cssfilter/lib/index.js",
@@ -297,21 +297,21 @@
           "kind": "require-call"
         },
         {
-          "path": "node_modules/.pnpm/xss@1.0.9/node_modules/xss/lib/util.js",
+          "path": "node_modules/.pnpm/xss@1.0.10/node_modules/xss/lib/util.js",
           "kind": "require-call"
         }
       ]
     },
-    "node_modules/.pnpm/xss@1.0.9/node_modules/xss/lib/parser.js": {
+    "node_modules/.pnpm/xss@1.0.10/node_modules/xss/lib/parser.js": {
       "bytes": 5670,
       "imports": [
         {
-          "path": "node_modules/.pnpm/xss@1.0.9/node_modules/xss/lib/util.js",
+          "path": "node_modules/.pnpm/xss@1.0.10/node_modules/xss/lib/util.js",
           "kind": "require-call"
         }
       ]
     },
-    "node_modules/.pnpm/xss@1.0.9/node_modules/xss/lib/xss.js": {
+    "node_modules/.pnpm/xss@1.0.10/node_modules/xss/lib/xss.js": {
       "bytes": 5396,
       "imports": [
         {
@@ -319,38 +319,38 @@
           "kind": "require-call"
         },
         {
-          "path": "node_modules/.pnpm/xss@1.0.9/node_modules/xss/lib/default.js",
+          "path": "node_modules/.pnpm/xss@1.0.10/node_modules/xss/lib/default.js",
           "kind": "require-call"
         },
         {
-          "path": "node_modules/.pnpm/xss@1.0.9/node_modules/xss/lib/parser.js",
+          "path": "node_modules/.pnpm/xss@1.0.10/node_modules/xss/lib/parser.js",
           "kind": "require-call"
         },
         {
-          "path": "node_modules/.pnpm/xss@1.0.9/node_modules/xss/lib/util.js",
+          "path": "node_modules/.pnpm/xss@1.0.10/node_modules/xss/lib/util.js",
           "kind": "require-call"
         }
       ]
     },
-    "node_modules/.pnpm/xss@1.0.9/node_modules/xss/lib/index.js": {
+    "node_modules/.pnpm/xss@1.0.10/node_modules/xss/lib/index.js": {
       "bytes": 1110,
       "imports": [
         {
-          "path": "node_modules/.pnpm/xss@1.0.9/node_modules/xss/lib/default.js",
+          "path": "node_modules/.pnpm/xss@1.0.10/node_modules/xss/lib/default.js",
           "kind": "require-call"
         },
         {
-          "path": "node_modules/.pnpm/xss@1.0.9/node_modules/xss/lib/parser.js",
+          "path": "node_modules/.pnpm/xss@1.0.10/node_modules/xss/lib/parser.js",
           "kind": "require-call"
         },
         {
-          "path": "node_modules/.pnpm/xss@1.0.9/node_modules/xss/lib/xss.js",
+          "path": "node_modules/.pnpm/xss@1.0.10/node_modules/xss/lib/xss.js",
           "kind": "require-call"
         }
       ]
     },
     "packages/client/utils.ts": {
-      "bytes": 3163,
+      "bytes": 3197,
       "imports": [
         {
           "path": "node_modules/.pnpm/dot-object@2.1.4/node_modules/dot-object/index.js",
@@ -369,7 +369,7 @@
           "kind": "import-statement"
         },
         {
-          "path": "node_modules/.pnpm/xss@1.0.9/node_modules/xss/lib/index.js",
+          "path": "node_modules/.pnpm/xss@1.0.10/node_modules/xss/lib/index.js",
           "kind": "import-statement"
         }
       ]
@@ -405,7 +405,7 @@
       "imports": []
     },
     "packages/client/core.ts": {
-      "bytes": 9779,
+      "bytes": 9810,
       "imports": [
         {
           "path": "packages/client/defs.ts",
@@ -457,16 +457,16 @@
           "bytesInOutput": 5347
         },
         "node_modules/.pnpm/braces@3.0.2/node_modules/braces/lib/utils.js": {
-          "bytesInOutput": 1015
+          "bytesInOutput": 1017
         },
         "node_modules/.pnpm/braces@3.0.2/node_modules/braces/lib/stringify.js": {
           "bytesInOutput": 343
         },
         "node_modules/.pnpm/is-number@7.0.0/node_modules/is-number/index.js": {
-          "bytesInOutput": 177
+          "bytesInOutput": 178
         },
         "node_modules/.pnpm/to-regex-range@5.0.1/node_modules/to-regex-range/index.js": {
-          "bytesInOutput": 3119
+          "bytesInOutput": 3120
         },
         "node_modules/.pnpm/fill-range@7.0.1/node_modules/fill-range/index.js": {
           "bytesInOutput": 3050
@@ -486,29 +486,29 @@
         "node_modules/.pnpm/braces@3.0.2/node_modules/braces/index.js": {
           "bytesInOutput": 704
         },
-        "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/constants.js": {
+        "node_modules/.pnpm/picomatch@2.3.1/node_modules/picomatch/lib/constants.js": {
           "bytesInOutput": 2668
         },
-        "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/utils.js": {
+        "node_modules/.pnpm/picomatch@2.3.1/node_modules/picomatch/lib/utils.js": {
           "bytesInOutput": 1038
         },
-        "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/scan.js": {
-          "bytesInOutput": 3110
+        "node_modules/.pnpm/picomatch@2.3.1/node_modules/picomatch/lib/scan.js": {
+          "bytesInOutput": 3105
         },
-        "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/parse.js": {
-          "bytesInOutput": 12177
+        "node_modules/.pnpm/picomatch@2.3.1/node_modules/picomatch/lib/parse.js": {
+          "bytesInOutput": 12213
         },
-        "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/lib/picomatch.js": {
+        "node_modules/.pnpm/picomatch@2.3.1/node_modules/picomatch/lib/picomatch.js": {
           "bytesInOutput": 2310
         },
-        "node_modules/.pnpm/picomatch@2.3.0/node_modules/picomatch/index.js": {
+        "node_modules/.pnpm/picomatch@2.3.1/node_modules/picomatch/index.js": {
           "bytesInOutput": 50
         },
         "node_modules/.pnpm/micromatch@4.0.4/node_modules/micromatch/index.js": {
           "bytesInOutput": 2548
         },
         "node_modules/.pnpm/deepmerge@4.2.2/node_modules/deepmerge/dist/cjs.js": {
-          "bytesInOutput": 1990
+          "bytesInOutput": 1987
         },
         "node_modules/.pnpm/html-entities@2.3.2/node_modules/html-entities/lib/named-references.js": {
           "bytesInOutput": 87595
@@ -537,47 +537,47 @@
         "node_modules/.pnpm/cssfilter@0.0.10/node_modules/cssfilter/lib/index.js": {
           "bytesInOutput": 237
         },
-        "node_modules/.pnpm/xss@1.0.9/node_modules/xss/lib/util.js": {
+        "node_modules/.pnpm/xss@1.0.10/node_modules/xss/lib/util.js": {
           "bytesInOutput": 457
         },
-        "node_modules/.pnpm/xss@1.0.9/node_modules/xss/lib/default.js": {
-          "bytesInOutput": 4308
+        "node_modules/.pnpm/xss@1.0.10/node_modules/xss/lib/default.js": {
+          "bytesInOutput": 4417
         },
-        "node_modules/.pnpm/xss@1.0.9/node_modules/xss/lib/parser.js": {
+        "node_modules/.pnpm/xss@1.0.10/node_modules/xss/lib/parser.js": {
           "bytesInOutput": 2080
         },
-        "node_modules/.pnpm/xss@1.0.9/node_modules/xss/lib/xss.js": {
-          "bytesInOutput": 1970
+        "node_modules/.pnpm/xss@1.0.10/node_modules/xss/lib/xss.js": {
+          "bytesInOutput": 1967
         },
-        "node_modules/.pnpm/xss@1.0.9/node_modules/xss/lib/index.js": {
+        "node_modules/.pnpm/xss@1.0.10/node_modules/xss/lib/index.js": {
           "bytesInOutput": 487
         },
         "packages/client/index.ts": {
-          "bytesInOutput": 57
+          "bytesInOutput": 62
         },
         "packages/client/defs.ts": {
-          "bytesInOutput": 1907
+          "bytesInOutput": 1534
         },
         "packages/client/inspector.ts": {
-          "bytesInOutput": 1233
+          "bytesInOutput": 1229
         },
         "packages/client/utils.ts": {
-          "bytesInOutput": 599
+          "bytesInOutput": 610
         },
         "packages/client/guard.ts": {
           "bytesInOutput": 676
         },
         "packages/client/adapter.ts": {
-          "bytesInOutput": 6156
+          "bytesInOutput": 6084
         },
         "packages/client/resolver.ts": {
           "bytesInOutput": 2608
         },
         "packages/client/core.ts": {
-          "bytesInOutput": 2653
+          "bytesInOutput": 2650
         }
       },
-      "bytes": 173039
+      "bytes": 172863
     }
   }
 }
