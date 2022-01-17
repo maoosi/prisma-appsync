@@ -209,16 +209,16 @@ export declare enum Actions {
     onMutated = "onMutated"
 }
 export declare enum ActionsAliases {
-    access = 0,
-    batchAccess = 1,
-    create = 2,
-    batchCreate = 3,
-    delete = 4,
-    batchDelete = 5,
-    modify = 6,
-    batchModify = 7,
-    subscribe = 8,
-    batchSubscribe = 9
+    access = "access",
+    batchAccess = "batchAccess",
+    create = "create",
+    batchCreate = "batchCreate",
+    delete = "delete",
+    batchDelete = "batchDelete",
+    modify = "modify",
+    batchModify = "batchModify",
+    subscribe = "subscribe",
+    batchSubscribe = "batchSubscribe"
 }
 export declare const ActionsAliasesList: {
     readonly access: readonly [Actions.get, Actions.list, Actions.count];

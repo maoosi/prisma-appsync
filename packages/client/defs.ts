@@ -139,6 +139,7 @@ export type ShieldAuthorization = {
     reason: string | Function
     prismaFilter: any
     matcher: string
+    globPattern: string
 }
 
 export type ResolveParams<Models extends string, CustomResolvers extends string> = {
@@ -292,16 +293,16 @@ export enum Actions {
 }
 
 export enum ActionsAliases {
-    access,
-    batchAccess,
-    create,
-    batchCreate,
-    delete,
-    batchDelete,
-    modify,
-    batchModify,
-    subscribe,
-    batchSubscribe,
+    access = 'access',
+    batchAccess = 'batchAccess',
+    create = 'create',
+    batchCreate = 'batchCreate',
+    delete = 'delete',
+    batchDelete = 'batchDelete',
+    modify = 'modify',
+    batchModify = 'batchModify',
+    subscribe = 'subscribe',
+    batchSubscribe = 'batchSubscribe',
 }
 
 export const ActionsAliasesList = {

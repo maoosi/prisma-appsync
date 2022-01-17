@@ -9,14 +9,14 @@ import {
     OPENID_CONNECT,
 } from '../../../packages/client/defs'
 
-export default function (identity: Authorization, opts: mockOptions): Identity {
+export default function (identity: Authorization, opts?: mockOptions): Identity {
     if (identity === Authorizations.AWS_IAM) {
         const mock: AWS_IAM = {
             accountId: 'string',
             cognitoIdentityPoolId: 'string',
             cognitoIdentityId: 'string',
-            sourceIp: [opts.sourceIp],
-            username: opts.username,
+            sourceIp: [opts?.sourceIp || 'undefined'],
+            username: opts?.username || 'undefined',
             userArn: 'string',
             cognitoIdentityAuthType: 'string',
             cognitoIdentityAuthProvider: 'string',
@@ -24,24 +24,24 @@ export default function (identity: Authorization, opts: mockOptions): Identity {
         return mock
     } else if (identity === Authorizations.AMAZON_COGNITO_USER_POOLS) {
         const mock: AMAZON_COGNITO_USER_POOLS = {
-            sub: opts.sub,
+            sub: opts?.sub || 'undefined',
             issuer: 'string',
-            username: opts.username,
+            username: opts?.username || 'undefined',
             claims: {},
-            sourceIp: [opts.sourceIp],
+            sourceIp: [opts?.sourceIp || 'undefined'],
             defaultAuthStrategy: 'string',
             groups: ['admin', 'member'],
         }
         return mock
     } else if (identity === Authorizations.AWS_LAMBDA) {
         const mock: AWS_LAMBDA = {
-            resolverContext: opts.resolverContext,
+            resolverContext: opts?.resolverContext || 'undefined',
         }
         return mock
     } else if (identity === Authorizations.OPENID_CONNECT) {
         const mock: OPENID_CONNECT = {
             claims: {
-                sub: opts.sub,
+                sub: opts?.sub || 'undefined',
                 aud: 'string',
                 azp: 'string',
                 iss: 'string',
@@ -49,9 +49,9 @@ export default function (identity: Authorization, opts: mockOptions): Identity {
                 iat: 1630837279,
                 gty: 'string',
             },
-            sourceIp: [opts.sourceIp],
+            sourceIp: [opts?.sourceIp || 'undefined'],
             issuer: 'string',
-            sub: opts.sub,
+            sub: opts?.sub || 'undefined',
         }
         return mock
     } else {

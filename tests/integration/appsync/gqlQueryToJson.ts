@@ -199,6 +199,7 @@ export const graphQlQueryToJson = (
     if (!query) return jsonObject
 
     const parsedQuery = parse(query)
+
     const operationDefinition = parsedQuery.definitions.find((q: any) => {
         return q.name.value === options.operationName
     })

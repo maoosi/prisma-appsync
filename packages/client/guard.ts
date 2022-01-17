@@ -1,33 +1,47 @@
-import { ShieldAuthorization, Shield, Context } from './defs'
-import { merge, clone, encode, filterXSS, isMatchingGlob } from './utils'
+import { ShieldAuthorization, Shield, Context, ActionsAliasesList } from './defs'
+import { merge, encode, decode, filterXSS, isMatchingGlob, traverse } from './utils'
+import { CustomError } from './inspector'
 
 /**
- * #### Sanitize data inside object (parse xss + encode html).
+ * #### Sanitize data (parse xss + encode html).
  *
  * @param {any} data
  * @returns any
  */
 export function sanitize(data: any): any {
-    const outputData = clone(data)
+    return traverse(data, (value, key) => {
+        let excludeChilds = false
 
-    for (const prop in outputData) {
-        if (Object.prototype.hasOwnProperty.call(outputData, prop)) {
-            const value = outputData[prop]
-
-            if (typeof value === 'string') {
-                outputData[prop] = encode(filterXSS(value))
-            } else if (
-                typeof value === 'object' &&
-                !Array.isArray(value) &&
-                typeof value !== 'function' &&
-                value !== null
-            ) {
-                outputData[prop] = this.sanitize(value)
-            }
+        if (typeof key === 'string' && key === '__prismaAppsync') {
+            excludeChilds = true
         }
-    }
+        if (typeof value === 'string') {
+            value = encode(filterXSS(value))
+        }
 
-    return outputData
+        return { value, excludeChilds }
+    })
+}
+
+/**
+ * #### Clarify data (decode html).
+ *
+ * @param {any} data
+ * @returns any
+ */
+export function clarify(data: any): any {
+    return traverse(data, (value, key) => {
+        let excludeChilds = false
+
+        if (typeof key === 'string' && key === '__prismaAppsync') {
+            excludeChilds = true
+        }
+        if (typeof value === 'string') {
+            value = decode(value)
+        }
+
+        return { value, excludeChilds }
+    })
 }
 
 /**
@@ -36,28 +50,45 @@ export function sanitize(data: any): any {
  * @param {any} options
  * @param {Shield} options.shield
  * @param {string[]} options.paths
+ * @param {Context} options.context
  * @returns ShieldAuthorization
  */
-export function getShieldAuthorization({ shield, paths }: { shield: Shield; paths: string[] }): ShieldAuthorization {
+export function getShieldAuthorization({
+    shield,
+    paths,
+    context,
+}: {
+    shield: Shield
+    paths: string[]
+    context: Context
+}): ShieldAuthorization {
     const authorization: ShieldAuthorization = {
         canAccess: true,
         reason: String(),
         prismaFilter: {},
         matcher: String(),
+        globPattern: String(),
     }
 
     for (let i = paths.length - 1; i >= 0; i--) {
-        const path: string = paths[i]
+        let path: string = paths[i]
 
-        for (const globPattern in shield) {
+        for (const matcher in shield) {
+            let globPattern = matcher
+
+            for (const alias in ActionsAliasesList) {
+                const actionsList = ActionsAliasesList[alias]
+                globPattern = globPattern.replace(new RegExp(`${alias}/`, 'g'), `{${actionsList.join(',')}}/`)
+            }
+
             if (isMatchingGlob(path, globPattern)) {
-                const shieldRule = shield[globPattern]
+                const shieldRule = shield[matcher]
 
                 if (typeof shieldRule === 'boolean') {
-                    authorization.canAccess = shield[globPattern] as boolean
+                    authorization.canAccess = shield[matcher] as boolean
                 } else {
                     if (typeof shieldRule.rule === 'undefined') {
-                        // Badly formed shield rule
+                        throw new CustomError(`Badly formed shield rule.`, { type: 'INTERNAL_SERVER_ERROR' })
                     }
 
                     if (typeof shieldRule.rule === 'boolean') {
@@ -71,11 +102,19 @@ export function getShieldAuthorization({ shield, paths }: { shield: Shield; path
                     }
                 }
 
-                authorization.matcher = globPattern
-                authorization.reason =
-                    typeof shieldRule !== 'boolean' && typeof shieldRule.reason !== 'undefined'
-                        ? shieldRule.reason
-                        : `Matcher: ${authorization.matcher}`
+                authorization.matcher = matcher
+                authorization.globPattern = globPattern
+
+                const isReasonDefined = typeof shieldRule !== 'boolean' && typeof shieldRule.reason !== 'undefined'
+                let reason = `Matcher: ${authorization.matcher}`
+
+                if (isReasonDefined && typeof shieldRule.reason === 'function') {
+                    reason = shieldRule.reason(context)
+                } else if (isReasonDefined && typeof shieldRule.reason === 'string') {
+                    reason = shieldRule.reason
+                }
+
+                authorization.reason = reason
             }
         }
     }

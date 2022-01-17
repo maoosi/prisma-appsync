@@ -8,14 +8,13 @@ export default function ({
     identity,
 }: {
     request: any
-    graphQLParams: { query: string; variables: any; operationName: string; raw: any }
+    graphQLParams: { query: string; variables?: any; operationName: string; raw?: any }
     identity: Identity
 }): AppsyncEvent {
     const selectionSetGraphQL = graphQLParams.query
     const variables = graphQLParams.variables || {}
     const operationName = graphQLParams.operationName
     const query: any = graphQlQueryToJson(selectionSetGraphQL, { variables, operationName })
-
     const parentType: string = Object.keys(query)[0]
     const fieldName: string = Object.keys(query[parentType])[0]
     const parentTypeName = parentType.charAt(0).toUpperCase() + parentType.slice(1)

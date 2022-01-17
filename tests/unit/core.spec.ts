@@ -1,8 +1,26 @@
 import { PrismaAppSync } from '../../packages/client'
+import { mockLambdaEvent, mockIdentity } from '../integration/appsync'
+import { Authorizations, Actions, ActionsAliases } from '../../packages/client/defs'
+import { Prisma } from '@prisma/client'
 
 process.env.PRISMA_APPSYNC_TESTING = 'true'
+process.env.PRISMA_APPSYNC_GENERATED_CONFIG = JSON.stringify({
+    prismaClientModels: { Post: 'post', Posts: 'post' },
+})
 
-// TODO: write more test cases
+const Models = Prisma.ModelName
+
+function mockAppSyncEvent(operationName: string, query: string) {
+    return mockLambdaEvent({
+        request: {},
+        identity: mockIdentity(Authorizations.API_KEY),
+        graphQLParams: {
+            operationName: operationName,
+            query: query,
+        },
+    })
+}
+
 describe('CLIENT #core', () => {
     describe('.connectionString?', () => {
         test('expect Connection String to be configurable via Class options', () => {
@@ -25,6 +43,41 @@ describe('CLIENT #core', () => {
         test('expect Sanitize to be configurable via Class options', () => {
             const prismaAppSync = new PrismaAppSync({ sanitize: false })
             expect(prismaAppSync.options.sanitize).toEqual(false)
+        })
+        test('expect Sanitizer to sanitize inputs', async () => {
+            const prismaAppSync = new PrismaAppSync()
+            const event = mockAppSyncEvent(
+                'createPost',
+                `query createPost {
+                    createPost(
+                        data: {
+                            title: "<IMG SRC=\\"javascript:alert('XSS');\\">"
+                        }
+                    ) {
+                        title
+                    }
+                }`,
+            )
+            const result = await prismaAppSync.resolve({ event })
+            const maliciousXss = result?.__prismaAppsync?.QueryParams?.prismaArgs?.data?.title
+            expect(maliciousXss).toEqual('&lt;img src&gt;')
+        })
+        test('expect outputs to be de-sanitize automatically', async () => {
+            const prismaAppSync = new PrismaAppSync()
+            const event = mockAppSyncEvent(
+                'createPost',
+                `query createPost {
+                    createPost(
+                        data: {
+                            title: "<IMG SRC=\\"javascript:alert('XSS');\\">"
+                        }
+                    ) {
+                        title
+                    }
+                }`,
+            )
+            const result = await prismaAppSync.resolve({ event })
+            expect(result?.title).toEqual('<img src>')
         })
     })
 
@@ -58,6 +111,56 @@ describe('CLIENT #core', () => {
         test('expect Max Query Depth to be configurable via Class options', () => {
             const prismaAppSync = new PrismaAppSync({ maxDepth: 5 })
             expect(prismaAppSync.options.maxDepth).toEqual(5)
+        })
+    })
+
+    describe('.resolve?', () => {
+        test('expect Resolve to return matching Query Params', async () => {
+            const prismaAppSync = new PrismaAppSync()
+            const result = await prismaAppSync.resolve({
+                event: mockAppSyncEvent(
+                    'getPost',
+                    `query getPost {
+                        getPost(where: {
+                            title: { not: { equals: "Foo" } }
+                        }) { 
+                            title
+                            author {
+                                username
+                            }
+                        }
+                    }`,
+                ),
+            })
+            expect(result?.__prismaAppsync?.QueryParams).toEqual({
+                args: {
+                    where: {
+                        title: { not: { equals: 'Foo' } },
+                    },
+                },
+                authorization: Authorizations.API_KEY,
+                context: {
+                    action: Actions.get,
+                    alias: ActionsAliases.access,
+                    model: Models.Post.toLowerCase(),
+                },
+                fields: ['title', 'author/username'],
+                identity: {},
+                operation: 'getPost',
+                paths: ['/get/post/title', '/get/post/author/username'],
+                prismaArgs: {
+                    where: {
+                        title: { not: { equals: 'Foo' } },
+                    },
+                    select: {
+                        title: true,
+                        author: {
+                            select: { username: true },
+                        },
+                    },
+                },
+                type: 'Query',
+            })
         })
     })
 })

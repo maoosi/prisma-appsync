@@ -28,6 +28,16 @@ export async function getQuery(prismaClient: PrismaClient, query: QueryParams) {
 export async function listQuery(prismaClient: PrismaClient, query: QueryParams) {
     if (query.context.model === null) return
 
+    console.log(
+        JSON.stringify({
+            ...(query.prismaArgs.where && { where: query.prismaArgs.where }),
+            ...(query.prismaArgs.orderBy && { orderBy: query.prismaArgs.orderBy }),
+            ...(query.prismaArgs.select && { select: query.prismaArgs.select }),
+            ...(typeof query.prismaArgs.skip !== 'undefined' && { skip: query.prismaArgs.skip }),
+            ...(typeof query.prismaArgs.take !== 'undefined' && { take: query.prismaArgs.take }),
+        }),
+    )
+
     const results = await prismaClient[query.context.model].findMany({
         ...(query.prismaArgs.where && { where: query.prismaArgs.where }),
         ...(query.prismaArgs.orderBy && { orderBy: query.prismaArgs.orderBy }),

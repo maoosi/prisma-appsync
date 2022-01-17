@@ -10,6 +10,7 @@
         "preinstall": "npx only-allow pnpm",
         "postinstall": "zx scripts/postinstall.mjs",
         "build": "zx scripts/build.mjs",
+        "docker": "zx scripts/docker.mjs",
         "serve": "zx scripts/serve.mjs",
         "test": "zx scripts/test.mjs",
         "docs:dev": "vuepress dev docs --host localhost",

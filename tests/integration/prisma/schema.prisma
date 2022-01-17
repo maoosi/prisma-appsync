@@ -1,50 +1,50 @@
 datasource db {
-    provider = "postgres"
-    url      = env("DATABASE_URL")
+  provider = "postgres"
+  url      = env("DATABASE_URL")
 }
 
 generator client {
-    provider      = "prisma-client-js"
-    binaryTargets = ["native", "rhel-openssl-1.0.x"]
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-1.0.x"]
 }
 
 generator appsync {
-    provider = "../../dist/generator.js"
+  provider = "../../dist/generator.js"
 
-    // optional params
-    output          = "./generated/prisma-appsync"
-    extendSchema    = "./custom-schema.gql"
-    extendResolvers = "./custom-resolvers.yaml"
+  // optional params
+  output          = "./generated/prisma-appsync"
+  extendSchema    = "./custom-schema.gql"
+  extendResolvers = "./custom-resolvers.yaml"
 }
 
 /// @gql(fields: { hiddenField: null }, subscriptions: null)
 /// @auth(model: [{ allow: apiKey }, { allow: userPools, groups: ["users", "admins"] }])
 model User {
-    uuid     String    @id @default(uuid()) @db.VarChar(200)
-    username String @unique
-    email String @unique
-    hiddenField String
-    role  Role   @default(USER)
-    posts Post[]
+  uuid        String @id @default(uuid()) @db.VarChar(200)
+  username    String @unique
+  email       String @unique
+  hiddenField String
+  role        Role   @default(USER)
+  posts       Post[]
 }
 
 /// @gql(model: null)
 model hiddenModel {
-    id Int @id @default(autoincrement())
+  id Int @id @default(autoincrement())
 }
 
 /// @gql(queries: { listPosts: null })
 /// @auth(model: [{ allow: apiKey }, { allow: userPools, groups: ["admins"] }])
 model Post {
-    id          Int      @id @default(autoincrement())
-    title       String
-    author      User?    @relation(fields: [authorUuid], references: [uuid])
-    authorUuid  String?  @db.VarChar(200)
-    published   Boolean  @default(false)
-    lastSavedAt DateTime @default(now())
+  id          Int      @id @default(autoincrement())
+  title       String
+  author      User?    @relation(fields: [authorUuid], references: [uuid])
+  authorUuid  String?  @db.VarChar(200)
+  published   Boolean  @default(false)
+  lastSavedAt DateTime @default(now())
 }
 
 enum Role {
-    USER
-    ADMIN
+  USER
+  ADMIN
 }

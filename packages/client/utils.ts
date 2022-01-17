@@ -135,3 +135,70 @@ export function lowerFirst(str: string): string {
     if (str) return str.charAt(0).toLowerCase() + str.slice(1)
     else return String()
 }
+
+/**
+ * #### Return true if element is an object
+ *
+ * @example const isObj = isObject(element)
+ *
+ * @param {any} element
+ * @returns boolean
+ */
+export function isObject(element): boolean {
+    return typeof element === 'object' && !Array.isArray(element) && typeof element !== 'function' && element !== null
+}
+
+/**
+ * #### Traverse any element and execute middleware
+ *
+ * @example const element = traverse(element, value => doSomething(value))
+ *
+ * @param {any} element
+ * @param {Function} iteratee
+ * @returns any
+ */
+export function traverse(
+    element: any,
+    iteratee: (value: any, key?: string) => { value: any; excludeChilds?: boolean },
+): any {
+    let outputData
+
+    // object
+    if (isObject(element)) {
+        outputData = clone(element)
+
+        for (const key in outputData) {
+            if (Object.prototype.hasOwnProperty.call(outputData, key)) {
+                const { excludeChilds, value } = iteratee(outputData[key], key)
+
+                // object
+                if (isObject(value)) {
+                    if (excludeChilds) outputData[key] = clone(value)
+                    else outputData[key] = traverse(value, iteratee)
+                }
+                // array
+                else if (Array.isArray(value)) {
+                    if (excludeChilds) outputData[key] = [...value]
+                    else outputData[key] = traverse(value, iteratee)
+                }
+                // anything else
+                else {
+                    outputData[key] = value
+                }
+            }
+        }
+    }
+    // array
+    else if (Array.isArray(element)) {
+        const { value } = iteratee(element)
+        outputData = [...value]
+        outputData = [...outputData.map((e: any) => traverse(e, iteratee))]
+    }
+    // anything else
+    else {
+        const { value } = iteratee(element)
+        outputData = value
+    }
+
+    return outputData
+}

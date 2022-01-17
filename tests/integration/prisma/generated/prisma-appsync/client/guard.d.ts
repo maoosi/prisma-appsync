@@ -1,11 +1,18 @@
 import { ShieldAuthorization, Shield, Context } from './defs';
 /**
- * #### Sanitize data inside object (parse xss + encode html).
+ * #### Sanitize data (parse xss + encode html).
  *
  * @param {any} data
  * @returns any
  */
 export declare function sanitize(data: any): any;
+/**
+ * #### Clarify data (decode html).
+ *
+ * @param {any} data
+ * @returns any
+ */
+export declare function clarify(data: any): any;
 /**
  * #### Returns an authorization object from a Shield configuration passed as input.
  *

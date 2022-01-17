@@ -1,5 +1,6 @@
 import { CustomError, inspect } from './inspector'
-import { merge, dotate, isEmpty, isUndefined, lowerFirst } from './utils'
+import { sanitize } from './guard'
+import { merge, dotate, isEmpty, isUndefined, lowerFirst, clone } from './utils'
 import {
     Options,
     AppsyncEvent,
@@ -29,12 +30,6 @@ import {
  * @returns `{ type, operation, context, fields, paths, args, prismaArgs, authorization, identity }` - QueryParams
  */
 export function parseEvent(appsyncEvent: AppsyncEvent, options: Options, customResolvers?: any | null): QueryParams {
-    console.log({
-        fieldName: appsyncEvent?.info?.fieldName,
-        selectionSetList: appsyncEvent?.info?.selectionSetList,
-        parentTypeName: appsyncEvent?.info?.parentTypeName,
-        arguments: appsyncEvent?.arguments,
-    })
     if (
         isEmpty(appsyncEvent?.info?.fieldName) ||
         isEmpty(appsyncEvent?.info?.selectionSetList) ||
@@ -56,12 +51,14 @@ export function parseEvent(appsyncEvent: AppsyncEvent, options: Options, customR
         _selectionSetList: appsyncEvent.info.selectionSetList,
     })
 
-    const args = appsyncEvent.arguments
+    const sanitizedArgs = sanitize(appsyncEvent.arguments)
+
+    const args = clone(sanitizedArgs)
 
     const prismaArgs = getPrismaArgs({
         action: context.action,
         defaultPagination: options.defaultPagination,
-        _arguments: appsyncEvent.arguments,
+        _arguments: clone(sanitizedArgs),
         _selectionSetList: appsyncEvent.info.selectionSetList,
     })
 

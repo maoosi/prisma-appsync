@@ -92,3 +92,25 @@ export declare function isUndefined(element: any): boolean;
  * @returns string
  */
 export declare function lowerFirst(str: string): string;
+/**
+ * #### Return true if element is an object
+ *
+ * @example const isObj = isObject(element)
+ *
+ * @param {any} element
+ * @returns boolean
+ */
+export declare function isObject(element: any): boolean;
+/**
+ * #### Traverse any element and execute middleware
+ *
+ * @example const element = traverse(element, value => doSomething(value))
+ *
+ * @param {any} element
+ * @param {Function} iteratee
+ * @returns any
+ */
+export declare function traverse(element: any, iteratee: (value: any, key?: string) => {
+    value: any;
+    excludeChilds?: boolean;
+}): any;

@@ -1,6 +1,14 @@
-import { PrismaAppSyncOptionsType, Options, PrismaClient, Shield, ShieldAuthorization, ResolveParams } from './defs'
+import {
+    PrismaAppSyncOptionsType,
+    Options,
+    PrismaClient,
+    Shield,
+    ShieldAuthorization,
+    ResolveParams,
+    BatchActionsList,
+} from './defs'
 import { parseError, inspect, debug, CustomError } from './inspector'
-import { getShieldAuthorization, getDepth } from './guard'
+import { getShieldAuthorization, getDepth, clarify } from './guard'
 import { parseEvent } from './adapter'
 import { isEmpty } from './utils'
 import * as queries from './resolver'
@@ -167,6 +175,7 @@ export class PrismaAppSync {
             const shieldAuth: ShieldAuthorization = getShieldAuthorization({
                 shield,
                 paths: QueryParams.paths,
+                context: QueryParams.context,
             })
 
             // Guard :: if `canAccess` if equal to `false`, we reject the API call
@@ -176,9 +185,9 @@ export class PrismaAppSync {
             }
 
             // Guard :: if `prismaFilter` is set, combine with current Prisma query
-            if (shieldAuth.prismaFilter) {
+            if (!isEmpty(shieldAuth.prismaFilter)) {
                 this.prismaClient.$use(async (params, next) => {
-                    if (typeof params.args.where !== 'undefined' && params.args.where.length > 0) {
+                    if (!isEmpty(params.args.where)) {
                         params.args.where = {
                             AND: [params.args.where, shieldAuth.prismaFilter],
                         }
@@ -198,7 +207,28 @@ export class PrismaAppSync {
             // Resolver :: resolve query for UNIT TESTS
             if (process?.env?.PRISMA_APPSYNC_TESTING === 'true') {
                 debug(`Resolving query for UNIT TESTS.`)
-                results = QueryParams
+                const isBatchAction = BatchActionsList.includes(QueryParams?.context?.action)
+
+                const getTestResult = () => {
+                    return {
+                        ...QueryParams.fields.reduce((a, v) => {
+                            const value = !isEmpty(QueryParams?.prismaArgs?.data?.[v])
+                                ? QueryParams.prismaArgs.data[v]
+                                : (Math.random() + 1).toString(36).substring(7)
+
+                            return { ...a, [v]: String(value) }
+                        }, {}),
+                        __prismaAppsync: {
+                            QueryParams,
+                        },
+                    }
+                }
+
+                if (isBatchAction) {
+                    results = [getTestResult(), getTestResult()]
+                } else {
+                    results = getTestResult()
+                }
             }
             // Resolver :: query is disabled
             else if (
@@ -234,7 +264,10 @@ export class PrismaAppSync {
             results = Promise.reject(parseError(error))
         }
 
-        debug(`Returning response to API request w/ results: ${inspect(results)}`)
-        return results
+        // Guard :: clarify results (decode html)
+        const resultsClarified = clarify(results)
+
+        debug(`Returning response to API request w/ results: ${inspect(resultsClarified)}`)
+        return resultsClarified
     }
 }

@@ -1,54 +1,144 @@
-import { Shield } from '../../packages/client/defs'
 import { getShieldAuthorization } from '../../packages/client/guard'
+import { Actions, ActionsAliases } from '../../packages/client/defs'
+import { Prisma } from '@prisma/client'
+
+const Models = Prisma.ModelName
 
 process.env.PRISMA_APPSYNC_TESTING = 'true'
 
 describe('CLIENT #guard', () => {
-    // TODO: write more test cases
     describe('.getShieldAuthorization?', () => {
-        const paths = [
-            '/update/post/title',
-            '/update/post/author/username',
-            '/get/post/title',
-            '/get/post/comment/content',
-            '/get/post/comment/author/email',
-            '/get/post/comment/author/username',
-            '/get/post/comment/author/badges/label',
-            '/get/post/comment/author/badges/owners/email',
-        ]
-
-        const createShield = ({ isOwner, isAdmin }): Shield => {
-            return {
-                '**': false,
-
-                '/access/**/!(email|username)': {
-                    rule: true,
-                    reason: () => 'Fields email and username are not accessible via n+1.',
-                },
-
-                '/modify/{post,comment,user}{,/*}': {
-                    rule: isOwner,
-                    reason: ({ model }) => `${model} can only be modified by their owner.`,
-                },
-
-                '/modify/{post,comment,user}{,/**}': {
-                    rule: isAdmin,
-                    reason: () => 'Field password is not accessible.',
-                },
-            }
-        }
-
         test('expect query to be _denied_ by default', () => {
             const authorization = getShieldAuthorization({
-                shield: createShield({ isOwner: false, isAdmin: false }),
-                paths: paths,
+                shield: { '**': false },
+                paths: ['/update/post/title'],
+                context: {
+                    action: Actions.update,
+                    alias: ActionsAliases.modify,
+                    model: Models.Post,
+                },
             })
 
             expect(authorization).toEqual({
                 canAccess: false,
                 reason: 'Matcher: **',
                 matcher: '**',
+                globPattern: '**',
                 prismaFilter: {},
+            })
+        })
+
+        test('expect query to be _denied_ when ** is false', () => {
+            const authorization = getShieldAuthorization({
+                shield: { '**': false },
+                paths: ['/update/post/title'],
+                context: {
+                    action: Actions.update,
+                    alias: ActionsAliases.modify,
+                    model: Models.Post,
+                },
+            })
+
+            expect(authorization).toEqual({
+                canAccess: false,
+                reason: 'Matcher: **',
+                matcher: '**',
+                globPattern: '**',
+                prismaFilter: {},
+            })
+        })
+
+        test('expect query to be _allowed_ when ** is true', () => {
+            const authorization = getShieldAuthorization({
+                shield: { '**': true },
+                paths: ['/update/post/title'],
+                context: {
+                    action: Actions.update,
+                    alias: ActionsAliases.modify,
+                    model: Models.Post,
+                },
+            })
+
+            expect(authorization).toEqual({
+                canAccess: true,
+                reason: 'Matcher: **',
+                matcher: '**',
+                globPattern: '**',
+                prismaFilter: {},
+            })
+        })
+
+        test('expect query to be _denied_ when custom rule overrides **', () => {
+            const authorization = getShieldAuthorization({
+                shield: {
+                    '**': true,
+                    '/modify/{post,comment,user}{,/**}': {
+                        rule: false,
+                        reason: ({ model }) => `${model} can only be modified by its owner.`,
+                    },
+                },
+                paths: ['/update/post/title'],
+                context: {
+                    action: Actions.update,
+                    alias: ActionsAliases.modify,
+                    model: Models.Post,
+                },
+            })
+
+            expect(authorization).toEqual({
+                canAccess: false,
+                reason: 'Post can only be modified by its owner.',
+                matcher: '/modify/{post,comment,user}{,/**}',
+                globPattern: '/{upsert,update,updateMany,delete,deleteMany}/{post,comment,user}{,/**}',
+                prismaFilter: {},
+            })
+        })
+
+        test('expect query to be _allowed_ when custom rule overrides **', () => {
+            const authorization = getShieldAuthorization({
+                shield: {
+                    '**': false,
+                    '/modify/{post,comment,user}{,/**}': { rule: true },
+                },
+                paths: ['/update/post/title'],
+                context: {
+                    action: Actions.update,
+                    alias: ActionsAliases.modify,
+                    model: Models.Post,
+                },
+            })
+
+            expect(authorization).toEqual({
+                canAccess: true,
+                reason: 'Matcher: /modify/{post,comment,user}{,/**}',
+                matcher: '/modify/{post,comment,user}{,/**}',
+                globPattern: '/{upsert,update,updateMany,delete,deleteMany}/{post,comment,user}{,/**}',
+                prismaFilter: {},
+            })
+        })
+
+        test('expect query to be a _prismaFilter_ when rule is an object', () => {
+            const isOwner = { owner: { cognitoSub: 'xxx' } }
+
+            const authorization = getShieldAuthorization({
+                shield: {
+                    '**': false,
+                    '/modify/{post,comment,user}{,/**}': { rule: isOwner },
+                },
+                paths: ['/update/post/title'],
+                context: {
+                    action: Actions.update,
+                    alias: ActionsAliases.modify,
+                    model: Models.Post,
+                },
+            })
+
+            expect(authorization).toEqual({
+                canAccess: true,
+                reason: 'Matcher: /modify/{post,comment,user}{,/**}',
+                matcher: '/modify/{post,comment,user}{,/**}',
+                globPattern: '/{upsert,update,updateMany,delete,deleteMany}/{post,comment,user}{,/**}',
+                prismaFilter: isOwner,
             })
         })
     })
