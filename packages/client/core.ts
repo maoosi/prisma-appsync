@@ -8,7 +8,7 @@ import {
     BatchActionsList,
 } from './defs'
 import { parseError, inspect, debug, CustomError } from './inspector'
-import { getShieldAuthorization, getDepth, clarify } from './guard'
+import { getShieldAuthorization, getDepth, clarify, runHooks } from './guard'
 import { parseEvent } from './adapter'
 import { isEmpty } from './utils'
 import * as queries from './resolver'
@@ -141,7 +141,7 @@ export class PrismaAppSync {
     public async resolve<Models extends string, CustomResolvers extends string>(
         resolveParams: ResolveParams<Models, CustomResolvers>,
     ): Promise<any> {
-        let results: any = null
+        let result: any = null
 
         try {
             debug(
@@ -187,7 +187,7 @@ export class PrismaAppSync {
             // Guard :: if `prismaFilter` is set, combine with current Prisma query
             if (!isEmpty(shieldAuth.prismaFilter)) {
                 this.prismaClient.$use(async (params, next) => {
-                    if (!isEmpty(params.args.where)) {
+                    if (!isEmpty(params?.args?.where)) {
                         params.args.where = {
                             AND: [params.args.where, shieldAuth.prismaFilter],
                         }
@@ -201,7 +201,12 @@ export class PrismaAppSync {
 
             // Guard: get and run all before hooks functions matching query
             if (resolveParams?.hooks) {
-                // await runHooks('before', resolveParams.hooks, QueryParams)
+                await runHooks({
+                    when: 'before',
+                    hooks: resolveParams.hooks,
+                    prismaClient: this.prismaClient,
+                    QueryParams,
+                })
             }
 
             // Resolver :: resolve query for UNIT TESTS
@@ -225,9 +230,9 @@ export class PrismaAppSync {
                 }
 
                 if (isBatchAction) {
-                    results = [getTestResult(), getTestResult()]
+                    result = [getTestResult(), getTestResult()]
                 } else {
-                    results = getTestResult()
+                    result = getTestResult()
                 }
             }
             // Resolver :: query is disabled
@@ -241,12 +246,12 @@ export class PrismaAppSync {
             // Resolver :: resolve query with Custom Resolver
             else if (resolveParams?.resolvers && typeof resolveParams.resolvers[QueryParams.operation] === 'function') {
                 debug(`Resolving query for Custom Resolver "${QueryParams.operation}".`)
-                results = await resolveParams.resolvers[QueryParams.operation](QueryParams)
+                result = await resolveParams.resolvers[QueryParams.operation](QueryParams)
             }
             // Resolver :: resolve query with built-in CRUD
             else if (!isEmpty(QueryParams?.context?.model)) {
                 debug(`Resolving query for built-in CRUD operation "${QueryParams.operation}".`)
-                results = await queries[`${QueryParams.context.action}Query`](this.prismaClient, QueryParams)
+                result = await queries[`${QueryParams.context.action}Query`](this.prismaClient, QueryParams)
             }
             // Resolver :: query resolver not found
             else {
@@ -257,17 +262,23 @@ export class PrismaAppSync {
 
             // Guard: get and run all after hooks functions matching query
             if (resolveParams?.hooks) {
-                // results = await runHooks('after', resolveParams.hooks, QueryParams)
+                result = await runHooks({
+                    when: 'after',
+                    hooks: resolveParams.hooks,
+                    prismaClient: this.prismaClient,
+                    QueryParams,
+                    result,
+                })
             }
         } catch (error) {
             // Return error
-            results = Promise.reject(parseError(error))
+            result = Promise.reject(parseError(error))
         }
 
-        // Guard :: clarify results (decode html)
-        const resultsClarified = clarify(results)
+        // Guard :: clarify result (decode html)
+        const resultClarified = this.options.sanitize ? clarify(result) : result
 
-        debug(`Returning response to API request w/ results: ${inspect(resultsClarified)}`)
-        return resultsClarified
+        debug(`Returning response to API request w/ result: ${inspect(resultClarified)}`)
+        return resultClarified
     }
 }

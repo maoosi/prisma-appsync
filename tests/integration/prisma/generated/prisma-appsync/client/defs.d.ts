@@ -104,6 +104,7 @@ export declare type ShieldAuthorization = {
     reason: string | Function;
     prismaFilter: any;
     matcher: string;
+    globPattern: string;
 };
 export declare type ResolveParams<Models extends string, CustomResolvers extends string> = {
     event: AppsyncEvent;
@@ -111,7 +112,7 @@ export declare type ResolveParams<Models extends string, CustomResolvers extends
         [resolver in CustomResolvers]: ((props: QueryParamsCustom) => Promise<any>) | boolean;
     };
     shield?: (props: QueryParams) => Shield;
-    hooks?: () => Hooks<Models, CustomResolvers>;
+    hooks?: Hooks<Models, CustomResolvers>;
 };
 export { PrismaClient };
 export declare type Model = string;

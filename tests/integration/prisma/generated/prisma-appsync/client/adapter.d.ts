@@ -9,6 +9,13 @@ import { Options, AppsyncEvent, QueryParams, Action, Model, Context, PrismaArgs,
  */
 export declare function parseEvent(appsyncEvent: AppsyncEvent, options: Options, customResolvers?: any | null): QueryParams;
 /**
+ * #### Convert undefined's to NULL's.
+ *
+ * @param {any} data
+ * @returns any
+ */
+export declare function addNullables(data: any): any;
+/**
  * #### Returns authorization and identity.
  *
  * @param {any} options

@@ -1,6 +1,6 @@
 import { CustomError, inspect } from './inspector'
 import { sanitize } from './guard'
-import { merge, dotate, isEmpty, isUndefined, lowerFirst, clone } from './utils'
+import { merge, dotate, isEmpty, isUndefined, lowerFirst, clone, traverse } from './utils'
 import {
     Options,
     AppsyncEvent,
@@ -51,7 +51,9 @@ export function parseEvent(appsyncEvent: AppsyncEvent, options: Options, customR
         _selectionSetList: appsyncEvent.info.selectionSetList,
     })
 
-    const sanitizedArgs = sanitize(appsyncEvent.arguments)
+    const sanitizedArgs = options.sanitize
+        ? sanitize(addNullables(appsyncEvent.arguments))
+        : addNullables(appsyncEvent.arguments)
 
     const args = clone(sanitizedArgs)
 
@@ -82,6 +84,29 @@ export function parseEvent(appsyncEvent: AppsyncEvent, options: Options, customR
         identity,
         paths,
     }
+}
+
+/**
+ * #### Convert undefined's to NULL's.
+ *
+ * @param {any} data
+ * @returns any
+ */
+export function addNullables(data: any): any {
+    return data
+
+    return traverse(data, (value, key) => {
+        let excludeChilds = false
+
+        if (typeof key === 'string' && key === '__prismaAppsync') {
+            excludeChilds = true
+        }
+        if (value === undefined) {
+            value = null
+        }
+
+        return { value, excludeChilds }
+    })
 }
 
 /**
@@ -352,7 +377,15 @@ export function getPrismaArgs({
 }): PrismaArgs {
     const prismaArgs: PrismaArgs = {}
 
+    if (typeof _arguments.data !== 'undefined' && typeof _arguments.operation !== 'undefined') {
+        throw new CustomError(`Using 'data' and 'operation' together is not possible.`, {
+            type: 'BAD_USER_INPUT',
+        })
+    }
+
     if (typeof _arguments.data !== 'undefined') prismaArgs.data = _arguments.data
+    else if (typeof _arguments.operation !== 'undefined') prismaArgs.data = _arguments.operation
+
     if (typeof _arguments.where !== 'undefined') prismaArgs.where = _arguments.where
     if (typeof _arguments.orderBy !== 'undefined') prismaArgs.orderBy = parseOrderBy(_arguments.orderBy)
     if (typeof _arguments.skipDuplicates !== 'undefined') prismaArgs.skipDuplicates = _arguments.skipDuplicates

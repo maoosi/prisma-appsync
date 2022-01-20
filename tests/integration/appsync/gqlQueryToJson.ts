@@ -111,17 +111,31 @@ const getArguments = (args) => {
         } else if (arg.value.kind === 'IntValue') {
             argsObj[arg.name.value] = parseInt(arg.value.value)
         } else if (arg.value.kind === 'ListValue') {
-            const values = flatMap(arg.value.values, (element: any) => element.value)
-            argsObj[arg.name.value] = values
+            argsObj[arg.name.value] = flatMap(arg.value.values, (element: any) => {
+                if (element.value) {
+                    return element.value
+                } else if (element.fields) {
+                    const args = getArguments(element.fields)
+                    const value = {}
+
+                    Object.keys(args).forEach((key) => {
+                        value[key] = args[key].value
+                    })
+
+                    return value
+                }
+            })
         } else {
             argsObj[arg.name.value] = arg.value.value
         }
     })
+
     return argsObj
 }
 
 const getSelections = (selections: Selection[]) => {
     const selObj = {}
+
     selections.forEach((selection) => {
         const selectionHasAlias = selection.alias
         const selectionName = selectionHasAlias ? selection.alias.value : selection.name.value
@@ -209,8 +223,10 @@ export const graphQlQueryToJson = (
     const operation = definition.operation
 
     checkEachVariableInQueryIsDefined(definition, options.variables)
+
     const selections = getSelections(definition.selectionSet.selections)
     jsonObject[operation] = selections
+
     const varsReplacedWithValues = replaceVariables(jsonObject, options.variables)
     return varsReplacedWithValues
 }

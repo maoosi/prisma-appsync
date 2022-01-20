@@ -16,6 +16,7 @@ List of fields available in the `Post` type.
 | author      | [User](./User.md) | _false_ | _false_           |
 | authorUuid  | String            | true    | _false_           |
 | published   | Boolean           | _false_ | true              |
+| views       | Int               | _false_ | true              |
 | lastSavedAt | AWSDateTime       | _false_ | true              |
 
 ## Queries
@@ -44,6 +45,7 @@ query {
         author # Relation to one
         authorUuid
         published
+        views
         lastSavedAt
     }
 }
@@ -68,6 +70,7 @@ query {
         author # Relation to one
         authorUuid
         published
+        views
         lastSavedAt
     }
 }
@@ -83,6 +86,7 @@ query {
         author # Relation to one
         authorUuid
         published
+        views
         lastSavedAt
     }
 }
@@ -98,6 +102,7 @@ query {
         author # Relation to one
         authorUuid
         published
+        views
         lastSavedAt
     }
 }
@@ -115,6 +120,7 @@ query {
         author # Relation to one
         authorUuid
         published
+        views
         lastSavedAt
     }
 }
@@ -132,6 +138,7 @@ query {
         author # Relation to one
         authorUuid
         published
+        views
         lastSavedAt
     }
 }
@@ -185,6 +192,7 @@ mutation {
             title: "Foo"
             authorUuid: "Foo"
             published: false
+            views: 2
             lastSavedAt: "dd/mm/YYYY"
         }
     ) {
@@ -192,6 +200,7 @@ mutation {
         title
         authorUuid
         published
+        views
         lastSavedAt
     }
 }
@@ -247,6 +256,7 @@ mutation {
             title: "Foo"
             authorUuid: "Foo"
             published: false
+            views: 2
             lastSavedAt: "dd/mm/YYYY"
         }
     ) {
@@ -254,6 +264,7 @@ mutation {
         title
         authorUuid
         published
+        views
         lastSavedAt
     }
 }
@@ -311,6 +322,7 @@ mutation {
         title
         authorUuid
         published
+        views
         lastSavedAt
     }
 }
@@ -397,6 +409,7 @@ subscription {
         title
         authorUuid
         published
+        views
         lastSavedAt
     }
 }
@@ -413,6 +426,7 @@ subscription {
         title
         authorUuid
         published
+        views
         lastSavedAt
     }
 }
@@ -429,6 +443,7 @@ subscription {
         title
         authorUuid
         published
+        views
         lastSavedAt
     }
 }
@@ -445,6 +460,7 @@ subscription {
         title
         authorUuid
         published
+        views
         lastSavedAt
     }
 }
@@ -461,6 +477,7 @@ subscription {
         title
         authorUuid
         published
+        views
         lastSavedAt
     }
 }

@@ -1,4 +1,4 @@
-import { ShieldAuthorization, Shield, Context, ActionsAliasesList } from './defs'
+import { PrismaClient, ShieldAuthorization, Shield, Context, ActionsAliasesList, QueryParams } from './defs'
 import { merge, encode, decode, filterXSS, isMatchingGlob, traverse } from './utils'
 import { CustomError } from './inspector'
 
@@ -141,4 +141,39 @@ export function getDepth({ paths, context }: { paths: string[]; context: Context
     if (context.model === null) depth += 1
 
     return depth
+}
+
+export async function runHooks({
+    when,
+    hooks,
+    prismaClient,
+    QueryParams,
+    result,
+}: {
+    when: 'before' | 'after'
+    hooks: any
+    prismaClient: PrismaClient
+    QueryParams: QueryParams
+    result?: any
+}): Promise<void | any> {
+    const sendResult = typeof result !== 'undefined'
+
+    const matchingHooks = Object.keys(hooks).filter((hookPath: string) => {
+        return `${when}:${QueryParams.context.alias}/${QueryParams.context.model}` === hookPath
+    })
+
+    for (let index = 0; index < matchingHooks.length; index++) {
+        const hookPath = matchingHooks[index]
+
+        if (Object.prototype.hasOwnProperty.call(hooks, hookPath)) {
+            result = await hooks[hookPath]({
+                ...QueryParams,
+                ...(when === 'after' && { result }),
+                prismaClient,
+            })
+        }
+    }
+
+    console.log({ matchingHooks })
+    if (sendResult) return result
 }

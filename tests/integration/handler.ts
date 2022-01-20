@@ -28,6 +28,19 @@ export const main = async (event: any, context: any) => {
                 }
             },
         },
+        hooks: {
+            // Triggered after a Post is modified
+            'after:modify/post': async ({ prismaClient, prismaArgs, result }: AfterHookParams) => {
+                if (prismaArgs?.data?.title) {
+                    await prismaClient.post.create({
+                        data: {
+                            title: `Clone of ${prismaArgs.data.title}`,
+                        },
+                    })
+                }
+                return result
+            },
+        },
         shield: ({ authorization, identity }: QueryParams) => {
             const isAdmin = identity?.groups?.includes('admin')
             const isOwner = { owner: { cognitoSub: identity?.sub } }
@@ -52,17 +65,6 @@ export const main = async (event: any, context: any) => {
                 // Custom resolver `notify` is restricted to admins
                 'notify{,/**}': {
                     rule: isAdmin,
-                },
-            }
-        },
-        hooks: () => {
-            return {
-                // Triggered after a Post is modified
-                'after:modify/post': async ({ prismaClient, prismaArgs, result }: AfterHookParams) => {
-                    await prismaClient.hiddenModel.create({
-                        data: prismaArgs.data,
-                    })
-                    return result
                 },
             }
         },

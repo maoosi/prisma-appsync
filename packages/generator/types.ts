@@ -21,6 +21,7 @@ export type DMMFPAS_Model = {
     directives?: DMMFPAS_Directives
     isEditable: boolean
     idFields: string[]
+    operationFields: DMMFPAS_Field[]
     subscriptionFields: DMMFPAS_Field[]
 }
 

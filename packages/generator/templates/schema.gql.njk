@@ -17,10 +17,10 @@ type BatchPayload {{ directiveAliases.default | safe }} {
         {% endfor %}
     }
 
-    input {{ enum.name }}EnumFilterInput {
+    input {{ enum.name }}EnumFilter {
         equals: {{ enum.name }}
         in: [{{ enum.name }}!]
-        not: {{ enum.name }}EnumFilterInput
+        not: {{ enum.name }}EnumFilter
         notIn: [{{ enum.name }}!]
     }
 {% endfor %}
@@ -41,30 +41,45 @@ enum OrderByArg {
         }
     {% endif %}
 
-    input {{ model.name }}FilterRelationsInput {
-        every: {{ model.name }}WhereFilterInput
-        none: {{ model.name }}WhereFilterInput
-        some: {{ model.name }}WhereFilterInput
+    input {{ model.name }}Filter {
+        some: {{ model.name }}ScalarWhereInput
+        every: {{ model.name }}ScalarWhereInput
+        none: {{ model.name }}ScalarWhereInput
     }
-    
-    input {{ model.name }}WhereFilterInput {
-        OR: [{{ model.name }}WhereFilterInput]
-        NOT: [{{ model.name }}WhereFilterInput]
-        AND: [{{ model.name }}WhereFilterInput]
+
+    input {{ model.name }}RelationFilter {
+        is: {{ model.name }}ScalarWhereInput
+        isNot: {{ model.name }}ScalarWhereInput
+    }
+
+    input {{ model.name }}ScalarWhereInput {
+        {% for field in model.fields -%}
+            {% if not field.relation -%}
+                {% if field.scalar in ["Int", "Float", "AWSDateTime", "AWSJSON", "AWSEmail", "AWSURL", "Boolean", "String"] -%}
+                    {{ field.name }}: {{ field.scalar }}
+                {% endif -%}
+            {% endif -%}
+        {% endfor %}
+    }
+
+    input {{ model.name }}WhereInput {
+        OR: [{{ model.name }}WhereInput]
+        NOT: [{{ model.name }}WhereInput]
+        AND: [{{ model.name }}WhereInput]
         {% for field in model.fields -%}
             {% if not field.relation -%}
                 {% if field.isEnum -%}
-                    {{ field.name }}: {{ field.scalar }}EnumFilterInput
+                    {{ field.name }}: {{ field.scalar }}EnumFilter
                 {% elseif field.scalar in ["Int", "Float", "AWSDateTime", "AWSJSON", "AWSEmail", "AWSURL", "Boolean"] -%}
-                    {{ field.name }}: {{ field.scalar }}FilterInput
+                    {{ field.name }}: {{ field.scalar }}Filter
                 {% else -%}
-                    {{ field.name }}: StringFilterInput
+                    {{ field.name }}: StringFilter
                 {% endif -%}
             {% else -%}
                 {% if field.relation.kind === "one" -%}
-                    {{ field.name }}: {{ field.relation.type }}WhereFilterInput
+                    {{ field.name }}: {{ field.relation.type }}RelationFilter
                 {% else  -%}
-                    {{ field.name }}: {{ field.relation.type }}FilterRelationsInput
+                    {{ field.name }}: {{ field.relation.type }}Filter
                 {% endif -%}
             {% endif -%}
         {% endfor %}
@@ -86,6 +101,8 @@ enum OrderByArg {
         {% for field in model.fields -%}
             {% if not field.relation -%}
                 {{ field.name }}: OrderByArg
+            {% else %}
+                {{ field.name }}: {{ field.relation.type }}OrderByInput
             {% endif -%}
         {% endfor %}
     }
@@ -98,7 +115,7 @@ enum OrderByArg {
                         {{ field.scalar }}{% if field.isRequired -%}!{% endif %}
                 {% elseif field.isEditable and field.relation -%}
                     {{ field.name }}: 
-                        {{ field.relation.name }}CreateRelationsInput{% if field.isRequired -%}!{% endif %}
+                        {{ field.relation.name }}CreateRelationInput{% if field.isRequired -%}!{% endif %}
                 {% endif -%}
             {% endfor %}
         }
@@ -122,13 +139,21 @@ enum OrderByArg {
             {% endfor %}
         }
 
+        {% if model.operationFields  | length -%}
+        input {{ model.name }}OperationInput {
+            {% for field in model.operationFields -%}
+                {{ field.name }}: {{ field.scalar }}Operation
+            {% endfor %}
+        }
+        {% endif -%}
+
         input {{ model.name }}UpdateUniqueInput {
             data: {{ model.name }}UpdateInput!
             where: {{ model.name }}WhereUniqueInput!
         }
 
         input {{ model.name }}UpdateManyInput {
-            where: {{ model.name }}WhereFilterInput!
+            where: {{ model.name }}WhereInput!
             data: {{ model.name }}UpdateInput!
         }
 
@@ -154,12 +179,12 @@ enum OrderByArg {
     }
 
     input {{ model.name }}DeleteManyInput {
-        where: {{ model.name }}WhereFilterInput!
+        where: {{ model.name }}WhereInput!
     }
 
     {% for field in model.fields -%}
         {% if field.relation -%}
-            input {{ field.relation.name }}CreateRelationsInput {
+            input {{ field.relation.name }}CreateRelationInput {
                 {% if field.relation.kind === "one" -%}
                 create: {{ field.relation.type }}CreateInput
                 connect: {{ field.relation.type }}WhereUniqueInput
@@ -197,82 +222,99 @@ enum OrderByArg {
     {% endfor %}
 {% endfor %}
 
-input AWSDateTimeFilterInput {
+input IntOperation {
+    set: Int
+    increment: Int
+    decrement: Int
+    multiply: Int
+    divide: Int
+}
+
+input FloatOperation {
+    set: Float
+    increment: Float
+    decrement: Float
+    multiply: Float
+    divide: Float
+}
+
+input AWSDateTimeFilter {
     equals: AWSDateTime
     gt: AWSDateTime
     gte: AWSDateTime
     in: [AWSDateTime!]
     lt: AWSDateTime
     lte: AWSDateTime
-    not: AWSDateTimeFilterInput
+    not: AWSDateTimeFilter
     notIn: [AWSDateTime!]
 }
 
-input FloatFilterInput {
+input FloatFilter {
     equals: Float
     gt: Float
     gte: Float
     in: [Float!]
     lt: Float
     lte: Float
-    not: FloatFilterInput
+    not: FloatFilter
     notIn: [Float!]
 }
 
-input IntFilterInput {
+input IntFilter {
     equals: Int
     gt: Int
     gte: Int
     in: [Int!]
     lt: Int
     lte: Int
-    not: IntFilterInput
+    not: IntFilter
     notIn: [Int!]
 }
 
-input AWSJSONFilterInput {
+input AWSJSONFilter {
     contains: String
     endsWith: String
     equals: AWSJSON
     in: [AWSJSON!]
-    not: AWSJSONFilterInput
+    not: AWSJSONFilter
     notIn: [AWSJSON!]
     startsWith: String
 }
 
-input AWSEmailFilterInput {
+input AWSEmailFilter {
     contains: String
     endsWith: String
     equals: AWSEmail
     in: [AWSEmail!]
-    not: AWSEmailFilterInput
+    not: AWSEmailFilter
     notIn: [AWSEmail!]
     startsWith: String
 }
 
-input AWSURLFilterInput {
+input AWSURLFilter {
     contains: String
     endsWith: String
     equals: AWSURL
     in: [AWSURL!]
-    not: AWSURLFilterInput
+    not: AWSURLFilter
     notIn: [AWSURL!]
     startsWith: String
 }
 
-input StringFilterInput {
+input StringFilter {
     contains: String
     endsWith: String
     equals: String
     in: [String!]
-    not: StringFilterInput
+    not: StringFilter
     notIn: [String!]
     startsWith: String
+    mode: String
 }
 
-input BooleanFilterInput {
+input BooleanFilter {
     equals: Boolean
-    not: BooleanFilterInput
+    not: BooleanFilter
 }
 
 type Mutation {
@@ -296,14 +338,24 @@ type Mutation {
         """
         update{{ model.name }}(
             where: {{ model.name }}WhereUniqueInput!,
-            data: {{ model.name }}UpdateInput!
+            {% if model.operationFields  | length -%}
+            data: {{ model.name }}UpdateInput,
+            operation: {{ model.name }}OperationInput,
+            {% else %}
+            data: {{ model.name }}UpdateInput,
+            {% endif %}
         ): {{ model.name }} {{ model.directives.update | safe }}
         """
         Update multiple existing {{ model.name }} records.
         """
         updateMany{{ model.pluralizedName }}(
-            where: {{ model.name }}WhereFilterInput!,
-            data: {{ model.name }}UpdateInput!
+            where: {{ model.name }}WhereInput!,
+            {% if model.operationFields  | length -%}
+            data: {{ model.name }}UpdateInput,
+            operation: {{ model.name }}OperationInput,
+            {% else %}
+            data: {{ model.name }}UpdateInput,
+            {% endif %}
         ): BatchPayload {{ model.directives.updateMany | safe }}
         """
         Update an existing or create a new single {{ model.name }} record.
@@ -323,7 +375,7 @@ type Mutation {
         Delete multiple {{ model.name }} records.
         """
         deleteMany{{ model.pluralizedName }}(
-            where: {{ model.name }}WhereFilterInput!
+            where: {{ model.name }}WhereInput!
         ): BatchPayload {{ model.directives.deleteMany | safe }}
     {% endfor %}
 }
@@ -340,7 +392,7 @@ type Query {
         Find many {{ model.name }} records (optional query filters).
         """
         list{{ model.pluralizedName }}(
-            where: {{ model.name }}WhereFilterInput,
+            where: {{ model.name }}WhereInput,
             orderBy: [{{ model.name }}OrderByInput],
             skip: Int,
             take: Int
@@ -349,7 +401,7 @@ type Query {
         Count all {{ model.name }} records (optional query filters).
         """
         count{{ model.pluralizedName }}(
-            where: {{ model.name }}WhereFilterInput,
+            where: {{ model.name }}WhereInput,
             orderBy: [{{ model.name }}OrderByInput],
             skip: Int,
             take: Int

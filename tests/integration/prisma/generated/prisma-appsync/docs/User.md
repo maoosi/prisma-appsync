@@ -14,7 +14,7 @@ List of fields available in the `User` type.
 | uuid        | String               | true    | true              |
 | username    | String               | true    | true              |
 | email       | AWSEmail             | true    | true              |
-| hiddenField | String               | _false_ | true              |
+| hiddenField | String               | _false_ | _false_           |
 | role        | Role                 | _false_ | true              |
 | posts       | [[Post!]](./Post.md) | _false_ | _false_           |
 

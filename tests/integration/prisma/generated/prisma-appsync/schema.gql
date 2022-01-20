@@ -2,7 +2,7 @@ type User {
     uuid: String!
     username: String!
     email: AWSEmail!
-    hiddenField: String!
+    hiddenField: String
     role: Role!
     posts: [Post!]
 }
@@ -17,6 +17,7 @@ type Post {
     author: User
     authorUuid: String
     published: Boolean!
+    views: Int!
     lastSavedAt: AWSDateTime!
 }
 
@@ -29,10 +30,10 @@ enum Role {
     ADMIN
 }
 
-input RoleEnumFilterInput {
+input RoleEnumFilter {
     equals: Role
     in: [Role!]
-    not: RoleEnumFilterInput
+    not: RoleEnumFilter
     notIn: [Role!]
 }
 
@@ -41,22 +42,34 @@ enum OrderByArg {
     DESC
 }
 
-input UserFilterRelationsInput {
-    every: UserWhereFilterInput
-    none: UserWhereFilterInput
-    some: UserWhereFilterInput
+input UserFilter {
+    some: UserScalarWhereInput
+    every: UserScalarWhereInput
+    none: UserScalarWhereInput
 }
 
-input UserWhereFilterInput {
-    OR: [UserWhereFilterInput]
-    NOT: [UserWhereFilterInput]
-    AND: [UserWhereFilterInput]
-    uuid: StringFilterInput
-    username: StringFilterInput
-    email: AWSEmailFilterInput
-    hiddenField: StringFilterInput
-    role: RoleEnumFilterInput
-    posts: PostFilterRelationsInput
+input UserRelationFilter {
+    is: UserScalarWhereInput
+    isNot: UserScalarWhereInput
+}
+
+input UserScalarWhereInput {
+    uuid: String
+    username: String
+    email: AWSEmail
+    hiddenField: String
+}
+
+input UserWhereInput {
+    OR: [UserWhereInput]
+    NOT: [UserWhereInput]
+    AND: [UserWhereInput]
+    uuid: StringFilter
+    username: StringFilter
+    email: AWSEmailFilter
+    hiddenField: StringFilter
+    role: RoleEnumFilter
+    posts: PostFilter
 }
 
 input UserWhereUniqueInput {
@@ -71,22 +84,24 @@ input UserOrderByInput {
     email: OrderByArg
     hiddenField: OrderByArg
     role: OrderByArg
+
+    posts: PostOrderByInput
 }
 
 input UserCreateInput {
     uuid: String!
     username: String!
     email: AWSEmail!
-    hiddenField: String!
+    hiddenField: String
     role: Role!
-    posts: UserPostsCreateRelationsInput
+    posts: UserPostsCreateRelationInput
 }
 
 input UserCreateManyInput {
     uuid: String!
     username: String!
     email: AWSEmail!
-    hiddenField: String!
+    hiddenField: String
     role: Role!
 }
 
@@ -105,7 +120,7 @@ input UserUpdateUniqueInput {
 }
 
 input UserUpdateManyInput {
-    where: UserWhereFilterInput!
+    where: UserWhereInput!
     data: UserUpdateInput!
 }
 
@@ -130,10 +145,10 @@ input UserDeleteUniqueInput {
 }
 
 input UserDeleteManyInput {
-    where: UserWhereFilterInput!
+    where: UserWhereInput!
 }
 
-input UserPostsCreateRelationsInput {
+input UserPostsCreateRelationInput {
     create: [PostCreateInput]
     connect: [PostWhereUniqueInput]
     connectOrCreate: [PostConnectOrCreateInput]
@@ -152,17 +167,26 @@ input UserPostsUpdateRelationsInput {
     deleteMany: [PostDeleteManyInput]
 }
 
-input HiddenModelFilterRelationsInput {
-    every: HiddenModelWhereFilterInput
-    none: HiddenModelWhereFilterInput
-    some: HiddenModelWhereFilterInput
+input HiddenModelFilter {
+    some: HiddenModelScalarWhereInput
+    every: HiddenModelScalarWhereInput
+    none: HiddenModelScalarWhereInput
 }
 
-input HiddenModelWhereFilterInput {
-    OR: [HiddenModelWhereFilterInput]
-    NOT: [HiddenModelWhereFilterInput]
-    AND: [HiddenModelWhereFilterInput]
-    id: IntFilterInput
+input HiddenModelRelationFilter {
+    is: HiddenModelScalarWhereInput
+    isNot: HiddenModelScalarWhereInput
+}
+
+input HiddenModelScalarWhereInput {
+    id: Int
+}
+
+input HiddenModelWhereInput {
+    OR: [HiddenModelWhereInput]
+    NOT: [HiddenModelWhereInput]
+    AND: [HiddenModelWhereInput]
+    id: IntFilter
 }
 
 input HiddenModelWhereUniqueInput {
@@ -178,25 +202,40 @@ input HiddenModelDeleteUniqueInput {
 }
 
 input HiddenModelDeleteManyInput {
-    where: HiddenModelWhereFilterInput!
+    where: HiddenModelWhereInput!
 }
 
-input PostFilterRelationsInput {
-    every: PostWhereFilterInput
-    none: PostWhereFilterInput
-    some: PostWhereFilterInput
+input PostFilter {
+    some: PostScalarWhereInput
+    every: PostScalarWhereInput
+    none: PostScalarWhereInput
 }
 
-input PostWhereFilterInput {
-    OR: [PostWhereFilterInput]
-    NOT: [PostWhereFilterInput]
-    AND: [PostWhereFilterInput]
-    id: IntFilterInput
-    title: StringFilterInput
-    author: UserWhereFilterInput
-    authorUuid: StringFilterInput
-    published: BooleanFilterInput
-    lastSavedAt: AWSDateTimeFilterInput
+input PostRelationFilter {
+    is: PostScalarWhereInput
+    isNot: PostScalarWhereInput
+}
+
+input PostScalarWhereInput {
+    id: Int
+    title: String
+    authorUuid: String
+    published: Boolean
+    views: Int
+    lastSavedAt: AWSDateTime
+}
+
+input PostWhereInput {
+    OR: [PostWhereInput]
+    NOT: [PostWhereInput]
+    AND: [PostWhereInput]
+    id: IntFilter
+    title: StringFilter
+    author: UserRelationFilter
+    authorUuid: StringFilter
+    published: BooleanFilter
+    views: IntFilter
+    lastSavedAt: AWSDateTimeFilter
 }
 
 input PostWhereUniqueInput {
@@ -207,21 +246,26 @@ input PostWhereUniqueInput {
 input PostOrderByInput {
     id: OrderByArg
     title: OrderByArg
+
+    author: UserOrderByInput
     authorUuid: OrderByArg
     published: OrderByArg
+    views: OrderByArg
     lastSavedAt: OrderByArg
 }
 
 input PostCreateInput {
     title: String!
-    author: PostAuthorCreateRelationsInput
+    author: PostAuthorCreateRelationInput
     published: Boolean!
+    views: Int!
     lastSavedAt: AWSDateTime!
 }
 
 input PostCreateManyInput {
     title: String!
     published: Boolean!
+    views: Int!
     lastSavedAt: AWSDateTime!
 }
 
@@ -229,16 +273,20 @@ input PostUpdateInput {
     title: String
     author: PostAuthorUpdateRelationsInput
     published: Boolean
+    views: Int
     lastSavedAt: AWSDateTime
 }
 
+input PostOperationInput {
+    views: IntOperation
+}
 input PostUpdateUniqueInput {
     data: PostUpdateInput!
     where: PostWhereUniqueInput!
 }
 
 input PostUpdateManyInput {
-    where: PostWhereFilterInput!
+    where: PostWhereInput!
     data: PostUpdateInput!
 }
 
@@ -263,10 +311,10 @@ input PostDeleteUniqueInput {
 }
 
 input PostDeleteManyInput {
-    where: PostWhereFilterInput!
+    where: PostWhereInput!
 }
 
-input PostAuthorCreateRelationsInput {
+input PostAuthorCreateRelationInput {
     create: UserCreateInput
     connect: UserWhereUniqueInput
     connectOrCreate: UserConnectOrCreateInput
@@ -282,82 +330,99 @@ input PostAuthorUpdateRelationsInput {
     disconnect: Boolean
 }
 
-input AWSDateTimeFilterInput {
+input IntOperation {
+    set: Int
+    increment: Int
+    decrement: Int
+    multiply: Int
+    divide: Int
+}
+
+input FloatOperation {
+    set: Float
+    increment: Float
+    decrement: Float
+    multiply: Float
+    divide: Float
+}
+
+input AWSDateTimeFilter {
     equals: AWSDateTime
     gt: AWSDateTime
     gte: AWSDateTime
     in: [AWSDateTime!]
     lt: AWSDateTime
     lte: AWSDateTime
-    not: AWSDateTimeFilterInput
+    not: AWSDateTimeFilter
     notIn: [AWSDateTime!]
 }
 
-input FloatFilterInput {
+input FloatFilter {
     equals: Float
     gt: Float
     gte: Float
     in: [Float!]
     lt: Float
     lte: Float
-    not: FloatFilterInput
+    not: FloatFilter
     notIn: [Float!]
 }
 
-input IntFilterInput {
+input IntFilter {
     equals: Int
     gt: Int
     gte: Int
     in: [Int!]
     lt: Int
     lte: Int
-    not: IntFilterInput
+    not: IntFilter
     notIn: [Int!]
 }
 
-input AWSJSONFilterInput {
+input AWSJSONFilter {
     contains: String
     endsWith: String
     equals: AWSJSON
     in: [AWSJSON!]
-    not: AWSJSONFilterInput
+    not: AWSJSONFilter
     notIn: [AWSJSON!]
     startsWith: String
 }
 
-input AWSEmailFilterInput {
+input AWSEmailFilter {
     contains: String
     endsWith: String
     equals: AWSEmail
     in: [AWSEmail!]
-    not: AWSEmailFilterInput
+    not: AWSEmailFilter
     notIn: [AWSEmail!]
     startsWith: String
 }
 
-input AWSURLFilterInput {
+input AWSURLFilter {
     contains: String
     endsWith: String
     equals: AWSURL
     in: [AWSURL!]
-    not: AWSURLFilterInput
+    not: AWSURLFilter
     notIn: [AWSURL!]
     startsWith: String
 }
 
-input StringFilterInput {
+input StringFilter {
     contains: String
     endsWith: String
     equals: String
     in: [String!]
-    not: StringFilterInput
+    not: StringFilter
     notIn: [String!]
     startsWith: String
+    mode: String
 }
 
-input BooleanFilterInput {
+input BooleanFilter {
     equals: Boolean
-    not: BooleanFilterInput
+    not: BooleanFilter
 }
 
 type Mutation {
@@ -377,14 +442,16 @@ type Mutation {
     """
     updateUser(
         where: UserWhereUniqueInput!
-        data: UserUpdateInput!
+
+        data: UserUpdateInput
     ): User
     """
     Update multiple existing User records.
     """
     updateManyUsers(
-        where: UserWhereFilterInput!
-        data: UserUpdateInput!
+        where: UserWhereInput!
+
+        data: UserUpdateInput
     ): BatchPayload
     """
     Update an existing or create a new single User record.
@@ -400,9 +467,7 @@ type Mutation {
     """
     Delete multiple User records.
     """
-    deleteManyUsers(
-        where: UserWhereFilterInput!
-    ): BatchPayload
+    deleteManyUsers(where: UserWhereInput!): BatchPayload
 
     """
     Delete a single HiddenModel record.
@@ -414,7 +479,7 @@ type Mutation {
     Delete multiple HiddenModel records.
     """
     deleteManyHiddenModels(
-        where: HiddenModelWhereFilterInput!
+        where: HiddenModelWhereInput!
     ): BatchPayload
 
     """
@@ -433,14 +498,16 @@ type Mutation {
     """
     updatePost(
         where: PostWhereUniqueInput!
-        data: PostUpdateInput!
+        data: PostUpdateInput
+        operation: PostOperationInput
     ): Post
     """
     Update multiple existing Post records.
     """
     updateManyPosts(
-        where: PostWhereFilterInput!
-        data: PostUpdateInput!
+        where: PostWhereInput!
+        data: PostUpdateInput
+        operation: PostOperationInput
     ): BatchPayload
     """
     Update an existing or create a new single Post record.
@@ -456,9 +523,7 @@ type Mutation {
     """
     Delete multiple Post records.
     """
-    deleteManyPosts(
-        where: PostWhereFilterInput!
-    ): BatchPayload
+    deleteManyPosts(where: PostWhereInput!): BatchPayload
 }
 
 type Query {
@@ -470,7 +535,7 @@ type Query {
     Find many User records (optional query filters).
     """
     listUsers(
-        where: UserWhereFilterInput
+        where: UserWhereInput
         orderBy: [UserOrderByInput]
         skip: Int
         take: Int
@@ -479,7 +544,7 @@ type Query {
     Count all User records (optional query filters).
     """
     countUsers(
-        where: UserWhereFilterInput
+        where: UserWhereInput
         orderBy: [UserOrderByInput]
         skip: Int
         take: Int
@@ -495,7 +560,7 @@ type Query {
     Find many HiddenModel records (optional query filters).
     """
     listHiddenModels(
-        where: HiddenModelWhereFilterInput
+        where: HiddenModelWhereInput
         orderBy: [HiddenModelOrderByInput]
         skip: Int
         take: Int
@@ -504,7 +569,7 @@ type Query {
     Count all HiddenModel records (optional query filters).
     """
     countHiddenModels(
-        where: HiddenModelWhereFilterInput
+        where: HiddenModelWhereInput
         orderBy: [HiddenModelOrderByInput]
         skip: Int
         take: Int
@@ -518,7 +583,7 @@ type Query {
     Find many Post records (optional query filters).
     """
     listPosts(
-        where: PostWhereFilterInput
+        where: PostWhereInput
         orderBy: [PostOrderByInput]
         skip: Int
         take: Int
@@ -527,7 +592,7 @@ type Query {
     Count all Post records (optional query filters).
     """
     countPosts(
-        where: PostWhereFilterInput
+        where: PostWhereInput
         orderBy: [PostOrderByInput]
         skip: Int
         take: Int

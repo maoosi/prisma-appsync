@@ -148,7 +148,7 @@ export type ResolveParams<Models extends string, CustomResolvers extends string>
         [resolver in CustomResolvers]: ((props: QueryParamsCustom) => Promise<any>) | boolean
     }
     shield?: (props: QueryParams) => Shield
-    hooks?: () => Hooks<Models, CustomResolvers>
+    hooks?: Hooks<Models, CustomResolvers>
 }
 
 // Prisma-related Types
@@ -257,6 +257,28 @@ export const ReservedPrismaKeys = [
     'deleteMany',
     'select',
     'include',
+    'equals',
+    'in',
+    'not',
+    'notIn',
+    'count',
+    'some',
+    'every',
+    'none',
+    'is',
+    'isNot',
+    'OR',
+    'NOT',
+    'AND',
+    'gt',
+    'gte',
+    'lt',
+    'lte',
+    'operations',
+    'contains',
+    'endsWith',
+    'startsWith',
+    'mode',
 ]
 
 // Prisma-AppSync Client Constants
