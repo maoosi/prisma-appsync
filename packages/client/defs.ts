@@ -365,6 +365,8 @@ export const ActionsList = actionsListSingle.filter((item, pos) => actionsListSi
 
 export const BatchActionsList = actionsListMultiple.filter((item, pos) => actionsListMultiple.indexOf(item) === pos)
 
+export const DebugTestingKey = '__prismaAppsync'
+
 /**
  * ### Authorizations
  *

@@ -65,14 +65,14 @@ generatorHandler({
                 }
 
                 // Generate schema
-                await compiler.makeSchema(options.generator.config.customSchema)
+                await compiler.makeSchema(options.generator.config.extendSchema)
 
                 if (debug) {
                     console.log(`[Prisma-AppSync] Generating resolvers.`)
                 }
 
                 // Generate resolvers
-                await compiler.makeResolvers(options.generator.config.customResolvers)
+                await compiler.makeResolvers(options.generator.config.extendResolvers)
 
                 if (debug) {
                     console.log(`[Prisma-AppSync] Generating models mapping.`)

@@ -88,3 +88,16 @@
 - typeName: Mutation
   fieldName: deleteManyPosts
   dataSource: prisma-appsync
+- typeName: Mutation
+  fieldName: notify
+  requestMappingTemplate: >-
+      {
+          "version": "2017-02-28",
+          "payload": {
+              "identity": $util.toJson($context.identity),
+              "arguments": $util.toJson($context.arguments)
+          }
+      }
+  responseMappingTemplate: >-
+      $util.toJson($context.arguments)
+  dataSource: none

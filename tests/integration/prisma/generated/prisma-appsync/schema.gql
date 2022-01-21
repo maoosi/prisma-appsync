@@ -84,7 +84,6 @@ input UserOrderByInput {
     email: OrderByArg
     hiddenField: OrderByArg
     role: OrderByArg
-
     posts: PostOrderByInput
 }
 
@@ -246,7 +245,6 @@ input PostWhereUniqueInput {
 input PostOrderByInput {
     id: OrderByArg
     title: OrderByArg
-
     author: UserOrderByInput
     authorUuid: OrderByArg
     published: OrderByArg
@@ -280,6 +278,7 @@ input PostUpdateInput {
 input PostOperationInput {
     views: IntOperation
 }
+
 input PostUpdateUniqueInput {
     data: PostUpdateInput!
     where: PostWhereUniqueInput!
@@ -426,123 +425,101 @@ input BooleanFilter {
 }
 
 type Mutation {
-    """
-    Create a new single User record.
-    """
+    # Create a new single User record.
     createUser(data: UserCreateInput!): User
-    """
-    Create multiple new User records.
-    """
+
+    # Create multiple new User records.
     createManyUsers(
         data: [UserCreateManyInput!]
         skipDuplicates: Boolean
     ): BatchPayload
-    """
-    Update an existing single User record.
-    """
+
+    # Update an existing single User record.
     updateUser(
         where: UserWhereUniqueInput!
-
         data: UserUpdateInput
     ): User
-    """
-    Update multiple existing User records.
-    """
+
+    # Update multiple existing User records.
     updateManyUsers(
         where: UserWhereInput!
-
         data: UserUpdateInput
     ): BatchPayload
-    """
-    Update an existing or create a new single User record.
-    """
+
+    # Update an existing or create a new single User record.
     upsertUser(
         data: UserUpdateInput!
         where: UserWhereUniqueInput!
     ): User
-    """
-    Delete a single User record.
-    """
+
+    # Delete a single User record.
     deleteUser(where: UserWhereUniqueInput!): User
-    """
-    Delete multiple User records.
-    """
+
+    # Delete multiple User records.
     deleteManyUsers(where: UserWhereInput!): BatchPayload
 
-    """
-    Delete a single HiddenModel record.
-    """
+    # Delete a single HiddenModel record.
     deleteHiddenModel(
         where: HiddenModelWhereUniqueInput!
     ): HiddenModel
-    """
-    Delete multiple HiddenModel records.
-    """
+
+    # Delete multiple HiddenModel records.
     deleteManyHiddenModels(
         where: HiddenModelWhereInput!
     ): BatchPayload
 
-    """
-    Create a new single Post record.
-    """
+    # Create a new single Post record.
     createPost(data: PostCreateInput!): Post
-    """
-    Create multiple new Post records.
-    """
+
+    # Create multiple new Post records.
     createManyPosts(
         data: [PostCreateManyInput!]
         skipDuplicates: Boolean
     ): BatchPayload
-    """
-    Update an existing single Post record.
-    """
+
+    # Update an existing single Post record.
     updatePost(
         where: PostWhereUniqueInput!
         data: PostUpdateInput
         operation: PostOperationInput
     ): Post
-    """
-    Update multiple existing Post records.
-    """
+
+    # Update multiple existing Post records.
     updateManyPosts(
         where: PostWhereInput!
         data: PostUpdateInput
         operation: PostOperationInput
     ): BatchPayload
-    """
-    Update an existing or create a new single Post record.
-    """
+
+    # Update an existing or create a new single Post record.
     upsertPost(
         data: PostUpdateInput!
         where: PostWhereUniqueInput!
     ): Post
-    """
-    Delete a single Post record.
-    """
+
+    # Delete a single Post record.
     deletePost(where: PostWhereUniqueInput!): Post
-    """
-    Delete multiple Post records.
-    """
+
+    # Delete multiple Post records.
     deleteManyPosts(where: PostWhereInput!): BatchPayload
+
+    # Send a notification.
+    notify(message: String!): PublishNotification
 }
 
 type Query {
-    """
-    Find a single User record by unique identifier.
-    """
+    # Find a single User record by unique identifier.
     getUser(where: UserWhereUniqueInput!): User
-    """
-    Find many User records (optional query filters).
-    """
+
+    # Find many User records (optional query filters).
     listUsers(
         where: UserWhereInput
         orderBy: [UserOrderByInput]
         skip: Int
         take: Int
     ): [User]
-    """
-    Count all User records (optional query filters).
-    """
+
+    # Count all User records (optional query filters).
     countUsers(
         where: UserWhereInput
         orderBy: [UserOrderByInput]
@@ -550,24 +527,20 @@ type Query {
         take: Int
     ): Int
 
-    """
-    Find a single HiddenModel record by unique identifier.
-    """
+    # Find a single HiddenModel record by unique identifier.
     getHiddenModel(
         where: HiddenModelWhereUniqueInput!
     ): HiddenModel
-    """
-    Find many HiddenModel records (optional query filters).
-    """
+
+    # Find many HiddenModel records (optional query filters).
     listHiddenModels(
         where: HiddenModelWhereInput
         orderBy: [HiddenModelOrderByInput]
         skip: Int
         take: Int
     ): [HiddenModel]
-    """
-    Count all HiddenModel records (optional query filters).
-    """
+
+    # Count all HiddenModel records (optional query filters).
     countHiddenModels(
         where: HiddenModelWhereInput
         orderBy: [HiddenModelOrderByInput]
@@ -575,22 +548,18 @@ type Query {
         take: Int
     ): Int
 
-    """
-    Find a single Post record by unique identifier.
-    """
+    # Find a single Post record by unique identifier.
     getPost(where: PostWhereUniqueInput!): Post
-    """
-    Find many Post records (optional query filters).
-    """
+
+    # Find many Post records (optional query filters).
     listPosts(
         where: PostWhereInput
         orderBy: [PostOrderByInput]
         skip: Int
         take: Int
     ): [Post]
-    """
-    Count all Post records (optional query filters).
-    """
+
+    # Count all Post records (optional query filters).
     countPosts(
         where: PostWhereInput
         orderBy: [PostOrderByInput]
@@ -600,41 +569,35 @@ type Query {
 }
 
 type Subscription {
-    """
-    Triggered from `createUser` mutation (excl. `createManyUsers` and `upsertUser`).
-    """
+    # Triggered from `createUser` mutation (excl. `createManyUsers` and `upsertUser`).
     onCreatedUser(
         uuid: String
         username: String
         email: AWSEmail
     ): User @aws_subscribe(mutations: ["createUser"])
-    """
-    Triggered from `updateUser` mutation (excl. `updateManyUsers` and `upsertUser`).
-    """
+
+    # Triggered from `updateUser` mutation (excl. `updateManyUsers` and `upsertUser`).
     onUpdatedUser(
         uuid: String
         username: String
         email: AWSEmail
     ): User @aws_subscribe(mutations: ["updateUser"])
-    """
-    Triggered from `upsertUser` mutation.
-    """
+
+    # Triggered from `upsertUser` mutation.
     onUpsertedUser(
         uuid: String
         username: String
         email: AWSEmail
     ): User @aws_subscribe(mutations: ["upsertUser"])
-    """
-    Triggered from `deleteUser` mutation (excl. `deleteManyUsers`).
-    """
+
+    # Triggered from `deleteUser` mutation (excl. `deleteManyUsers`).
     onDeletedUser(
         uuid: String
         username: String
         email: AWSEmail
     ): User @aws_subscribe(mutations: ["deleteUser"])
-    """
-    Triggered from ANY SINGLE record mutation (excl. `on*ManyUsers`).
-    """
+
+    # Triggered from ANY SINGLE record mutation (excl. `on*ManyUsers`).
     onMutatedUser(
         uuid: String
         username: String
@@ -648,19 +611,16 @@ type Subscription {
                 "deleteUser"
             ]
         )
-    """
-    Triggered from `createManyUsers` mutation.
-    """
+
+    # Triggered from `createManyUsers` mutation.
     onCreatedManyUsers: BatchPayload
         @aws_subscribe(mutations: ["createManyUsers"])
-    """
-    Triggered from `updateManyUsers` mutation.
-    """
+
+    # Triggered from `updateManyUsers` mutation.
     onUpdatedManyUsers: BatchPayload
         @aws_subscribe(mutations: ["updateManyUsers"])
-    """
-    Triggered from ANY MULTIPLE records mutation (excl. single record mutations).
-    """
+
+    # Triggered from ANY MULTIPLE records mutation (excl. single record mutations).
     onMutatedManyUsers: BatchPayload
         @aws_subscribe(
             mutations: [
@@ -669,48 +629,38 @@ type Subscription {
                 "deleteManyUsers"
             ]
         )
-    """
-    Triggered from `deleteManyUsers` mutation.
-    """
+
+    # Triggered from `deleteManyUsers` mutation.
     onDeletedManyUsers: BatchPayload
         @aws_subscribe(mutations: ["deleteManyUsers"])
 
-    """
-    Triggered from `deleteHiddenModel` mutation (excl. `deleteManyHiddenModels`).
-    """
+    # Triggered from `deleteHiddenModel` mutation (excl. `deleteManyHiddenModels`).
     onDeletedHiddenModel(id: Int): HiddenModel
         @aws_subscribe(mutations: ["deleteHiddenModel"])
-    """
-    Triggered from `deleteManyHiddenModels` mutation.
-    """
+
+    # Triggered from `deleteManyHiddenModels` mutation.
     onDeletedManyHiddenModels: BatchPayload
         @aws_subscribe(
             mutations: ["deleteManyHiddenModels"]
         )
 
-    """
-    Triggered from `createPost` mutation (excl. `createManyPosts` and `upsertPost`).
-    """
+    # Triggered from `createPost` mutation (excl. `createManyPosts` and `upsertPost`).
     onCreatedPost(id: Int, authorUuid: String): Post
         @aws_subscribe(mutations: ["createPost"])
-    """
-    Triggered from `updatePost` mutation (excl. `updateManyPosts` and `upsertPost`).
-    """
+
+    # Triggered from `updatePost` mutation (excl. `updateManyPosts` and `upsertPost`).
     onUpdatedPost(id: Int, authorUuid: String): Post
         @aws_subscribe(mutations: ["updatePost"])
-    """
-    Triggered from `upsertPost` mutation.
-    """
+
+    # Triggered from `upsertPost` mutation.
     onUpsertedPost(id: Int, authorUuid: String): Post
         @aws_subscribe(mutations: ["upsertPost"])
-    """
-    Triggered from `deletePost` mutation (excl. `deleteManyPosts`).
-    """
+
+    # Triggered from `deletePost` mutation (excl. `deleteManyPosts`).
     onDeletedPost(id: Int, authorUuid: String): Post
         @aws_subscribe(mutations: ["deletePost"])
-    """
-    Triggered from ANY SINGLE record mutation (excl. `on*ManyPosts`).
-    """
+
+    # Triggered from ANY SINGLE record mutation (excl. `on*ManyPosts`).
     onMutatedPost(id: Int, authorUuid: String): Post
         @aws_subscribe(
             mutations: [
@@ -720,19 +670,16 @@ type Subscription {
                 "deletePost"
             ]
         )
-    """
-    Triggered from `createManyPosts` mutation.
-    """
+
+    # Triggered from `createManyPosts` mutation.
     onCreatedManyPosts: BatchPayload
         @aws_subscribe(mutations: ["createManyPosts"])
-    """
-    Triggered from `updateManyPosts` mutation.
-    """
+
+    # Triggered from `updateManyPosts` mutation.
     onUpdatedManyPosts: BatchPayload
         @aws_subscribe(mutations: ["updateManyPosts"])
-    """
-    Triggered from ANY MULTIPLE records mutation (excl. single record mutations).
-    """
+
+    # Triggered from ANY MULTIPLE records mutation (excl. single record mutations).
     onMutatedManyPosts: BatchPayload
         @aws_subscribe(
             mutations: [
@@ -741,9 +688,16 @@ type Subscription {
                 "deleteManyPosts"
             ]
         )
-    """
-    Triggered from `deleteManyPosts` mutation.
-    """
+
+    # Triggered from `deleteManyPosts` mutation.
     onDeletedManyPosts: BatchPayload
         @aws_subscribe(mutations: ["deleteManyPosts"])
+
+    # Triggered from `notify` mutation.
+    onNotification: PublishNotification
+        @aws_subscribe(mutations: ["notify"])
+}
+
+type PublishNotification {
+    message: String!
 }

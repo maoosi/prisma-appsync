@@ -19,6 +19,7 @@ import {
     Authorization,
     Authorizations,
     GraphQLType,
+    DebugTestingKey,
 } from './defs'
 
 /**
@@ -98,7 +99,7 @@ export function addNullables(data: any): any {
     return traverse(data, (value, key) => {
         let excludeChilds = false
 
-        if (typeof key === 'string' && key === '__prismaAppsync') {
+        if (typeof key === 'string' && key === DebugTestingKey) {
             excludeChilds = true
         }
         if (value === undefined) {

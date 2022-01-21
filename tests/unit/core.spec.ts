@@ -1,3 +1,4 @@
+import { describe, expect, test } from 'vitest'
 import { PrismaAppSync } from '../../packages/client'
 import { mockLambdaEvent, mockIdentity } from '../integration/appsync'
 import { Authorizations, Actions, ActionsAliases } from '../../packages/client/defs'

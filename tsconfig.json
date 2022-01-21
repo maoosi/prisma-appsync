@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
         "baseUrl": ".",
-        "types": ["jest", "node", "lodash"],
+        "types": ["node", "lodash"],
         "esModuleInterop": true,
         "moduleResolution": "node",
         "resolveJsonModule": true,
@@ -11,5 +11,5 @@
         "forceConsistentCasingInFileNames": true,
         "noImplicitAny": false
     },
-    "exclude": ["dist", "node_modules", "jest.config.js"]
+    "exclude": ["dist", "node_modules"]
 }

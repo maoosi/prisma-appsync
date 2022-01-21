@@ -1,6 +1,14 @@
-import { PrismaClient, ShieldAuthorization, Shield, Context, ActionsAliasesList, QueryParams } from './defs'
+import {
+    PrismaClient,
+    ShieldAuthorization,
+    Shield,
+    Context,
+    ActionsAliasesList,
+    QueryParams,
+    DebugTestingKey,
+} from './defs'
 import { merge, encode, decode, filterXSS, isMatchingGlob, traverse } from './utils'
-import { CustomError } from './inspector'
+import { CustomError, inspect, debug } from './inspector'
 
 /**
  * #### Sanitize data (parse xss + encode html).
@@ -12,7 +20,7 @@ export function sanitize(data: any): any {
     return traverse(data, (value, key) => {
         let excludeChilds = false
 
-        if (typeof key === 'string' && key === '__prismaAppsync') {
+        if (typeof key === 'string' && key === DebugTestingKey) {
             excludeChilds = true
         }
         if (typeof value === 'string') {
@@ -33,7 +41,7 @@ export function clarify(data: any): any {
     return traverse(data, (value, key) => {
         let excludeChilds = false
 
-        if (typeof key === 'string' && key === '__prismaAppsync') {
+        if (typeof key === 'string' && key === DebugTestingKey) {
             excludeChilds = true
         }
         if (typeof value === 'string') {
@@ -143,6 +151,17 @@ export function getDepth({ paths, context }: { paths: string[]; context: Context
     return depth
 }
 
+/**
+ * #### Execute hooks that apply to a given Query.
+ *
+ * @param {any} options
+ * @param {'before' | 'after'} options.when
+ * @param {any} options.hooks
+ * @param {PrismaClient} options.prismaClient
+ * @param {QueryParams} options.QueryParams
+ * @param {any | any[]} options.result
+ * @returns Promise<void | any>
+ */
 export async function runHooks({
     when,
     hooks,
@@ -154,26 +173,38 @@ export async function runHooks({
     hooks: any
     prismaClient: PrismaClient
     QueryParams: QueryParams
-    result?: any
+    result?: any | any[]
 }): Promise<void | any> {
-    const sendResult = typeof result !== 'undefined'
+    const sendResult = typeof result !== 'undefined' && when === 'after'
 
     const matchingHooks = Object.keys(hooks).filter((hookPath: string) => {
-        return `${when}:${QueryParams.context.alias}/${QueryParams.context.model}` === hookPath
+        const hookWhen = hookPath.split(':')[0]
+        const hookGlob = hookPath.split(':')[1]
+
+        const currentPath =
+            QueryParams.context.alias === 'custom'
+                ? `${QueryParams.context.action}`
+                : `${QueryParams.context.alias}/${QueryParams.context.model}`
+
+        return hookWhen === when && isMatchingGlob(currentPath, hookGlob)
     })
 
-    for (let index = 0; index < matchingHooks.length; index++) {
-        const hookPath = matchingHooks[index]
+    if (matchingHooks.length > 0) {
+        debug(`Triggering hooks: "${inspect(matchingHooks)}".`)
 
-        if (Object.prototype.hasOwnProperty.call(hooks, hookPath)) {
-            result = await hooks[hookPath]({
-                ...QueryParams,
-                ...(when === 'after' && { result }),
-                prismaClient,
-            })
+        for (let index = 0; index < matchingHooks.length; index++) {
+            const hookPath = matchingHooks[index]
+
+            if (Object.prototype.hasOwnProperty.call(hooks, hookPath)) {
+                const hookResult = await hooks[hookPath]({
+                    ...QueryParams,
+                    ...(sendResult && { result }),
+                    prismaClient,
+                })
+                if (sendResult) result = hookResult
+            }
         }
     }
 
-    console.log({ matchingHooks })
     if (sendResult) return result
 }

@@ -1,3 +1,5 @@
+import { describe, expect } from 'vitest'
+import { testEach } from './_helpers'
 import * as queries from '../../packages/client/resolver'
 import { QueryParams, Authorizations, Actions, ActionsAliases } from '../../packages/client/defs'
 import { mockIdentity } from '../integration/appsync'
@@ -144,7 +146,7 @@ describe('CLIENT #queries', () => {
         return [test.name, test.prismaQuery, test.expectedResult]
     })
 
-    test.each(cases)('expect "%s" to call "%s" Prisma Query', async (name, prismaQuery, expectedResult) => {
+    testEach(cases)('expect "{0}" to call "{1}" Prisma Query', async (name, prismaQuery, expectedResult) => {
         const result = await queries[name](createPrismaClient(query.context.model, prismaQuery), query)
         expect(result).toEqual(expectedResult)
     })

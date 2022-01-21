@@ -6,6 +6,7 @@ import {
     ShieldAuthorization,
     ResolveParams,
     BatchActionsList,
+    DebugTestingKey,
 } from './defs'
 import { parseError, inspect, debug, CustomError } from './inspector'
 import { getShieldAuthorization, getDepth, clarify, runHooks } from './guard'
@@ -223,7 +224,7 @@ export class PrismaAppSync {
 
                             return { ...a, [v]: String(value) }
                         }, {}),
-                        __prismaAppsync: {
+                        [DebugTestingKey]: {
                             QueryParams,
                         },
                     }

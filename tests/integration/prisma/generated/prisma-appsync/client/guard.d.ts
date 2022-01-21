@@ -39,10 +39,21 @@ export declare function getDepth({ paths, context }: {
     paths: string[];
     context: Context;
 }): number;
+/**
+ * #### Execute hooks that apply to a given Query.
+ *
+ * @param {any} options
+ * @param {'before' | 'after'} options.when
+ * @param {any} options.hooks
+ * @param {PrismaClient} options.prismaClient
+ * @param {QueryParams} options.QueryParams
+ * @param {any | any[]} options.result
+ * @returns Promise<void | any>
+ */
 export declare function runHooks({ when, hooks, prismaClient, QueryParams, result, }: {
     when: 'before' | 'after';
     hooks: any;
     prismaClient: PrismaClient;
     QueryParams: QueryParams;
-    result?: any;
+    result?: any | any[];
 }): Promise<void | any>;

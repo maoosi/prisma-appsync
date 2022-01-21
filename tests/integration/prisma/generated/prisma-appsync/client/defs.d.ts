@@ -235,6 +235,7 @@ export declare const ActionsAliasesList: {
 };
 export declare const ActionsList: string[];
 export declare const BatchActionsList: string[];
+export declare const DebugTestingKey = "__prismaAppsync";
 /**
  * ### Authorizations
  *

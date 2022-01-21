@@ -1,3 +1,5 @@
+import { describe, expect, test } from 'vitest'
+import { testEach } from './_helpers'
 import {
     getAction,
     getOperation,
@@ -84,7 +86,7 @@ describe('CLIENT #adapter', () => {
         const cases = Object.values(Actions).map((action: Action) => {
             return [`${action}People`, `${action}People`]
         })
-        test.each(cases)('when fieldName is "%s", expect operation to equal "%s"', (fieldName, expected) => {
+        testEach(cases)('when fieldName is "{0}", expect operation to equal "{1}"', (fieldName, expected) => {
             const result = getOperation({ fieldName })
             expect(result).toEqual(expected)
         })
@@ -94,7 +96,7 @@ describe('CLIENT #adapter', () => {
         const cases = Object.values(Actions).map((action: Action) => {
             return [`${action}People`, action]
         })
-        test.each(cases)('when operation is "%s", expect action to equal "%s"', (operation: any, expected) => {
+        testEach(cases)('when operation is "{0}", expect action to equal "{1}"', (operation: any, expected) => {
             const result = getAction({ operation })
             expect(result).toEqual(expected)
         })
@@ -104,7 +106,7 @@ describe('CLIENT #adapter', () => {
         const cases = Object.values(Actions).map((action: Action) => {
             return [action, 'People']
         })
-        test.each(cases)('when operation is "%sPeople", expect model to equal "%s"', (action: Action, expected) => {
+        testEach(cases)('when operation is "{0}People", expect model to equal "{1}"', (action: Action, expected) => {
             const result = getModel({ operation: `${action}People`, action: action })
             expect(result).toEqual(expected)
         })

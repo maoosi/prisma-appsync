@@ -3,10 +3,15 @@ type PublishNotification {
 }
 
 extend type Mutation {
+    """
+    Send a notification.
+    """
     notify(message: String!): PublishNotification
 }
 
 extend type Subscription {
-    onNotification: PublishNotification
-        @aws_subscribe(mutations: ["notify"])
+    """
+    Triggered from `notify` mutation.
+    """
+    onNotification: PublishNotification @aws_subscribe(mutations: ["notify"])
 }
