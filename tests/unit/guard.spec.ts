@@ -243,7 +243,7 @@ describe('CLIENT #guard', () => {
                     fields: ['message'],
                     identity: {},
                     operation: 'notify',
-                    paths: ['/notify', '/get/notify/message'],
+                    paths: ['/notify/message'],
                     prismaArgs: {
                         select: { message: true },
                     },
@@ -252,6 +252,43 @@ describe('CLIENT #guard', () => {
             })
 
             expect(testValue).toEqual('before:notify')
+        })
+
+        test('expect "before:**" to run _before_ everything', async () => {
+            let testValue: any = false
+            await runHooks({
+                when: 'before',
+                hooks: {
+                    'before:**': async () => {
+                        testValue = 'before:**'
+                    },
+                },
+                prismaClient: new PrismaClient(),
+                QueryParams: {
+                    args: {
+                        where: { id: 1 },
+                        data: { title: 'New title' },
+                    },
+                    authorization: Authorizations.API_KEY,
+                    context: {
+                        action: Actions.update,
+                        alias: ActionsAliases.modify,
+                        model: Models.Post.toLowerCase(),
+                    },
+                    fields: ['title'],
+                    identity: {},
+                    operation: 'updatePost',
+                    paths: ['/update/post/title', '/get/post/title'],
+                    prismaArgs: {
+                        where: { id: 1 },
+                        data: { title: 'New title' },
+                        select: { title: true },
+                    },
+                    type: 'Mutation',
+                },
+            })
+
+            expect(testValue).toEqual('before:**')
         })
     })
 })

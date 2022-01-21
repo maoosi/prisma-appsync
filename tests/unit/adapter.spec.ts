@@ -5,6 +5,7 @@ import {
     getOperation,
     getModel,
     getFields,
+    getContext,
     getType,
     getPrismaArgs,
     getPaths,
@@ -109,6 +110,32 @@ describe('CLIENT #adapter', () => {
         testEach(cases)('when operation is "{0}People", expect model to equal "{1}"', (action: Action, expected) => {
             const result = getModel({ operation: `${action}People`, action: action })
             expect(result).toEqual(expected)
+        })
+    })
+
+    describe('.getContext?', () => {
+        test('expect to extract context from custom resolver', () => {
+            const context = getContext({
+                customResolvers: {
+                    notify: async () => {
+                        return { message: 'Hello world' }
+                    },
+                },
+                options: {
+                    connectionString: 'xxx',
+                    sanitize: true,
+                    debug: false,
+                    defaultPagination: false,
+                    maxDepth: 3,
+                    generatedConfig: {},
+                },
+                operation: 'notify',
+            })
+            expect(context).toEqual({
+                action: 'notify',
+                alias: 'custom',
+                model: null,
+            })
         })
     })
 
@@ -307,6 +334,7 @@ describe('CLIENT #adapter', () => {
                     alias: ActionsAliases.access,
                     model: Models.Post,
                 },
+                args: {},
                 prismaArgs: getPrismaArgs({
                     action: Actions.get,
                     _selectionSetList: [
@@ -337,12 +365,23 @@ describe('CLIENT #adapter', () => {
         })
 
         test('expect nested update to return matching paths', () => {
+            const args = {
+                data: {
+                    title: 'New title',
+                    author: {
+                        connect: {
+                            username: 'other user',
+                        },
+                    },
+                },
+            }
             const result = getPaths({
                 context: {
                     action: Actions.update,
                     alias: ActionsAliases.modify,
                     model: Models.Post,
                 },
+                args,
                 prismaArgs: getPrismaArgs({
                     action: Actions.update,
                     _selectionSetList: [
@@ -358,16 +397,7 @@ describe('CLIENT #adapter', () => {
                         'comment/author/badges/owners',
                         'comment/author/badges/owners/email',
                     ],
-                    _arguments: {
-                        data: {
-                            title: 'New title',
-                            author: {
-                                connect: {
-                                    username: 'other user',
-                                },
-                            },
-                        },
-                    },
+                    _arguments: args,
                     defaultPagination: false,
                 }),
             })
@@ -384,26 +414,28 @@ describe('CLIENT #adapter', () => {
         })
 
         test('expect nested createMany to return matching paths', () => {
+            const args = {
+                data: [
+                    {
+                        title: 'New title',
+                        author: {
+                            connect: {
+                                username: 'johndoe',
+                            },
+                        },
+                    },
+                ],
+            }
             const result = getPaths({
                 context: {
                     action: Actions.createMany,
                     alias: ActionsAliases.batchCreate,
                     model: Models.Post,
                 },
+                args,
                 prismaArgs: getPrismaArgs({
                     action: Actions.createMany,
-                    _arguments: {
-                        data: [
-                            {
-                                title: 'New title',
-                                author: {
-                                    connect: {
-                                        username: 'johndoe',
-                                    },
-                                },
-                            },
-                        ],
-                    },
+                    _arguments: args,
                     _selectionSetList: [
                         '__typename',
                         'title',
@@ -430,6 +462,29 @@ describe('CLIENT #adapter', () => {
                 '/list/post/comment/author/badges/label',
                 '/list/post/comment/author/badges/owners/email',
             ])
+        })
+
+        test('expect custom resolver notify to return matching paths', () => {
+            const resolver = 'notify'
+            const result = getPaths({
+                context: {
+                    action: resolver,
+                    alias: 'custom',
+                    model: null,
+                },
+                args: {
+                    message: 'Hello World',
+                },
+                prismaArgs: getPrismaArgs({
+                    action: resolver,
+                    _arguments: {
+                        message: 'Hello World',
+                    },
+                    _selectionSetList: ['__typename', 'message'],
+                    defaultPagination: false,
+                }),
+            })
+            expect(result).toEqual(['/notify/message'])
         })
     })
 })

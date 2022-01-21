@@ -248,9 +248,9 @@ export declare const DebugTestingKey = "__prismaAppsync";
  * https://docs.aws.amazon.com/appsync/latest/devguide/security-authz.html
  */
 export declare enum Authorizations {
-    API_KEY = 0,
-    AWS_IAM = 1,
-    AMAZON_COGNITO_USER_POOLS = 2,
-    AWS_LAMBDA = 3,
-    OPENID_CONNECT = 4
+    API_KEY = "API_KEY",
+    AWS_IAM = "AWS_IAM",
+    AMAZON_COGNITO_USER_POOLS = "AMAZON_COGNITO_USER_POOLS",
+    AWS_LAMBDA = "AWS_LAMBDA",
+    OPENID_CONNECT = "OPENID_CONNECT"
 }

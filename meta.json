@@ -1,7 +1,7 @@
 {
   "inputs": {
     "packages/client/defs.ts": {
-      "bytes": 9201,
+      "bytes": 9289,
       "imports": []
     },
     "packages/client/inspector.ts": {
@@ -392,7 +392,7 @@
       ]
     },
     "packages/client/adapter.ts": {
-      "bytes": 17175,
+      "bytes": 18355,
       "imports": [
         {
           "path": "packages/client/inspector.ts",
@@ -568,7 +568,7 @@
           "bytesInOutput": 62
         },
         "packages/client/defs.ts": {
-          "bytesInOutput": 1720
+          "bytesInOutput": 1695
         },
         "packages/client/inspector.ts": {
           "bytesInOutput": 1229
@@ -580,7 +580,7 @@
           "bytesInOutput": 1847
         },
         "packages/client/adapter.ts": {
-          "bytesInOutput": 6172
+          "bytesInOutput": 6669
         },
         "packages/client/resolver.ts": {
           "bytesInOutput": 2608
@@ -589,7 +589,7 @@
           "bytesInOutput": 3174
         }
       },
-      "bytes": 175516
+      "bytes": 175988
     }
   }
 }

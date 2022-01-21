@@ -1,6 +1,6 @@
 import { CustomError, inspect } from './inspector'
 import { sanitize } from './guard'
-import { merge, dotate, isEmpty, isUndefined, lowerFirst, clone, traverse } from './utils'
+import { merge, dotate, isEmpty, isUndefined, lowerFirst, clone, traverse, isObject } from './utils'
 import {
     Options,
     AppsyncEvent,
@@ -71,6 +71,7 @@ export function parseEvent(appsyncEvent: AppsyncEvent, options: Options, customR
 
     const paths = getPaths({
         context,
+        args,
         prismaArgs,
     })
 
@@ -270,7 +271,10 @@ export function getAction({ operation }: { operation: Operation }): Action {
     }) as Action
 
     if (!(typeof action !== 'undefined' && String(action).length > 0))
-        throw new CustomError(`Error parsing 'action' from input event.`, { type: 'INTERNAL_SERVER_ERROR' })
+        throw new CustomError(
+            `Error parsing 'action' from input event. If you are trying to query a custom resolver, make sure it is properly declared inside 'prismaAppSync.resolve({ event, resolvers: { /* HERE */ } })'.`,
+            { type: 'INTERNAL_SERVER_ERROR' },
+        )
 
     return action
 }
@@ -511,45 +515,71 @@ function parseSelectionList(selectionSetList: any): any {
  *
  * @param {any} options
  * @param {Context} options.context
+ * @param {any} options.args
  * @param {PrismaArgs} options.prismaArgs
  * @returns string[]
  */
-export function getPaths({ context, prismaArgs }: { context: Context; prismaArgs: PrismaArgs }): string[] {
+export function getPaths({
+    context,
+    args,
+    prismaArgs,
+}: {
+    context: Context
+    args: any
+    prismaArgs: PrismaArgs
+}): string[] {
     const paths: string[] = []
-    const pathRoot =
-        context.model !== null
-            ? `/${lowerFirst(context.action)}/${lowerFirst(context.model)}`
-            : `/${lowerFirst(context.action)}`
-    const isBatchAction: boolean = BatchActionsList.includes(context.action)
 
-    if (typeof prismaArgs.data !== 'undefined') {
-        const inputs: any[] = Array.isArray(prismaArgs.data) ? prismaArgs.data : [prismaArgs.data]
+    if (context.model === null) {
+        for (const key in args) {
+            if (Object.prototype.hasOwnProperty.call(args, key)) {
+                const value = args[key]
+                const objectPaths = isObject(value) ? dotate(value) : { [key]: value }
 
-        inputs.forEach((input: any) => {
-            const objectPaths = dotate(input)
-
-            for (const key in objectPaths) {
-                const item = key
-                    .split('.')
-                    .filter((k) => !ReservedPrismaKeys.includes(k))
-                    .join('/')
-                const path = `${pathRoot}/${lowerFirst(item)}`
-                if (!paths.includes(path)) paths.push(path)
+                for (const key in objectPaths) {
+                    const item = key.split('.').join('/')
+                    const path = `/${lowerFirst(context.action)}/${lowerFirst(item)}`
+                    if (!paths.includes(path)) paths.push(path)
+                }
             }
-        })
+        }
     }
 
-    if (typeof prismaArgs.select !== 'undefined' && context.model !== null) {
-        const objectPaths = dotate(prismaArgs.select)
+    for (const key in prismaArgs) {
+        if (Object.prototype.hasOwnProperty.call(prismaArgs, key)) {
+            const value = prismaArgs[key]
 
-        for (const key in objectPaths) {
-            const item = key
-                .split('.')
-                .filter((k) => !ReservedPrismaKeys.includes(k))
-                .join('/')
-            const selectAction = isBatchAction ? Actions.list : Actions.get
-            const path = `/${lowerFirst(selectAction)}/${lowerFirst(context.model)}/${lowerFirst(item)}`
-            if (!paths.includes(path)) paths.push(path)
+            if (key === 'data' && context.model !== null) {
+                const inputs: any[] = Array.isArray(value) ? value : [value]
+
+                inputs.forEach((input: any) => {
+                    const objectPaths = isObject(input) ? dotate(input) : { [key]: input }
+
+                    for (const key in objectPaths) {
+                        const item = key
+                            .split('.')
+                            .filter((k) => !ReservedPrismaKeys.includes(k))
+                            .join('/')
+                        const path = `/${lowerFirst(context.action)}/${lowerFirst(context.model!)}/${lowerFirst(item)}`
+                        if (!paths.includes(path)) paths.push(path)
+                    }
+                })
+            } else if (key === 'select') {
+                const objectPaths = isObject(value) ? dotate(value) : { [key]: value }
+
+                for (const key in objectPaths) {
+                    const item = key
+                        .split('.')
+                        .filter((k) => !ReservedPrismaKeys.includes(k))
+                        .join('/')
+                    const selectAction = BatchActionsList.includes(context.action) ? Actions.list : Actions.get
+                    const path =
+                        context.model !== null
+                            ? `/${lowerFirst(selectAction)}/${lowerFirst(context.model)}/${lowerFirst(item)}`
+                            : `/${lowerFirst(context.action)}/${lowerFirst(item)}`
+                    if (!paths.includes(path)) paths.push(path)
+                }
+            }
         }
     }
 

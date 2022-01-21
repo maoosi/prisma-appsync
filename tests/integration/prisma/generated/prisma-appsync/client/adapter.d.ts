@@ -127,10 +127,12 @@ export declare function getPrismaArgs({ action, defaultPagination, _arguments, _
  *
  * @param {any} options
  * @param {Context} options.context
+ * @param {any} options.args
  * @param {PrismaArgs} options.prismaArgs
  * @returns string[]
  */
-export declare function getPaths({ context, prismaArgs }: {
+export declare function getPaths({ context, args, prismaArgs, }: {
     context: Context;
+    args: any;
     prismaArgs: PrismaArgs;
 }): string[];
