@@ -66,13 +66,15 @@ export class PrismaAppSync {
      * Read more in our [docs](https://prisma-appsync.vercel.app).
      */
     constructor(options?: PrismaAppSyncOptionsType) {
+        // Set ENV variable DATABASE_URL if connectionString option is set
+        if (typeof options?.connectionString !== 'undefined') {
+            process.env.DATABASE_URL = options.connectionString
+        }
+
         // Set client options using constructor options
         this.options = {
             generatedConfig: {},
-            connectionString:
-                typeof options?.connectionString !== 'undefined'
-                    ? options.connectionString
-                    : String(process.env.DATABASE_URL),
+            connectionString: String(process.env.DATABASE_URL),
             sanitize: typeof options?.sanitize !== 'undefined' ? options.sanitize : true,
             debug: typeof options?.debug !== 'undefined' ? options.debug : true,
             defaultPagination: typeof options?.defaultPagination !== 'undefined' ? options.defaultPagination : 50,
@@ -93,11 +95,6 @@ export class PrismaAppSync {
             )
         }
 
-        // Set ENV variable DATABASE_URL if non existing
-        if (typeof process.env.DATABASE_URL === 'undefined') {
-            process.env.DATABASE_URL = this.options.connectionString
-        }
-
         // Set ENV variable to indicate if debug logs should print
         process.env.PRISMA_APPSYNC_DEBUG = this.options.debug ? 'true' : 'false'
 
@@ -105,7 +102,12 @@ export class PrismaAppSync {
         debug(`New instance created using: ${inspect(this.options)}`)
 
         // Create new Prisma Client
-        this.prismaClient = new PrismaClient()
+        if (process?.env?.PRISMA_APPSYNC_TESTING === 'true') {
+            if (!global.prisma) global.prisma = new PrismaClient()
+            this.prismaClient = global.prisma
+        } else {
+            this.prismaClient = new PrismaClient()
+        }
     }
 
     /**

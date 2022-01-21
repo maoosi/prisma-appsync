@@ -417,7 +417,7 @@
       "imports": []
     },
     "packages/client/core.ts": {
-      "bytes": 11251,
+      "bytes": 11338,
       "imports": [
         {
           "path": "packages/client/defs.ts",
@@ -586,10 +586,10 @@
           "bytesInOutput": 2608
         },
         "packages/client/core.ts": {
-          "bytesInOutput": 3118
+          "bytesInOutput": 3174
         }
       },
-      "bytes": 175460
+      "bytes": 175516
     }
   }
 }

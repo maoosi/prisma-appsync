@@ -5,7 +5,6 @@ import './build.mjs'
 
 // unit tests
 console.log(chalk.blue('\nTest :: Unit\n'))
-// await $`jest tests/unit/*.spec.ts --verbose --expand`
 await $`vitest run tests/unit/*.spec.ts`
 
 // integration tests

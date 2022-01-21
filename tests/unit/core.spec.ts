@@ -38,15 +38,22 @@ describe('CLIENT #core', () => {
 
     describe('.sanitize?', () => {
         test('expect Sanitize to be TRUE by default', () => {
-            const prismaAppSync = new PrismaAppSync()
+            const prismaAppSync = new PrismaAppSync({
+                connectionString: 'postgresql://USER:PASSWORD@HOST:PORT/DATABASE',
+            })
             expect(prismaAppSync.options.sanitize).toEqual(true)
         })
         test('expect Sanitize to be configurable via Class options', () => {
-            const prismaAppSync = new PrismaAppSync({ sanitize: false })
+            const prismaAppSync = new PrismaAppSync({
+                sanitize: false,
+                connectionString: 'postgresql://USER:PASSWORD@HOST:PORT/DATABASE',
+            })
             expect(prismaAppSync.options.sanitize).toEqual(false)
         })
         test('expect Sanitizer to sanitize inputs', async () => {
-            const prismaAppSync = new PrismaAppSync()
+            const prismaAppSync = new PrismaAppSync({
+                connectionString: 'postgresql://USER:PASSWORD@HOST:PORT/DATABASE',
+            })
             const event = mockAppSyncEvent(
                 'createPost',
                 `query createPost {
@@ -64,7 +71,9 @@ describe('CLIENT #core', () => {
             expect(maliciousXss).toEqual('&lt;img src&gt;')
         })
         test('expect outputs to be de-sanitize automatically', async () => {
-            const prismaAppSync = new PrismaAppSync()
+            const prismaAppSync = new PrismaAppSync({
+                connectionString: 'postgresql://USER:PASSWORD@HOST:PORT/DATABASE',
+            })
             const event = mockAppSyncEvent(
                 'createPost',
                 `query createPost {
@@ -84,40 +93,54 @@ describe('CLIENT #core', () => {
 
     describe('.debug?', () => {
         test('expect Debug Logs to be TRUE by default', () => {
-            new PrismaAppSync()
+            new PrismaAppSync({
+                connectionString: 'postgresql://USER:PASSWORD@HOST:PORT/DATABASE',
+            })
             expect(process.env.PRISMA_APPSYNC_DEBUG).toEqual(String(true))
         })
         test('expect Debug Logs to be configurable via Class options', () => {
-            new PrismaAppSync({ debug: false })
+            new PrismaAppSync({ connectionString: 'postgresql://USER:PASSWORD@HOST:PORT/DATABASE', debug: false })
             expect(process.env.PRISMA_APPSYNC_DEBUG).toEqual(String(false))
         })
     })
 
     describe('.defaultPagination?', () => {
         test('expect Pagination to equal 50 by default', () => {
-            const prismaAppSync = new PrismaAppSync()
+            const prismaAppSync = new PrismaAppSync({
+                connectionString: 'postgresql://USER:PASSWORD@HOST:PORT/DATABASE',
+            })
             expect(prismaAppSync.options.defaultPagination).toEqual(50)
         })
         test('expect Pagination to be configurable via Class options', () => {
-            const prismaAppSync = new PrismaAppSync({ defaultPagination: 13 })
+            const prismaAppSync = new PrismaAppSync({
+                connectionString: 'postgresql://USER:PASSWORD@HOST:PORT/DATABASE',
+                defaultPagination: 13,
+            })
             expect(prismaAppSync.options.defaultPagination).toEqual(13)
         })
     })
 
     describe('.maxDepth?', () => {
         test('expect Max Query Depth to equal 3 by default', () => {
-            const prismaAppSync = new PrismaAppSync()
+            const prismaAppSync = new PrismaAppSync({
+                connectionString: 'postgresql://USER:PASSWORD@HOST:PORT/DATABASE',
+            })
             expect(prismaAppSync.options.maxDepth).toEqual(3)
         })
         test('expect Max Query Depth to be configurable via Class options', () => {
-            const prismaAppSync = new PrismaAppSync({ maxDepth: 5 })
+            const prismaAppSync = new PrismaAppSync({
+                connectionString: 'postgresql://USER:PASSWORD@HOST:PORT/DATABASE',
+                maxDepth: 5,
+            })
             expect(prismaAppSync.options.maxDepth).toEqual(5)
         })
     })
 
     describe('.resolve?', () => {
         test('expect Resolve to return matching Query Params', async () => {
-            const prismaAppSync = new PrismaAppSync()
+            const prismaAppSync = new PrismaAppSync({
+                connectionString: 'postgresql://USER:PASSWORD@HOST:PORT/DATABASE',
+            })
             const result = await prismaAppSync.resolve({
                 event: mockAppSyncEvent(
                     'getPost',
