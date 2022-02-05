@@ -350,7 +350,7 @@
       ]
     },
     "packages/client/utils.ts": {
-      "bytes": 5097,
+      "bytes": 5806,
       "imports": [
         {
           "path": "node_modules/.pnpm/dot-object@2.1.4/node_modules/dot-object/index.js",

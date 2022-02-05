@@ -202,3 +202,31 @@ export function traverse(
 
     return outputData
 }
+
+/**
+ * #### Replace all from findArray with replaceArray
+ *
+ * @example replaceAll('you & me', ['you','me'], ['me','you'])
+ *
+ * @param {string} str
+ * @param {string[]} findArray
+ * @param {string[]} replaceArray
+ * @returns string
+ */
+export function replaceAll(str: string, findArray: string[], replaceArray: string[]): string {
+    let regex: string[] | string = []
+    let map = {}
+
+    for (let i = 0; i < findArray.length; i++) {
+        regex.push(findArray[i].replace(/([-[\]{}()*+?.\\^$|#,])/g, '\\$1'))
+        map[findArray[i]] = replaceArray[i]
+    }
+
+    regex = regex.join('|')
+
+    str = str.replace(new RegExp(regex, 'g'), (matched) => {
+        return map[matched]
+    })
+
+    return str
+}

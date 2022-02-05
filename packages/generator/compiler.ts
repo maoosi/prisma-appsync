@@ -6,19 +6,20 @@ import { load as loadYaml } from 'js-yaml'
 import {
     DMMFPAS,
     DMMFPAS_Field,
-    DMMFPAS_Directives,
+    DMMFPAS_Comments,
     CompilerOptions,
     CompilerOptionsPrivate,
-    DMMFPAS_DirectiveAliases,
     DMMFPAS_CustomResolver,
 } from './types'
-import { parseAnnotations } from 'graphql-annotations'
+// import { parseAnnotations } from 'graphql-annotations'
 import { join, extname, basename, dirname } from 'path'
 import { readFile, outputFile, writeFile, readFileSync, copy, openSync, writeSync, close } from 'fs-extra'
 import flow from 'lodash/flow'
 import camelCase from 'lodash/camelCase'
 import upperFirst from 'lodash/upperFirst'
 import merge from 'lodash/merge'
+// import { inspect } from 'util'
+import { replaceAll } from '../../packages/client/utils'
 
 // AppSync schema helper
 const { convertSchemas } = require('appsync-schema-converter')
@@ -34,39 +35,108 @@ export class PrismaAppSyncCompiler {
     // Class constructor (entry point)
     constructor(dmmf: DMMF.Document, options: CompilerOptions) {
         this.options = {
-            directiveAliases: options.directiveAliases || {},
             schemaPath: options.schemaPath || process.cwd(),
             outputDir: options.outputDir || join(process.cwd(), 'generated/prisma-appsync'),
-            directivesPriorityScheme: {
+            defaultDirective: options.defaultDirective || String(),
+            debug: typeof options.debug !== 'undefined' ? options.debug : false,
+            template: {
                 model: {
-                    type: ['type', 'default'],
-                    query: ['query', 'type', 'default'],
-                    mutation: ['mutation', 'type', 'default'],
-                    batch: ['batch', 'mutation', 'type', 'default'],
-                    subscription: ['subscription', 'type', 'default'],
-                    get: ['get', 'query', 'type', 'default'],
-                    list: ['list', 'query', 'type', 'default'],
-                    count: ['count', 'query', 'type', 'default'],
-                    create: ['create', 'mutation', 'type', 'default'],
-                    update: ['update', 'mutation', 'type', 'default'],
-                    upsert: ['upsert', 'mutation', 'type', 'default'],
-                    delete: ['delete', 'mutation', 'type', 'default'],
-                    createMany: ['createMany', 'batch', 'mutation', 'type', 'default'],
-                    updateMany: ['updateMany', 'batch', 'mutation', 'type', 'default'],
-                    deleteMany: ['deleteMany', 'batch', 'mutation', 'type', 'default'],
+                    directives: ['model'],
                 },
-                field: {
-                    field: ['field'],
+                fields: {
+                    directives: ['fields'],
+                },
+                queries: {
+                    directives: ['queries', 'model'],
+                },
+                mutations: {
+                    directives: ['mutations', 'model'],
+                },
+                subscriptions: {
+                    directives: ['subscriptions', 'model'],
+                },
+                create: {
+                    label: ({ name }) => `create${name}`,
+                    directives: ['create', 'mutations', 'model'],
+                },
+                createMany: {
+                    label: ({ pluralizedName }) => `createMany${pluralizedName}`,
+                    directives: ['createMany', 'mutations', 'model'],
+                },
+                update: {
+                    label: ({ name }) => `update${name}`,
+                    directives: ['update', 'mutations', 'model'],
+                },
+                updateMany: {
+                    label: ({ pluralizedName }) => `updateMany${pluralizedName}`,
+                    directives: ['updateMany', 'mutations', 'model'],
+                },
+                upsert: {
+                    label: ({ name }) => `upsert${name}`,
+                    directives: ['upsert', 'mutations', 'model'],
+                },
+                delete: {
+                    label: ({ name }) => `delete${name}`,
+                    directives: ['delete', 'mutations', 'model'],
+                },
+                deleteMany: {
+                    label: ({ pluralizedName }) => `deleteMany${pluralizedName}`,
+                    directives: ['deleteMany', 'mutations', 'model'],
+                },
+                get: {
+                    label: ({ name }) => `get${name}`,
+                    directives: ['get', 'queries', 'model'],
+                },
+                list: {
+                    label: ({ pluralizedName }) => `list${pluralizedName}`,
+                    directives: ['list', 'queries', 'model'],
+                },
+                count: {
+                    label: ({ pluralizedName }) => `count${pluralizedName}`,
+                    directives: ['count', 'queries', 'model'],
+                },
+                onCreated: {
+                    label: ({ name }) => `onCreated${name}`,
+                    directives: ['onCreated', 'subscriptions', 'model'],
+                },
+                onUpdated: {
+                    label: ({ name }) => `onUpdated${name}`,
+                    directives: ['onUpdated', 'subscriptions', 'model'],
+                },
+                onUpserted: {
+                    label: ({ name }) => `onUpserted${name}`,
+                    directives: ['onUpserted', 'subscriptions', 'model'],
+                },
+                onDeleted: {
+                    label: ({ name }) => `onDeleted${name}`,
+                    directives: ['onDeleted', 'subscriptions', 'model'],
+                },
+                onMutated: {
+                    label: ({ name }) => `onMutated${name}`,
+                    directives: ['onMutated', 'subscriptions', 'model'],
+                },
+                onCreatedMany: {
+                    label: ({ pluralizedName }) => `onCreatedMany${pluralizedName}`,
+                    directives: ['onCreatedMany', 'subscriptions', 'model'],
+                },
+                onUpdatedMany: {
+                    label: ({ pluralizedName }) => `onUpdatedMany${pluralizedName}`,
+                    directives: ['onUpdatedMany', 'subscriptions', 'model'],
+                },
+                onMutatedMany: {
+                    label: ({ pluralizedName }) => `onMutatedMany${pluralizedName}`,
+                    directives: ['onMutatedMany', 'subscriptions', 'model'],
+                },
+                onDeletedMany: {
+                    label: ({ pluralizedName }) => `onDeletedMany${pluralizedName}`,
+                    directives: ['onDeletedMany', 'subscriptions', 'model'],
                 },
             },
-            aliasPrefix: 'directiveAlias_',
-            debug: typeof options.debug !== 'undefined' ? options.debug : false,
         }
         this.dmmf = dmmf
         this.data = {
             models: [],
             enums: [],
-            directiveAliases: merge({ default: String() }, this.options.directiveAliases),
             customResolvers: [],
         }
 
@@ -198,18 +268,107 @@ export class PrismaAppSyncCompiler {
         return this
     }
 
+    // Read directives from comments
+    private parseComments(directives?: string): DMMFPAS_Comments {
+        let gql = {}
+        let auth = {}
+
+        const gqlRegex = /@(?:gql)\(([^)]+)\)/gm
+        const authRegex = /@(?:auth)\(([^)]+)\)/gm
+
+        const find = ['apiKey', 'userPools']
+        const replace = ['"apiKey"', '"userPools"']
+
+        if (directives) {
+            const gqlDirectives = directives.match(gqlRegex)
+
+            if (gqlDirectives) {
+                for (let i = 0; i < gqlDirectives.length; i++) {
+                    const str = replaceAll(gqlDirectives[i].replace(gqlRegex, '$1'), find, replace)
+                    gql = merge({}, gql, new Function('return ({' + str + '})')())
+                }
+            }
+
+            const authDirectives = directives.match(authRegex)
+
+            if (authDirectives) {
+                for (let j = 0; j < authDirectives.length; j++) {
+                    const str = replaceAll(authDirectives[j].replace(authRegex, '$1'), find, replace)
+                    auth = merge({}, auth, new Function('return ({' + str + '})')())
+                }
+            }
+        }
+
+        return { auth, gql }
+    }
+
+    // Convert directive rules into string
+    private getDirectives(directivesObject: object): object {
+        const directivesOutput: object = {}
+
+        for (const key in this.options.template) {
+            if (Object.prototype.hasOwnProperty.call(this.options.template, key)) {
+                const parentKeys = this.options.template[key].directives
+
+                for (let i = 0; i < parentKeys.length; i++) {
+                    const parentKey = parentKeys[i]
+                    directivesOutput[key] = this.options.defaultDirective
+
+                    if (typeof directivesObject[parentKey] !== 'undefined') {
+                        const parentKeyDirectives = Array.isArray(directivesObject[parentKey])
+                            ? directivesObject[parentKey]
+                            : [directivesObject[parentKey]]
+                        const outputDirectives: string[] = []
+
+                        for (let j = 0; j < parentKeyDirectives.length; j++) {
+                            const directive = parentKeyDirectives[j]
+
+                            if (directive?.allow === 'apiKey') {
+                                outputDirectives.push('@aws_api_key')
+                            } else if (directive?.allow === 'iam') {
+                                outputDirectives.push('@aws_iam')
+                            } else if (directive?.allow === 'oidc') {
+                                outputDirectives.push('@aws_oidc')
+                            } else if (directive?.allow === 'userPools') {
+                                if (directive?.groups && Array.isArray(directive.groups)) {
+                                    outputDirectives.push(
+                                        `@aws_cognito_user_pools(cognito_groups: [${directive.groups
+                                            .map((g) => `"${g}"`)
+                                            .join(', ')}])`,
+                                    )
+                                } else {
+                                    outputDirectives.push('@aws_cognito_user_pools')
+                                }
+                            }
+                        }
+
+                        directivesOutput[key] = outputDirectives.join(' ')
+                        break
+                    }
+                }
+            }
+        }
+
+        return directivesOutput
+    }
+
     // Parse data from Prisma DMMF
     private parseDMMF(): this {
         // models
         this.dmmf.datamodel.models.forEach((model: DMMF.Model) => {
-            const modelDirectives: DMMFPAS_Directives = this.getModelDirectives(model)
             const fields: DMMFPAS_Field[] = []
+            const comments: DMMFPAS_Comments = this.parseComments(model['documentation'])
+            const authDirectives: any = comments.auth
+            const gqlConfig: any = comments.gql
+            const isModelIgnored = gqlConfig?.model === null
 
-            if (!this.isIgnored(model)) {
+            if (!isModelIgnored) {
+                const directives = this.getDirectives(authDirectives)
+
                 model.fields.forEach((field: DMMF.Field) => {
-                    const fieldDirectives: DMMFPAS_Directives = this.getFieldDirectives(field, model)
+                    const isFieldIgnored = gqlConfig?.fields?.[field.name] === null
 
-                    if (!field.isGenerated && !this.isIgnored(field)) {
+                    if (!field.isGenerated && !isFieldIgnored) {
                         fields.push({
                             name: field.name,
                             scalar: this.getFieldScalar(field),
@@ -224,26 +383,35 @@ export class PrismaAppSyncCompiler {
                                     type: this.getFieldType(field),
                                 },
                             }),
-                            ...(Object.keys(fieldDirectives).length > 0 && {
-                                directives: fieldDirectives,
-                            }),
+                            directives: directives,
                             sample: this.getFieldSample(field),
                         })
                     }
                 })
 
+                const name = pascalCase(model.name)
+                const pluralizedName = pascalCase(plural(model.name))
+
+                let gql = {}
+                for (const key in this.options.template) {
+                    if (Object.prototype.hasOwnProperty.call(this.options.template, key)) {
+                        if (typeof this.options.template[key].label !== 'undefined') {
+                            gql[key] = this.options.template[key].label!({ name, pluralizedName })
+                        }
+                    }
+                }
+
                 this.data.models.push({
-                    name: pascalCase(model.name),
-                    pluralizedName: pascalCase(plural(model.name)),
+                    name,
+                    pluralizedName,
                     prismaRef: model.name.charAt(0).toLowerCase() + model.name.slice(1),
-                    ...(Object.keys(modelDirectives).length > 0 && {
-                        directives: modelDirectives,
-                    }),
+                    directives,
                     idFields: model.idFields,
                     fields: fields,
                     operationFields: fields.filter(
                         (f) => f.isEditable && !f.relation && ['Int', 'Float'].includes(f.scalar),
                     ),
+                    gql,
                     isEditable: fields.filter((f) => f.isEditable).length > 0,
                     subscriptionFields: this.filterSubscriptionFields(fields, model.idFields),
                 })
@@ -260,7 +428,7 @@ export class PrismaAppSyncCompiler {
             })
         })
 
-        // console.log( inspect(this.data, false, null, true) )
+        // console.log(inspect(this.data, false, null, true))
 
         return this
     }
@@ -496,109 +664,5 @@ export class PrismaAppSyncCompiler {
         }
 
         return type
-    }
-
-    // Read AppSync model directives from AST comments
-    private getModelDirectives(model: DMMF.Model): DMMFPAS_Directives {
-        return this.getDirectives(model, this.options.directivesPriorityScheme['model'])
-    }
-
-    // Return true if field or model is ignored /// @PrismaAppSync.ignore
-    private isIgnored(node: DMMF.Field | DMMF.Model): boolean {
-        let isIgnored = false
-
-        // search .ignore annotations in Prisma doc node (AST)
-        if (typeof node['documentation'] !== 'undefined' && node['documentation'].includes('@PrismaAppSync.ignore')) {
-            isIgnored = true
-        }
-
-        return isIgnored
-    }
-
-    // Read AppSync field directives from AST comments
-    private getFieldDirectives(field: DMMF.Field, model: DMMF.Model): DMMFPAS_Directives {
-        if (field.relationName && typeof field.type === 'string') {
-            const relationModel: DMMF.Model | false = this.getModelIfExists(field.type)
-
-            if (relationModel) {
-                const modelDirectives = this.getModelDirectives(model)
-                const relationModelDirectives = this.getModelDirectives(relationModel)
-                const fieldDirectives: DMMFPAS_Directives = {
-                    ...(modelDirectives['type'] !== relationModelDirectives['type'] && {
-                        field: relationModelDirectives['type'],
-                    }),
-                    ...(modelDirectives['mutation'] !== relationModelDirectives['mutation'] && {
-                        mutation: relationModelDirectives['mutation'],
-                    }),
-                    ...(modelDirectives['create'] !== relationModelDirectives['create'] && {
-                        create: relationModelDirectives['create'],
-                    }),
-                    ...(modelDirectives['update'] !== relationModelDirectives['update'] && {
-                        update: relationModelDirectives['update'],
-                    }),
-                }
-                return fieldDirectives
-            }
-        }
-
-        return this.getDirectives(field, this.options.directivesPriorityScheme['field'])
-    }
-
-    // Return DMMF model from model name
-    private getModelIfExists(name: string): DMMF.Model | false {
-        const modelIndex = this.dmmf.datamodel.models.findIndex((model: DMMF.Model) => {
-            return model.name === name
-        })
-        return modelIndex > -1 ? this.dmmf.datamodel.models[modelIndex] : false
-    }
-
-    // Return directives strings
-    private getDirectives(node: DMMF.Field | DMMF.Model, priorityScheme?: any): DMMFPAS_Directives {
-        let directives: DMMFPAS_Directives = {}
-        let annotations: any
-
-        // search annotations in Prisma documentation node (AST)
-        if (typeof node['documentation'] !== 'undefined') {
-            annotations = parseAnnotations('PrismaAppSync', node['documentation'])
-        }
-
-        // format all directive aliases to with @@ prefix (except for default)
-        const directiveAliases: DMMFPAS_DirectiveAliases = {}
-        Object.keys(this.data.directiveAliases).forEach((alias) => {
-            if (alias === 'default') directiveAliases[alias] = this.data.directiveAliases[alias]
-            else directiveAliases[`@@${alias}`] = this.data.directiveAliases[alias]
-        })
-
-        // merge directive alias with annotations
-        annotations = merge(annotations, directiveAliases)
-
-        // generate directives list based on priorityScheme
-        for (const schemaScope in priorityScheme) {
-            if (Object.prototype.hasOwnProperty.call(priorityScheme, schemaScope)) {
-                const priorityList: string[] = priorityScheme[schemaScope]
-
-                // If we find a matching scope rule, then apply AND stop
-                for (let i = 0; i < priorityList.length; i++) {
-                    const scope: string = priorityList[i]
-
-                    if (typeof annotations[scope] !== 'undefined') {
-                        directives[schemaScope] = annotations[scope]
-                        break
-                    }
-                }
-            }
-        }
-
-        // replace all user aliases with matching directives
-        Object.keys(directives).forEach((scope) => {
-            const directive = directives[scope]
-            const directiveKey = directive.replace('@@', '')
-
-            if (/\@\@\w+/.test(directive) && typeof this.data.directiveAliases[directiveKey] !== 'undefined') {
-                directives[scope] = this.data.directiveAliases[directiveKey]
-            }
-        })
-
-        return directives
     }
 }

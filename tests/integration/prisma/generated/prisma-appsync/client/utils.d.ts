@@ -114,3 +114,14 @@ export declare function traverse(element: any, iteratee: (value: any, key?: stri
     value: any;
     excludeChilds?: boolean;
 }): any;
+/**
+ * #### Replace all from findArray with replaceArray
+ *
+ * @example replaceAll('you & me', ['you','me'], ['me','you'])
+ *
+ * @param {string} str
+ * @param {string[]} findArray
+ * @param {string[]} replaceArray
+ * @returns string
+ */
+export declare function replaceAll(str: string, findArray: string[], replaceArray: string[]): string;

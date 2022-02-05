@@ -19,25 +19,12 @@ generatorHandler({
     async onGenerate(options: any) {
         if (options.generator.output) {
             try {
-                // Parse directive aliases
-                const aliasPrefix: string = 'directiveAlias_'
-                const directiveAliases: any = {}
-
                 // Is debug mode enabled?
                 const debug: boolean = true
 
                 if (debug) {
                     console.log(`[Prisma-AppSync] Generator config: `, options.generator.config)
                 }
-
-                Object.keys(options.generator.config)
-                    .filter((cfg: string) => cfg.startsWith(aliasPrefix))
-                    .forEach((cfg: string) => {
-                        const directive: string = options.generator.config[cfg]
-                        const splitIndex: number = cfg.indexOf(aliasPrefix) + aliasPrefix.length
-                        const aliasKey: string = cfg.substr(splitIndex)
-                        directiveAliases[aliasKey] = directive
-                    })
 
                 // Read output dir (ensures previous version of prisma are still supported)
                 const outputDir =
@@ -48,9 +35,9 @@ generatorHandler({
                 // Init compiler with user options
                 const compiler = new PrismaAppSyncCompiler(options.dmmf, {
                     schemaPath: options.schemaPath,
-                    outputDir: outputDir,
-                    directiveAliases: directiveAliases,
-                    debug: debug,
+                    outputDir,
+                    defaultDirective: options?.generator?.config?.defaultDirective || String(),
+                    debug,
                 })
 
                 if (debug) {
@@ -79,7 +66,7 @@ generatorHandler({
                 }
 
                 // Generate docs
-                await compiler.makeDocs()
+                // await compiler.makeDocs()
             } catch (e) {
                 console.error('Error: unable to compile files for Prisma AppSync Generator')
                 throw e

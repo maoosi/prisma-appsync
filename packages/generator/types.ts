@@ -1,16 +1,20 @@
 export type CompilerOptions = {
     schemaPath?: string
     outputDir?: string
-    directiveAliases?: DMMFPAS_DirectiveAliases
+    defaultDirective?: string
     debug?: boolean
 }
 
 export interface CompilerOptionsPrivate extends CompilerOptions {
-    directiveAliases: DMMFPAS_DirectiveAliases
     schemaPath: string
     outputDir: string
-    directivesPriorityScheme: any
-    aliasPrefix: string
+    defaultDirective: string
+    template: {
+        [key: string]: {
+            label?: ({ name, pluralizedName }: { name: string; pluralizedName: string }) => string
+            directives: string[]
+        }
+    }
 }
 
 export type DMMFPAS_Model = {
@@ -18,19 +22,17 @@ export type DMMFPAS_Model = {
     pluralizedName: string
     prismaRef: string
     fields: DMMFPAS_Field[]
-    directives?: DMMFPAS_Directives
+    directives: any
     isEditable: boolean
+    gql: any
     idFields: string[]
     operationFields: DMMFPAS_Field[]
     subscriptionFields: DMMFPAS_Field[]
 }
 
-export type DMMFPAS_DirectiveAliases = {
-    [key: string]: string
-}
-
-export type DMMFPAS_Directives = {
-    [key: string]: string
+export type DMMFPAS_Comments = {
+    auth: any
+    gql: any
 }
 
 export type DMMFPAS_Field = {
@@ -40,7 +42,7 @@ export type DMMFPAS_Field = {
     isEditable: boolean
     isEnum: boolean
     isUnique: boolean
-    directives?: DMMFPAS_Directives
+    directives?: any
     relation?: DMMFPAS_Relation
     sample: any
 }
@@ -67,6 +69,5 @@ export type DMMFPAS_CustomResolver = {
 export type DMMFPAS = {
     models: DMMFPAS_Model[]
     enums: DMMFPAS_Enum[]
-    directiveAliases: DMMFPAS_DirectiveAliases
     customResolvers: DMMFPAS_CustomResolver[]
 }

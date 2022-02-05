@@ -70,6 +70,27 @@ describe('CLIENT #core', () => {
             const maliciousXss = result?.__prismaAppsync?.QueryParams?.prismaArgs?.data?.title
             expect(maliciousXss).toEqual('&lt;img src&gt;')
         })
+        test('expect Sanitizer to _not_ sanitize inputs', async () => {
+            const prismaAppSync = new PrismaAppSync({
+                connectionString: 'postgresql://USER:PASSWORD@HOST:PORT/DATABASE',
+                sanitize: false,
+            })
+            const event = mockAppSyncEvent(
+                'createPost',
+                `query createPost {
+                    createPost(
+                        data: {
+                            title: "<IMG SRC=\\"javascript:alert('XSS');\\">"
+                        }
+                    ) {
+                        title
+                    }
+                }`,
+            )
+            const result = await prismaAppSync.resolve({ event })
+            const maliciousXss = result?.__prismaAppsync?.QueryParams?.prismaArgs?.data?.title
+            expect(maliciousXss).toEqual(`<IMG SRC="javascript:alert('XSS');">`)
+        })
         test('expect outputs to be de-sanitize automatically', async () => {
             const prismaAppSync = new PrismaAppSync({
                 connectionString: 'postgresql://USER:PASSWORD@HOST:PORT/DATABASE',

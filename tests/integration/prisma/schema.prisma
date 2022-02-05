@@ -12,13 +12,14 @@ generator appsync {
   provider = "../../dist/generator.js"
 
   // optional params
-  output          = "./generated/prisma-appsync"
-  extendSchema    = "./custom-schema.gql"
-  extendResolvers = "./custom-resolvers.yaml"
+  output           = "./generated/prisma-appsync"
+  extendSchema     = "./custom-schema.gql"
+  extendResolvers  = "./custom-resolvers.yaml"
+  defaultDirective = "@auth(model: [{ allow: apiKey }])"
 }
 
 /// @gql(fields: { hiddenField: null }, subscriptions: null)
-/// @auth(model: [{ allow: apiKey }, { allow: userPools, groups: ["users", "admins"] }])
+/// @auth(model: [{ allow: apiKey }, { allow: userPools, groups: ["admins"] }])
 model User {
   uuid        String  @id @default(uuid()) @db.VarChar(200)
   username    String  @unique
@@ -34,7 +35,7 @@ model hiddenModel {
 }
 
 /// @gql(queries: { listPosts: null })
-/// @auth(model: [{ allow: apiKey }, { allow: userPools, groups: ["admins"] }])
+/// @auth(model: [{ allow: apiKey }, { allow: userPools, groups: ["users", "admin"] }])
 model Post {
   id          Int      @id @default(autoincrement())
   title       String

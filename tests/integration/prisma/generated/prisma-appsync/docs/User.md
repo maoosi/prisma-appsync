@@ -9,14 +9,13 @@
 
 List of fields available in the `User` type.
 
-| Field       | Scalar Type          | Unique  | Required (create) |
-| ----------- | -------------------- | ------- | ----------------- |
-| uuid        | String               | true    | true              |
-| username    | String               | true    | true              |
-| email       | AWSEmail             | true    | true              |
-| hiddenField | String               | _false_ | _false_           |
-| role        | Role                 | _false_ | true              |
-| posts       | [[Post!]](./Post.md) | _false_ | _false_           |
+| Field    | Scalar Type          | Unique  | Required (create) |
+| -------- | -------------------- | ------- | ----------------- |
+| uuid     | String               | true    | true              |
+| username | String               | true    | true              |
+| email    | AWSEmail             | true    | true              |
+| role     | Role                 | _false_ | true              |
+| posts    | [[Post!]](./Post.md) | _false_ | _false_           |
 
 ## Queries
 
@@ -42,7 +41,6 @@ query {
         uuid
         username
         email
-        hiddenField
         role
 
         posts # Relation to many
@@ -67,7 +65,6 @@ query {
         uuid
         username
         email
-        hiddenField
         role
 
         posts # Relation to many
@@ -83,7 +80,6 @@ query {
         uuid
         username
         email
-        hiddenField
         role
 
         posts # Relation to many
@@ -95,11 +91,10 @@ query {
 
 ```graphql
 query {
-    listUsers(where: { hiddenField: { equals: "Foo" } }) {
+    listUsers(where: { role: { equals: Role } }) {
         uuid
         username
         email
-        hiddenField
         role
 
         posts # Relation to many
@@ -111,13 +106,10 @@ query {
 
 ```graphql
 query {
-    listUsers(
-        where: { hiddenField: { not: { equals: "Foo" } } }
-    ) {
+    listUsers(where: { role: { not: { equals: Role } } }) {
         uuid
         username
         email
-        hiddenField
         role
 
         posts # Relation to many
@@ -129,13 +121,10 @@ query {
 
 ```graphql
 query {
-    listUsers(
-        orderBy: [{ hiddenField: DESC }, { role: ASC }]
-    ) {
+    listUsers(orderBy: [{ role: DESC }]) {
         uuid
         username
         email
-        hiddenField
         role
 
         posts # Relation to many
@@ -191,14 +180,12 @@ mutation {
             uuid: "Foo"
             username: "Foo"
             email: "Foo"
-            hiddenField: "Foo"
             role: Role
         }
     ) {
         uuid
         username
         email
-        hiddenField
         role
     }
 }
@@ -256,14 +243,12 @@ mutation {
             uuid: "Foo"
             username: "Foo"
             email: "Foo"
-            hiddenField: "Foo"
             role: Role
         }
     ) {
         uuid
         username
         email
-        hiddenField
         role
     }
 }
@@ -325,7 +310,6 @@ mutation {
         uuid
         username
         email
-        hiddenField
         role
     }
 }
@@ -344,9 +328,9 @@ Multiple Users create mutations take one input:
 mutation {
     createManyUsers(
         data: [
-            { hiddenField: "Foo" }
-            { hiddenField: "Foo" }
-            { hiddenField: "Foo" }
+            { role: Role }
+            { role: Role }
+            { role: Role }
         ]
         skipDuplicates: true
     ) {
@@ -369,8 +353,8 @@ Multiple Users update mutations take two inputs:
 ```graphql
 mutation {
     updateManyUsers(
-        where: { hiddenField: "Foo" }
-        data: { hiddenField: "Foo" }
+        where: { role: Role }
+        data: { role: Role }
     ) {
         count
     }
@@ -389,7 +373,7 @@ Multiple Users delete mutations can take one input:
 
 ```graphql
 mutation {
-    deleteManyUsers(where: { hiddenField: "Foo" }) {
+    deleteManyUsers(where: { role: Role }) {
         count
     }
 }
@@ -411,7 +395,6 @@ subscription {
         uuid
         username
         email
-        hiddenField
         role
     }
 }
@@ -427,7 +410,6 @@ subscription {
         uuid
         username
         email
-        hiddenField
         role
     }
 }
@@ -443,7 +425,6 @@ subscription {
         uuid
         username
         email
-        hiddenField
         role
     }
 }
@@ -459,7 +440,6 @@ subscription {
         uuid
         username
         email
-        hiddenField
         role
     }
 }
@@ -475,7 +455,6 @@ subscription {
         uuid
         username
         email
-        hiddenField
         role
     }
 }
