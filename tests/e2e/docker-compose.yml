@@ -6,7 +6,7 @@ services:
     db:
         image: postgres:13
         restart: always
-        container_name: prisma-appsync-tests-integration
+        container_name: prisma-appsync-tests-e2e
         ports:
             - '5433:5432'
         environment:

@@ -24,10 +24,6 @@
 - Full CloudWatch logs for easy debugging on AWS.
 - XSS data sanitization by default.
 
-## ⚓ Compatibility
-
-- Prisma 2.25.0
-
 ## 📓 Documentation
 
 [Read the documentation](https://prisma-appsync.vercel.app) to get started with Prisma-AppSync.

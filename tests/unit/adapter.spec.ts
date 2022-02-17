@@ -13,7 +13,7 @@ import {
 } from '../../packages/client/adapter'
 import { Actions, Action, ActionsAliases, Authorization, Authorizations } from '../../packages/client/defs'
 import { Prisma } from '@prisma/client'
-import { mockLambdaEvent, mockIdentity } from '../integration/appsync'
+import { mockLambdaEvent, mockIdentity } from '../e2e/appsync'
 
 process.env.PRISMA_APPSYNC_TESTING = 'true'
 

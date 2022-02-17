@@ -2,7 +2,7 @@ import { describe, expect } from 'vitest'
 import { testEach } from './_helpers'
 import * as queries from '../../packages/client/resolver'
 import { QueryParams, Authorizations, Actions, ActionsAliases } from '../../packages/client/defs'
-import { mockIdentity } from '../integration/appsync'
+import { mockIdentity } from '../e2e/appsync'
 import { Prisma } from '@prisma/client'
 
 const Models = Prisma.ModelName

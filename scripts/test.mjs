@@ -7,8 +7,8 @@ import './build.mjs'
 console.log(chalk.blue('\nTest :: Unit\n'))
 await $`vitest run tests/unit/*.spec.ts`
 
-// integration tests
-console.log(chalk.blue('Test :: Integration\n'))
+// e2e tests
+console.log(chalk.blue('Test :: e2e\n'))
 // await $`print hello`
 
 // copy examples API docs into package docs

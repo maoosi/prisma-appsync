@@ -34,7 +34,7 @@ model hiddenModel {
   id Int @id @default(autoincrement())
 }
 
-/// @gql(queries: { listPosts: null })
+/// @gql(queries: { list: null, count: "county" })
 /// @auth(model: [{ allow: apiKey }, { allow: userPools, groups: ["users", "admin"] }])
 model Post {
   id          Int      @id @default(autoincrement())

@@ -11,7 +11,6 @@ import {
     CompilerOptionsPrivate,
     DMMFPAS_CustomResolver,
 } from './types'
-// import { parseAnnotations } from 'graphql-annotations'
 import { join, extname, basename, dirname } from 'path'
 import { readFile, outputFile, writeFile, readFileSync, copy, openSync, writeSync, close } from 'fs-extra'
 import flow from 'lodash/flow'
@@ -19,7 +18,7 @@ import camelCase from 'lodash/camelCase'
 import upperFirst from 'lodash/upperFirst'
 import merge from 'lodash/merge'
 // import { inspect } from 'util'
-import { replaceAll } from '../../packages/client/utils'
+import { replaceAll, isUndefined, isObject } from '../../packages/client/utils'
 
 // AppSync schema helper
 const { convertSchemas } = require('appsync-schema-converter')
@@ -302,7 +301,52 @@ export class PrismaAppSyncCompiler {
         return { auth, gql }
     }
 
-    // Convert directive rules into string
+    // Get all GQL modeling from config
+    private getGqlModeling(gqlObject: any, { name, pluralizedName }: { name: string; pluralizedName: string }): object {
+        const gqlOutput: object = {
+            _model: gqlObject?.model !== null,
+            _fields: gqlObject?.fields || {},
+        }
+
+        for (const key in this.options.template) {
+            if (
+                Object.prototype.hasOwnProperty.call(this.options.template, key) &&
+                !isUndefined(this.options.template?.[key]?.directives) &&
+                !isUndefined(this.options.template[key]?.label)
+            ) {
+                const groups = this.options.template[key].directives
+                const defaultValue = this.options.template[key].label!({ name, pluralizedName })
+
+                for (let i = 0; i < groups.length; i++) {
+                    const group = groups[i]
+                    const childGroup = i > 0 ? groups[i - 1] : undefined
+
+                    gqlOutput[key] = defaultValue
+
+                    // Example: @gql(mutations: null)
+                    if (typeof gqlObject[group] !== 'undefined' && gqlObject[group] === null) {
+                        gqlOutput[key] = gqlObject[group]
+
+                        break
+                    }
+                    // Example: @gql(queries: { count: "county" })
+                    else if (
+                        childGroup !== undefined &&
+                        !isUndefined(gqlObject?.[group]?.[childGroup]) &&
+                        !isObject(gqlObject[group][childGroup])
+                    ) {
+                        gqlOutput[key] = gqlObject[group][childGroup]
+
+                        break
+                    }
+                }
+            }
+        }
+
+        return gqlOutput
+    }
+
+    // Get all directives from config
     private getDirectives(directivesObject: object): object {
         const directivesOutput: object = {}
 
@@ -358,15 +402,18 @@ export class PrismaAppSyncCompiler {
         this.dmmf.datamodel.models.forEach((model: DMMF.Model) => {
             const fields: DMMFPAS_Field[] = []
             const comments: DMMFPAS_Comments = this.parseComments(model['documentation'])
-            const authDirectives: any = comments.auth
-            const gqlConfig: any = comments.gql
-            const isModelIgnored = gqlConfig?.model === null
+            const name = pascalCase(model.name)
+            const pluralizedName = pascalCase(plural(model.name))
+            const directives: any = this.getDirectives(comments.auth)
+            const gqlConfig: any = this.getGqlModeling(comments.gql, {
+                name,
+                pluralizedName,
+            })
+            const isModelIgnored = !isUndefined(gqlConfig?._model) && gqlConfig._model === false
 
             if (!isModelIgnored) {
-                const directives = this.getDirectives(authDirectives)
-
                 model.fields.forEach((field: DMMF.Field) => {
-                    const isFieldIgnored = gqlConfig?.fields?.[field.name] === null
+                    const isFieldIgnored = gqlConfig?._fields?.[field.name] === null
 
                     if (!field.isGenerated && !isFieldIgnored) {
                         fields.push({
@@ -389,18 +436,6 @@ export class PrismaAppSyncCompiler {
                     }
                 })
 
-                const name = pascalCase(model.name)
-                const pluralizedName = pascalCase(plural(model.name))
-
-                let gql = {}
-                for (const key in this.options.template) {
-                    if (Object.prototype.hasOwnProperty.call(this.options.template, key)) {
-                        if (typeof this.options.template[key].label !== 'undefined') {
-                            gql[key] = this.options.template[key].label!({ name, pluralizedName })
-                        }
-                    }
-                }
-
                 this.data.models.push({
                     name,
                     pluralizedName,
@@ -411,7 +446,7 @@ export class PrismaAppSyncCompiler {
                     operationFields: fields.filter(
                         (f) => f.isEditable && !f.relation && ['Int', 'Float'].includes(f.scalar),
                     ),
-                    gql,
+                    gql: gqlConfig,
                     isEditable: fields.filter((f) => f.isEditable).length > 0,
                     subscriptionFields: this.filterSubscriptionFields(fields, model.idFields),
                 })

@@ -529,20 +529,8 @@ type Query {
             cognito_groups: ["users", "admin"]
         )
 
-    # Find many Post records (optional query filters).
-    listPosts(
-        where: PostWhereInput
-        orderBy: [PostOrderByInput]
-        skip: Int
-        take: Int
-    ): [Post]
-        @aws_api_key
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admin"]
-        )
-
     # Count all Post records (optional query filters).
-    countPosts(
+    county(
         where: PostWhereInput
         orderBy: [PostOrderByInput]
         skip: Int
@@ -555,71 +543,6 @@ type Query {
 }
 
 type Subscription {
-    # Triggered from `createUser` mutation (excl. `createManyUsers` and `upsertUser`).
-    onCreatedUser(
-        uuid: String
-        username: String
-        email: AWSEmail
-    ): User @aws_subscribe(mutations: ["createUser"])
-
-    # Triggered from `updateUser` mutation (excl. `updateManyUsers` and `upsertUser`).
-    onUpdatedUser(
-        uuid: String
-        username: String
-        email: AWSEmail
-    ): User @aws_subscribe(mutations: ["updateUser"])
-
-    # Triggered from `upsertUser` mutation.
-    onUpsertedUser(
-        uuid: String
-        username: String
-        email: AWSEmail
-    ): User @aws_subscribe(mutations: ["upsertUser"])
-
-    # Triggered from `deleteUser` mutation (excl. `deleteManyUsers`).
-    onDeletedUser(
-        uuid: String
-        username: String
-        email: AWSEmail
-    ): User @aws_subscribe(mutations: ["deleteUser"])
-
-    # Triggered from ANY SINGLE record mutation.
-    onMutatedUser(
-        uuid: String
-        username: String
-        email: AWSEmail
-    ): User
-        @aws_subscribe(
-            mutations: [
-                "createUser"
-                "updateUser"
-                "upsertUser"
-                "deleteUser"
-            ]
-        )
-
-    # Triggered from `createManyUsers` mutation.
-    onCreatedManyUsers: BatchPayload
-        @aws_subscribe(mutations: ["createManyUsers"])
-
-    # Triggered from `updateManyUsers` mutation.
-    onUpdatedManyUsers: BatchPayload
-        @aws_subscribe(mutations: ["updateManyUsers"])
-
-    # Triggered from ANY MULTIPLE records mutation.
-    onMutatedManyUsers: BatchPayload
-        @aws_subscribe(
-            mutations: [
-                "createManyUsers"
-                "updateManyUsers"
-                "deleteManyUsers"
-            ]
-        )
-
-    # Triggered from `deleteManyUsers` mutation.
-    onDeletedManyUsers: BatchPayload
-        @aws_subscribe(mutations: ["deleteManyUsers"])
-
     # Triggered from `createPost` mutation (excl. `createManyPosts` and `upsertPost`).
     onCreatedPost(id: Int, authorUuid: String): Post
         @aws_subscribe(mutations: ["createPost"])
