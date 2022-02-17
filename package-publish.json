@@ -1,0 +1,23 @@
+{
+    "name": "prisma-appsync",
+    "description": "⚡ AppSync GraphQL API Generator for ◭ Prisma ORM.",
+    "version": "1.0.0-rc.0",
+    "bin": "./dist/generator.js",
+    "repository": "git@github.com:maoosi/prisma-appsync.git",
+    "author": "maoosi <hello@sylvainsimao.fr>",
+    "license": "BSD-2-Clause",
+    "engines": {
+        "node": ">=14"
+    },
+    "keywords": [
+        "api",
+        "appsync",
+        "aws",
+        "crud",
+        "generator",
+        "graphql",
+        "prisma",
+        "prisma-appsync",
+        "appsync-crud-api"
+    ]
+}

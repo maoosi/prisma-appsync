@@ -1,5 +1,4 @@
 {
-    "version": "1.0.0-rc.0",
     "dependencies": {
         "degit": "^2.8.4",
         "detect-package-manager": "^2.0.1",

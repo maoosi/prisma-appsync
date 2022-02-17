@@ -2,13 +2,19 @@
 node_modules/
 */**/node_modules/
 
-# Excl. project files
-docs/
-test/
-src/
+# Source files
+packages/
+scripts/
+tests/
 .editorconfig
-*.config.js
-tsconfig.*.json
+.eslintrc.cjs
+.markdownlint.json
+.prettierignore
+.prettierrc.cjs
+tsconfig.json
+
+# Package cache files
+package-*.json
 
 # Log files
 npm-debug.log*

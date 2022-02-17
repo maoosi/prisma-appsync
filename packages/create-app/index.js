@@ -39,7 +39,7 @@ async function init() {
     const dependencies = [
         { package: 'prisma', dev: true },
         { package: '@prisma/client', dev: true },
-        { package: 'prisma-appsync', dev: true },
+        { package: 'prisma-appsync@preview', dev: true },
     ]
 
     const { project } = await prompts({
@@ -114,7 +114,7 @@ async function init() {
         }
     }
 
-    const emitter = degit('maoosi/prisma-appsync#alpha', {
+    const emitter = degit('maoosi/prisma-appsync#preview', {
         cache: false,
         force: true,
         verbose: true,

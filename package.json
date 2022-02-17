@@ -1,6 +1,6 @@
 {
     "name": "prisma-appsync",
-    "description": "⚡ AppSync GraphQL API Generator for ◭ Prisma 2, the next-gen ORM.",
+    "description": "⚡ AppSync GraphQL API Generator for ◭ Prisma ORM.",
     "version": "1.0.0-rc.0",
     "bin": "./dist/generator.js",
     "repository": "git@github.com:maoosi/prisma-appsync.git",
@@ -13,11 +13,11 @@
         "docker": "zx scripts/docker.mjs",
         "serve": "zx scripts/serve.mjs",
         "test": "zx scripts/test.mjs",
-        "docs:dev": "vuepress dev docs --host localhost",
-        "docs:build": "vuepress build docs"
+        "publish:preview": "zx scripts/preview.mjs",
+        "publish:latest": "zx scripts/publish.mjs"
     },
     "engines": {
-        "node": ">=12",
+        "node": ">=14",
         "pnpm": ">=6"
     },
     "keywords": [
@@ -42,11 +42,8 @@
         "@types/nunjucks": "^3.2.1",
         "@types/pluralize": "^0.0.29",
         "@types/prettier": "^2.4.2",
-        "@types/validator": "^13.7.1",
         "@typescript-eslint/eslint-plugin": "^5.9.0",
         "@typescript-eslint/parser": "^5.9.0",
-        "@vuepress/plugin-back-to-top": "^1.9.5",
-        "@vuepress/plugin-medium-zoom": "^1.9.5",
         "appsync-schema-converter": "^2.0.0",
         "concurrently": "^7.0.0",
         "deepmerge": "^4.2.2",
@@ -70,7 +67,6 @@
         "prisma": "^3.9.2",
         "typescript": "^4.5.4",
         "vitest": "^0.1.25",
-        "vuepress": "^1.9.5",
         "xss": "^1.0.10",
         "zx": "^4.2.0"
     }
