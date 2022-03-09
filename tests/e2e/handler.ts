@@ -51,19 +51,19 @@ export const main = async (event: any, context: any) => {
                 '**': isCognitoAuth,
 
                 // Posts and Comments can only be modified by their owner
-                'modify/{post,comment}{,/**}': {
+                '/modify/{post,comment}{,/**}': {
                     rule: isOwner,
                     reason: ({ model }) => `${model} can only be modified by their owner.`,
                 },
 
                 // Password field is protected
-                '**/*password{,/**}': {
+                '/**/*password{,/**}': {
                     rule: false,
                     reason: () => 'Field password is not accessible.',
                 },
 
                 // Custom resolver `notify` is restricted to admins
-                'notify{,/**}': {
+                '/notify{,/**}': {
                     rule: isAdmin,
                 },
             }

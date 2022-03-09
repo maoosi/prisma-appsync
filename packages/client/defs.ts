@@ -59,9 +59,24 @@ export type QueryParams = {
     prismaArgs: PrismaArgs
     authorization: Authorization
     identity: Identity
+    headers: any
 }
 
 export type Authorization = typeof Authorizations[keyof typeof Authorizations] | null
+
+export type QueryBuilder = {
+    prismaGet: (prismaArgs: PrismaArgs) => any
+    prismaList: (prismaArgs: PrismaArgs) => any
+    prismaCount: (prismaArgs: PrismaArgs) => any
+    prismaCreate: (prismaArgs: PrismaArgs) => any
+    prismaCreateMany: (prismaArgs: PrismaArgs) => any
+    prismaUpdate: (prismaArgs: PrismaArgs) => any
+    prismaUpdateMany: (prismaArgs: PrismaArgs) => any
+    prismaUpsert: (prismaArgs: PrismaArgs) => any
+    prismaDelete: (prismaArgs: PrismaArgs) => any
+    prismaDeleteMany: (prismaArgs: PrismaArgs) => any
+    prismaWhere: (prismaArgs: PrismaArgs, filter: any) => PrismaArgs
+}
 
 export type QueryParamsCustom = QueryParams & {
     prismaClient: PrismaClient
@@ -98,12 +113,14 @@ export type AfterHookParams = QueryParams & {
     result: any | any[]
 }
 
+export type Reason = string | ((context: Context) => string)
+
 export type Shield = {
     [matcher: string]:
         | boolean
         | {
               rule: boolean | any
-              reason?: string | Function
+              reason?: Reason
           }
 }
 
@@ -136,7 +153,7 @@ export type Hooks<Models extends string, CustomResolvers extends string> =
 
 export type ShieldAuthorization = {
     canAccess: boolean
-    reason: string | Function
+    reason: Reason
     prismaFilter: any
     matcher: string
     globPattern: string

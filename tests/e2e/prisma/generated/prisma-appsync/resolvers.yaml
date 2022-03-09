@@ -32,9 +32,6 @@
   fieldName: getPost
   dataSource: prisma-appsync
 - typeName: Query
-  fieldName: listPosts
-  dataSource: prisma-appsync
-- typeName: Query
   fieldName: countPosts
   dataSource: prisma-appsync
 - typeName: Mutation

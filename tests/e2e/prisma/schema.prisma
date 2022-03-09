@@ -19,7 +19,7 @@ generator appsync {
 }
 
 /// @gql(fields: { hiddenField: null }, subscriptions: null)
-/// @auth(model: [{ allow: apiKey }, { allow: userPools, groups: ["admins"] }])
+/// @auth(model: [{ allow: userPools, groups: ["admins"] }])
 model User {
   uuid        String  @id @default(uuid()) @db.VarChar(200)
   username    String  @unique
@@ -35,7 +35,7 @@ model hiddenModel {
 }
 
 /// @gql(queries: { list: null, count: "county" })
-/// @auth(model: [{ allow: apiKey }, { allow: userPools, groups: ["users", "admin"] }])
+/// @auth(model: [{ allow: userPools, groups: ["users", "admin"] }])
 model Post {
   id          Int      @id @default(autoincrement())
   title       String

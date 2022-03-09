@@ -145,7 +145,13 @@ export function lowerFirst(str: string): string {
  * @returns boolean
  */
 export function isObject(element): boolean {
-    return typeof element === 'object' && !Array.isArray(element) && typeof element !== 'function' && element !== null
+    return (
+        typeof element === 'object' &&
+        !Array.isArray(element) &&
+        typeof element !== 'function' &&
+        element !== null &&
+        !(element instanceof Date)
+    )
 }
 
 /**

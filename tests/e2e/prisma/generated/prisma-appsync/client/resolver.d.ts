@@ -1,4 +1,8 @@
-import { PrismaClient, QueryParams } from './defs';
+import { PrismaClient, QueryParams, QueryBuilder } from './defs';
+/**
+ *  #### Query Builder
+ */
+export declare const queryBuilder: QueryBuilder;
 /**
  *  #### Query :: Find Unique
  *

@@ -13,7 +13,11 @@ const Models = Prisma.ModelName
 
 function mockAppSyncEvent(operationName: string, query: string) {
     return mockLambdaEvent({
-        request: {},
+        request: {
+            headers: {
+                'x-fingerprint': 'fingerprint:abcdef',
+            },
+        },
         identity: mockIdentity(Authorizations.API_KEY),
         graphQLParams: {
             operationName: operationName,
@@ -205,6 +209,9 @@ describe('CLIENT #core', () => {
                     },
                 },
                 type: 'Query',
+                headers: {
+                    'x-fingerprint': 'fingerprint:abcdef',
+                },
             })
         })
     })

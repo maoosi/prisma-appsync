@@ -51,8 +51,21 @@ export declare type QueryParams = {
     identity: Identity;
 };
 export declare type Authorization = typeof Authorizations[keyof typeof Authorizations] | null;
+export declare type QueryBuilder = {
+    get: (prismaArgs: PrismaArgs) => any;
+    list: (prismaArgs: PrismaArgs) => any;
+    count: (prismaArgs: PrismaArgs) => any;
+    create: (prismaArgs: PrismaArgs) => any;
+    createMany: (prismaArgs: PrismaArgs) => any;
+    update: (prismaArgs: PrismaArgs) => any;
+    updateMany: (prismaArgs: PrismaArgs) => any;
+    upsert: (prismaArgs: PrismaArgs) => any;
+    delete: (prismaArgs: PrismaArgs) => any;
+    deleteMany: (prismaArgs: PrismaArgs) => any;
+};
 export declare type QueryParamsCustom = QueryParams & {
     prismaClient: PrismaClient;
+    queryBuilder: QueryBuilder;
 };
 export declare type BeforeHookParams = QueryParams & {
     prismaClient: PrismaClient;
@@ -83,10 +96,11 @@ export declare type AfterHookParams = QueryParams & {
     prismaClient: PrismaClient;
     result: any | any[];
 };
+export declare type Reason = string | ((context: Context) => string);
 export declare type Shield = {
     [matcher: string]: boolean | {
         rule: boolean | any;
-        reason?: string | Function;
+        reason?: Reason;
     };
 };
 export declare type HooksProps = {
@@ -101,7 +115,7 @@ export declare type HooksParameters<HookType extends 'before' | 'after', Models 
 export declare type Hooks<Models extends string, CustomResolvers extends string> = HooksParameters<'before', Models, CustomResolvers> | HooksParameters<'after', Models, CustomResolvers>;
 export declare type ShieldAuthorization = {
     canAccess: boolean;
-    reason: string | Function;
+    reason: Reason;
     prismaFilter: any;
     matcher: string;
     globPattern: string;

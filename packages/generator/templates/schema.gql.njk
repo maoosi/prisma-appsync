@@ -6,7 +6,7 @@
     }
 {% endfor %}
 
-type BatchPayload {{ defaultDirective | safe }} {
+type BatchPayload {{ defaultAuthDirective.model | safe }} {
     count: Int
 }
 
@@ -369,7 +369,7 @@ type Mutation {
             """
             Update an existing or create a new single {{ model.name }} record.
             """
-            {{ model.gql.upsert }}{{ model.name }}(
+            {{ model.gql.upsert }}(
                 data: {{ model.name }}UpdateInput!,
                 where: {{ model.name }}WhereUniqueInput!
             ): {{ model.name }} {{ model.directives.upsert | safe }}
@@ -432,7 +432,7 @@ type Query {
 type Subscription {
     {% for model in models %}
         {% if model.isEditable -%}
-            {% if model.gql.onCreated -%}
+            {% if model.gql.onCreated and model.gql.create -%}
             """
             Triggered from `{{ model.gql.create }}` mutation (excl. `{{ model.gql.createMany }}` and `{{ model.gql.upsert }}`).
             """
@@ -445,9 +445,9 @@ type Subscription {
                     {{ field.name }}: {{ field.scalar }}
                 {% endfor %}
             ): {{ model.name }}
-                @aws_subscribe(mutations: ["{{ model.gql.create }}"]) {{ model.directives.subscription | safe }}
+                @aws_subscribe(mutations: ["{{ model.gql.create }}"]) {{ model.directives.onCreated | safe }}
             {% endif %}
-            {% if model.gql.onUpdated -%}
+            {% if model.gql.onUpdated and model.gql.update -%}
             """
             Triggered from `{{ model.gql.update }}` mutation (excl. `{{ model.gql.updateMany }}` and `{{ model.gql.upsert }}`).
             """
@@ -460,9 +460,9 @@ type Subscription {
                     {{ field.name }}: {{ field.scalar }}
                 {% endfor %}
             ): {{ model.name }}
-                @aws_subscribe(mutations: ["{{ model.gql.update }}"]) {{ model.directives.subscription | safe }}
+                @aws_subscribe(mutations: ["{{ model.gql.update }}"]) {{ model.directives.onUpdated | safe }}
             {% endif %}
-            {% if model.gql.onUpserted -%}
+            {% if model.gql.onUpserted and model.gql.upsert -%}
             """
             Triggered from `{{ model.gql.upsert }}` mutation.
             """
@@ -475,9 +475,9 @@ type Subscription {
                     {{ field.name }}: {{ field.scalar }}
                 {% endfor %}
             ): {{ model.name }}
-                @aws_subscribe(mutations: ["{{ model.gql.upsert }}"]) {{ model.directives.subscription | safe }}
+                @aws_subscribe(mutations: ["{{ model.gql.upsert }}"]) {{ model.directives.onUpserted | safe }}
             {% endif %}
-            {% if model.gql.onDeleted -%}
+            {% if model.gql.onDeleted and model.gql.delete -%}
             """
             Triggered from `{{ model.gql.delete }}` mutation (excl. `{{ model.gql.deleteMany }}`).
             """
@@ -490,9 +490,9 @@ type Subscription {
                     {{ field.name }}: {{ field.scalar }}
                 {% endfor %}
             ): {{ model.name }}
-                @aws_subscribe(mutations: ["{{ model.gql.delete }}"]) {{ model.directives.subscription | safe }}
+                @aws_subscribe(mutations: ["{{ model.gql.delete }}"]) {{ model.directives.onDeleted | safe }}
             {% endif %}
-            {% if model.gql.onMutated -%}
+            {% if model.gql.onMutated and model.gql.create and model.gql.update and model.gql.upsert and model.gql.delete -%}
             """
             Triggered from ANY SINGLE record mutation.
             """
@@ -505,35 +505,35 @@ type Subscription {
                     {{ field.name }}: {{ field.scalar }}
                 {% endfor %}
             ): {{ model.name }}
-                @aws_subscribe(mutations: ["{{ model.gql.create }}", "{{ model.gql.update }}", "{{ model.gql.upsert }}", "{{ model.gql.delete }}"]) {{ model.directives.subscription | safe }}
+                @aws_subscribe(mutations: ["{{ model.gql.create }}", "{{ model.gql.update }}", "{{ model.gql.upsert }}", "{{ model.gql.delete }}"]) {{ model.directives.onMutated | safe }}
             {% endif %}
-            {% if model.gql.onCreatedMany -%}
+            {% if model.gql.onCreatedMany and model.gql.createMany -%}
             """
             Triggered from `{{ model.gql.createMany }}` mutation.
             """
             {{ model.gql.onCreatedMany }}: BatchPayload
-                @aws_subscribe(mutations: ["{{ model.gql.createMany }}"]) {{ model.directives.subscription | safe }}
+                @aws_subscribe(mutations: ["{{ model.gql.createMany }}"]) {{ model.directives.onCreatedMany | safe }}
             {% endif %}
-            {% if model.gql.onUpdatedMany -%}
+            {% if model.gql.onUpdatedMany and model.gql.updateMany -%}
             """
             Triggered from `{{ model.gql.updateMany }}` mutation.
             """
             {{ model.gql.onUpdatedMany }}: BatchPayload
-                @aws_subscribe(mutations: ["{{ model.gql.updateMany }}"]) {{ model.directives.subscription | safe }}
+                @aws_subscribe(mutations: ["{{ model.gql.updateMany }}"]) {{ model.directives.onUpdatedMany | safe }}
             {% endif %}
-            {% if model.gql.onMutatedMany -%}
+            {% if model.gql.onMutatedMany and model.gql.createMany and model.gql.updateMany and model.gql.deleteMany -%}
             """
             Triggered from ANY MULTIPLE records mutation.
             """
             {{ model.gql.onMutatedMany }}: BatchPayload
-                @aws_subscribe(mutations: ["{{ model.gql.createMany }}", "{{ model.gql.updateMany }}", "{{ model.gql.deleteMany }}"]) {{ model.directives.subscription | safe }}
+                @aws_subscribe(mutations: ["{{ model.gql.createMany }}", "{{ model.gql.updateMany }}", "{{ model.gql.deleteMany }}"]) {{ model.directives.onMutatedMany | safe }}
             {% endif %}
-            {% if model.gql.onDeletedMany -%}
+            {% if model.gql.onDeletedMany and model.gql.deleteMany -%}
             """
             Triggered from `{{ model.gql.deleteMany }}` mutation.
             """
             {{ model.gql.onDeletedMany }}: BatchPayload
-                @aws_subscribe(mutations: ["{{ model.gql.deleteMany }}"]) {{ model.directives.subscription | safe }}
+                @aws_subscribe(mutations: ["{{ model.gql.deleteMany }}"]) {{ model.directives.onDeletedMany | safe }}
             {% endif %}
         {% endif -%}
     {% endfor %}

@@ -137,6 +137,7 @@ export class PrismaAppSyncCompiler {
             models: [],
             enums: [],
             customResolvers: [],
+            defaultAuthDirective: '',
         }
 
         if (!(process?.env?.PRISMA_APPSYNC === 'false')) {
@@ -275,8 +276,8 @@ export class PrismaAppSyncCompiler {
         const gqlRegex = /@(?:gql)\(([^)]+)\)/gm
         const authRegex = /@(?:auth)\(([^)]+)\)/gm
 
-        const find = ['apiKey', 'userPools']
-        const replace = ['"apiKey"', '"userPools"']
+        const find = ['apiKey', 'userPools', 'iam', 'oidc']
+        const replace = ['"apiKey"', '"userPools"', '"iam"', '"oidc"']
 
         if (directives) {
             const gqlDirectives = directives.match(gqlRegex)
@@ -346,9 +347,38 @@ export class PrismaAppSyncCompiler {
         return gqlOutput
     }
 
+    // Converts directives objects into appsync directive strings
+    private parseDirectives(directivesObjects: any[]): string {
+        const outputDirectives: string[] = []
+
+        for (let j = 0; j < directivesObjects.length; j++) {
+            const directive = directivesObjects[j]
+
+            if (directive?.allow === 'apiKey') {
+                outputDirectives.push('@aws_api_key')
+            } else if (directive?.allow === 'iam') {
+                outputDirectives.push('@aws_iam')
+            } else if (directive?.allow === 'oidc') {
+                outputDirectives.push('@aws_oidc')
+            } else if (directive?.allow === 'userPools') {
+                if (directive?.groups && Array.isArray(directive.groups)) {
+                    outputDirectives.push(
+                        `@aws_cognito_user_pools(cognito_groups: [${directive.groups
+                            .map((g) => `"${g}"`)
+                            .join(', ')}])`,
+                    )
+                } else {
+                    outputDirectives.push('@aws_cognito_user_pools')
+                }
+            }
+        }
+
+        return outputDirectives.join(' ')
+    }
+
     // Get all directives from config
-    private getDirectives(directivesObject: object): object {
-        const directivesOutput: object = {}
+    private getDirectives(directivesObject: any): any {
+        const directivesOutput: any = {}
 
         for (const key in this.options.template) {
             if (Object.prototype.hasOwnProperty.call(this.options.template, key)) {
@@ -356,37 +386,14 @@ export class PrismaAppSyncCompiler {
 
                 for (let i = 0; i < parentKeys.length; i++) {
                     const parentKey = parentKeys[i]
-                    directivesOutput[key] = this.options.defaultDirective
+                    directivesOutput[key] = ''
 
                     if (typeof directivesObject[parentKey] !== 'undefined') {
                         const parentKeyDirectives = Array.isArray(directivesObject[parentKey])
                             ? directivesObject[parentKey]
                             : [directivesObject[parentKey]]
-                        const outputDirectives: string[] = []
 
-                        for (let j = 0; j < parentKeyDirectives.length; j++) {
-                            const directive = parentKeyDirectives[j]
-
-                            if (directive?.allow === 'apiKey') {
-                                outputDirectives.push('@aws_api_key')
-                            } else if (directive?.allow === 'iam') {
-                                outputDirectives.push('@aws_iam')
-                            } else if (directive?.allow === 'oidc') {
-                                outputDirectives.push('@aws_oidc')
-                            } else if (directive?.allow === 'userPools') {
-                                if (directive?.groups && Array.isArray(directive.groups)) {
-                                    outputDirectives.push(
-                                        `@aws_cognito_user_pools(cognito_groups: [${directive.groups
-                                            .map((g) => `"${g}"`)
-                                            .join(', ')}])`,
-                                    )
-                                } else {
-                                    outputDirectives.push('@aws_cognito_user_pools')
-                                }
-                            }
-                        }
-
-                        directivesOutput[key] = outputDirectives.join(' ')
+                        directivesOutput[key] = this.parseDirectives(parentKeyDirectives)
                         break
                     }
                 }
@@ -398,13 +405,16 @@ export class PrismaAppSyncCompiler {
 
     // Parse data from Prisma DMMF
     private parseDMMF(): this {
+        const defaultDirective: DMMFPAS_Comments = this.parseComments(this.options.defaultDirective)
+        this.data.defaultAuthDirective = this.getDirectives(defaultDirective.auth)
+
         // models
         this.dmmf.datamodel.models.forEach((model: DMMF.Model) => {
             const fields: DMMFPAS_Field[] = []
             const comments: DMMFPAS_Comments = this.parseComments(model['documentation'])
             const name = pascalCase(model.name)
             const pluralizedName = pascalCase(plural(model.name))
-            const directives: any = this.getDirectives(comments.auth)
+            const directives: any = this.getDirectives({ ...defaultDirective.auth, ...comments.auth })
             const gqlConfig: any = this.getGqlModeling(comments.gql, {
                 name,
                 pluralizedName,
@@ -430,7 +440,7 @@ export class PrismaAppSyncCompiler {
                                     type: this.getFieldType(field),
                                 },
                             }),
-                            directives: directives,
+                            directives,
                             sample: this.getFieldSample(field),
                         })
                     }

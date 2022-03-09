@@ -75,6 +75,8 @@ export function parseEvent(appsyncEvent: AppsyncEvent, options: Options, customR
         prismaArgs,
     })
 
+    const headers = appsyncEvent?.request?.headers || {}
+
     return {
         operation,
         context,
@@ -85,6 +87,7 @@ export function parseEvent(appsyncEvent: AppsyncEvent, options: Options, customR
         authorization,
         identity,
         paths,
+        headers,
     }
 }
 

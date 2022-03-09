@@ -12,6 +12,7 @@ import { parseError, inspect, debug, CustomError } from './inspector'
 import { getShieldAuthorization, getDepth, clarify, runHooks } from './guard'
 import { parseEvent } from './adapter'
 import { isEmpty } from './utils'
+import { queryBuilder } from './resolver'
 import * as queries from './resolver'
 
 /**
@@ -180,26 +181,22 @@ export class PrismaAppSync {
                 paths: QueryParams.paths,
                 context: QueryParams.context,
             })
+            debug(`Query shield authorization: ${inspect(shieldAuth)}.`)
 
             // Guard :: if `canAccess` if equal to `false`, we reject the API call
             if (!shieldAuth.canAccess) {
-                const reason = typeof shieldAuth.reason === 'string' ? shieldAuth.reason : shieldAuth.reason()
+                const reason =
+                    typeof shieldAuth.reason === 'string' ? shieldAuth.reason : shieldAuth.reason(QueryParams.context)
                 throw new CustomError(reason, { type: 'FORBIDDEN' })
             }
 
             // Guard :: if `prismaFilter` is set, combine with current Prisma query
             if (!isEmpty(shieldAuth.prismaFilter)) {
-                this.prismaClient.$use(async (params, next) => {
-                    if (!isEmpty(params?.args?.where)) {
-                        params.args.where = {
-                            AND: [params.args.where, shieldAuth.prismaFilter],
-                        }
-                    } else {
-                        params.args.where = shieldAuth.prismaFilter
-                    }
+                debug(`QueryParams before adding Shield filters: ${inspect(QueryParams)}.`)
 
-                    return next(params)
-                })
+                QueryParams.prismaArgs = queryBuilder.prismaWhere(QueryParams.prismaArgs, shieldAuth.prismaFilter)
+
+                debug(`QueryParams after adding Shield filters: ${inspect(QueryParams)}.`)
             }
 
             // Guard: get and run all before hooks functions matching query
@@ -249,7 +246,10 @@ export class PrismaAppSync {
             // Resolver :: resolve query with Custom Resolver
             else if (resolveParams?.resolvers && typeof resolveParams.resolvers[QueryParams.operation] === 'function') {
                 debug(`Resolving query for Custom Resolver "${QueryParams.operation}".`)
-                result = await resolveParams.resolvers[QueryParams.operation](QueryParams)
+                result = await resolveParams.resolvers[QueryParams.operation]({
+                    ...QueryParams,
+                    prismaClient: this.prismaClient,
+                })
             }
             // Resolver :: resolve query with built-in CRUD
             else if (!isEmpty(QueryParams?.context?.model)) {
@@ -279,6 +279,7 @@ export class PrismaAppSync {
         }
 
         // Guard :: clarify result (decode html)
+        debug(`Result before sanitize: ${inspect(result)}`)
         const resultClarified = this.options.sanitize ? clarify(result) : result
 
         debug(`Returning response to API request w/ result: ${inspect(resultClarified)}`)

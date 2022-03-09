@@ -1,11 +1,7 @@
 {
   "inputs": {
-    "packages/client/defs.ts": {
-      "bytes": 9289,
-      "imports": []
-    },
-    "packages/client/inspector.ts": {
-      "bytes": 2702,
+    "packages/client/resolver.ts": {
+      "bytes": 7318,
       "imports": []
     },
     "node_modules/.pnpm/dot-object@2.1.4/node_modules/dot-object/index.js": {
@@ -350,7 +346,7 @@
       ]
     },
     "packages/client/utils.ts": {
-      "bytes": 5806,
+      "bytes": 5884,
       "imports": [
         {
           "path": "node_modules/.pnpm/dot-object@2.1.4/node_modules/dot-object/index.js",
@@ -374,8 +370,16 @@
         }
       ]
     },
+    "packages/client/defs.ts": {
+      "bytes": 9953,
+      "imports": []
+    },
+    "packages/client/inspector.ts": {
+      "bytes": 2688,
+      "imports": []
+    },
     "packages/client/guard.ts": {
-      "bytes": 6130,
+      "bytes": 6168,
       "imports": [
         {
           "path": "packages/client/defs.ts",
@@ -392,7 +396,7 @@
       ]
     },
     "packages/client/adapter.ts": {
-      "bytes": 18355,
+      "bytes": 18430,
       "imports": [
         {
           "path": "packages/client/inspector.ts",
@@ -412,12 +416,8 @@
         }
       ]
     },
-    "packages/client/resolver.ts": {
-      "bytes": 6109,
-      "imports": []
-    },
     "packages/client/core.ts": {
-      "bytes": 11338,
+      "bytes": 11497,
       "imports": [
         {
           "path": "packages/client/defs.ts",
@@ -442,14 +442,30 @@
         {
           "path": "packages/client/resolver.ts",
           "kind": "import-statement"
+        },
+        {
+          "path": "packages/client/resolver.ts",
+          "kind": "import-statement"
         }
       ]
     },
     "packages/client/index.ts": {
-      "bytes": 127,
+      "bytes": 847,
       "imports": [
         {
+          "path": "packages/client/resolver.ts",
+          "kind": "import-statement"
+        },
+        {
+          "path": "packages/client/utils.ts",
+          "kind": "import-statement"
+        },
+        {
           "path": "packages/client/core.ts",
+          "kind": "import-statement"
+        },
+        {
+          "path": "packages/client/inspector.ts",
           "kind": "import-statement"
         },
         {
@@ -469,7 +485,7 @@
           "bytesInOutput": 5347
         },
         "node_modules/.pnpm/braces@3.0.2/node_modules/braces/lib/utils.js": {
-          "bytesInOutput": 1017
+          "bytesInOutput": 1029
         },
         "node_modules/.pnpm/braces@3.0.2/node_modules/braces/lib/stringify.js": {
           "bytesInOutput": 343
@@ -505,10 +521,10 @@
           "bytesInOutput": 1038
         },
         "node_modules/.pnpm/picomatch@2.3.1/node_modules/picomatch/lib/scan.js": {
-          "bytesInOutput": 3105
+          "bytesInOutput": 3110
         },
         "node_modules/.pnpm/picomatch@2.3.1/node_modules/picomatch/lib/parse.js": {
-          "bytesInOutput": 12213
+          "bytesInOutput": 12217
         },
         "node_modules/.pnpm/picomatch@2.3.1/node_modules/picomatch/lib/picomatch.js": {
           "bytesInOutput": 2310
@@ -559,37 +575,37 @@
           "bytesInOutput": 2080
         },
         "node_modules/.pnpm/xss@1.0.10/node_modules/xss/lib/xss.js": {
-          "bytesInOutput": 1967
+          "bytesInOutput": 1970
         },
         "node_modules/.pnpm/xss@1.0.10/node_modules/xss/lib/index.js": {
           "bytesInOutput": 487
         },
         "packages/client/index.ts": {
-          "bytesInOutput": 62
+          "bytesInOutput": 275
+        },
+        "packages/client/resolver.ts": {
+          "bytesInOutput": 2777
+        },
+        "packages/client/utils.ts": {
+          "bytesInOutput": 1524
         },
         "packages/client/defs.ts": {
           "bytesInOutput": 1695
         },
         "packages/client/inspector.ts": {
-          "bytesInOutput": 1229
-        },
-        "packages/client/utils.ts": {
-          "bytesInOutput": 1294
+          "bytesInOutput": 1219
         },
         "packages/client/guard.ts": {
-          "bytesInOutput": 1847
+          "bytesInOutput": 1851
         },
         "packages/client/adapter.ts": {
-          "bytesInOutput": 6669
-        },
-        "packages/client/resolver.ts": {
-          "bytesInOutput": 2608
+          "bytesInOutput": 6695
         },
         "packages/client/core.ts": {
-          "bytesInOutput": 3174
+          "bytesInOutput": 3336
         }
       },
-      "bytes": 175988
+      "bytes": 176826
     }
   }
 }

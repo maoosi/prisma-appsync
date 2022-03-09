@@ -70,4 +70,5 @@ export type DMMFPAS = {
     models: DMMFPAS_Model[]
     enums: DMMFPAS_Enum[]
     customResolvers: DMMFPAS_CustomResolver[]
+    defaultAuthDirective: string
 }

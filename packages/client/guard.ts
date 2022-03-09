@@ -84,6 +84,8 @@ export function getShieldAuthorization({
         for (const matcher in shield) {
             let globPattern = matcher
 
+            if (!globPattern.startsWith('/') && globPattern !== '**') globPattern = `/${globPattern}`
+
             for (const alias in ActionsAliasesList) {
                 const actionsList = ActionsAliasesList[alias]
                 globPattern = globPattern.replace(new RegExp(`${alias}/`, 'g'), `{${actionsList.join(',')}}/`)
@@ -190,8 +192,6 @@ export async function runHooks({
     })
 
     if (matchingHooks.length > 0) {
-        debug(`Triggering hooks: "${inspect(matchingHooks)}".`)
-
         for (let index = 0; index < matchingHooks.length; index++) {
             const hookPath = matchingHooks[index]
 

@@ -1,4 +1,69 @@
-import { PrismaClient, QueryParams } from './defs'
+import { PrismaClient, QueryParams, PrismaArgs, QueryBuilder } from './defs'
+
+/**
+ *  #### Query Builder
+ */
+export const queryBuilder: QueryBuilder = {
+    prismaGet: (prismaArgs: PrismaArgs) => ({
+        where: prismaArgs.where,
+        ...(prismaArgs.select && { select: prismaArgs.select }),
+    }),
+    prismaList: (prismaArgs: PrismaArgs) => ({
+        ...(prismaArgs.where && { where: prismaArgs.where }),
+        ...(prismaArgs.orderBy && { orderBy: prismaArgs.orderBy }),
+        ...(prismaArgs.select && { select: prismaArgs.select }),
+        ...(typeof prismaArgs.skip !== 'undefined' && { skip: prismaArgs.skip }),
+        ...(typeof prismaArgs.take !== 'undefined' && { take: prismaArgs.take }),
+    }),
+    prismaCount: (prismaArgs: PrismaArgs) => ({
+        ...(prismaArgs.where && { where: prismaArgs.where }),
+        ...(prismaArgs.orderBy && { orderBy: prismaArgs.orderBy }),
+        ...(prismaArgs.select && { select: prismaArgs.select }),
+        ...(typeof prismaArgs.skip !== 'undefined' && { skip: prismaArgs.skip }),
+        ...(typeof prismaArgs.take !== 'undefined' && { take: prismaArgs.take }),
+    }),
+    prismaCreate: (prismaArgs: PrismaArgs) => ({
+        data: prismaArgs.data,
+        ...(prismaArgs.select && { select: prismaArgs.select }),
+    }),
+    prismaCreateMany: (prismaArgs: PrismaArgs) => ({
+        data: prismaArgs.data,
+        ...(prismaArgs.skipDuplicates && { skipDuplicates: prismaArgs.skipDuplicates }),
+    }),
+    prismaUpdate: (prismaArgs: PrismaArgs) => ({
+        data: prismaArgs.data,
+        where: prismaArgs.where,
+        ...(prismaArgs.select && { select: prismaArgs.select }),
+    }),
+    prismaUpdateMany: (prismaArgs: PrismaArgs) => ({
+        data: prismaArgs.data,
+        where: prismaArgs.where,
+    }),
+    prismaUpsert: (prismaArgs: PrismaArgs) => ({
+        update: prismaArgs.data,
+        create: prismaArgs.data,
+        where: prismaArgs.where,
+        ...(prismaArgs.select && { select: prismaArgs.select }),
+    }),
+    prismaDelete: (prismaArgs: PrismaArgs) => ({
+        where: prismaArgs.where,
+        ...(prismaArgs.select && { select: prismaArgs.select }),
+    }),
+    prismaDeleteMany: (prismaArgs: PrismaArgs) => ({
+        where: prismaArgs.where,
+    }),
+    prismaWhere: (prismaArgs: PrismaArgs, filters: any | any[]) => {
+        if (!Array.isArray(filters)) filters = [filters]
+
+        filters.forEach((filter: any) => {
+            if (prismaArgs?.where?.AND) prismaArgs.where.AND.push(filter)
+            else if (prismaArgs?.where) prismaArgs.where = { AND: [prismaArgs.where, filter] }
+            else prismaArgs.where = filter
+        })
+
+        return prismaArgs
+    },
+}
 
 /**
  *  #### Query :: Find Unique
@@ -10,10 +75,7 @@ import { PrismaClient, QueryParams } from './defs'
 export async function getQuery(prismaClient: PrismaClient, query: QueryParams) {
     if (query.context.model === null) return
 
-    const results = await prismaClient[query.context.model].findUnique({
-        where: query.prismaArgs.where,
-        ...(query.prismaArgs.select && { select: query.prismaArgs.select }),
-    })
+    const results = await prismaClient[query.context.model].findUnique(queryBuilder.prismaGet(query.prismaArgs))
 
     return results
 }
@@ -28,13 +90,7 @@ export async function getQuery(prismaClient: PrismaClient, query: QueryParams) {
 export async function listQuery(prismaClient: PrismaClient, query: QueryParams) {
     if (query.context.model === null) return
 
-    const results = await prismaClient[query.context.model].findMany({
-        ...(query.prismaArgs.where && { where: query.prismaArgs.where }),
-        ...(query.prismaArgs.orderBy && { orderBy: query.prismaArgs.orderBy }),
-        ...(query.prismaArgs.select && { select: query.prismaArgs.select }),
-        ...(typeof query.prismaArgs.skip !== 'undefined' && { skip: query.prismaArgs.skip }),
-        ...(typeof query.prismaArgs.take !== 'undefined' && { take: query.prismaArgs.take }),
-    })
+    const results = await prismaClient[query.context.model].findMany(queryBuilder.prismaList(query.prismaArgs))
 
     return results
 }
@@ -49,13 +105,7 @@ export async function listQuery(prismaClient: PrismaClient, query: QueryParams) 
 export async function countQuery(prismaClient: PrismaClient, query: QueryParams) {
     if (query.context.model === null) return
 
-    const results = await prismaClient[query.context.model].count({
-        ...(query.prismaArgs.where && { where: query.prismaArgs.where }),
-        ...(query.prismaArgs.orderBy && { orderBy: query.prismaArgs.orderBy }),
-        ...(query.prismaArgs.select && { select: query.prismaArgs.select }),
-        ...(typeof query.prismaArgs.skip !== 'undefined' && { skip: query.prismaArgs.skip }),
-        ...(typeof query.prismaArgs.take !== 'undefined' && { take: query.prismaArgs.take }),
-    })
+    const results = await prismaClient[query.context.model].count(queryBuilder.prismaCount(query.prismaArgs))
 
     return results
 }
@@ -70,10 +120,7 @@ export async function countQuery(prismaClient: PrismaClient, query: QueryParams)
 export async function createQuery(prismaClient: PrismaClient, query: QueryParams) {
     if (query.context.model === null) return
 
-    const results = await prismaClient[query.context.model].create({
-        data: query.prismaArgs.data,
-        ...(query.prismaArgs.select && { select: query.prismaArgs.select }),
-    })
+    const results = await prismaClient[query.context.model].create(queryBuilder.prismaCreate(query.prismaArgs))
 
     return results
 }
@@ -88,10 +135,7 @@ export async function createQuery(prismaClient: PrismaClient, query: QueryParams
 export async function createManyQuery(prismaClient: PrismaClient, query: QueryParams) {
     if (query.context.model === null) return
 
-    const results = await prismaClient[query.context.model].createMany({
-        data: query.prismaArgs.data,
-        ...(query.prismaArgs.skipDuplicates && { skipDuplicates: query.prismaArgs.skipDuplicates }),
-    })
+    const results = await prismaClient[query.context.model].createMany(queryBuilder.prismaCreateMany(query.prismaArgs))
 
     return results
 }
@@ -106,11 +150,7 @@ export async function createManyQuery(prismaClient: PrismaClient, query: QueryPa
 export async function updateQuery(prismaClient: PrismaClient, query: QueryParams) {
     if (query.context.model === null) return
 
-    const results = await prismaClient[query.context.model].update({
-        data: query.prismaArgs.data,
-        where: query.prismaArgs.where,
-        ...(query.prismaArgs.select && { select: query.prismaArgs.select }),
-    })
+    const results = await prismaClient[query.context.model].update(queryBuilder.prismaUpdate(query.prismaArgs))
 
     return results
 }
@@ -125,10 +165,7 @@ export async function updateQuery(prismaClient: PrismaClient, query: QueryParams
 export async function updateManyQuery(prismaClient: PrismaClient, query: QueryParams) {
     if (query.context.model === null) return
 
-    const results = await prismaClient[query.context.model].updateMany({
-        data: query.prismaArgs.data,
-        where: query.prismaArgs.where,
-    })
+    const results = await prismaClient[query.context.model].updateMany(queryBuilder.prismaUpdateMany(query.prismaArgs))
 
     return results
 }
@@ -143,12 +180,7 @@ export async function updateManyQuery(prismaClient: PrismaClient, query: QueryPa
 export async function upsertQuery(prismaClient: PrismaClient, query: QueryParams) {
     if (query.context.model === null) return
 
-    const results = await prismaClient[query.context.model].upsert({
-        update: query.prismaArgs.data,
-        create: query.prismaArgs.data,
-        where: query.prismaArgs.where,
-        ...(query.prismaArgs.select && { select: query.prismaArgs.select }),
-    })
+    const results = await prismaClient[query.context.model].upsert(queryBuilder.prismaUpsert(query.prismaArgs))
 
     return results
 }
@@ -163,10 +195,7 @@ export async function upsertQuery(prismaClient: PrismaClient, query: QueryParams
 export async function deleteQuery(prismaClient: PrismaClient, query: QueryParams) {
     if (query.context.model === null) return
 
-    const results = await prismaClient[query.context.model].delete({
-        where: query.prismaArgs.where,
-        ...(query.prismaArgs.select && { select: query.prismaArgs.select }),
-    })
+    const results = await prismaClient[query.context.model].delete(queryBuilder.prismaDelete(query.prismaArgs))
 
     return results
 }
@@ -181,9 +210,7 @@ export async function deleteQuery(prismaClient: PrismaClient, query: QueryParams
 export async function deleteManyQuery(prismaClient: PrismaClient, query: QueryParams) {
     if (query.context.model === null) return
 
-    const results = await prismaClient[query.context.model].deleteMany({
-        where: query.prismaArgs.where,
-    })
+    const results = await prismaClient[query.context.model].deleteMany(queryBuilder.prismaDeleteMany(query.prismaArgs))
 
     return results
 }

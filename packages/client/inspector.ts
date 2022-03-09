@@ -68,7 +68,7 @@ export function parseError(error: Error): CustomError {
 }
 
 export function inspect(data: any): string {
-    return nodeInspect(data, { compact: true, depth: 5, breakLength: 80, colors: true })
+    return nodeInspect(data, { compact: true, depth: 5, breakLength: 80 })
 }
 
 export function debug(...data): void {
