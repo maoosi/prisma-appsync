@@ -18,6 +18,7 @@ const identity = mockIdentity(Authorizations.AMAZON_COGNITO_USER_POOLS, {
 
 describe('CLIENT #queries', () => {
     const query: QueryParams = {
+        headers: {},
         args: {},
         context: {
             action: Actions.get,

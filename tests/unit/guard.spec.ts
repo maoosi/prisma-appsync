@@ -157,6 +157,7 @@ describe('CLIENT #guard', () => {
                 },
                 prismaClient: new PrismaClient(),
                 QueryParams: {
+                    headers: {},
                     args: {
                         where: { id: 1 },
                         data: { title: 'New title' },
@@ -193,6 +194,7 @@ describe('CLIENT #guard', () => {
                 },
                 prismaClient: new PrismaClient(),
                 QueryParams: {
+                    headers: {},
                     args: {
                         where: { id: 1 },
                         data: { title: 'New title' },
@@ -231,6 +233,7 @@ describe('CLIENT #guard', () => {
                 },
                 prismaClient: new PrismaClient(),
                 QueryParams: {
+                    headers: {},
                     args: {
                         message: 'Hello world',
                     },
@@ -265,6 +268,7 @@ describe('CLIENT #guard', () => {
                 },
                 prismaClient: new PrismaClient(),
                 QueryParams: {
+                    headers: {},
                     args: {
                         where: { id: 1 },
                         data: { title: 'New title' },
