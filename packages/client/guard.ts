@@ -8,7 +8,7 @@ import {
     DebugTestingKey,
 } from './defs'
 import { merge, encode, decode, filterXSS, isMatchingGlob, traverse } from './utils'
-import { CustomError, inspect, debug } from './inspector'
+import { CustomError } from './inspector'
 
 /**
  * #### Sanitize data (parse xss + encode html).
@@ -177,8 +177,6 @@ export async function runHooks({
     QueryParams: QueryParams
     result?: any | any[]
 }): Promise<void | any> {
-    const sendResult = typeof result !== 'undefined' && when === 'after'
-
     const matchingHooks = Object.keys(hooks).filter((hookPath: string) => {
         const hookWhen = hookPath.split(':')[0]
         const hookGlob = hookPath.split(':')[1]
@@ -198,13 +196,13 @@ export async function runHooks({
             if (Object.prototype.hasOwnProperty.call(hooks, hookPath)) {
                 const hookResult = await hooks[hookPath]({
                     ...QueryParams,
-                    ...(sendResult && { result }),
+                    ...(typeof result !== 'undefined' && when === 'after' && { result }),
                     prismaClient,
                 })
-                if (sendResult) result = hookResult
+                result = hookResult
             }
         }
     }
 
-    if (sendResult) return result
+    return result
 }

@@ -49,23 +49,24 @@ export declare type QueryParams = {
     prismaArgs: PrismaArgs;
     authorization: Authorization;
     identity: Identity;
+    headers: any;
 };
 export declare type Authorization = typeof Authorizations[keyof typeof Authorizations] | null;
 export declare type QueryBuilder = {
-    get: (prismaArgs: PrismaArgs) => any;
-    list: (prismaArgs: PrismaArgs) => any;
-    count: (prismaArgs: PrismaArgs) => any;
-    create: (prismaArgs: PrismaArgs) => any;
-    createMany: (prismaArgs: PrismaArgs) => any;
-    update: (prismaArgs: PrismaArgs) => any;
-    updateMany: (prismaArgs: PrismaArgs) => any;
-    upsert: (prismaArgs: PrismaArgs) => any;
-    delete: (prismaArgs: PrismaArgs) => any;
-    deleteMany: (prismaArgs: PrismaArgs) => any;
+    prismaGet: (prismaArgs: PrismaArgs) => any;
+    prismaList: (prismaArgs: PrismaArgs) => any;
+    prismaCount: (prismaArgs: PrismaArgs) => any;
+    prismaCreate: (prismaArgs: PrismaArgs) => any;
+    prismaCreateMany: (prismaArgs: PrismaArgs) => any;
+    prismaUpdate: (prismaArgs: PrismaArgs) => any;
+    prismaUpdateMany: (prismaArgs: PrismaArgs) => any;
+    prismaUpsert: (prismaArgs: PrismaArgs) => any;
+    prismaDelete: (prismaArgs: PrismaArgs) => any;
+    prismaDeleteMany: (prismaArgs: PrismaArgs) => any;
+    prismaWhere: (prismaArgs: PrismaArgs, filter: any) => PrismaArgs;
 };
 export declare type QueryParamsCustom = QueryParams & {
     prismaClient: PrismaClient;
-    queryBuilder: QueryBuilder;
 };
 export declare type BeforeHookParams = QueryParams & {
     prismaClient: PrismaClient;
@@ -108,7 +109,7 @@ export declare type HooksProps = {
     after: AfterHookParams;
 };
 export declare type HookPath<Models extends string, CustomResolvers> = `${ActionsAliasStr}/${Uncapitalize<Models>}` | CustomResolvers;
-export declare type HooksParameter<HookType extends 'before' | 'after', Models extends string, CustomResolvers extends string> = `${HookType}:${HookPath<Models, CustomResolvers>}`;
+export declare type HooksParameter<HookType extends 'before' | 'after', Models extends string, CustomResolvers extends string> = `${HookType}:${HookPath<Models, CustomResolvers>}` | `${HookType}:*`;
 export declare type HooksParameters<HookType extends 'before' | 'after', Models extends string, CustomResolvers extends string> = {
     [matcher in HooksParameter<HookType, Models, CustomResolvers>]?: (props: HooksProps[HookType]) => Promise<any>;
 };

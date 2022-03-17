@@ -5,6 +5,7 @@ import {
     Shield,
     ShieldAuthorization,
     ResolveParams,
+    AfterHookParams,
     BatchActionsList,
     DebugTestingKey,
 } from './defs'
@@ -157,7 +158,7 @@ export class PrismaAppSync {
             )
 
             // Adapter :: parse appsync event
-            const QueryParams = parseEvent(resolveParams.event, this.options, resolveParams.resolvers)
+            let QueryParams = parseEvent(resolveParams.event, this.options, resolveParams.resolvers)
             debug(`Parsed event: ${inspect(QueryParams)}`)
 
             // Guard :: block queries with a depth > maxDepth
@@ -201,7 +202,7 @@ export class PrismaAppSync {
 
             // Guard: get and run all before hooks functions matching query
             if (resolveParams?.hooks) {
-                await runHooks({
+                QueryParams = await runHooks({
                     when: 'before',
                     hooks: resolveParams.hooks,
                     prismaClient: this.prismaClient,
@@ -265,13 +266,14 @@ export class PrismaAppSync {
 
             // Guard: get and run all after hooks functions matching query
             if (resolveParams?.hooks) {
-                result = await runHooks({
+                const q:AfterHookParams = await runHooks({
                     when: 'after',
                     hooks: resolveParams.hooks,
                     prismaClient: this.prismaClient,
                     QueryParams,
                     result,
                 })
+                result = q.result
             }
         } catch (error) {
             // Return error

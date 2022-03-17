@@ -1,2 +1,21 @@
+import { merge, clone, decode, encode, dotate, isMatchingGlob, filterXSS, isEmpty, isUndefined, lowerFirst, isObject, traverse, replaceAll } from './utils';
 export { PrismaAppSync } from './core';
-export { QueryParams, BeforeHookParams, AfterHookParams, Authorizations } from './defs';
+export { CustomError } from './inspector';
+export { QueryParams, QueryParamsCustom, BeforeHookParams, AfterHookParams, Authorizations, Authorization, AppsyncEvent, Identity, API_KEY, AWS_IAM, AMAZON_COGNITO_USER_POOLS, AWS_LAMBDA, OPENID_CONNECT, } from './defs';
+declare const Helpers: {
+    queryBuilder: import("./defs").QueryBuilder;
+    merge: typeof merge;
+    clone: typeof clone;
+    decode: typeof decode;
+    encode: typeof encode;
+    dotate: typeof dotate;
+    isMatchingGlob: typeof isMatchingGlob;
+    filterXSS: typeof filterXSS;
+    isEmpty: typeof isEmpty;
+    isUndefined: typeof isUndefined;
+    lowerFirst: typeof lowerFirst;
+    isObject: typeof isObject;
+    traverse: typeof traverse;
+    replaceAll: typeof replaceAll;
+};
+export { Helpers };

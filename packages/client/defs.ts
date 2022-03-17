@@ -129,6 +129,11 @@ export type HooksProps = {
     after: AfterHookParams
 }
 
+export type HooksReturn = {
+    before: Promise<BeforeHookParams>
+    after: Promise<AfterHookParams>
+}
+
 export type HookPath<Models extends string, CustomResolvers> =
     | `${ActionsAliasStr}/${Uncapitalize<Models>}`
     | CustomResolvers
@@ -137,14 +142,14 @@ export type HooksParameter<
     HookType extends 'before' | 'after',
     Models extends string,
     CustomResolvers extends string,
-> = `${HookType}:${HookPath<Models, CustomResolvers>}`
+> = `${HookType}:${HookPath<Models, CustomResolvers>}` | `${HookType}:**`
 
 export type HooksParameters<
     HookType extends 'before' | 'after',
     Models extends string,
     CustomResolvers extends string,
 > = {
-    [matcher in HooksParameter<HookType, Models, CustomResolvers>]?: (props: HooksProps[HookType]) => Promise<any>
+    [matcher in HooksParameter<HookType, Models, CustomResolvers>]?: (props: HooksProps[HookType]) => HooksReturn[HookType]
 }
 
 export type Hooks<Models extends string, CustomResolvers extends string> =
