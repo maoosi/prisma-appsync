@@ -51,7 +51,6 @@ export function parseEvent(appsyncEvent: AppsyncEvent, options: Options, customR
     const fields = getFields({
         _selectionSetList: appsyncEvent.info.selectionSetList,
     })
-
     const sanitizedArgs = options.sanitize
         ? sanitize(addNullables(appsyncEvent.arguments))
         : addNullables(appsyncEvent.arguments)

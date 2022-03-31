@@ -7,6 +7,7 @@ import {
     DMMFPAS,
     DMMFPAS_Field,
     DMMFPAS_Comments,
+    DMMFPAS_Model,
     CompilerOptions,
     CompilerOptionsPrivate,
     DMMFPAS_CustomResolver,
@@ -426,6 +427,7 @@ export class PrismaAppSyncCompiler {
                     const isFieldIgnored = gqlConfig?._fields?.[field.name] === null
 
                     if (!field.isGenerated && !isFieldIgnored) {
+                        if (field.relationName) console.log({ field })
                         fields.push({
                             name: field.name,
                             scalar: this.getFieldScalar(field),
@@ -471,6 +473,23 @@ export class PrismaAppSyncCompiler {
                 name: enumerated.name,
                 values: enumValues,
             })
+        })
+
+        // remove fields with broken relations (e.g. related model does not exist)
+        this.data.models = this.data.models.map((model: DMMFPAS_Model) => {
+            model.fields = model.fields.filter((field: DMMFPAS_Field) => {
+                if (field?.relation) {
+                    const modelExists = this.data.models.find((searchModel: DMMFPAS_Model) => {
+                        return searchModel.name === field?.relation?.type
+                    })
+
+                    if (!Boolean(modelExists)) return false
+                }
+
+                return true
+            })
+
+            return model
         })
 
         // console.log(inspect(this.data, false, null, true))

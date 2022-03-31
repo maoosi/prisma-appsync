@@ -12,6 +12,7 @@ import {
     lowerFirst,
     isObject,
     traverse,
+    traverseAsync,
     replaceAll,
 } from './utils'
 
@@ -47,6 +48,7 @@ const Helpers = {
     lowerFirst,
     isObject,
     traverse,
+    traverseAsync,
     replaceAll,
 }
 

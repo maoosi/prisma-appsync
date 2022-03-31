@@ -210,6 +210,63 @@ export function traverse(
 }
 
 /**
+ * #### Traverse any element and execute middleware (Async)
+ *
+ * @example const element = await traverse(element, value => doSomething(value))
+ *
+ * @param {any} element
+ * @param {Function} iteratee
+ * @returns Promise<any>
+ */
+ export async function traverseAsync(
+    element: any,
+    iteratee: (value: any, key?: string) => Promise<{ value: any; excludeChilds?: boolean }>,
+): Promise<any> {
+    let outputData
+
+    // object
+    if (isObject(element)) {
+        outputData = clone(element)
+
+        for (const key in outputData) {
+            if (Object.prototype.hasOwnProperty.call(outputData, key)) {
+                const { excludeChilds, value } = await iteratee(outputData[key], key)
+
+                // object
+                if (isObject(value)) {
+                    if (excludeChilds) outputData[key] = clone(value)
+                    else outputData[key] = await traverseAsync(value, iteratee)
+                }
+                // array
+                else if (Array.isArray(value)) {
+                    if (excludeChilds) outputData[key] = [...value]
+                    else outputData[key] = await traverseAsync(value, iteratee)
+                }
+                // anything else
+                else {
+                    outputData[key] = value
+                }
+            }
+        }
+    }
+    // array
+    else if (Array.isArray(element)) {
+        const { value } = await iteratee(element)
+        outputData = [...value]
+        for (let index = 0; index < outputData.length; index++) {
+            outputData[index] = await traverseAsync(outputData[index], iteratee)
+        }
+    }
+    // anything else
+    else {
+        const { value } = await iteratee(element)
+        outputData = value
+    }
+
+    return outputData
+}
+
+/**
  * #### Replace all from findArray with replaceArray
  *
  * @example replaceAll('you & me', ['you','me'], ['me','you'])

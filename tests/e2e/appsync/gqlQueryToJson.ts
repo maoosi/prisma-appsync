@@ -228,5 +228,6 @@ export const graphQlQueryToJson = (
     jsonObject[operation] = selections
 
     const varsReplacedWithValues = replaceVariables(jsonObject, options.variables)
+    
     return varsReplacedWithValues
 }

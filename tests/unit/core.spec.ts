@@ -74,6 +74,33 @@ describe('CLIENT #core', () => {
             const maliciousXss = result?.__prismaAppsync?.QueryParams?.prismaArgs?.data?.title
             expect(maliciousXss).toEqual('&lt;img src&gt;')
         })
+        // test('expect Sanitizer to sanitize array inputs', async () => {
+        //     const prismaAppSync = new PrismaAppSync({
+        //         connectionString: 'postgresql://USER:PASSWORD@HOST:PORT/DATABASE',
+        //         maxDepth: 4,
+        //     })
+        //     const event = mockAppSyncEvent(
+        //         'updatePosts',
+        //         `query updatePosts {
+        //             updatePosts(
+        //                 data: {
+        //                     pins: [
+        //                         { title: "<IMG SRC=\\"javascript:alert('XSS');\\">", order: 1 }
+        //                         { title: "<IMG SRC=\\"javascript:alert('XSS');\\">", order: 3 }
+        //                     ]
+        //                 }
+        //             ) {
+        //                 title
+        //             }
+        //         }`,
+        //     )
+        //     const result = await prismaAppSync.resolve({ event })
+        //     const maliciousXss = result?.__prismaAppsync?.QueryParams?.prismaArgs?.data?.pins
+        //     expect(maliciousXss).toEqual([
+        //         { title: '&lt;img src&gt;', order: 1 },
+        //         { title: '&lt;img src&gt;', order: 3 }
+        //     ])
+        // })
         test('expect Sanitizer to _not_ sanitize inputs', async () => {
             const prismaAppSync = new PrismaAppSync({
                 connectionString: 'postgresql://USER:PASSWORD@HOST:PORT/DATABASE',

@@ -108,10 +108,14 @@ export declare type HooksProps = {
     before: BeforeHookParams;
     after: AfterHookParams;
 };
+export declare type HooksReturn = {
+    before: Promise<BeforeHookParams>;
+    after: Promise<AfterHookParams>;
+};
 export declare type HookPath<Models extends string, CustomResolvers> = `${ActionsAliasStr}/${Uncapitalize<Models>}` | CustomResolvers;
-export declare type HooksParameter<HookType extends 'before' | 'after', Models extends string, CustomResolvers extends string> = `${HookType}:${HookPath<Models, CustomResolvers>}` | `${HookType}:*`;
+export declare type HooksParameter<HookType extends 'before' | 'after', Models extends string, CustomResolvers extends string> = `${HookType}:${HookPath<Models, CustomResolvers>}` | `${HookType}:**`;
 export declare type HooksParameters<HookType extends 'before' | 'after', Models extends string, CustomResolvers extends string> = {
-    [matcher in HooksParameter<HookType, Models, CustomResolvers>]?: (props: HooksProps[HookType]) => Promise<any>;
+    [matcher in HooksParameter<HookType, Models, CustomResolvers>]?: (props: HooksProps[HookType]) => HooksReturn[HookType];
 };
 export declare type Hooks<Models extends string, CustomResolvers extends string> = HooksParameters<'before', Models, CustomResolvers> | HooksParameters<'after', Models, CustomResolvers>;
 export declare type ShieldAuthorization = {

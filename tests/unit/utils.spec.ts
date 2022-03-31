@@ -49,6 +49,37 @@ describe('CLIENT #utils', () => {
                 },
             })
         })
+        
+        test('expect merge to deep merge objects with array', () => {
+            const obj1 = {
+                where: { collectionUuid: "a" },
+                data: {
+                    pins: [
+                        { uuid: "b", order: 2 },
+                        { uuid: "c", order: 5 },
+                    ]
+                }
+            }
+            const obj2 = {
+                select: {
+                    uuid: true,
+                    order: true
+                },
+            }
+            expect(merge(obj1, obj2)).toEqual({
+                where: { collectionUuid: "a" },
+                data: {
+                    pins: [
+                        { uuid: "b", order: 2 },
+                        { uuid: "c", order: 5 },
+                    ]
+                },
+                select: {
+                    uuid: true,
+                    order: true
+                },
+            })
+        })
     })
     describe('.clone?', () => {
         test('expect clone to deep clone object', () => {
@@ -58,6 +89,18 @@ describe('CLIENT #utils', () => {
                     author: {
                         select: { username: true },
                     },
+                },
+            }
+            expect(clone(obj1)).toEqual(obj1)
+        })
+        test('expect clone to deep clone object with array', () => {
+            const obj1 = {
+                where: { collectionUuid: "a" },
+                data: {
+                    pins: [
+                        { uuid: "b", order: 2 },
+                        { uuid: "c", order: 5 },
+                    ]
                 },
             }
             expect(clone(obj1)).toEqual(obj1)

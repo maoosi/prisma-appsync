@@ -21,12 +21,13 @@ generator appsync {
 /// @gql(fields: { hiddenField: null }, subscriptions: null)
 /// @auth(model: [{ allow: userPools, groups: ["admins"] }])
 model User {
-  uuid        String  @id @default(uuid()) @db.VarChar(200)
-  username    String  @unique
-  email       String  @unique
+  uuid        String    @id @default(uuid()) @db.VarChar(200)
+  username    String    @unique
+  email       String    @unique
   hiddenField String?
-  role        Role    @default(USER)
+  role        Role      @default(USER)
   posts       Post[]
+  comments    Comment[]
 }
 
 /// @gql(model: null)
@@ -37,12 +38,24 @@ model hiddenModel {
 /// @gql(queries: { list: null, count: "county" })
 /// @auth(model: [{ allow: userPools, groups: ["users", "admin"] }])
 model Post {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   title       String
+  author      User?     @relation(fields: [authorUuid], references: [uuid])
+  authorUuid  String?   @db.VarChar(200)
+  published   Boolean   @default(false)
+  comments    Comment[]
+  views       Int       @default(0)
+  lastSavedAt DateTime  @default(now())
+}
+
+/// @gql(model: null)
+model Comment {
+  id          Int      @id @default(autoincrement())
   author      User?    @relation(fields: [authorUuid], references: [uuid])
   authorUuid  String?  @db.VarChar(200)
-  published   Boolean  @default(false)
-  views       Int      @default(0)
+  post        Post     @relation(fields: [postId], references: [id])
+  postId      Int
+  message     String
   lastSavedAt DateTime @default(now())
 }
 
