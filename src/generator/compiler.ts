@@ -483,7 +483,7 @@ export class PrismaAppSyncCompiler {
                 }
             }
         } else {
-            type = field.type
+            type = pascalCase(field.type)
         }
         
         return type
