@@ -1,48 +1,52 @@
-import * as cdk from '@aws-cdk/core'
+import * as cdk from 'aws-cdk-lib'
+import { Construct } from 'constructs';
 import * as fs from 'fs'
 import * as path from 'path'
 import * as yaml from 'js-yaml'
-import { NodejsFunction } from '@aws-cdk/aws-lambda-nodejs'
-import { Runtime } from '@aws-cdk/aws-lambda'
+import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs'
+import { Runtime } from 'aws-cdk-lib/aws-lambda'
 import {
     Role,
     ServicePrincipal,
     ManagedPolicy,
     PolicyDocument,
     PolicyStatement
-} from '@aws-cdk/aws-iam'
+} from 'aws-cdk-lib/aws-iam'
 import {
     GraphqlApi,
-    CfnApiKey,
     Schema,
     AuthorizationType,
     LambdaDataSource,
     NoneDataSource,
     Resolver,
     MappingTemplate
-} from '@aws-cdk/aws-appsync'
+} from '@aws-cdk/aws-appsync-alpha'
 
 require('dotenv').config()
 
 export class AppSyncCdkStack extends cdk.Stack {
 
-    constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
+    constructor(scope: Construct, id: string, props?: cdk.StackProps) {
         super(scope, id, props)
 
         // create new API
         const graphqlApi = new GraphqlApi(this, `${process.env.SERVICES_PREFIX}_Api`, {
             name: `${process.env.SERVICES_PREFIX}_Api`,
-            schema: Schema.fromAsset( 
+            schema: Schema.fromAsset(
                 path.join(
-                    __dirname, 
+                    __dirname,
                     String(process.env.ROOT_DIR_PATH),
                     String(process.env.PRISMA_APPSYNC_OUTPUT_PATH),
                     'schema.gql'
-                ) 
+                )
             ),
             authorizationConfig: {
                 defaultAuthorization: {
-                    authorizationType: AuthorizationType.API_KEY
+                    authorizationType: AuthorizationType.API_KEY,
+                    apiKeyConfig: {
+                        description: `${process.env.SERVICES_PREFIX}_api-key`,
+                        expires: cdk.Expiration.after(cdk.Duration.days(365)),
+                    },
                 }
             },
         })
@@ -50,29 +54,15 @@ export class AppSyncCdkStack extends cdk.Stack {
             value: graphqlApi.graphqlUrl,
             exportName: `${process.env.SERVICES_PREFIX}ApiEndpoint`
         })
-
-        // create API key
-        const today = new Date()
-        const apiKey = new CfnApiKey(this, `${process.env.SERVICES_PREFIX}ApiKey`, {
-            apiId: graphqlApi.apiId,
-            description: `${process.env.SERVICES_PREFIX}_api-key`,
-            expires: Math.floor( today.setDate(today.getDate() + 364) / 1000.0 )
-        })
         new cdk.CfnOutput(this, `${process.env.SERVICES_PREFIX}CfnApiKey`, {
-            value: apiKey.attrApiKey,
+            value: graphqlApi.apiKey || '',
             exportName: `${process.env.SERVICES_PREFIX}ApiKey`
         })
 
         // lambda function policy statements
         const policyStatements = [
             new PolicyStatement({
-                actions: [
-                    "ec2:DescribeNetworkInterfaces",
-                    "ec2:CreateNetworkInterface",
-                    "ec2:DeleteNetworkInterface",
-                    "ec2:DescribeInstances",
-                    "ec2:AttachNetworkInterface"
-                ],
+                actions: ["rds-data:connect"],
                 resources: ["*"]
             })
         ]
@@ -101,7 +91,7 @@ export class AppSyncCdkStack extends cdk.Stack {
             timeout: cdk.Duration.seconds(10),
             handler: 'main',
             entry: path.join(
-                __dirname, 
+                __dirname,
                 String(process.env.ROOT_DIR_PATH),
                 String(process.env.HANDLER_FUNCTION_PATH)
             ),
@@ -112,17 +102,17 @@ export class AppSyncCdkStack extends cdk.Stack {
                 commandHooks: {
                     beforeBundling(inputDir: string, outputDir: string): string[] {
                         const prismaSchema = path.join(
-                            inputDir, 
+                            inputDir,
                             String(process.env.PRISMA_SCHEMA_PATH)
                         )
 
                         <% if (testingMode) { %>
                         const customSchema = path.join(
-                            path.dirname(prismaSchema), 
+                            path.dirname(prismaSchema),
                             'custom-schema.gql'
                         )
                         const customResolvers = path.join(
-                            path.dirname(prismaSchema), 
+                            path.dirname(prismaSchema),
                             'custom-resolvers.yaml'
                         )
 
@@ -140,10 +130,10 @@ export class AppSyncCdkStack extends cdk.Stack {
                     afterBundling(<% if (testingMode) { %>inputDir: string, outputDir: string<% } %>): string[] {
                         return [
                             <% if (testingMode) { %>`cp -R ${path.join(inputDir, 'node_modules/.tmp/prisma-appsync/')} ${path.join(outputDir, 'node_modules/')}`,
-                            <% } %>'npx prisma generate', 
-                            'rm -rf node_modules/@prisma/engines', 
-                            'rm -rf node_modules/@prisma/client/node_modules', 
-                            'rm -rf node_modules/.bin', 
+                            <% } %>'npx prisma generate',
+                            'rm -rf node_modules/@prisma/engines',
+                            'rm -rf node_modules/@prisma/client/node_modules',
+                            'rm -rf node_modules/.bin',
                             'rm -rf node_modules/prisma',
                             'rm -rf node_modules/prisma-appsync',
                             'rm -rf generated'
@@ -181,7 +171,7 @@ export class AppSyncCdkStack extends cdk.Stack {
 
         // create datasource of type "lambda"
         const dataSource_lambda = new LambdaDataSource(
-            this, 
+            this,
             `${process.env.SERVICES_PREFIX}LambdaDatasource`, {
                 api: graphqlApi,
                 name: `${process.env.SERVICES_PREFIX}LambdaDataSource`,
@@ -202,7 +192,7 @@ export class AppSyncCdkStack extends cdk.Stack {
         const resolvers = yaml.load(
             fs.readFileSync(
                 path.join(
-                    __dirname, 
+                    __dirname,
                     String(process.env.ROOT_DIR_PATH),
                     String(process.env.PRISMA_APPSYNC_OUTPUT_PATH),
                     'resolvers.yaml'
