@@ -13,7 +13,7 @@
         "@types/js-yaml": "4.0.0",
         "@types/node": "14.14.37",
         "aws-cdk-lib": "^2.20.0",
-        "constructs": "^10.0.0",
+        "constructs": "^10.0.120",
         "dotenv": "8.2.0",
         "js-yaml": "^4.0.0",
         "ts-node": "9.1.1",
