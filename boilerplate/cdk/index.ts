@@ -54,7 +54,7 @@ export class AppSyncCdkStack extends cdk.Stack {
             value: graphqlApi.graphqlUrl,
             exportName: `${process.env.SERVICES_PREFIX}ApiEndpoint`
         })
-        new cdk.CfnOutput(this, `${process.env.SERVICES_PREFIX}CfnApiKey`, {
+        new cdk.CfnOutput(this, `${process.env.SERVICES_PREFIX}ApiKey`, {
             value: graphqlApi.apiKey || '',
             exportName: `${process.env.SERVICES_PREFIX}ApiKey`
         })
