@@ -482,10 +482,12 @@ export class PrismaAppSyncCompiler {
                     case 'url': type = 'AWSURL'; break
                 }
             }
+        } else if (field.kind === 'enum') {
+            type = field.type
         } else {
             type = pascalCase(field.type)
         }
-        
+
         return type
     }
 
