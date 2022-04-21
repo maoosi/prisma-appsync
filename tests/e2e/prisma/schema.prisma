@@ -12,6 +12,7 @@ generator appsync {
   provider = "../../dist/generator.js"
 
   // optional params
+  debug            = true
   output           = "./generated/prisma-appsync"
   extendSchema     = "./custom-schema.gql"
   extendResolvers  = "./custom-resolvers.yaml"

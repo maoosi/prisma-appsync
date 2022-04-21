@@ -13,6 +13,7 @@ export interface CompilerOptionsPrivate extends CompilerOptions {
         [key: string]: {
             label?: ({ name, pluralizedName }: { name: string; pluralizedName: string }) => string
             directives: string[]
+            type?: 'Query' | 'Mutation' | 'Subscription'
         }
     }
 }
@@ -71,4 +72,7 @@ export type DMMFPAS = {
     enums: DMMFPAS_Enum[]
     customResolvers: DMMFPAS_CustomResolver[]
     defaultAuthDirective: string
+    usesQueries: boolean
+    usesMutations: boolean
+    usesSubscriptions: boolean
 }

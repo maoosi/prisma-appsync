@@ -20,7 +20,9 @@ generatorHandler({
         if (options.generator.output) {
             try {
                 // Is debug mode enabled?
-                const debug: boolean = true
+                const debug: boolean = typeof options.generator.debug === 'boolean'
+                    ? options.generator.debug
+                    : false
 
                 if (debug) {
                     console.log(`[Prisma-AppSync] Generator config: `, options.generator.config)
@@ -41,29 +43,22 @@ generatorHandler({
                 })
 
                 if (debug) {
-                    console.log(`[Prisma-AppSync] Generating client.`)
+                    console.log(`[Prisma-AppSync] Parsed schema config: `, JSON.stringify(compiler.getConfig(), null, 2))
                 }
+
+                console.log(`[Prisma-AppSync] Generating client.`)
 
                 // Generate client
                 await compiler.makeClient()
-
-                if (debug) {
-                    console.log(`[Prisma-AppSync] Generating schema.`)
-                }
+                console.log(`[Prisma-AppSync] Generating schema.`)
 
                 // Generate schema
                 await compiler.makeSchema(options.generator.config.extendSchema)
-
-                if (debug) {
-                    console.log(`[Prisma-AppSync] Generating resolvers.`)
-                }
+                console.log(`[Prisma-AppSync] Generating resolvers.`)
 
                 // Generate resolvers
                 await compiler.makeResolvers(options.generator.config.extendResolvers)
-
-                if (debug) {
-                    console.log(`[Prisma-AppSync] Generating models mapping.`)
-                }
+                console.log(`[Prisma-AppSync] Generating models mapping.`)
 
                 // Generate docs
                 // await compiler.makeDocs()

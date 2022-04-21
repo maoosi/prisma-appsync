@@ -450,7 +450,7 @@
       ]
     },
     "packages/client/index.ts": {
-      "bytes": 885,
+      "bytes": 890,
       "imports": [
         {
           "path": "packages/client/resolver.ts",
@@ -581,7 +581,7 @@
           "bytesInOutput": 487
         },
         "packages/client/index.ts": {
-          "bytesInOutput": 292
+          "bytesInOutput": 303
         },
         "packages/client/resolver.ts": {
           "bytesInOutput": 2777
@@ -605,7 +605,7 @@
           "bytesInOutput": 3349
         }
       },
-      "bytes": 177253
+      "bytes": 177268
     }
   }
 }

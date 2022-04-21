@@ -18,6 +18,7 @@ import flow from 'lodash/flow'
 import camelCase from 'lodash/camelCase'
 import upperFirst from 'lodash/upperFirst'
 import merge from 'lodash/merge'
+import omit from 'lodash/omit'
 // import { inspect } from 'util'
 import { replaceAll, isUndefined, isObject } from '../../packages/client/utils'
 
@@ -58,78 +59,97 @@ export class PrismaAppSyncCompiler {
                 create: {
                     label: ({ name }) => `create${name}`,
                     directives: ['create', 'mutations', 'model'],
+                    type: 'Mutation'
                 },
                 createMany: {
                     label: ({ pluralizedName }) => `createMany${pluralizedName}`,
                     directives: ['createMany', 'mutations', 'model'],
+                    type: 'Mutation'
                 },
                 update: {
                     label: ({ name }) => `update${name}`,
                     directives: ['update', 'mutations', 'model'],
+                    type: 'Mutation'
                 },
                 updateMany: {
                     label: ({ pluralizedName }) => `updateMany${pluralizedName}`,
                     directives: ['updateMany', 'mutations', 'model'],
+                    type: 'Mutation'
                 },
                 upsert: {
                     label: ({ name }) => `upsert${name}`,
                     directives: ['upsert', 'mutations', 'model'],
+                    type: 'Mutation'
                 },
                 delete: {
                     label: ({ name }) => `delete${name}`,
                     directives: ['delete', 'mutations', 'model'],
+                    type: 'Mutation'
                 },
                 deleteMany: {
                     label: ({ pluralizedName }) => `deleteMany${pluralizedName}`,
                     directives: ['deleteMany', 'mutations', 'model'],
+                    type: 'Mutation'
                 },
                 get: {
                     label: ({ name }) => `get${name}`,
                     directives: ['get', 'queries', 'model'],
+                    type: 'Query'
                 },
                 list: {
                     label: ({ pluralizedName }) => `list${pluralizedName}`,
                     directives: ['list', 'queries', 'model'],
+                    type: 'Query'
                 },
                 count: {
                     label: ({ pluralizedName }) => `count${pluralizedName}`,
                     directives: ['count', 'queries', 'model'],
+                    type: 'Query'
                 },
                 onCreated: {
                     label: ({ name }) => `onCreated${name}`,
                     directives: ['onCreated', 'subscriptions', 'model'],
+                    type: 'Subscription'
                 },
                 onUpdated: {
                     label: ({ name }) => `onUpdated${name}`,
                     directives: ['onUpdated', 'subscriptions', 'model'],
+                    type: 'Subscription'
                 },
                 onUpserted: {
                     label: ({ name }) => `onUpserted${name}`,
                     directives: ['onUpserted', 'subscriptions', 'model'],
+                    type: 'Subscription'
                 },
                 onDeleted: {
                     label: ({ name }) => `onDeleted${name}`,
                     directives: ['onDeleted', 'subscriptions', 'model'],
+                    type: 'Subscription'
                 },
                 onMutated: {
                     label: ({ name }) => `onMutated${name}`,
                     directives: ['onMutated', 'subscriptions', 'model'],
+                    type: 'Subscription'
                 },
                 onCreatedMany: {
                     label: ({ pluralizedName }) => `onCreatedMany${pluralizedName}`,
                     directives: ['onCreatedMany', 'subscriptions', 'model'],
+                    type: 'Subscription'
                 },
                 onUpdatedMany: {
                     label: ({ pluralizedName }) => `onUpdatedMany${pluralizedName}`,
                     directives: ['onUpdatedMany', 'subscriptions', 'model'],
+                    type: 'Subscription'
                 },
                 onMutatedMany: {
                     label: ({ pluralizedName }) => `onMutatedMany${pluralizedName}`,
                     directives: ['onMutatedMany', 'subscriptions', 'model'],
+                    type: 'Subscription'
                 },
                 onDeletedMany: {
                     label: ({ pluralizedName }) => `onDeletedMany${pluralizedName}`,
                     directives: ['onDeletedMany', 'subscriptions', 'model'],
+                    type: 'Subscription'
                 },
             },
         }
@@ -139,6 +159,9 @@ export class PrismaAppSyncCompiler {
             enums: [],
             customResolvers: [],
             defaultAuthDirective: '',
+            usesQueries: false,
+            usesMutations: false,
+            usesSubscriptions: false,
         }
 
         if (!(process?.env?.PRISMA_APPSYNC === 'false')) {
@@ -146,6 +169,21 @@ export class PrismaAppSyncCompiler {
         }
 
         return this
+    }
+
+    // Return config
+    public getConfig() {
+        return {
+            models: this.data.models.map((m:DMMFPAS_Model) => {
+                return omit(m, ['fields'])
+            }),
+            enums: this.data.enums,
+            customResolvers: this.data.customResolvers,
+            defaultAuthDirective: this.data.defaultAuthDirective,
+            usesQueries: this.data.usesQueries,
+            usesMutations: this.data.usesMutations,
+            usesSubscriptions: this.data.usesSubscriptions,
+        }
     }
 
     // Generate and output AppSync schema
@@ -305,19 +343,31 @@ export class PrismaAppSyncCompiler {
 
     // Get all GQL modeling from config
     private getGqlModeling(gqlObject: any, { name, pluralizedName }: { name: string; pluralizedName: string }): object {
-        const gqlOutput: object = {
+        const gqlOutput: {
+            _model: boolean
+            _fields: any
+            _usesQueries: boolean
+            _usesMutations: boolean
+            _usesSubscriptions: boolean
+            [key:string]: any
+        } = {
             _model: gqlObject?.model !== null,
             _fields: gqlObject?.fields || {},
+            _usesQueries: false,
+            _usesMutations: false,
+            _usesSubscriptions: false,
         }
 
         for (const key in this.options.template) {
             if (
                 Object.prototype.hasOwnProperty.call(this.options.template, key) &&
                 !isUndefined(this.options.template?.[key]?.directives) &&
-                !isUndefined(this.options.template[key]?.label)
+                !isUndefined(this.options.template[key]?.label) &&
+                !isUndefined(this.options.template[key]?.type)
             ) {
                 const groups = this.options.template[key].directives
                 const defaultValue = this.options.template[key].label!({ name, pluralizedName })
+                const type = this.options.template[key].type
 
                 for (let i = 0; i < groups.length; i++) {
                     const group = groups[i]
@@ -342,7 +392,21 @@ export class PrismaAppSyncCompiler {
                         break
                     }
                 }
+
+                if (type === 'Query' && gqlOutput._usesQueries === false && gqlOutput[key] !== null) {
+                    gqlOutput._usesQueries = true
+                }
+                if (type === 'Mutation' && gqlOutput._usesMutations === false && gqlOutput[key] !== null) {
+                    gqlOutput._usesMutations = true
+                }
+                if (type === 'Subscription' && gqlOutput._usesSubscriptions === false && gqlOutput[key] !== null) {
+                    gqlOutput._usesSubscriptions = true
+                }
             }
+        }
+
+        if (gqlOutput._usesMutations === false) {
+            gqlOutput._usesSubscriptions = false
         }
 
         return gqlOutput
@@ -427,7 +491,6 @@ export class PrismaAppSyncCompiler {
                     const isFieldIgnored = gqlConfig?._fields?.[field.name] === null
 
                     if (!field.isGenerated && !isFieldIgnored) {
-                        if (field.relationName) console.log({ field })
                         fields.push({
                             name: field.name,
                             scalar: this.getFieldScalar(field),
@@ -490,6 +553,19 @@ export class PrismaAppSyncCompiler {
             })
 
             return model
+        })
+
+        // usesQueries / usesMutations / usesSubscriptions
+        this.data.models.forEach((model: DMMFPAS_Model) => {
+            if (this.data.usesQueries === false && model.gql._usesQueries === true) {
+                this.data.usesQueries = true
+            }
+            if (this.data.usesMutations === false && model.gql._usesMutations === true) {
+                this.data.usesMutations = true
+            }
+            if (this.data.usesSubscriptions === false && model.gql._usesSubscriptions === true) {
+                this.data.usesSubscriptions = true
+            }
         })
 
         // console.log(inspect(this.data, false, null, true))
@@ -623,16 +699,21 @@ export class PrismaAppSyncCompiler {
         }
 
         // pretiffy output
-        outputContent = parserOpt
-            ? prettier.format(outputContent, {
-                  semi: false,
-                  parser: parserOpt,
-                  tabWidth: 4,
-                  trailingComma: 'none',
-                  singleQuote: true,
-                  printWidth: 60,
-              })
-            : outputContent
+        try {
+            outputContent = parserOpt
+                ? prettier.format(outputContent, {
+                    semi: false,
+                    parser: parserOpt,
+                    tabWidth: 4,
+                    trailingComma: 'none',
+                    singleQuote: true,
+                    printWidth: 60,
+                })
+                : outputContent
+        } catch(err) {
+            console.error(err)
+            console.log(outputContent)
+        }
 
         const outputFilePath = join(
             this.options.outputDir,

@@ -317,6 +317,8 @@ input BooleanFilter {
     not: BooleanFilter
 }
 
+{% if models | length -%}
+{% if usesMutations -%}
 type Mutation {
     {% for model in models %}
         {% if model.isEditable -%}
@@ -393,7 +395,9 @@ type Mutation {
         {% endif -%}
     {% endfor %}
 }
+{% endif -%}
 
+{% if usesQueries -%}
 type Query {
     {% for model in models %}
         {% if model.gql.get -%}
@@ -428,7 +432,9 @@ type Query {
         {% endif %}
     {% endfor %}
 }
+{% endif -%}
 
+{% if usesSubscriptions -%}
 type Subscription {
     {% for model in models %}
         {% if model.isEditable -%}
@@ -538,3 +544,5 @@ type Subscription {
         {% endif -%}
     {% endfor %}
 }
+{% endif -%}
+{% endif -%}

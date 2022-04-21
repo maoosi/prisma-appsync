@@ -17,7 +17,7 @@ import {
 } from './utils'
 
 export { PrismaAppSync } from './core'
-export { CustomError } from './inspector'
+export { CustomError, log } from './inspector'
 export {
     QueryParams,
     QueryParamsCustom,

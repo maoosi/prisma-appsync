@@ -115,6 +115,19 @@ export declare function traverse(element: any, iteratee: (value: any, key?: stri
     excludeChilds?: boolean;
 }): any;
 /**
+ * #### Traverse any element and execute middleware (Async)
+ *
+ * @example const element = await traverse(element, value => doSomething(value))
+ *
+ * @param {any} element
+ * @param {Function} iteratee
+ * @returns Promise<any>
+ */
+export declare function traverseAsync(element: any, iteratee: (value: any, key?: string) => Promise<{
+    value: any;
+    excludeChilds?: boolean;
+}>): Promise<any>;
+/**
  * #### Replace all from findArray with replaceArray
  *
  * @example replaceAll('you & me', ['you','me'], ['me','you'])
