@@ -1,19 +1,20 @@
 #!/usr/bin/env node
 /* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-var-requires */
+import fs from 'fs'
+import path from 'path'
+import prompts from 'prompts'
+import degit from 'degit'
+import execa from 'execa'
+import { detect } from 'detect-package-manager'
+import { cyan, yellow, bold, dim } from 'kolorist'
 
-const { version } = require('../package.json')
-
-// @ts-check
-const fs = require('fs')
-const path = require('path')
-const prompts = require('prompts')
-const degit = require('degit')
-const execa = require('execa')
-const { detect } = require('detect-package-manager')
-const { cyan, yellow, bold, dim } = require('kolorist')
+const gitBranch = 'maoosi/prisma-appsync#maoosi/dev'
+const installPackage = 'prisma-appsync@preview'
 
 const cwd = process.cwd()
+const { version } = require('../package.json')
+const isLocalDevMode = String(process.env.PRISMAAPPSYNC_CREATEAPP_MODE) === 'dev'
 
 async function init() {
     console.log()
@@ -36,18 +37,21 @@ async function init() {
         recommendations: [],
     }
 
-    const dependencies = [
+    const dependencies = !isLocalDevMode ? [
         { package: 'prisma', dev: true },
         { package: '@prisma/client', dev: true },
-        { package: 'prisma-appsync@preview', dev: true },
+        { package: installPackage, dev: true },
+    ] : [
+        { package: 'prisma', dev: true },
+        { package: '@prisma/client', dev: true }
     ]
 
-    const { project } = await prompts({
+    const { project } = !isLocalDevMode ? await prompts({
         type: 'text',
         name: 'project',
         message: 'Project directory (default: current dir)',
         initial: '',
-    })
+    }) : { project: '' }
 
     if (typeof project === 'undefined') return
 
@@ -56,19 +60,19 @@ async function init() {
 
     userConfig.packageManager = await detect(userConfig.targetDir)
 
-    let existingSchema = false
+    let existingSchema: any = false
     if (fs.existsSync(path.join(userConfig.root, 'prisma', 'schema.prisma'))) {
         existingSchema = path.join('prisma', 'schema.prisma')
     } else if (fs.existsSync(path.join(userConfig.root, 'schema.prisma'))) {
         existingSchema = path.join('schema.prisma')
     }
 
-    const { yes } = await prompts({
+    const { yes } = !isLocalDevMode ? await prompts({
         type: 'confirm',
         name: 'yes',
         initial: existingSchema ? true : false,
         message: 'Already existing `schema.prisma` file?',
-    })
+    }) : { yes: false }
 
     if (typeof yes === 'undefined') return
 
@@ -114,54 +118,77 @@ async function init() {
         }
     }
 
-    const emitter = degit('maoosi/prisma-appsync#preview', {
-        cache: false,
-        force: true,
-        verbose: true,
-    })
-
     const tmpDir = path.join(userConfig.root, '.prisma-appsync')
 
-    await emitter.clone(tmpDir)
-
-    userConfig.clones = [
-        {
-            from: path.join(userConfig.root, '.prisma-appsync', 'packages/boilerplate/cdk'),
-            to: path.join(userConfig.root, 'cdk'),
-        },
-        {
-            from: path.join(userConfig.root, '.prisma-appsync', 'packages/boilerplate/handler.ts'),
-            to: path.join(userConfig.root, 'handler.ts'),
-        },
-    ]
-
-    if (userConfig.generateSchema) {
-        userConfig.clones.push({
-            from: path.join(userConfig.root, '.prisma-appsync', 'packages/boilerplate/prisma/schema.prisma'),
-            to: path.join(userConfig.root, userConfig.targetSchema),
+    if (!isLocalDevMode) {
+        const emitter = degit(gitBranch, {
+            cache: false,
+            force: true,
+            verbose: true,
         })
-    } else {
-        const schemaPath = path.join(userConfig.root, userConfig.targetSchema)
-        const schemaContent = fs.readFileSync(schemaPath, 'utf-8')
 
-        if (!schemaContent.match(/generator\s+appsync\s+{/g)) {
-            userConfig.injects.push({
-                file: schemaPath,
-                find: /((?: )*generator\s+client\s+{[^}]*})/g,
-                replace: `$1\n\ngenerator appsync {\n\tprovider = "prisma-appsync"\n}`,
-            })
-        }
-        if (!schemaContent.match(/binaryTargets\s*=\s*\[(.)*\]/g)) {
-            userConfig.injects.push({
-                file: schemaPath,
-                find: /( *)provider\s*=\s*"prisma-client-js"(?:\r|\n)/g,
-                replace: `$1provider = "prisma-client-js"\n$1binaryTargets = ["native", "rhel-openssl-1.0.x"]\n`,
+        await emitter.clone(tmpDir)
+
+        userConfig.clones = [
+            {
+                from: path.join(userConfig.root, '.prisma-appsync', 'packages/boilerplate/cdk'),
+                to: path.join(userConfig.root, 'cdk'),
+            },
+            {
+                from: path.join(userConfig.root, '.prisma-appsync', 'packages/boilerplate/handler.ts'),
+                to: path.join(userConfig.root, 'handler.ts'),
+            },
+        ]
+
+        if (userConfig.generateSchema) {
+            userConfig.clones.push({
+                from: path.join(userConfig.root, '.prisma-appsync', 'packages/boilerplate/prisma/schema.prisma'),
+                to: path.join(userConfig.root, userConfig.targetSchema),
             })
         } else {
-            userConfig.recommendations.push(
-                'Make sure the `binaryTargets` inside your `schema.prisma` file include both "native" and "rhel-openssl-1.0.x"',
-            )
+            const schemaPath = path.join(userConfig.root, userConfig.targetSchema)
+            const schemaContent = fs.readFileSync(schemaPath, 'utf-8')
+
+            if (!schemaContent.match(/generator\s+appsync\s+{/g)) {
+                userConfig.injects.push({
+                    file: schemaPath,
+                    find: /((?: )*generator\s+client\s+{[^}]*})/g,
+                    replace: `$1\n\ngenerator appsync {\n\tprovider = "prisma-appsync"\n}`,
+                })
+            }
+            if (!schemaContent.match(/binaryTargets\s*=\s*\[(.)*\]/g)) {
+                userConfig.injects.push({
+                    file: schemaPath,
+                    find: /( *)provider\s*=\s*"prisma-client-js"(?:\r|\n)/g,
+                    replace: `$1provider = "prisma-client-js"\n$1binaryTargets = ["native", "rhel-openssl-1.0.x"]\n`,
+                })
+            } else {
+                userConfig.recommendations.push(
+                    'Make sure the `binaryTargets` inside your `schema.prisma` file include both "native" and "rhel-openssl-1.0.x"',
+                )
+            }
         }
+    } else {
+        userConfig.clones = [
+            {
+                from: path.join(userConfig.root, '../', 'packages/boilerplate/cdk'),
+                to: path.join(userConfig.root, 'cdk'),
+            },
+            {
+                from: path.join(userConfig.root, '../', 'packages/boilerplate/handler.ts'),
+                to: path.join(userConfig.root, 'handler.ts'),
+            },
+            {
+                from: path.join(userConfig.root, '../', 'packages/boilerplate/prisma/schema.prisma'),
+                to: path.join(userConfig.root, userConfig.targetSchema),
+            }
+        ]
+
+        userConfig.injects.push({
+            file: path.join(userConfig.root, userConfig.targetSchema),
+            find: /((?: )*generator\s+appsync\s+{[^}]*})/g,
+            replace: `generator appsync {\n\tprovider = "../dist/generator.js"\n}`,
+        })
     }
 
     const timestamp = new Date().getTime()
@@ -182,7 +209,7 @@ async function init() {
 
     await execUserConfig(userConfig)
 
-    removeDir(tmpDir)
+    if (!isLocalDevMode) removeDir(tmpDir)
 }
 
 async function execUserConfig(userConfig: UserConfig) {
@@ -297,7 +324,7 @@ init().catch((e) => {
 
 type UserConfig = {
     root: string,
-    targetDir: string,
+    targetDir: any,
     targetSchema: string,
     generateSchema: boolean,
     initPackage: boolean,
@@ -306,6 +333,6 @@ type UserConfig = {
     renames: { from: string, to:string }[],
     clones: { from: string, to:string }[],
     injects: { file: string, find: RegExp, replace:string }[],
-    packageManager: 'npm' | 'yarn',
+    packageManager: 'npm' | 'yarn' | 'pnpm',
     recommendations: string[],
 }

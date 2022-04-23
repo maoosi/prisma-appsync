@@ -2,8 +2,9 @@
 node_modules/
 */**/node_modules/
 
-# Test files
-test/generated/
+# Testing
+tests/e2e/prisma/generated/
+playground/
 
 # Dist folder
 dist/
@@ -12,8 +13,8 @@ dist/
 docs/.vuepress/dist/
 
 # Boilerplate files
-Boilerplate/cdk/*.lock
-Boilerplate/cdk/cdk.out
+packages/boilerplate/cdk/*.lock
+packages/boilerplate/cdk/cdk.out
 
 # Log files
 npm-debug.log*

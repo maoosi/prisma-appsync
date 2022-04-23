@@ -11,7 +11,7 @@
         "postinstall": "zx scripts/postinstall.mjs",
         "build": "zx scripts/build.mjs",
         "test": "zx scripts/test.mjs",
-        "dev": "zx scripts/serve.mjs",
+        "dev": "zx scripts/dev.mjs",
         "cleans": "zx scripts/cleans.mjs",
         "docker": "zx scripts/docker.mjs",
         "serve": "zx scripts/serve.mjs",
