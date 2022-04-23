@@ -1,6 +1,6 @@
 {
   "inputs": {
-    "packages/client/resolver.ts": {
+    "packages/client/src/resolver.ts": {
       "bytes": 7318,
       "imports": []
     },
@@ -180,8 +180,8 @@
         }
       ]
     },
-    "node_modules/.pnpm/micromatch@4.0.4/node_modules/micromatch/index.js": {
-      "bytes": 13731,
+    "node_modules/.pnpm/micromatch@4.0.5/node_modules/micromatch/index.js": {
+      "bytes": 13741,
       "imports": [
         {
           "path": "node_modules/.pnpm/braces@3.0.2/node_modules/braces/index.js",
@@ -201,31 +201,31 @@
       "bytes": 4035,
       "imports": []
     },
-    "node_modules/.pnpm/html-entities@2.3.2/node_modules/html-entities/lib/named-references.js": {
+    "node_modules/.pnpm/html-entities@2.3.3/node_modules/html-entities/lib/named-references.js": {
       "bytes": 74412,
       "imports": []
     },
-    "node_modules/.pnpm/html-entities@2.3.2/node_modules/html-entities/lib/numeric-unicode-map.js": {
+    "node_modules/.pnpm/html-entities@2.3.3/node_modules/html-entities/lib/numeric-unicode-map.js": {
       "bytes": 339,
       "imports": []
     },
-    "node_modules/.pnpm/html-entities@2.3.2/node_modules/html-entities/lib/surrogate-pairs.js": {
+    "node_modules/.pnpm/html-entities@2.3.3/node_modules/html-entities/lib/surrogate-pairs.js": {
       "bytes": 537,
       "imports": []
     },
-    "node_modules/.pnpm/html-entities@2.3.2/node_modules/html-entities/lib/index.js": {
+    "node_modules/.pnpm/html-entities@2.3.3/node_modules/html-entities/lib/index.js": {
       "bytes": 7923,
       "imports": [
         {
-          "path": "node_modules/.pnpm/html-entities@2.3.2/node_modules/html-entities/lib/named-references.js",
+          "path": "node_modules/.pnpm/html-entities@2.3.3/node_modules/html-entities/lib/named-references.js",
           "kind": "require-call"
         },
         {
-          "path": "node_modules/.pnpm/html-entities@2.3.2/node_modules/html-entities/lib/numeric-unicode-map.js",
+          "path": "node_modules/.pnpm/html-entities@2.3.3/node_modules/html-entities/lib/numeric-unicode-map.js",
           "kind": "require-call"
         },
         {
-          "path": "node_modules/.pnpm/html-entities@2.3.2/node_modules/html-entities/lib/surrogate-pairs.js",
+          "path": "node_modules/.pnpm/html-entities@2.3.3/node_modules/html-entities/lib/surrogate-pairs.js",
           "kind": "require-call"
         }
       ]
@@ -277,11 +277,11 @@
         }
       ]
     },
-    "node_modules/.pnpm/xss@1.0.10/node_modules/xss/lib/util.js": {
+    "node_modules/.pnpm/xss@1.0.11/node_modules/xss/lib/util.js": {
       "bytes": 766,
       "imports": []
     },
-    "node_modules/.pnpm/xss@1.0.10/node_modules/xss/lib/default.js": {
+    "node_modules/.pnpm/xss@1.0.11/node_modules/xss/lib/default.js": {
       "bytes": 10471,
       "imports": [
         {
@@ -293,59 +293,59 @@
           "kind": "require-call"
         },
         {
-          "path": "node_modules/.pnpm/xss@1.0.10/node_modules/xss/lib/util.js",
+          "path": "node_modules/.pnpm/xss@1.0.11/node_modules/xss/lib/util.js",
           "kind": "require-call"
         }
       ]
     },
-    "node_modules/.pnpm/xss@1.0.10/node_modules/xss/lib/parser.js": {
+    "node_modules/.pnpm/xss@1.0.11/node_modules/xss/lib/parser.js": {
       "bytes": 5670,
       "imports": [
         {
-          "path": "node_modules/.pnpm/xss@1.0.10/node_modules/xss/lib/util.js",
+          "path": "node_modules/.pnpm/xss@1.0.11/node_modules/xss/lib/util.js",
           "kind": "require-call"
         }
       ]
     },
-    "node_modules/.pnpm/xss@1.0.10/node_modules/xss/lib/xss.js": {
-      "bytes": 5396,
+    "node_modules/.pnpm/xss@1.0.11/node_modules/xss/lib/xss.js": {
+      "bytes": 5432,
       "imports": [
         {
           "path": "node_modules/.pnpm/cssfilter@0.0.10/node_modules/cssfilter/lib/index.js",
           "kind": "require-call"
         },
         {
-          "path": "node_modules/.pnpm/xss@1.0.10/node_modules/xss/lib/default.js",
+          "path": "node_modules/.pnpm/xss@1.0.11/node_modules/xss/lib/default.js",
           "kind": "require-call"
         },
         {
-          "path": "node_modules/.pnpm/xss@1.0.10/node_modules/xss/lib/parser.js",
+          "path": "node_modules/.pnpm/xss@1.0.11/node_modules/xss/lib/parser.js",
           "kind": "require-call"
         },
         {
-          "path": "node_modules/.pnpm/xss@1.0.10/node_modules/xss/lib/util.js",
+          "path": "node_modules/.pnpm/xss@1.0.11/node_modules/xss/lib/util.js",
           "kind": "require-call"
         }
       ]
     },
-    "node_modules/.pnpm/xss@1.0.10/node_modules/xss/lib/index.js": {
+    "node_modules/.pnpm/xss@1.0.11/node_modules/xss/lib/index.js": {
       "bytes": 1110,
       "imports": [
         {
-          "path": "node_modules/.pnpm/xss@1.0.10/node_modules/xss/lib/default.js",
+          "path": "node_modules/.pnpm/xss@1.0.11/node_modules/xss/lib/default.js",
           "kind": "require-call"
         },
         {
-          "path": "node_modules/.pnpm/xss@1.0.10/node_modules/xss/lib/parser.js",
+          "path": "node_modules/.pnpm/xss@1.0.11/node_modules/xss/lib/parser.js",
           "kind": "require-call"
         },
         {
-          "path": "node_modules/.pnpm/xss@1.0.10/node_modules/xss/lib/xss.js",
+          "path": "node_modules/.pnpm/xss@1.0.11/node_modules/xss/lib/xss.js",
           "kind": "require-call"
         }
       ]
     },
-    "packages/client/utils.ts": {
+    "packages/client/src/utils.ts": {
       "bytes": 7645,
       "imports": [
         {
@@ -353,7 +353,7 @@
           "kind": "import-statement"
         },
         {
-          "path": "node_modules/.pnpm/micromatch@4.0.4/node_modules/micromatch/index.js",
+          "path": "node_modules/.pnpm/micromatch@4.0.5/node_modules/micromatch/index.js",
           "kind": "import-statement"
         },
         {
@@ -361,115 +361,115 @@
           "kind": "import-statement"
         },
         {
-          "path": "node_modules/.pnpm/html-entities@2.3.2/node_modules/html-entities/lib/index.js",
+          "path": "node_modules/.pnpm/html-entities@2.3.3/node_modules/html-entities/lib/index.js",
           "kind": "import-statement"
         },
         {
-          "path": "node_modules/.pnpm/xss@1.0.10/node_modules/xss/lib/index.js",
+          "path": "node_modules/.pnpm/xss@1.0.11/node_modules/xss/lib/index.js",
           "kind": "import-statement"
         }
       ]
     },
-    "packages/client/defs.ts": {
+    "packages/client/src/defs.ts": {
       "bytes": 10086,
       "imports": []
     },
-    "packages/client/inspector.ts": {
+    "packages/client/src/inspector.ts": {
       "bytes": 2688,
       "imports": []
     },
-    "packages/client/guard.ts": {
+    "packages/client/src/guard.ts": {
       "bytes": 6085,
       "imports": [
         {
-          "path": "packages/client/defs.ts",
+          "path": "packages/client/src/defs.ts",
           "kind": "import-statement"
         },
         {
-          "path": "packages/client/utils.ts",
+          "path": "packages/client/src/utils.ts",
           "kind": "import-statement"
         },
         {
-          "path": "packages/client/inspector.ts",
+          "path": "packages/client/src/inspector.ts",
           "kind": "import-statement"
         }
       ]
     },
-    "packages/client/adapter.ts": {
+    "packages/client/src/adapter.ts": {
       "bytes": 18429,
       "imports": [
         {
-          "path": "packages/client/inspector.ts",
+          "path": "packages/client/src/inspector.ts",
           "kind": "import-statement"
         },
         {
-          "path": "packages/client/guard.ts",
+          "path": "packages/client/src/guard.ts",
           "kind": "import-statement"
         },
         {
-          "path": "packages/client/utils.ts",
+          "path": "packages/client/src/utils.ts",
           "kind": "import-statement"
         },
         {
-          "path": "packages/client/defs.ts",
+          "path": "packages/client/src/defs.ts",
           "kind": "import-statement"
         }
       ]
     },
-    "packages/client/core.ts": {
+    "packages/client/src/core.ts": {
       "bytes": 11581,
       "imports": [
         {
-          "path": "packages/client/defs.ts",
+          "path": "packages/client/src/defs.ts",
           "kind": "import-statement"
         },
         {
-          "path": "packages/client/inspector.ts",
+          "path": "packages/client/src/inspector.ts",
           "kind": "import-statement"
         },
         {
-          "path": "packages/client/guard.ts",
+          "path": "packages/client/src/guard.ts",
           "kind": "import-statement"
         },
         {
-          "path": "packages/client/adapter.ts",
+          "path": "packages/client/src/adapter.ts",
           "kind": "import-statement"
         },
         {
-          "path": "packages/client/utils.ts",
+          "path": "packages/client/src/utils.ts",
           "kind": "import-statement"
         },
         {
-          "path": "packages/client/resolver.ts",
+          "path": "packages/client/src/resolver.ts",
           "kind": "import-statement"
         },
         {
-          "path": "packages/client/resolver.ts",
+          "path": "packages/client/src/resolver.ts",
           "kind": "import-statement"
         }
       ]
     },
-    "packages/client/index.ts": {
+    "packages/client/src/index.ts": {
       "bytes": 890,
       "imports": [
         {
-          "path": "packages/client/resolver.ts",
+          "path": "packages/client/src/resolver.ts",
           "kind": "import-statement"
         },
         {
-          "path": "packages/client/utils.ts",
+          "path": "packages/client/src/utils.ts",
           "kind": "import-statement"
         },
         {
-          "path": "packages/client/core.ts",
+          "path": "packages/client/src/core.ts",
           "kind": "import-statement"
         },
         {
-          "path": "packages/client/inspector.ts",
+          "path": "packages/client/src/inspector.ts",
           "kind": "import-statement"
         },
         {
-          "path": "packages/client/defs.ts",
+          "path": "packages/client/src/defs.ts",
           "kind": "import-statement"
         }
       ]
@@ -479,10 +479,10 @@
     "dist/prisma-appsync/index.js": {
       "imports": [],
       "exports": [],
-      "entryPoint": "packages/client/index.ts",
+      "entryPoint": "packages/client/src/index.ts",
       "inputs": {
         "node_modules/.pnpm/dot-object@2.1.4/node_modules/dot-object/index.js": {
-          "bytesInOutput": 5347
+          "bytesInOutput": 5311
         },
         "node_modules/.pnpm/braces@3.0.2/node_modules/braces/lib/utils.js": {
           "bytesInOutput": 1029
@@ -532,22 +532,22 @@
         "node_modules/.pnpm/picomatch@2.3.1/node_modules/picomatch/index.js": {
           "bytesInOutput": 50
         },
-        "node_modules/.pnpm/micromatch@4.0.4/node_modules/micromatch/index.js": {
-          "bytesInOutput": 2548
+        "node_modules/.pnpm/micromatch@4.0.5/node_modules/micromatch/index.js": {
+          "bytesInOutput": 2556
         },
         "node_modules/.pnpm/deepmerge@4.2.2/node_modules/deepmerge/dist/cjs.js": {
           "bytesInOutput": 1987
         },
-        "node_modules/.pnpm/html-entities@2.3.2/node_modules/html-entities/lib/named-references.js": {
+        "node_modules/.pnpm/html-entities@2.3.3/node_modules/html-entities/lib/named-references.js": {
           "bytesInOutput": 87595
         },
-        "node_modules/.pnpm/html-entities@2.3.2/node_modules/html-entities/lib/numeric-unicode-map.js": {
+        "node_modules/.pnpm/html-entities@2.3.3/node_modules/html-entities/lib/numeric-unicode-map.js": {
           "bytesInOutput": 343
         },
-        "node_modules/.pnpm/html-entities@2.3.2/node_modules/html-entities/lib/surrogate-pairs.js": {
+        "node_modules/.pnpm/html-entities@2.3.3/node_modules/html-entities/lib/surrogate-pairs.js": {
           "bytesInOutput": 429
         },
-        "node_modules/.pnpm/html-entities@2.3.2/node_modules/html-entities/lib/index.js": {
+        "node_modules/.pnpm/html-entities@2.3.3/node_modules/html-entities/lib/index.js": {
           "bytesInOutput": 3045
         },
         "node_modules/.pnpm/cssfilter@0.0.10/node_modules/cssfilter/lib/default.js": {
@@ -563,49 +563,49 @@
           "bytesInOutput": 871
         },
         "node_modules/.pnpm/cssfilter@0.0.10/node_modules/cssfilter/lib/index.js": {
-          "bytesInOutput": 237
+          "bytesInOutput": 228
         },
-        "node_modules/.pnpm/xss@1.0.10/node_modules/xss/lib/util.js": {
+        "node_modules/.pnpm/xss@1.0.11/node_modules/xss/lib/util.js": {
           "bytesInOutput": 457
         },
-        "node_modules/.pnpm/xss@1.0.10/node_modules/xss/lib/default.js": {
+        "node_modules/.pnpm/xss@1.0.11/node_modules/xss/lib/default.js": {
           "bytesInOutput": 4417
         },
-        "node_modules/.pnpm/xss@1.0.10/node_modules/xss/lib/parser.js": {
+        "node_modules/.pnpm/xss@1.0.11/node_modules/xss/lib/parser.js": {
           "bytesInOutput": 2080
         },
-        "node_modules/.pnpm/xss@1.0.10/node_modules/xss/lib/xss.js": {
-          "bytesInOutput": 1970
+        "node_modules/.pnpm/xss@1.0.11/node_modules/xss/lib/xss.js": {
+          "bytesInOutput": 1983
         },
-        "node_modules/.pnpm/xss@1.0.10/node_modules/xss/lib/index.js": {
-          "bytesInOutput": 487
+        "node_modules/.pnpm/xss@1.0.11/node_modules/xss/lib/index.js": {
+          "bytesInOutput": 460
         },
-        "packages/client/index.ts": {
-          "bytesInOutput": 303
+        "packages/client/src/index.ts": {
+          "bytesInOutput": 325
         },
-        "packages/client/resolver.ts": {
-          "bytesInOutput": 2777
+        "packages/client/src/resolver.ts": {
+          "bytesInOutput": 2817
         },
-        "packages/client/utils.ts": {
+        "packages/client/src/utils.ts": {
           "bytesInOutput": 1945
         },
-        "packages/client/defs.ts": {
+        "packages/client/src/defs.ts": {
           "bytesInOutput": 1695
         },
-        "packages/client/inspector.ts": {
-          "bytesInOutput": 1219
+        "packages/client/src/inspector.ts": {
+          "bytesInOutput": 1335
         },
-        "packages/client/guard.ts": {
+        "packages/client/src/guard.ts": {
           "bytesInOutput": 1827
         },
-        "packages/client/adapter.ts": {
-          "bytesInOutput": 6695
+        "packages/client/src/adapter.ts": {
+          "bytesInOutput": 7045
         },
-        "packages/client/core.ts": {
-          "bytesInOutput": 3349
+        "packages/client/src/core.ts": {
+          "bytesInOutput": 3700
         }
       },
-      "bytes": 177268
+      "bytes": 177939
     }
   }
 }

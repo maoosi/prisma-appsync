@@ -1,4 +1,5 @@
 #!/usr/bin/env zx
+import './env.mjs'
 
 // run tests (incl. build)
 import './test.mjs'

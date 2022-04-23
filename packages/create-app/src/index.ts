@@ -2,7 +2,7 @@
 /* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-var-requires */
 
-const { version } = require('./package.json')
+const { version } = require('../package.json')
 
 // @ts-check
 const fs = require('fs')
@@ -21,7 +21,7 @@ async function init() {
     console.log(`${bold('  Prisma-AppSync') + dim(' Creator')}  ${cyan(`v${version}`)}`)
     console.log()
 
-    const userConfig = {
+    const userConfig:UserConfig = {
         root: cwd,
         targetDir: '',
         targetSchema: 'prisma/schema.prisma',
@@ -91,10 +91,10 @@ async function init() {
         userConfig.generateSchema = true
     }
 
-    let package = false
+    let packageFile:any = false
 
     try {
-        package = fs.readFileSync(path.join(userConfig.root, 'package.json'))
+        packageFile = fs.readFileSync(path.join(userConfig.root, 'package.json'))
     } catch (e) {
         userConfig.initPackage = true
     }
@@ -103,12 +103,12 @@ async function init() {
         const dep = dependencies[i]
 
         const isInstalled =
-            typeof package.dependencies !== 'undefined' && typeof package.dependencies[dep.package] !== 'undefined'
+            typeof packageFile.dependencies !== 'undefined' && typeof packageFile.dependencies[dep.package] !== 'undefined'
         const isDevInstalled =
-            typeof package.devDependencies !== 'undefined' &&
-            typeof package.devDependencies[dep.package] !== 'undefined'
+            typeof packageFile.devDependencies !== 'undefined' &&
+            typeof packageFile.devDependencies[dep.package] !== 'undefined'
 
-        if (!package || (!isInstalled && !isDevInstalled)) {
+        if (!packageFile || (!isInstalled && !isDevInstalled)) {
             if (dep.dev) userConfig.addDevDependencies.push(dep.package)
             else userConfig.addDependencies.push(dep.package)
         }
@@ -185,7 +185,7 @@ async function init() {
     removeDir(tmpDir)
 }
 
-async function execUserConfig(userConfig) {
+async function execUserConfig(userConfig: UserConfig) {
     // console.log(userConfig)
 
     // rename
@@ -241,11 +241,11 @@ async function execUserConfig(userConfig) {
     }
 }
 
-function rename(before, after) {
+function rename(before: string, after: string) {
     fs.renameSync(before, after)
 }
 
-function copy(src, dest) {
+function copy(src: string, dest: string) {
     const stat = fs.statSync(src)
     if (stat.isDirectory()) {
         copyDir(src, dest)
@@ -256,7 +256,7 @@ function copy(src, dest) {
     }
 }
 
-function copyDir(srcDir, destDir) {
+function copyDir(srcDir: string, destDir: string) {
     fs.mkdirSync(destDir, { recursive: true })
     for (const file of fs.readdirSync(srcDir)) {
         const srcFile = path.resolve(srcDir, file)
@@ -265,7 +265,7 @@ function copyDir(srcDir, destDir) {
     }
 }
 
-function emptyDir(dir) {
+function emptyDir(dir: string) {
     if (!fs.existsSync(dir)) return
 
     for (const file of fs.readdirSync(dir)) {
@@ -280,12 +280,12 @@ function emptyDir(dir) {
     }
 }
 
-function replaceInFile(file, findRegex, replace) {
+function replaceInFile(file: string, findRegex: RegExp, replace: string) {
     const content = fs.readFileSync(file, 'utf-8')
     fs.writeFileSync(file, content.replace(findRegex, replace), 'utf-8')
 }
 
-function removeDir(dir) {
+function removeDir(dir: string) {
     emptyDir(dir)
     fs.rmdirSync(dir)
 }
@@ -294,3 +294,18 @@ init().catch((e) => {
     console.error(e)
     process.exit()
 })
+
+type UserConfig = {
+    root: string,
+    targetDir: string,
+    targetSchema: string,
+    generateSchema: boolean,
+    initPackage: boolean,
+    addDependencies: string[],
+    addDevDependencies: string[],
+    renames: { from: string, to:string }[],
+    clones: { from: string, to:string }[],
+    injects: { file: string, find: RegExp, replace:string }[],
+    packageManager: 'npm' | 'yarn',
+    recommendations: string[],
+}

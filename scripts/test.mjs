@@ -1,4 +1,5 @@
 #!/usr/bin/env zx
+import './env.mjs'
 
 // build
 import './build.mjs'

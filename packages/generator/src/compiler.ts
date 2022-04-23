@@ -20,7 +20,7 @@ import upperFirst from 'lodash/upperFirst'
 import merge from 'lodash/merge'
 import omit from 'lodash/omit'
 // import { inspect } from 'util'
-import { replaceAll, isUndefined, isObject } from '../../packages/client/utils'
+import { replaceAll, isUndefined, isObject } from '@client/utils'
 
 // AppSync schema helper
 const { convertSchemas } = require('appsync-schema-converter')

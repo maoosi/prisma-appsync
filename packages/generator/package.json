@@ -1,0 +1,7 @@
+{
+    "name": "prisma-appsync-generator",
+    "private": true,
+    "version": "1.0.0",
+    "author": "maoosi <hello@sylvainsimao.fr>",
+    "license": "BSD-2-Clause"
+}

@@ -1,15 +1,9 @@
 #!/usr/bin/env zx
+import './env.mjs'
 
 // set DATABASE_URL env variable to docker instance
 process.env.DATABASE_URL = 'postgresql://prisma:prisma@localhost:5433/tests'
 
 // install boilerplate dependencies using Yarn
-console.log(chalk.blue('Post Install :: CDK\n'))
+console.log(chalk.blue('\nPost Install :: CDK\n'))
 await $`cd packages/boilerplate/cdk && yarn install`
-
-// install create-app dependencies using Pnpm
-console.log(chalk.blue('Post Install :: Create-App\n'))
-await $`cd packages/create-app && pnpm install`
-
-// launch docker + reset db
-import './docker.mjs'

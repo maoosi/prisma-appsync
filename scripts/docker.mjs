@@ -1,4 +1,5 @@
 #!/usr/bin/env zx
+import './env.mjs'
 
 // build local version of Prisma-AppSync
 import './build.mjs'
@@ -11,9 +12,9 @@ console.log(chalk.blue('\nDocker :: Generate local Prisma schema + client\n'))
 await $`cd tests/e2e && npx prisma generate`
 
 // create a docker container in a detached state
-console.log(chalk.blue('Docker :: Run docker container with local DB\n'))
+console.log(chalk.blue('\nDocker :: Run docker container with local DB\n'))
 await $`cd tests/e2e && docker-compose up -d`
 
 // apply migrations to local DB
-console.log(chalk.blue('Docker :: Apply migrations on local DB\n'))
+console.log(chalk.blue('\nDocker :: Apply migrations on local DB\n'))
 await $`cd tests/e2e && npx prisma db push --accept-data-loss`
