@@ -7,7 +7,7 @@
         "lib": ["es2018"],
         "declaration": false,
         "strict": true,
-        "noImplicitAny": true,
+        "noImplicitAny": false,
         "strictNullChecks": true,
         "noImplicitThis": true,
         "alwaysStrict": true,
@@ -24,6 +24,8 @@
         "paths": {
             "@client": ["packages/client/src/index"],
             "@client/*": ["packages/client/src/*"],
+            "@appsync-server": ["packages/appsync-server/src/index"],
+            "@appsync-server/*": ["packages/appsync-server/src/*"]
         },
         "types": ["node", "lodash"]
     },

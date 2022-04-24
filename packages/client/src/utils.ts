@@ -137,6 +137,20 @@ export function lowerFirst(str: string): string {
 }
 
 /**
+ * #### Return string with first letter uppercase.
+ *
+ * @example upperFirst("postOffice")
+ * // returns 'PostOffice'
+ *
+ * @param {string} str
+ * @returns string
+ */
+export function upperFirst(str: string): string {
+    if (str) return str.charAt(0).toUpperCase() + str.slice(1)
+    else return String()
+}
+
+/**
  * #### Return true if element is an object
  *
  * @example const isObj = isObject(element)

@@ -10,10 +10,11 @@ import {
     getPrismaArgs,
     getPaths,
     getAuthIdentity,
-} from '../../packages/client/adapter'
-import { Actions, Action, ActionsAliases, Authorization, Authorizations } from '../../packages/client/defs'
+} from '@client/adapter'
+import { Actions, Action, ActionsAliases, Authorization, Authorizations } from '@client/defs'
 import { Prisma } from '@prisma/client'
-import { mockLambdaEvent, mockIdentity } from '../e2e/appsync'
+import mockIdentity from '@appsync-server/mocks/identity'
+import mockLambdaEvent from '@appsync-server/mocks/lambda-event'
 
 process.env.PRISMA_APPSYNC_TESTING = 'true'
 
@@ -127,7 +128,7 @@ describe('CLIENT #adapter', () => {
                     debug: false,
                     defaultPagination: false,
                     maxDepth: 3,
-                    generatedConfig: {},
+                    modelsMapping: {},
                 },
                 operation: 'notify',
             })

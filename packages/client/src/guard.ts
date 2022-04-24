@@ -3,11 +3,13 @@ import {
     ShieldAuthorization,
     Shield,
     Context,
-    ActionsAliasesList,
     QueryParams,
     DebugTestingKey,
+    ActionsList,
+    BatchActionsList,
+    Options
 } from './defs'
-import { merge, encode, decode, filterXSS, isMatchingGlob, traverse } from './utils'
+import { merge, encode, decode, filterXSS, isMatchingGlob, traverse, upperFirst } from './utils'
 import { CustomError } from './inspector'
 
 /**
@@ -65,10 +67,12 @@ export function getShieldAuthorization({
     shield,
     paths,
     context,
+    options,
 }: {
     shield: Shield
     paths: string[]
     context: Context
+    options: Options
 }): ShieldAuthorization {
     const authorization: ShieldAuthorization = {
         canAccess: true,
@@ -78,20 +82,45 @@ export function getShieldAuthorization({
         globPattern: String(),
     }
 
-    for (let i = paths.length - 1; i >= 0; i--) {
-        let path: string = paths[i]
+    let modelSingular = context.model ? upperFirst(context.model!) : String()
+    let modelPlural = modelSingular
+
+    if (options?.modelsMapping && modelSingular) {
+        const models: any[] = Object.keys(options.modelsMapping)
+        const modelPluralMatch = models
+            .find((key:string) => {
+                return options.modelsMapping[key] === modelSingular.toLowerCase() && key !== upperFirst(modelSingular)
+            })
+        if (modelPluralMatch) modelPlural = modelPluralMatch
+    }
+
+    const shieldPaths = paths.map((path: string) => {
+        if (context.model) {
+            BatchActionsList.forEach((batchAction:string) => {
+                path = path.replace(
+                    `${batchAction}/${modelSingular.toLowerCase()}`, 
+                    `${batchAction}${upperFirst(modelPlural)}`
+                )
+            })
+            ActionsList.forEach((action:string) => {
+                path = path.replace(
+                    `${action}/${modelSingular.toLowerCase()}`, 
+                    `${action}${upperFirst(modelSingular)}`
+                )
+            })
+        }
+        return path
+    })
+
+    for (let i = shieldPaths.length - 1; i >= 0; i--) {
+        let shieldPath: string = shieldPaths[i]
 
         for (const matcher in shield) {
             let globPattern = matcher
 
             if (!globPattern.startsWith('/') && globPattern !== '**') globPattern = `/${globPattern}`
 
-            for (const alias in ActionsAliasesList) {
-                const actionsList = ActionsAliasesList[alias]
-                globPattern = globPattern.replace(new RegExp(`${alias}/`, 'g'), `{${actionsList.join(',')}}/`)
-            }
-
-            if (isMatchingGlob(path, globPattern)) {
+            if (isMatchingGlob(shieldPath, globPattern)) {
                 const shieldRule = shield[matcher]
 
                 if (typeof shieldRule === 'boolean') {
@@ -178,13 +207,10 @@ export async function runHooks({
     result?: any | any[]
 }): Promise<void | any> {
     const matchingHooks = Object.keys(hooks).filter((hookPath: string) => {
-        const hookWhen = hookPath.split(':')[0]
-        const hookGlob = hookPath.split(':')[1]
-
-        const currentPath =
-            QueryParams.context.alias === 'custom'
-                ? `${QueryParams.context.action}`
-                : `${QueryParams.context.alias}/${QueryParams.context.model}`
+        const hookParts = hookPath.split(':')
+        const hookWhen = hookParts[0]
+        const hookGlob = hookParts[1]
+        const currentPath = QueryParams.operation
 
         return hookWhen === when && isMatchingGlob(currentPath, hookGlob)
     })

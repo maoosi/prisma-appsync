@@ -5,7 +5,7 @@ import { readFileSync } from 'fs'
 import { join } from 'path'
 import { mockLambdaEvent, mockIdentity } from './appsync'
 import { main as lambdaHandler } from './handler'
-import { Authorizations } from '../../packages/client/defs'
+import { Authorizations } from '@client/defs'
 
 const scalars = readFileSync(join(__dirname, 'appsync/scalars.gql'), { encoding: 'utf-8' })
 const directives = readFileSync(join(__dirname, 'appsync/directives.gql'), { encoding: 'utf-8' })

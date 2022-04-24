@@ -13,7 +13,7 @@ import {
     DMMFPAS_CustomResolver,
 } from './types'
 import { join, extname, basename, dirname } from 'path'
-import { readFile, outputFile, writeFile, readFileSync, copy, openSync, writeSync, close } from 'fs-extra'
+import { readFile, outputFile, writeFile, writeFileSync, readFileSync, copy, openSync, writeSync, close } from 'fs-extra'
 import flow from 'lodash/flow'
 import camelCase from 'lodash/camelCase'
 import upperFirst from 'lodash/upperFirst'
@@ -21,6 +21,7 @@ import merge from 'lodash/merge'
 import omit from 'lodash/omit'
 // import { inspect } from 'util'
 import { replaceAll, isUndefined, isObject } from '@client/utils'
+import { InjectedConfig } from '@client/defs'
 
 // AppSync schema helper
 const { convertSchemas } = require('appsync-schema-converter')
@@ -230,23 +231,41 @@ export class PrismaAppSyncCompiler {
         return this
     }
 
-    // Return the AppSync client config
-    public getClientConfig(): string {
-        const config = {
-            prismaClientModels: {},
+    private replaceInFile(file: string, findRegex: RegExp, replace: string) {
+        const content = readFileSync(file, 'utf-8')
+        writeFileSync(file, content.replace(findRegex, replace), 'utf-8')
+    }
+
+    public getInjectedConfig(): Required<InjectedConfig> {
+        const injectedConfig:Required<InjectedConfig> = {
+            modelsMapping: {},
+            operations: String()
         }
+
+        const operationsList:string[] = []
 
         for (let i = 0; i < this.data.models.length; i++) {
             const model = this.data.models[i]
 
             if (model.name !== model.pluralizedName) {
-                config['prismaClientModels'][model.pluralizedName] = model.prismaRef
+                injectedConfig.modelsMapping[model.pluralizedName] = model.prismaRef
             }
 
-            config['prismaClientModels'][model.name] = model.prismaRef
+            injectedConfig.modelsMapping[model.name] = model.prismaRef
+
+            for (let i = 0; i < Object.keys(model.gql).length; i++) {
+                const key = Object.keys(model.gql)[i]
+                const operation = model.gql[key]
+
+                if (typeof operation === 'string') {
+                   if (!operationsList.includes(operation)) operationsList.push(operation)
+                }
+            }
         }
 
-        return JSON.stringify(config)
+        injectedConfig.operations = operationsList.sort().map((o:string) => `"${o}"`).join(' | ')
+        
+        return injectedConfig
     }
 
     // Generate and output AppSync resolvers
@@ -275,16 +294,13 @@ export class PrismaAppSyncCompiler {
     public async makeClient(): Promise<this> {
         await copy(join(__dirname, './prisma-appsync'), join(this.options.outputDir, 'client'))
 
-        // edit output to inject env var at beginning
+        // edit output to inject configs
         const clientPath = join(this.options.outputDir, 'client', 'index.js')
-        const clientContent = readFileSync(clientPath)
-        const clientDescriptor = openSync(clientPath, 'w+')
-        const clientConfig = Buffer.from(
-            `process.env.PRISMA_APPSYNC_GENERATED_CONFIG=${JSON.stringify(this.getClientConfig())};`,
-        )
-        writeSync(clientDescriptor, clientConfig, 0, clientConfig.length, 0)
-        writeSync(clientDescriptor, clientContent, 0, clientContent.length, clientConfig.length)
-        close(clientDescriptor)
+        const coreDefPath = join(this.options.outputDir, 'client', 'core.d.ts')
+        const injectedConfig = this.getInjectedConfig()
+
+        this.replaceInFile(clientPath, /((?: )*{}\;*\s*\/\/\!\s+inject:config)/g, JSON.stringify(injectedConfig))
+        this.replaceInFile(coreDefPath, /((?: )*(\'|\")\/\/\!\s+inject:type:operations(\'|\"))/g, injectedConfig.operations)
 
         return this
     }
@@ -429,7 +445,7 @@ export class PrismaAppSyncCompiler {
                 if (directive?.groups && Array.isArray(directive.groups)) {
                     outputDirectives.push(
                         `@aws_cognito_user_pools(cognito_groups: [${directive.groups
-                            .map((g) => `"${g}"`)
+                            .map((g:string) => `"${g}"`)
                             .join(', ')}])`,
                     )
                 } else {

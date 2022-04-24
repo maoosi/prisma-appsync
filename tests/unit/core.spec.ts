@@ -1,12 +1,13 @@
 import { describe, expect, test } from 'vitest'
-import { PrismaAppSync } from '../../packages/client'
-import { mockLambdaEvent, mockIdentity } from '../e2e/appsync'
-import { Authorizations, Actions, ActionsAliases } from '../../packages/client/defs'
+import { PrismaAppSync } from '@client'
+import mockIdentity from '@appsync-server/mocks/identity'
+import mockLambdaEvent from '@appsync-server/mocks/lambda-event'
+import { Authorizations, Actions, ActionsAliases } from '@client/defs'
 import { Prisma } from '@prisma/client'
 
 process.env.PRISMA_APPSYNC_TESTING = 'true'
-process.env.PRISMA_APPSYNC_GENERATED_CONFIG = JSON.stringify({
-    prismaClientModels: { Post: 'post', Posts: 'post' },
+process.env.PRISMA_APPSYNC_INJECTED_CONFIG = JSON.stringify({
+    modelsMapping: { Post: 'post', Posts: 'post' },
 })
 
 const Models = Prisma.ModelName

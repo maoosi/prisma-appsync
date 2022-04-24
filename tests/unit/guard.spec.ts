@@ -1,12 +1,21 @@
 import { describe, expect, test } from 'vitest'
-import { getShieldAuthorization, runHooks } from '../../packages/client/guard'
-import { Actions, ActionsAliases, Authorizations } from '../../packages/client/defs'
+import { getShieldAuthorization, runHooks } from '@client/guard'
+import { Actions, ActionsAliases, Authorizations, Options } from '@client/defs'
 import { Prisma, PrismaClient } from '@prisma/client'
 
 const Models = Prisma.ModelName
 
 process.env.DATABASE_URL = 'postgresql://USER:PASSWORD@HOST:PORT/DATABASE'
 process.env.PRISMA_APPSYNC_TESTING = 'true'
+
+const options:Options = {
+    connectionString: 'xxx',
+    sanitize: true,
+    debug: false,
+    defaultPagination: false,
+    maxDepth: 3,
+    modelsMapping: { Post: 'post', Posts: 'post' },
+}
 
 describe('CLIENT #guard', () => {
     describe('.getShieldAuthorization?', () => {
@@ -19,6 +28,7 @@ describe('CLIENT #guard', () => {
                     alias: ActionsAliases.modify,
                     model: Models.Post,
                 },
+                options
             })
 
             expect(authorization).toEqual({
@@ -39,6 +49,7 @@ describe('CLIENT #guard', () => {
                     alias: ActionsAliases.modify,
                     model: Models.Post,
                 },
+                options
             })
 
             expect(authorization).toEqual({
@@ -59,6 +70,7 @@ describe('CLIENT #guard', () => {
                     alias: ActionsAliases.modify,
                     model: Models.Post,
                 },
+                options
             })
 
             expect(authorization).toEqual({
@@ -74,7 +86,7 @@ describe('CLIENT #guard', () => {
             const authorization = getShieldAuthorization({
                 shield: {
                     '**': true,
-                    '/modify/{post,comment,user}{,/**}': {
+                    '/update{Post,Comment,User}{,/**}': {
                         rule: false,
                         reason: ({ model }) => `${model} can only be modified by its owner.`,
                     },
@@ -85,13 +97,14 @@ describe('CLIENT #guard', () => {
                     alias: ActionsAliases.modify,
                     model: Models.Post,
                 },
+                options
             })
 
             expect(authorization).toEqual({
                 canAccess: false,
                 reason: 'Post can only be modified by its owner.',
-                matcher: '/modify/{post,comment,user}{,/**}',
-                globPattern: '/{upsert,update,updateMany,delete,deleteMany}/{post,comment,user}{,/**}',
+                matcher: '/update{Post,Comment,User}{,/**}',
+                globPattern: '/update{Post,Comment,User}{,/**}',
                 prismaFilter: {},
             })
         })
@@ -100,21 +113,22 @@ describe('CLIENT #guard', () => {
             const authorization = getShieldAuthorization({
                 shield: {
                     '**': false,
-                    '/modify/{post,comment,user}{,/**}': { rule: true },
+                    '/updateMany{Posts,Comments,Users}{,/**}': { rule: true },
                 },
-                paths: ['/update/post/title'],
+                paths: ['/updateMany/post/title'],
                 context: {
                     action: Actions.update,
                     alias: ActionsAliases.modify,
                     model: Models.Post,
                 },
+                options
             })
 
             expect(authorization).toEqual({
                 canAccess: true,
-                reason: 'Matcher: /modify/{post,comment,user}{,/**}',
-                matcher: '/modify/{post,comment,user}{,/**}',
-                globPattern: '/{upsert,update,updateMany,delete,deleteMany}/{post,comment,user}{,/**}',
+                reason: 'Matcher: /updateMany{Posts,Comments,Users}{,/**}',
+                matcher: '/updateMany{Posts,Comments,Users}{,/**}',
+                globPattern: '/updateMany{Posts,Comments,Users}{,/**}',
                 prismaFilter: {},
             })
         })
@@ -125,7 +139,7 @@ describe('CLIENT #guard', () => {
             const authorization = getShieldAuthorization({
                 shield: {
                     '**': false,
-                    '/modify/{post,comment,user}{,/**}': { rule: isOwner },
+                    '/update{Post,Comment,User}{,/**}': { rule: isOwner },
                 },
                 paths: ['/update/post/title'],
                 context: {
@@ -133,26 +147,27 @@ describe('CLIENT #guard', () => {
                     alias: ActionsAliases.modify,
                     model: Models.Post,
                 },
+                options
             })
 
             expect(authorization).toEqual({
                 canAccess: true,
-                reason: 'Matcher: /modify/{post,comment,user}{,/**}',
-                matcher: '/modify/{post,comment,user}{,/**}',
-                globPattern: '/{upsert,update,updateMany,delete,deleteMany}/{post,comment,user}{,/**}',
+                reason: 'Matcher: /update{Post,Comment,User}{,/**}',
+                matcher: '/update{Post,Comment,User}{,/**}',
+                globPattern: '/update{Post,Comment,User}{,/**}',
                 prismaFilter: isOwner,
             })
         })
     })
 
     describe('.runHooks?', () => {
-        test('expect "before:modify/post" to run _before_ "updatePost"', async () => {
+        test('expect "before:updatePost" to run _before_ "updatePost"', async () => {
             let testValue: any = false
             await runHooks({
                 when: 'before',
                 hooks: {
-                    'before:modify/post': async () => {
-                        testValue = 'before:modify/post'
+                    'before:updatePost': async () => {
+                        testValue = 'before:updatePost'
                     },
                 },
                 prismaClient: new PrismaClient(),
@@ -181,7 +196,7 @@ describe('CLIENT #guard', () => {
                 },
             })
 
-            expect(testValue).toEqual('before:modify/post')
+            expect(testValue).toEqual('before:updatePost')
         })
 
         test('expect "after:modify/post" to run _after_ "updatePost" and modify result', async () => {

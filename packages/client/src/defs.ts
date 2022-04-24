@@ -11,7 +11,12 @@ export type PrismaAppSyncOptionsType = {
 }
 
 export type Options = Required<PrismaAppSyncOptionsType> & {
-    generatedConfig: any
+    modelsMapping: any
+}
+
+export type InjectedConfig = {
+    modelsMapping?:{ [modelVariant:string]: string },
+    operations?: string
 }
 
 export type Action = typeof Actions[keyof typeof Actions] | string
@@ -20,12 +25,10 @@ export type ActionsAlias = typeof ActionsAliases[keyof typeof ActionsAliases] | 
 
 export type ActionsAliasStr = keyof typeof ActionsAliases
 
-export type Operation = `${Action}${Capitalize<Model>}`
-
 export type Context = {
     action: Action
     alias: ActionsAlias
-    model: Model | null
+    model: string | null
 }
 
 /**
@@ -51,7 +54,7 @@ export type Context = {
  */
 export type QueryParams = {
     type: GraphQLType
-    operation: Operation | string
+    operation: string
     context: Context
     fields: string[]
     paths: string[]
@@ -134,27 +137,25 @@ export type HooksReturn = {
     after: Promise<AfterHookParams>
 }
 
-export type HookPath<Models extends string, CustomResolvers> =
-    | `${ActionsAliasStr}/${Uncapitalize<Models>}`
-    | CustomResolvers
+export type HookPath<Operations extends string, CustomResolvers> = Operations | CustomResolvers
 
 export type HooksParameter<
     HookType extends 'before' | 'after',
-    Models extends string,
+    Operations extends string,
     CustomResolvers extends string,
-> = `${HookType}:${HookPath<Models, CustomResolvers>}` | `${HookType}:**`
+> = `${HookType}:${HookPath<Operations, CustomResolvers>}` | `${HookType}:**`
 
 export type HooksParameters<
     HookType extends 'before' | 'after',
-    Models extends string,
+    Operations extends string,
     CustomResolvers extends string,
 > = {
-    [matcher in HooksParameter<HookType, Models, CustomResolvers>]?: (props: HooksProps[HookType]) => HooksReturn[HookType]
+    [matcher in HooksParameter<HookType, Operations, CustomResolvers>]?: (props: HooksProps[HookType]) => HooksReturn[HookType]
 }
 
-export type Hooks<Models extends string, CustomResolvers extends string> =
-    | HooksParameters<'before', Models, CustomResolvers>
-    | HooksParameters<'after', Models, CustomResolvers>
+export type Hooks<Operations extends string, CustomResolvers extends string> =
+    | HooksParameters<'before', Operations, CustomResolvers>
+    | HooksParameters<'after', Operations, CustomResolvers>
 
 export type ShieldAuthorization = {
     canAccess: boolean
@@ -164,20 +165,18 @@ export type ShieldAuthorization = {
     globPattern: string
 }
 
-export type ResolveParams<Models extends string, CustomResolvers extends string> = {
+export type ResolveParams<Operations extends string, CustomResolvers extends string> = {
     event: AppsyncEvent
     resolvers?: {
         [resolver in CustomResolvers]: ((props: QueryParamsCustom) => Promise<any>) | boolean
     }
     shield?: (props: QueryParams) => Shield
-    hooks?: Hooks<Models, CustomResolvers>
+    hooks?: Hooks<Operations, CustomResolvers>
 }
 
 // Prisma-related Types
 
 export { PrismaClient }
-
-export type Model = string
 
 export type PrismaArgs = {
     where?: any

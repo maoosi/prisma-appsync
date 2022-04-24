@@ -12,7 +12,7 @@ try {
 
     // build Prisma-AppSync Client
     console.log(chalk.blue('\nBuild :: Client\n'))
-    await $`esbuild packages/client/src/index.ts --bundle --define:process.env.NODE_ENV="production" --format=cjs --minify --keep-names --metafile=meta.json --platform=node --external:fsevents --external:@prisma/client --outfile=dist/prisma-appsync/index.js`
+    await $`esbuild packages/client/src/index.ts --bundle --define:process.env.NODE_ENV="production" --format=cjs --minify --keep-names --platform=node --external:fsevents --external:@prisma/client --outfile=dist/prisma-appsync/index.js --legal-comments=inline`
 
     // build Prisma-AppSync Client TS Declarations
     console.log(chalk.blue('\nBuild :: TS Declarations\n'))

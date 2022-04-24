@@ -7,14 +7,12 @@ import {
     QueryParams,
     Action,
     Actions,
-    Model,
     Context,
     PrismaArgs,
     ActionsAliasesList,
     ActionsAlias,
     ReservedPrismaKeys,
     BatchActionsList,
-    Operation,
     Identity,
     Authorization,
     Authorizations,
@@ -197,7 +195,7 @@ export function getAuthIdentity({ appsyncEvent }: { appsyncEvent: AppsyncEvent }
  *
  * @param  {any} options
  * @param  {any|null} options.customResolvers
- * @param  {Operation} options.operation
+ * @param  {string} options.operation
  * @param  {Options} options.options
  * @returns Context
  */
@@ -207,7 +205,7 @@ export function getContext({
     options,
 }: {
     customResolvers?: any | null
-    operation: Operation
+    operation: string
     options: Options
 }): Context {
     const context: Context = {
@@ -224,14 +222,11 @@ export function getContext({
         context.action = getAction({ operation })
         context.model = getModel({ operation, action: context.action })
 
-        if (
-            options?.generatedConfig?.prismaClientModels &&
-            typeof options.generatedConfig.prismaClientModels[context.model] !== 'undefined'
-        ) {
-            context.model = options.generatedConfig.prismaClientModels[context.model]
+        if (typeof options?.modelsMapping?.[context.model] !== 'undefined') {
+            context.model = options.modelsMapping[context.model]
         } else {
             throw new CustomError(
-                'Issue parsing prismaClientModels from auto-injected environment variable `PRISMA_APPSYNC_GENERATED_CONFIG`.',
+                'Issue parsing auto-injected models mapping config.',
                 { type: 'INTERNAL_SERVER_ERROR' },
             )
         }
@@ -249,8 +244,8 @@ export function getContext({
  * @param  {string} options.fieldName
  * @returns Operation
  */
-export function getOperation({ fieldName }: { fieldName: string }): Operation {
-    const operation = fieldName as Operation
+export function getOperation({ fieldName }: { fieldName: string }): string {
+    const operation = fieldName
 
     if (!(operation.length > 0))
         throw new CustomError(`Error parsing 'operation' from input event.`, { type: 'INTERNAL_SERVER_ERROR' })
@@ -265,7 +260,7 @@ export function getOperation({ fieldName }: { fieldName: string }): Operation {
  * @param  {string} options.operation
  * @returns Action
  */
-export function getAction({ operation }: { operation: Operation }): Action {
+export function getAction({ operation }: { operation: string }): Action {
     const actionsList = Object.keys(Actions).sort().reverse()
 
     const action = actionsList.find((action: Action) => {
@@ -315,8 +310,8 @@ export function getActionAlias({ action }: { action: Action }): ActionsAlias {
  * @param  {Action} options.action
  * @returns Model
  */
-export function getModel({ operation, action }: { operation: string; action: Action }): Model {
-    const model = operation.replace(String(action), '') as Model
+export function getModel({ operation, action }: { operation: string; action: Action }): string {
+    const model = operation.replace(String(action), '')
 
     if (!(model.length > 0))
         throw new CustomError(`Error parsing 'model' from input event.`, { type: 'INTERNAL_SERVER_ERROR' })

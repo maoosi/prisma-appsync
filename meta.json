@@ -371,7 +371,7 @@
       ]
     },
     "packages/client/src/defs.ts": {
-      "bytes": 10086,
+      "bytes": 9859,
       "imports": []
     },
     "packages/client/src/inspector.ts": {
@@ -396,7 +396,7 @@
       ]
     },
     "packages/client/src/adapter.ts": {
-      "bytes": 18429,
+      "bytes": 18364,
       "imports": [
         {
           "path": "packages/client/src/inspector.ts",
@@ -417,7 +417,7 @@
       ]
     },
     "packages/client/src/core.ts": {
-      "bytes": 11581,
+      "bytes": 11609,
       "imports": [
         {
           "path": "packages/client/src/defs.ts",
@@ -599,13 +599,13 @@
           "bytesInOutput": 1827
         },
         "packages/client/src/adapter.ts": {
-          "bytesInOutput": 7045
+          "bytesInOutput": 7039
         },
         "packages/client/src/core.ts": {
-          "bytesInOutput": 3700
+          "bytesInOutput": 3630
         }
       },
-      "bytes": 177939
+      "bytes": 177863
     }
   }
 }

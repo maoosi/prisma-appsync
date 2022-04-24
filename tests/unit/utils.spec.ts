@@ -9,10 +9,11 @@ import {
     isEmpty,
     filterXSS,
     isUndefined,
+    upperFirst,
     lowerFirst,
     isObject,
     traverse,
-} from '../../packages/client/utils'
+} from '@client/utils'
 
 process.env.PRISMA_APPSYNC_TESTING = 'true'
 
@@ -175,6 +176,11 @@ describe('CLIENT #utils', () => {
     describe('.lowerFirst?', () => {
         test('expect lowerFirst to return a string with first letter lowercase', () => {
             expect(lowerFirst('HELLO')).toEqual('hELLO')
+        })
+    })
+    describe('.upperFirst?', () => {
+        test('expect upperFirst to return a string with first letter uppercase', () => {
+            expect(upperFirst('heLLO')).toEqual('HeLLO')
         })
     })
     describe('.isObject?', () => {

@@ -8,6 +8,7 @@ import {
     AfterHookParams,
     BatchActionsList,
     DebugTestingKey,
+    InjectedConfig
 } from './defs'
 import { parseError, inspect, debug, CustomError } from './inspector'
 import { getShieldAuthorization, getDepth, clarify, runHooks } from './guard'
@@ -15,6 +16,11 @@ import { parseEvent } from './adapter'
 import { isEmpty } from './utils'
 import { queryBuilder } from './resolver'
 import * as queries from './resolver'
+
+/**
+ * ##  Auto-injected at generation time
+ */
+const injectedConfig:InjectedConfig = {} //! inject:config
 
 /**
  * ##  Prisma-AppSync Client ʲˢ
@@ -75,7 +81,7 @@ export class PrismaAppSync {
 
         // Set client options using constructor options
         this.options = {
-            generatedConfig: {},
+            modelsMapping: {},
             connectionString: String(process.env.DATABASE_URL),
             sanitize: typeof options?.sanitize !== 'undefined' ? options.sanitize : true,
             debug: typeof options?.debug !== 'undefined' ? options.debug : true,
@@ -83,15 +89,20 @@ export class PrismaAppSync {
             maxDepth: typeof options?.maxDepth !== 'undefined' ? options.maxDepth : 3,
         }
 
-        // Try parse auto-injected ENV variable `PRISMA_APPSYNC_GENERATED_CONFIG`
-        try {
-            if (typeof process.env.PRISMA_APPSYNC_GENERATED_CONFIG !== 'undefined') {
-                this.options.generatedConfig = JSON.parse(process.env.PRISMA_APPSYNC_GENERATED_CONFIG)
-            }
-        } catch (error) {
+        this.options.modelsMapping = {}
+
+        // Read injected config
+        if (injectedConfig?.modelsMapping) {
+            this.options.modelsMapping = injectedConfig.modelsMapping
+        } else if (process?.env?.PRISMA_APPSYNC_INJECTED_CONFIG) {
+            try { this.options.modelsMapping = JSON.parse(process.env.PRISMA_APPSYNC_INJECTED_CONFIG).modelsMapping }
+            catch {}
+        }
+
+        // Make sure injected config isn't empty
+        if (Object.keys(this.options.modelsMapping).length === 0) {
             throw new CustomError(
-                'Issue parsing auto-injected environment variable `PRISMA_APPSYNC_GENERATED_CONFIG`.',
-                {
+                'Issue with auto-injected models mapping config.', {
                     type: 'INTERNAL_SERVER_ERROR',
                 },
             )
@@ -143,8 +154,8 @@ export class PrismaAppSync {
      *
      * Read more in our [docs](https://prisma-appsync.vercel.app).
      */
-    public async resolve<Models extends string, CustomResolvers extends string>(
-        resolveParams: ResolveParams<Models, CustomResolvers>,
+    public async resolve<CustomResolvers = void>(
+        resolveParams: ResolveParams<'//! inject:type:operations', Extract<CustomResolvers, string>>,
     ): Promise<any> {
         let result: any = null
 
@@ -180,6 +191,7 @@ export class PrismaAppSync {
             const shieldAuth: ShieldAuthorization = getShieldAuthorization({
                 shield,
                 paths: QueryParams.paths,
+                options: this.options,
                 context: QueryParams.context,
             })
             debug(`Query shield authorization: ${inspect(shieldAuth)}.`)
@@ -245,9 +257,10 @@ export class PrismaAppSync {
                 throw new CustomError(`Query resolver for ${QueryParams.operation} is disabled.`, { type: 'FORBIDDEN' })
             }
             // Resolver :: resolve query with Custom Resolver
-            else if (resolveParams?.resolvers && typeof resolveParams.resolvers[QueryParams.operation] === 'function') {
+            else if (typeof resolveParams?.resolvers?.[QueryParams.operation] === 'function') {
                 debug(`Resolving query for Custom Resolver "${QueryParams.operation}".`)
-                result = await resolveParams.resolvers[QueryParams.operation]({
+                const customResolverFn = resolveParams.resolvers[QueryParams.operation] as Function
+                result = await customResolverFn({
                     ...QueryParams,
                     prismaClient: this.prismaClient,
                 })
@@ -277,7 +290,7 @@ export class PrismaAppSync {
             }
         } catch (error) {
             // Return error
-            result = Promise.reject(parseError(error))
+            result = Promise.reject(parseError(error as Error))
         }
 
         // Guard :: clarify result (decode html)

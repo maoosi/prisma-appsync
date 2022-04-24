@@ -11,4 +11,6 @@ if (!playgroundExists) {
     await fs.ensureDir(playgroundPath)
     process.env.PRISMAAPPSYNC_CREATEAPP_MODE = 'dev'
     await $`cd ${playgroundPath} && node ../dist/create-app`
+} else {
+    await $`cd ${playgroundPath} && npx prisma generate`
 }
