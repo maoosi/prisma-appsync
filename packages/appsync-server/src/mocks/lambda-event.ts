@@ -1,4 +1,4 @@
-import { AppsyncEvent, Identity, Helpers } from '@client'
+import { AppsyncEvent, Identity, Helpers } from '../../../client/src'
 import { graphQlQueryToJson } from '../gql-query-to-json'
 
 export default function ({

@@ -1,9 +1,6 @@
 #!/usr/bin/env zx
 import './env.mjs'
 
-// build local version of Prisma-AppSync
-import './build.mjs'
-
 // set DATABASE_URL env variable to docker instance
 process.env.DATABASE_URL = 'postgresql://prisma:prisma@localhost:5433/tests'
 

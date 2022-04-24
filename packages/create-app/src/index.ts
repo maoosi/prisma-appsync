@@ -181,6 +181,10 @@ async function init() {
             {
                 from: path.join(userConfig.root, '../', 'packages/boilerplate/prisma/schema.prisma'),
                 to: path.join(userConfig.root, userConfig.targetSchema),
+            },
+            {
+                from: path.join(userConfig.root, '../', 'packages/boilerplate/server.ts'),
+                to: path.join(userConfig.root, 'server.ts'),
             }
         ]
 

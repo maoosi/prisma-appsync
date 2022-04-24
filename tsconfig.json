@@ -24,10 +24,16 @@
         "paths": {
             "@client": ["packages/client/src/index"],
             "@client/*": ["packages/client/src/*"],
+            "prisma-appsync/dist/appsync-server": ["dist/appsync-server"],
             "@appsync-server": ["packages/appsync-server/src/index"],
             "@appsync-server/*": ["packages/appsync-server/src/*"]
         },
-        "types": ["node", "lodash"]
+        "types": ["node", "lodash"],
+        "plugins": [
+            {
+                "transform": "@zerollup/ts-transform-paths"
+            }
+        ]
     },
     "include": ["**/*.ts", "**/*.tsx"],
     "exclude": ["node_modules"]
