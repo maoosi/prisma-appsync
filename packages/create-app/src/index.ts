@@ -185,6 +185,10 @@ async function init() {
             {
                 from: path.join(userConfig.root, '../', 'packages/boilerplate/server.ts'),
                 to: path.join(userConfig.root, 'server.ts'),
+            },
+            {
+                from: path.join(userConfig.root, '../', 'packages/boilerplate/docker-compose.yml'),
+                to: path.join(userConfig.root, 'docker-compose.yml'),
             }
         ]
 

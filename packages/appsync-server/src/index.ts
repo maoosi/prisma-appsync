@@ -27,11 +27,17 @@ function createServer({
     
     const app = express()
     
-    let defaultQuery = `query listPosts {\n`
-    defaultQuery += `\tlistPosts {\n`
-    defaultQuery += `\t\ttitle\n`
-    defaultQuery += `\t}\n`
-    defaultQuery += `}\n`
+    let defaultQueries = `query listPosts {\n`
+    defaultQueries += `\tlistPosts {\n`
+    defaultQueries += `\t\tid\n`
+    defaultQueries += `\t\ttitle\n`
+    defaultQueries += `\t}\n`
+    defaultQueries += `}\n\n`
+    defaultQueries += `mutation createPost {\n`
+    defaultQueries += `\tcreatePost(data:{ title: "My first post" }) {\n`
+    defaultQueries += `\t\ttitle\n`
+    defaultQueries += `\t}\n`
+    defaultQueries += `}\n`
     
     app.use(
         '/graphql',
@@ -40,7 +46,7 @@ function createServer({
             rootValue: await getRootValue(request, response, graphQLParams),
             graphiql: {
                 headerEditorEnabled: true,
-                defaultQuery,
+                defaultQueries,
             },
         })),
     )

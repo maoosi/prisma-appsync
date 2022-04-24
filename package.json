@@ -13,8 +13,6 @@
         "test": "zx scripts/test.mjs",
         "dev": "zx scripts/dev.mjs",
         "cleans": "zx scripts/cleans.mjs",
-        "docker": "zx scripts/docker.mjs",
-        "serve": "zx scripts/serve.mjs",
         "publish:preview": "zx scripts/preview.mjs",
         "publish:latest": "zx scripts/publish.mjs"
     },
