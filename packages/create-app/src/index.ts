@@ -19,7 +19,7 @@ const isLocalDevMode = String(process.env.PRISMAAPPSYNC_CREATEAPP_MODE) === 'dev
 async function init() {
     console.log()
     console.log(`  ${cyan('◭') + yellow(' ◬')}`)
-    console.log(`${bold('  Prisma-AppSync') + dim(' Creator')}  ${cyan(`v${version}`)}`)
+    console.log(`${bold('  Prisma-AppSync') + dim(' Installer')}  ${cyan(`v${version}`)}`)
     console.log()
 
     const userConfig:UserConfig = {
@@ -30,6 +30,7 @@ async function init() {
         initPackage: false,
         addDependencies: [],
         addDevDependencies: [],
+        scripts: [],
         renames: [],
         clones: [],
         injects: [],
@@ -67,16 +68,16 @@ async function init() {
         existingSchema = path.join('schema.prisma')
     }
 
-    const { yes } = !isLocalDevMode ? await prompts({
+    const { useExistingSchema } = !isLocalDevMode ? await prompts({
         type: 'confirm',
-        name: 'yes',
+        name: 'useExistingSchema',
         initial: existingSchema ? true : false,
-        message: 'Already existing `schema.prisma` file?',
-    }) : { yes: false }
+        message: 'Use existing `schema.prisma` file?',
+    }) : { useExistingSchema: false }
 
-    if (typeof yes === 'undefined') return
+    if (typeof useExistingSchema === 'undefined') return
 
-    if (yes) {
+    if (useExistingSchema) {
         const { schema } = await prompts({
             type: 'text',
             name: 'schema',
@@ -95,10 +96,33 @@ async function init() {
         userConfig.generateSchema = true
     }
 
+    const { createLocalDevServer } = !isLocalDevMode ? await prompts({
+        type: 'confirm',
+        name: 'createLocalDevServer',
+        initial: true,
+        message: 'Create local dev server?',
+    }) : { createLocalDevServer: true }
+
+    if (typeof createLocalDevServer === 'undefined') return
+
+    if (createLocalDevServer) {
+        dependencies.push({ package: 'concurrently', dev: true })
+        dependencies.push({ package: 'nodemon', dev: true })
+        dependencies.push({ package: 'zx', dev: true })
+        userConfig.clones.push({
+            from: path.join(userConfig.root, '../', 'packages/boilerplate/server'),
+            to: path.join(userConfig.root, '.server'),
+        })
+        userConfig.scripts.push({
+            name: 'serve',
+            cmd: 'zx ./.server/server.mjs'
+        })
+    }
+
     let packageFile:any = false
 
     try {
-        packageFile = fs.readFileSync(path.join(userConfig.root, 'package.json'))
+        packageFile = JSON.parse(fs.readFileSync(path.join(userConfig.root, 'package.json'), 'utf8'))
     } catch (e) {
         userConfig.initPackage = true
     }
@@ -129,16 +153,14 @@ async function init() {
 
         await emitter.clone(tmpDir)
 
-        userConfig.clones = [
-            {
-                from: path.join(userConfig.root, '.prisma-appsync', 'packages/boilerplate/cdk'),
-                to: path.join(userConfig.root, 'cdk'),
-            },
-            {
-                from: path.join(userConfig.root, '.prisma-appsync', 'packages/boilerplate/handler.ts'),
-                to: path.join(userConfig.root, 'handler.ts'),
-            },
-        ]
+        userConfig.clones.push({
+            from: path.join(userConfig.root, '.prisma-appsync', 'packages/boilerplate/cdk'),
+            to: path.join(userConfig.root, 'cdk'),
+        })
+        userConfig.clones.push({
+            from: path.join(userConfig.root, '.prisma-appsync', 'packages/boilerplate/handler.ts'),
+            to: path.join(userConfig.root, 'handler.ts'),
+        })
 
         if (userConfig.generateSchema) {
             userConfig.clones.push({
@@ -169,29 +191,18 @@ async function init() {
             }
         }
     } else {
-        userConfig.clones = [
-            {
-                from: path.join(userConfig.root, '../', 'packages/boilerplate/cdk'),
-                to: path.join(userConfig.root, 'cdk'),
-            },
-            {
-                from: path.join(userConfig.root, '../', 'packages/boilerplate/handler.ts'),
-                to: path.join(userConfig.root, 'handler.ts'),
-            },
-            {
-                from: path.join(userConfig.root, '../', 'packages/boilerplate/prisma/schema.prisma'),
-                to: path.join(userConfig.root, userConfig.targetSchema),
-            },
-            {
-                from: path.join(userConfig.root, '../', 'packages/boilerplate/server.ts'),
-                to: path.join(userConfig.root, 'server.ts'),
-            },
-            {
-                from: path.join(userConfig.root, '../', 'packages/boilerplate/docker-compose.yml'),
-                to: path.join(userConfig.root, 'docker-compose.yml'),
-            }
-        ]
-
+        userConfig.clones.push({
+            from: path.join(userConfig.root, '../', 'packages/boilerplate/cdk'),
+            to: path.join(userConfig.root, 'cdk'),
+        })
+        userConfig.clones.push({
+            from: path.join(userConfig.root, '../', 'packages/boilerplate/handler.ts'),
+            to: path.join(userConfig.root, 'handler.ts'),
+        })
+        userConfig.clones.push({
+            from: path.join(userConfig.root, '../', 'packages/boilerplate/prisma/schema.prisma'),
+            to: path.join(userConfig.root, userConfig.targetSchema),
+        })
         userConfig.injects.push({
             file: path.join(userConfig.root, userConfig.targetSchema),
             find: /((?: )*generator\s+appsync\s+{[^}]*})/g,
@@ -266,6 +277,22 @@ async function execUserConfig(userConfig: UserConfig) {
         })
     }
 
+    // pkg
+    if (userConfig.scripts.length > 0) {
+        const pkg:any = JSON.parse(fs.readFileSync(path.join(userConfig.root, 'package.json'), 'utf-8'))
+
+        if (typeof pkg?.scripts === 'undefined') pkg['scripts'] = {}
+
+        userConfig.scripts.forEach((script) => {
+            if (pkg?.scripts?.[script.name]) {
+                pkg.scripts[`old.${script.name}`] = pkg.scripts[script.name]
+            }
+            pkg.scripts[script.name] = script.cmd
+        })
+
+        fs.writeFileSync(path.join(userConfig.root, 'package.json'), JSON.stringify(pkg, null, 2), 'utf-8')
+    }
+
     // generate
     await execa('npx', ['prisma', 'generate'], { stdio: 'inherit', cwd: userConfig.root })
 
@@ -338,6 +365,7 @@ type UserConfig = {
     initPackage: boolean,
     addDependencies: string[],
     addDevDependencies: string[],
+    scripts: { name: string, cmd:string }[],
     renames: { from: string, to:string }[],
     clones: { from: string, to:string }[],
     injects: { file: string, find: RegExp, replace:string }[],
