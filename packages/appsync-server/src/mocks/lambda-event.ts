@@ -1,4 +1,4 @@
-import { AppsyncEvent, Identity, Helpers } from '../../../client/src'
+import { AppSyncEvent, Identity, Helpers } from '../../../client/src'
 import { graphQlQueryToJson } from '../gql-query-to-json'
 
 export default function ({
@@ -9,7 +9,7 @@ export default function ({
     request: any
     graphQLParams: { query: string; variables?: any; operationName: string; raw?: any }
     identity: Identity
-}): AppsyncEvent {
+}): AppSyncEvent {
     const selectionSetGraphQL = graphQLParams.query
     const variables = graphQLParams.variables || {}
     const operationName = graphQLParams.operationName
@@ -28,7 +28,7 @@ export default function ({
 
     selectionSetList.unshift('__typename')
 
-    const event: AppsyncEvent = {
+    const event: AppSyncEvent = {
         arguments: args,
         source: null,
         identity,

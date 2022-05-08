@@ -3,7 +3,7 @@ import { sanitize } from './guard'
 import { merge, dotate, isEmpty, isUndefined, lowerFirst, clone, traverse, isObject } from './utils'
 import {
     Options,
-    AppsyncEvent,
+    AppSyncEvent,
     QueryParams,
     Action,
     Actions,
@@ -23,12 +23,12 @@ import {
 /**
  * #### Parse AppSync direct resolver `event` and returns Query Params.
  *
- * @param  {AppsyncEvent} appsyncEvent - AppSync event received in Lambda.
+ * @param  {AppSyncEvent} appsyncEvent - AppSync event received in Lambda.
  * @param  {Required<PrismaAppSyncOptionsType>} options - PrismaAppSync Client options.
  * @param  {any|null} customResolvers? - Custom Resolvers.
  * @returns `{ type, operation, context, fields, paths, args, prismaArgs, authorization, identity }` - QueryParams
  */
-export function parseEvent(appsyncEvent: AppsyncEvent, options: Options, customResolvers?: any | null): QueryParams {
+export function parseEvent(appsyncEvent: AppSyncEvent, options: Options, customResolvers?: any | null): QueryParams {
     if (
         isEmpty(appsyncEvent?.info?.fieldName) ||
         isEmpty(appsyncEvent?.info?.selectionSetList) ||
@@ -115,12 +115,12 @@ export function addNullables(data: any): any {
  * #### Returns authorization and identity.
  *
  * @param {any} options
- * @param {AppsyncEvent} options.appsyncEvent - AppSync event received in Lambda.
+ * @param {AppSyncEvent} options.appsyncEvent - AppSync event received in Lambda.
  * @returns `{ authorization, identity }`
  *
  * https://docs.aws.amazon.com/appsync/latest/devguide/resolver-context-reference.html#aws-appsync-resolver-context-reference-identity
  */
-export function getAuthIdentity({ appsyncEvent }: { appsyncEvent: AppsyncEvent }): {
+export function getAuthIdentity({ appsyncEvent }: { appsyncEvent: AppSyncEvent }): {
     identity: Identity
     authorization: Authorization
 } {

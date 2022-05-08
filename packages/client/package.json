@@ -3,5 +3,13 @@
     "private": true,
     "version": "1.0.0",
     "author": "maoosi <hello@sylvainsimao.fr>",
-    "license": "BSD-2-Clause"
+    "license": "BSD-2-Clause",
+    "devDependencies": {
+        "@types/aws-lambda": "^8.10.95",
+        "deepmerge": "^4.2.2",
+        "dot-object": "^2.1.4",
+        "html-entities": "^2.3.2",
+        "micromatch": "^4.0.4",
+        "xss": "^1.0.10"
+    }
 }

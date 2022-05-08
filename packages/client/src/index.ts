@@ -25,13 +25,15 @@ export {
     AfterHookParams,
     Authorizations,
     Authorization,
-    AppsyncEvent,
+    AppSyncEvent,
     Identity,
     API_KEY,
     AWS_IAM,
     AMAZON_COGNITO_USER_POOLS,
     AWS_LAMBDA,
     OPENID_CONNECT,
+    AppSyncResolverHandler,
+    AppSyncResolverEvent
 } from './defs'
 
 const Helpers = {

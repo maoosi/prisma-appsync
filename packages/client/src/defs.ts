@@ -1,4 +1,12 @@
 import { PrismaClient } from '@prisma/client'
+import type {
+    AppSyncResolverHandler,
+    AppSyncResolverEvent,
+    AppSyncIdentityIAM,
+    AppSyncIdentityCognito,
+    AppSyncIdentityOIDC,
+    AppSyncIdentityLambda,
+} from 'aws-lambda'
 
 // Prisma-AppSync Client Types
 
@@ -30,6 +38,8 @@ export type Context = {
     alias: ActionsAlias
     model: string | null
 }
+
+export { AppSyncResolverHandler, AppSyncResolverEvent }
 
 /**
  * ### QueryParams
@@ -166,7 +176,7 @@ export type ShieldAuthorization = {
 }
 
 export type ResolveParams<Operations extends string, CustomResolvers extends string> = {
-    event: AppsyncEvent
+    event: AppSyncEvent
     resolvers?: {
         [resolver in CustomResolvers]: ((props: QueryParamsCustom) => Promise<any>) | boolean
     }
@@ -190,23 +200,7 @@ export type PrismaArgs = {
 
 // AppSync-related Types
 
-export type AppsyncEvent = {
-    arguments: any
-    source: any
-    identity: Identity
-    request: any
-    info: {
-        fieldName: string
-        parentTypeName: string
-        variables: any
-        selectionSetList: string[]
-        selectionSetGraphQL: string
-    }
-    prev: {
-        result: any
-    }
-    stash: any
-}
+export type AppSyncEvent = AppSyncResolverEvent<any>
 
 export type GraphQLType = 'Query' | 'Mutation' | 'Subscription'
 
@@ -214,49 +208,13 @@ export type API_KEY = null | {
     [key: string]: any
 }
 
-export type AWS_LAMBDA = {
-    resolverContext: any
-    [key: string]: any
-}
+export type AWS_LAMBDA = AppSyncIdentityLambda
 
-export type AWS_IAM = {
-    accountId: string
-    cognitoIdentityPoolId: string
-    cognitoIdentityId: string
-    sourceIp: string[]
-    username: string
-    userArn: string
-    cognitoIdentityAuthType: string
-    cognitoIdentityAuthProvider: string
-    [key: string]: any
-}
+export type AWS_IAM = AppSyncIdentityIAM
 
-export type AMAZON_COGNITO_USER_POOLS = {
-    sub: string
-    issuer: string
-    username: string
-    claims: any
-    sourceIp: string[]
-    defaultAuthStrategy: string
-    groups: string[]
-    [key: string]: any
-}
+export type AMAZON_COGNITO_USER_POOLS = AppSyncIdentityCognito
 
-export type OPENID_CONNECT = {
-    claims: {
-        sub: string
-        aud: string
-        azp: string
-        iss: string
-        exp: number
-        iat: number
-        gty: string
-    }
-    sourceIp: string[]
-    issuer: string
-    sub: string
-    [key: string]: any
-}
+export type OPENID_CONNECT = AppSyncIdentityOIDC
 
 export type Identity = API_KEY | AWS_LAMBDA | AWS_IAM | AMAZON_COGNITO_USER_POOLS | OPENID_CONNECT
 

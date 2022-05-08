@@ -106,17 +106,47 @@ async function init() {
     if (typeof createLocalDevServer === 'undefined') return
 
     if (createLocalDevServer) {
+        const serverDir = '.server'
+        
         dependencies.push({ package: 'concurrently', dev: true })
         dependencies.push({ package: 'nodemon', dev: true })
+        dependencies.push({ package: 'wait-on', dev: true })
         dependencies.push({ package: 'zx', dev: true })
+
         userConfig.clones.push({
             from: path.join(userConfig.root, '../', 'packages/boilerplate/server'),
-            to: path.join(userConfig.root, '.server'),
+            to: path.join(userConfig.root, serverDir),
         })
+
         userConfig.scripts.push({
             name: 'serve',
             cmd: 'zx ./.server/server.mjs'
         })
+
+        const serverTsPath = path.join(userConfig.root, serverDir, 'server.ts')
+        const serverMjsPath = path.join(userConfig.root, serverDir, 'server.mjs')
+
+        userConfig.injects.push({
+            file: serverTsPath,
+            find: /\.\.\/prisma\/generated\/prisma-appsync\/schema\.gql/g,
+            replace: path.relative(
+                path.join(userConfig.root, serverDir), 
+                path.join(userConfig.root, path.dirname(userConfig.targetSchema), 'generated/prisma-appsync/schema.gql')
+            ),
+        })
+
+        if (isLocalDevMode) {
+            userConfig.injects.push({
+                file: serverTsPath,
+                find: /prisma-appsync\/dist\/appsync-server/g,
+                replace: '../../dist/appsync-server',
+            })
+            userConfig.injects.push({
+                file: serverMjsPath,
+                find: /npx concurrently [^`]*/g,
+                replace: `npx concurrently --kill-others --names "server,schema,packages" -c "bgBlue.black,bgYellow.black,bgGreen.black" "npx nodemon -e ts --watch './**/*' --watch './.server/server.ts' --ignore './node_modules' --ignore '**/generated/**' ./.server/server.ts" "npx nodemon -e prisma,gql,yaml --watch './**/*' --ignore './node_modules' --ignore '**/generated/**' --exec 'npx prisma generate'" "wait-on tcp:4000 && npx nodemon -e ts --watch '../packages/**/*' --exec 'cd ../ && pnpm build && echo \'Running a GraphQL API server at http://localhost:4000/graphql\'"`,
+            })
+        }
     }
 
     let packageFile:any = false
