@@ -10,28 +10,25 @@ import {
     aws_iam as iam,
     aws_lambda_nodejs as lambdaNodejs,
     aws_lambda as lambda,
-    aws_ssm as ssm,
     aws_appsync as appsync,
 } from 'aws-cdk-lib'
 import * as appsync_alpha from '@aws-cdk/aws-appsync-alpha'
 
 export interface ApiStackProps {
     resourcesPrefix: string
-    ssmPrefix: string
-
     cognitoUserPoolId?: string
     schema: string
     resolvers: string
     function: {
         code: string
+        memorySize: number
+        warmUp: boolean
         policies?: any[]
-        keepAlive: boolean
         bundling?: lambdaNodejs.BundlingOptions
         environment?: {}
     }
-    additionalApiKeys: string[]
+    additionalApiKeys?: string[]
     authorizationConfig: appsync_alpha.AuthorizationConfig
-    // databaseUrl: ({ ctx }: { ctx: Stack }) => { databaseUrl: string }
 }
 
 export class AppSyncStack extends Stack {
@@ -40,7 +37,6 @@ export class AppSyncStack extends Stack {
     private resourcesPrefixCamel: string
     private graphqlApi: appsync_alpha.GraphqlApi
     private directResolverFn: lambda.Alias
-    private apiKey: appsync.CfnApiKey
     private apiRole: iam.Role
     private dataSources: {
         lambda?: appsync_alpha.LambdaDataSource
@@ -52,14 +48,13 @@ export class AppSyncStack extends Stack {
 
         // stack naming convention
         this.props = tplProps
-        this.resourcesPrefix = this.props.resourcesPrefix
+        this.resourcesPrefix = kebabCase(this.props.resourcesPrefix)
         this.resourcesPrefixCamel = camelCase(this.resourcesPrefix)
 
         this.createGraphQLApi()
         this.createLambdaResolver()
         this.createDataSources()
         this.createPrismaAppSyncResolvers()
-        this.exportParameters()
     }
 
     createGraphQLApi() {
@@ -75,20 +70,22 @@ export class AppSyncStack extends Stack {
         })
 
         // create default API key
-        this.apiKey = new appsync.CfnApiKey(this, `${this.resourcesPrefixCamel}ApiKey`, {
+        new appsync.CfnApiKey(this, `${this.resourcesPrefixCamel}ApiKey`, {
             apiId: this.graphqlApi.apiId,
             description: `${this.resourcesPrefix}_api-key`,
             expires: Math.floor(new Date().setDate(new Date().getDate() + 365) / 1000.0),
         })
 
         // create additional API keys
-        this.props.additionalApiKeys.forEach((apiKey: string) => {
-            new appsync.CfnApiKey(this, `${this.resourcesPrefixCamel}ApiKey${pascalCase(apiKey)}`, {
-                apiId: this.graphqlApi.apiId,
-                description: `${this.resourcesPrefix}_api-key_${kebabCase(apiKey)}`,
-                expires: Math.floor(new Date().setDate(new Date().getDate() + 365) / 1000.0),
+        if (this.props.additionalApiKeys) {
+            this.props.additionalApiKeys.forEach((apiKey: string) => {
+                new appsync.CfnApiKey(this, `${this.resourcesPrefixCamel}ApiKey${pascalCase(apiKey)}`, {
+                    apiId: this.graphqlApi.apiId,
+                    description: `${this.resourcesPrefix}_api-key_${kebabCase(apiKey)}`,
+                    expires: Math.floor(new Date().setDate(new Date().getDate() + 365) / 1000.0),
+                })
             })
-        })
+        }
     }
 
     createLambdaResolver() {
@@ -116,7 +113,7 @@ export class AppSyncStack extends Stack {
             timeout: Duration.seconds(10),
             handler: 'main',
             entry: this.props.function.code,
-            memorySize: 1536,
+            memorySize: this.props.function.memorySize,
             tracing: lambda.Tracing.ACTIVE,
             currentVersionOptions: {
                 removalPolicy: RemovalPolicy.RETAIN,
@@ -131,7 +128,7 @@ export class AppSyncStack extends Stack {
         this.directResolverFn = new lambda.Alias(this, `${this.resourcesPrefixCamel}_FnAliasLive`, {
             aliasName: 'live',
             version: lambdaFunction.currentVersion,
-            ...(this.props.function.keepAlive && {
+            ...(this.props.function.warmUp === true && {
                 provisionedConcurrentExecutions: 1,
             }),
         })
@@ -206,17 +203,6 @@ export class AppSyncStack extends Stack {
         this.dataSources.none = new appsync_alpha.NoneDataSource(this, `${this.resourcesPrefixCamel}NoneDatasource`, {
             api: this.graphqlApi,
             name: `${this.resourcesPrefixCamel}NoneDataSource`,
-        })
-    }
-
-    exportParameters() {
-        new ssm.StringParameter(this, `${this.resourcesPrefixCamel}Endpoint`, {
-            parameterName: `${this.props.ssmPrefix}/endpoint`,
-            stringValue: this.graphqlApi.graphqlUrl,
-        })
-        new ssm.StringParameter(this, `${this.resourcesPrefixCamel}Key`, {
-            parameterName: `${this.props.ssmPrefix}/key`,
-            stringValue: this.apiKey.attrApiKey,
         })
     }
 }
