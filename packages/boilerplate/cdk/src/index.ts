@@ -3,8 +3,6 @@ import { AuthorizationType } from '@aws-cdk/aws-appsync-alpha'
 import { AppSyncStack } from './appsync'
 import { join } from 'path'
 
-require('dotenv').config()
-
 const app = new App()
 
 new AppSyncStack(app, String(process.env.SERVICES_PREFIX), {
@@ -18,6 +16,30 @@ new AppSyncStack(app, String(process.env.SERVICES_PREFIX), {
         environment: {
             NODE_ENV: 'production',
             DATABASE_URL: process.env.DATABASE_URL,
+        },
+        bundling: {
+            minify: true,
+            sourceMap: true,
+            commandHooks: {
+                beforeBundling() { return [] },
+                beforeInstall() { return [] },
+                afterBundling() {
+                    return [
+                        `npx prisma generate`,
+                        'rm -rf generated',
+
+                        // yarn + npm
+                        'rm -rf node_modules/@prisma/engines',
+                        'rm -rf node_modules/@prisma/client/node_modules',
+                        'rm -rf node_modules/.bin',
+                        'rm -rf node_modules/prisma',
+                        'rm -rf node_modules/prisma-appsync',
+                    ]
+                },
+            },
+            environment: {
+                NODE_ENV: 'production',
+            },
         }
     },
     authorizationConfig: {

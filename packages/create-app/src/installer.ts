@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-var-requires */
-import fs from 'fs'
+import fs from 'fs-extra'
 import path from 'path'
 import prompts from 'prompts'
 import degit from 'degit'
@@ -22,7 +22,7 @@ export class Installer {
         rootPath: string
         prismaSchemaPath: string | null
         packageManager: 'npm' | 'yarn' | 'pnpm'
-        packageJson: any | null
+        tmpDirPath: string
     }
     private userChoices: {
         projectDirectory: string
@@ -56,7 +56,7 @@ export class Installer {
             rootPath: this.cwd,
             prismaSchemaPath: null,
             packageManager: 'npm',
-            packageJson: null
+            tmpDirPath: this.cwd,
         }
         this.userChoices = {
             projectDirectory: '',
@@ -107,7 +107,7 @@ export class Installer {
         this.detected.rootPath = path.join(this.cwd, this.userChoices.projectDirectory)
         this.detected.packageManager = await detectPackageManager({ cwd: this.cwd })
         this.detected.prismaSchemaPath = this.findFilesInDir(this.detected.rootPath, /.+\.prisma/)?.[0] || null
-        this.detected.packageJson = this.readPackageJson(path.join(this.detected.rootPath, 'package.json'))
+        this.detected.tmpDirPath = path.join(this.detected.rootPath, '.prisma-appsync')
 
         // prisma schema
         if (!this.isLocalDevMode) {
@@ -141,7 +141,9 @@ export class Installer {
                 }
             }
         } else {
+            this.userChoices.useExistingSchema = false
             this.userChoices.generateSchema = true
+            this.userChoices.prismaSchemaPath = path.join(this.detected.rootPath, 'prisma/schema.prisma')
         }
 
         // cdk boilerplate
@@ -174,9 +176,8 @@ export class Installer {
     }
 
     private async prepare(): Promise<void> {
-        const tmpDir = path.join(this.detected.rootPath, '.prisma-appsync')
         const emitter = degit(this.gitBranch, { cache: false, force: true, verbose: true })
-        await emitter.clone(tmpDir)
+        await emitter.clone(this.detected.tmpDirPath)
 
         // core deps
         if (!this.isLocalDevMode) {
@@ -201,7 +202,7 @@ export class Installer {
         // cdk boilerplate
         if (!this.isLocalDevMode) {
             this.installConfig.clones.push({
-                from: path.join(this.detected.rootPath, '.prisma-appsync', 'packages/boilerplate/cdk'),
+                from: path.join(this.detected.tmpDirPath, 'packages/boilerplate/cdk'),
                 to: path.join(this.detected.rootPath, 'cdk'),
             })
         } else {
@@ -214,7 +215,7 @@ export class Installer {
         // handler
         if (!this.isLocalDevMode) {
             this.installConfig.clones.push({
-                from: path.join(this.detected.rootPath, '.prisma-appsync', 'packages/boilerplate/handler.ts'),
+                from: path.join(this.detected.tmpDirPath, 'packages/boilerplate/handler.ts'),
                 to: path.join(this.detected.rootPath, 'handler.ts'),
             })
         } else {
@@ -227,12 +228,11 @@ export class Installer {
         // prisma schema
         if (!this.isLocalDevMode && this.userChoices.prismaSchemaPath) {
             if (this.userChoices.useExistingSchema) {
-                const schemaPath = path.join(this.detected.rootPath, this.userChoices.prismaSchemaPath)
-                const schemaContent = fs.readFileSync(schemaPath, 'utf-8')
+                const schemaContent = fs.readFileSync(this.userChoices.prismaSchemaPath, 'utf-8')
 
                 if (!schemaContent.match(/generator\s+appsync\s+{/g)) {
                     this.installConfig.injects.push({
-                        file: schemaPath,
+                        file: this.userChoices.prismaSchemaPath,
                         find: /((?: )*generator\s+client\s+{[^}]*})/g,
                         replace: `$1\n\ngenerator appsync {\n\tprovider = "prisma-appsync"\n}`,
                     })
@@ -240,7 +240,7 @@ export class Installer {
 
                 if (!schemaContent.match(/binaryTargets\s*=\s*\[(.)*\]/g)) {
                     this.installConfig.injects.push({
-                        file: schemaPath,
+                        file: this.userChoices.prismaSchemaPath,
                         find: /( *)provider\s*=\s*"prisma-client-js"(?:\r|\n)/g,
                         replace: `$1provider = "prisma-client-js"\n$1binaryTargets = ["native", "rhel-openssl-1.0.x"]\n`,
                     })
@@ -251,17 +251,17 @@ export class Installer {
                 }
             } else if (this.userChoices.generateSchema) {
                 this.installConfig.clones.push({
-                    from: path.join(this.detected.rootPath, '.prisma-appsync', 'packages/boilerplate/prisma/schema.prisma'),
-                    to: path.join(this.detected.rootPath, this.userChoices.prismaSchemaPath),
+                    from: path.join(this.detected.tmpDirPath, 'packages/boilerplate/prisma/schema.prisma'),
+                    to: this.userChoices.prismaSchemaPath,
                 })
             }
         } else if (this.userChoices.prismaSchemaPath) {
             this.installConfig.clones.push({
                 from: path.join(this.detected.rootPath, '../', 'packages/boilerplate/prisma/schema.prisma'),
-                to: path.join(this.detected.rootPath, this.userChoices.prismaSchemaPath),
+                to: this.userChoices.prismaSchemaPath,
             })
             this.installConfig.injects.push({
-                file: path.join(this.detected.rootPath, this.userChoices.prismaSchemaPath),
+                file: this.userChoices.prismaSchemaPath,
                 find: /((?: )*generator\s+appsync\s+{[^}]*})/g,
                 replace: `generator appsync {\n\tprovider = "../dist/generator.js"\n}`,
             })
@@ -297,7 +297,7 @@ export class Installer {
                 find: /\{\{ relativeGqlSchemaPath \}\}/g,
                 replace: path.relative(
                     path.join(this.detected.rootPath, this.localServerDir), 
-                    path.join(this.detected.rootPath, path.dirname(this.userChoices.prismaSchemaPath), 'generated/prisma-appsync/schema.gql')
+                    path.join(path.dirname(this.userChoices.prismaSchemaPath), 'generated/prisma-appsync/schema.gql')
                 ),
             })
 
@@ -331,7 +331,7 @@ export class Installer {
         }
 
         // package
-        if (!this.detected.packageJson) {
+        if (!this.fileExists(path.join(this.detected.rootPath, 'package.json'))) {
             this.installConfig.shells.push({
                 cmd: `${this.detected.packageManager} init -y`,
                 dir: this.detected.rootPath
@@ -368,7 +368,7 @@ export class Installer {
                     find: /\{\{ relativeGqlSchemaPath \}\}/g,
                     replace: path.relative(
                         path.join(this.detected.rootPath, 'cdk/src'), 
-                        path.join(this.detected.rootPath, path.dirname(this.userChoices.prismaSchemaPath), 'generated/prisma-appsync/schema.gql')
+                        path.join(path.dirname(this.userChoices.prismaSchemaPath), 'generated/prisma-appsync/schema.gql')
                     ),
                 })
                 this.installConfig.injects.push({
@@ -376,7 +376,7 @@ export class Installer {
                     find: /\{\{ relativeYmlResolversPath \}\}/g,
                     replace: path.relative(
                         path.join(this.detected.rootPath, 'cdk/src'), 
-                        path.join(this.detected.rootPath, path.dirname(this.userChoices.prismaSchemaPath), 'generated/prisma-appsync/resolvers.yaml')
+                        path.join(path.dirname(this.userChoices.prismaSchemaPath), 'generated/prisma-appsync/resolvers.yaml')
                     ),
                 })
             }
@@ -445,7 +445,7 @@ export class Installer {
         }
 
         // scripts
-        const pkg = this.detected.packageJson || {}
+        const pkg = this.readJson(path.join(this.detected.rootPath, 'package.json'))
         if (typeof pkg?.scripts === 'undefined') pkg['scripts'] = {}
 
         for (let m = 0; m < this.installConfig.scripts.length; m++) {
@@ -458,23 +458,24 @@ export class Installer {
             pkg.scripts[script.name] = script.cmd
         }
 
-        fs.writeFileSync(path.join(this.detected.rootPath, 'package.json'), JSON.stringify(pkg, null, 2), 'utf-8')
+        this.writeJson(path.join(this.detected.rootPath, 'package.json'), pkg)
 
         // recos
         for (let n = 0; n < this.installConfig.recommendations.length; n++) {
             const reco = this.installConfig.recommendations[n]
             console.log(bold(cyan('  Note: ')) + reco + dim(' ...'))
         }
+
+        // delete tmp dir
+        this.removeDir(this.detected.tmpDirPath)
     }
 
-    private readPackageJson(path: string): any | null {
-        let json = null
+    private writeJson(path: string, json: any): any {
+        return fs.outputJsonSync(path, json, { spaces: 2 })
+    }
 
-        try { 
-            json = JSON.parse(fs.readFileSync(path, 'utf8'))
-        } catch {}
-
-        return json
+    private readJson(path: string): any {
+        return fs.readJsonSync(path, { throws: false })
     }
 
     private rename(before: string, after: string): void {
@@ -487,18 +488,44 @@ export class Installer {
             this.copyDir(src, dest)
         } else {
             const parentDir = path.dirname(dest)
-            if (!fs.existsSync(parentDir)) fs.mkdirSync(parentDir)
+            fs.ensureDirSync(parentDir)
             fs.copyFileSync(src, dest)
         }
     }
     
     private copyDir(srcDir: string, destDir: string): void {
-        fs.mkdirSync(destDir, { recursive: true })
+        fs.ensureDirSync(destDir)
         for (const file of fs.readdirSync(srcDir)) {
-            const srcFile = path.resolve(srcDir, file)
-            const destFile = path.resolve(destDir, file)
-            this.copy(srcFile, destFile)
+            if (!file.match(/(.+\.lock|node_modules)/)) {
+                const srcFile = path.resolve(srcDir, file)
+                const destFile = path.resolve(destDir, file)
+                this.copy(srcFile, destFile)
+            }
         }
+    }
+
+    private emptyDir(dir: string) {
+        if (!fs.existsSync(dir)) return
+    
+        for (const file of fs.readdirSync(dir)) {
+            const abs = path.resolve(dir, file)
+            // baseline is Node 12 so can't use rmSync :(
+            if (fs.lstatSync(abs).isDirectory()) {
+                this.emptyDir(abs)
+                fs.rmdirSync(abs)
+            } else {
+                fs.unlinkSync(abs)
+            }
+        }
+    }
+
+    private removeDir(dir: string) {
+        this.emptyDir(dir)
+        fs.rmdirSync(dir)
+    }
+
+    private fileExists(file:string): boolean {
+        return Boolean(fs.existsSync(file))
     }
     
     private replaceInFile(file: string, findRegex: RegExp, replace: string): void {
