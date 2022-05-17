@@ -13,7 +13,7 @@ import {
 import { parseError, inspect, debug, CustomError } from './inspector'
 import { getShieldAuthorization, getDepth, clarify, runHooks } from './guard'
 import { parseEvent } from './adapter'
-import { isEmpty } from './utils'
+import { isEmpty, merge } from './utils'
 import { queryBuilder } from './resolver'
 import * as queries from './resolver'
 
@@ -112,7 +112,7 @@ export class PrismaAppSync {
         process.env.PRISMA_APPSYNC_DEBUG = this.options.debug ? 'true' : 'false'
 
         // Debug logs
-        debug(`New instance created using: ${inspect(this.options)}`)
+        debug('New instance created using:', inspect(this.options))
 
         // Create new Prisma Client
         if (process?.env?.PRISMA_APPSYNC_TESTING === 'true') {
@@ -160,17 +160,15 @@ export class PrismaAppSync {
         let result: any = null
 
         try {
-            debug(
-                `Resolving API request w/ event (shortened): ${inspect({
-                    arguments: resolveParams.event.arguments,
-                    identity: resolveParams.event.identity,
-                    info: resolveParams.event.info,
-                })}`,
-            )
+            debug(`Resolving API request w/ event (shortened):`, inspect({
+                arguments: resolveParams.event.arguments,
+                identity: resolveParams.event.identity,
+                info: resolveParams.event.info,
+            }))
 
             // Adapter :: parse appsync event
             let QueryParams = parseEvent(resolveParams.event, this.options, resolveParams.resolvers)
-            debug(`Parsed event: ${inspect(QueryParams)}`)
+            debug(`Parsed event:`, inspect(QueryParams))
 
             // Guard :: block queries with a depth > maxDepth
             const depth = getDepth({ paths: QueryParams.paths, context: QueryParams.context })
@@ -194,7 +192,7 @@ export class PrismaAppSync {
                 options: this.options,
                 context: QueryParams.context,
             })
-            debug(`Query shield authorization: ${inspect(shieldAuth)}.`)
+            debug('Query shield authorization:', inspect(shieldAuth))
 
             // Guard :: if `canAccess` if equal to `false`, we reject the API call
             if (!shieldAuth.canAccess) {
@@ -205,11 +203,11 @@ export class PrismaAppSync {
 
             // Guard :: if `prismaFilter` is set, combine with current Prisma query
             if (!isEmpty(shieldAuth.prismaFilter)) {
-                debug(`QueryParams before adding Shield filters: ${inspect(QueryParams)}.`)
+                debug('QueryParams before adding Shield filters:', inspect(QueryParams))
 
                 QueryParams.prismaArgs = queryBuilder.prismaWhere(QueryParams.prismaArgs, shieldAuth.prismaFilter)
 
-                debug(`QueryParams after adding Shield filters: ${inspect(QueryParams)}.`)
+                debug('QueryParams after adding Shield filters:', inspect(QueryParams))
             }
 
             // Guard: get and run all before hooks functions matching query
@@ -294,10 +292,10 @@ export class PrismaAppSync {
         }
 
         // Guard :: clarify result (decode html)
-        debug(`Result before sanitize: ${inspect(result)}`)
+        debug('Result before sanitize:', inspect(result))
         const resultClarified = this.options.sanitize ? clarify(result) : result
 
-        debug(`Returning response to API request w/ result: ${inspect(resultClarified)}`)
+        debug('Returning response to API request w/ result:', inspect(resultClarified))
         return resultClarified
     }
 }

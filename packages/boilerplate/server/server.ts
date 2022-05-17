@@ -7,5 +7,10 @@ createServer({
     lambdaHandler: main,
     headers: {},
     authorization: Authorizations.AWS_IAM,
-    port: 4000
+    port: 4000,
+    watch: {
+        [join(__dirname, '{{ relativePrismaSchemaPath }}')]: async ({ exec }) => {
+            await exec('npx prisma generate', { cwd: join(__dirname, '../') })
+        }
+    }
 })

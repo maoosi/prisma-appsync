@@ -6,38 +6,37 @@ import { join } from 'path'
 import mockIdentity from './mocks/identity'
 import mockLambdaEvent from './mocks/lambda-event'
 import { Authorization, Authorizations } from '../../client/src'
+import nodeWatch from 'node-watch'
+import { exec as nodeExec } from 'child_process'
 
 function createServer({
     schema,
     lambdaHandler,
     headers,
     authorization,
-    port
+    port,
+    watch
 }: {
     schema: string
     lambdaHandler: (...args: any) => Promise<any>
     headers?: any,
     authorization?: Authorization,
     port?: number
+    watch?: {
+        [fileOrDir:string]: (
+            { evt, name, exec }: { 
+                evt: any,
+                name: string,
+                exec: (command: string, options?: { cwd?: string}) => Promise<{ err: any, strdout: any, stderr: any }>,
+            }
+        ) => Promise<void>
+    }
 }) {
     const scalars = readFileSync(join(__dirname, 'gql/scalars.gql'), { encoding: 'utf-8' })
     const directives = readFileSync(join(__dirname, 'gql/directives.gql'), { encoding: 'utf-8' })
     const generatedSchema = readFileSync(schema, { encoding: 'utf-8' })
     const gqlSchema = buildSchema(`${scalars}\n${directives}\n${generatedSchema}`)
-    
     const app = express()
-    
-    let defaultQueries = `query listPosts {\n`
-    defaultQueries += `\tlistPosts {\n`
-    defaultQueries += `\t\tid\n`
-    defaultQueries += `\t\ttitle\n`
-    defaultQueries += `\t}\n`
-    defaultQueries += `}\n\n`
-    defaultQueries += `mutation createPost {\n`
-    defaultQueries += `\tcreatePost(data:{ title: "My first post" }) {\n`
-    defaultQueries += `\t\ttitle\n`
-    defaultQueries += `\t}\n`
-    defaultQueries += `}\n`
     
     app.use(
         '/graphql',
@@ -46,7 +45,21 @@ function createServer({
             rootValue: await getRootValue(request, response, graphQLParams),
             graphiql: {
                 headerEditorEnabled: true,
-                defaultQueries,
+                pretty: true,
+                defaultQuery: [
+                    `query listPosts {`,
+                        `\tlistPosts {`,
+                            `\t\tid`,
+                            `\t\ttitle`,
+                        `\t}`,
+                    `}`,
+                    ``,
+                    `mutation createPost {`,
+                        `\tcreatePost(data:{ title: "My first post" }) {`,
+                            `\t\ttitle`,
+                        `\t}`,
+                    `}`,
+                ].join('\n'),
             },
         })),
     )
@@ -54,7 +67,7 @@ function createServer({
     const portNumber = port || 4000
 
     app.listen(portNumber)
-    console.log(`Running a GraphQL API server at http://localhost:${portNumber}/graphql`)
+    console.log(`Running a GraphQL API server at: http://localhost:${portNumber}/graphql`)
     
     const getRootValue = async (request: any, response: any, graphQLParams: any) => {
         let rootValue: any = {}
@@ -67,10 +80,8 @@ function createServer({
                 resolverContext: {},
             })
 
-            if (!request?.headers) request.headers = {}
-
             request.headers = {
-                ...request.headers,
+                ...request?.headers || {},
                 headers
             }
     
@@ -84,7 +95,7 @@ function createServer({
                 await lambdaHandler(
                     event,
                     {
-                        functionName: 'travis-local-1-anz-fn',
+                        functionName: 'prisma-appsync--handler',
                         functionVersion: '1',
                         invokedFunctionArn: 'xxx',
                         memoryLimitInMB: '1536',
@@ -106,6 +117,39 @@ function createServer({
         return rootValue
     }
     
+    if (watch) {
+        const exec = (
+            command: string,
+            options?: { cwd?: string}
+        ): Promise<{ err: any, strdout: any, stderr: any }> => new Promise((resolve) => {
+            nodeExec(
+                options?.cwd ? `cd ${options.cwd} && ${command}` : command, 
+                (err:any, strdout:any, stderr:any) => {
+                    if (err) console.error(stderr)
+                    else if (strdout) console.log(strdout)
+                    resolve({ err, strdout, stderr })
+                }
+            )
+        })
+
+        for (const fileOrDir in watch) {
+            if (Object.prototype.hasOwnProperty.call(watch, fileOrDir)) {
+                const func = watch[fileOrDir]
+
+                nodeWatch(
+                    fileOrDir, 
+                    {
+                        recursive: true,
+                        delay: 1000,
+                        filter: f => !/node_modules/.test(f)
+                    },
+                    (evt, name) => {
+                        func({ exec, evt, name })
+                    }
+                )
+            }
+        }
+    }
 }
 
 export default createServer

@@ -4,6 +4,15 @@ export default function createServer({ schema, lambdaHandler, headers, authoriza
     headers?: any;
     authorization?: Authorization;
     port?: number;
+    watch?: {
+        [fileOrDir:string]: (
+            { evt, name, exec }: { 
+                evt: any,
+                name: string,
+                exec: (command: string, options?: { cwd?: string}) => Promise<{ err: any, strdout: any, stderr: any }>,
+            }
+        ) => Promise<void>
+    };
 }): void;
 
 export declare enum Authorizations {

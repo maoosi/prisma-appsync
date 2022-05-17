@@ -68,7 +68,15 @@ export function parseError(error: Error): CustomError {
 }
 
 export function inspect(data: any): string {
-    return nodeInspect(data, { compact: true, depth: 5, breakLength: 80 })
+    return nodeInspect(data, {
+        compact: true, 
+        depth: 5, 
+        breakLength: 80, 
+        maxStringLength: 300, 
+        ...(!process.env.LAMBDA_TASK_ROOT && {
+            colors: true
+        })
+    })
 }
 
 export function debug(...data): void {
@@ -82,15 +90,12 @@ export function log(data: any, level?: 'ERROR' | 'WARN' | 'INFO'): void {
     const logPrefix = `◭ Prisma-AppSync :: <<${logLevel}>>`
     const dataList = Array.isArray(data) ? data : []
 
-    dataList.forEach((d: any) => {
-        const logMessage = typeof d === 'string' ? d : inspect(d)
+    dataList.forEach((logData: any, index: number) => {
+        let log = typeof logData === 'string' ? logData : inspect(logData)
+        if (index === 0) log = `${logPrefix} ${log}`
 
-        if (level === 'ERROR') {
-            console.error(`${logPrefix} ${logMessage}`)
-        } else if (level === 'WARN') {
-            console.warn(`${logPrefix} ${logMessage}`)
-        } else {
-            console.info(`${logPrefix} ${logMessage}`)
-        }
+        if (level === 'ERROR') console.error(log)
+        else if (level === 'WARN') console.warn(log)
+        else console.info(log)
     })
 }

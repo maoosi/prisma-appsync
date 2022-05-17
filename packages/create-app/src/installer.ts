@@ -6,7 +6,7 @@ import prompts from 'prompts'
 import degit from 'degit'
 import execa from 'execa'
 import { detect as detectPackageManager } from 'detect-package-manager'
-import { cyan, yellow, bold, dim } from 'kolorist'
+import { cyan, bold, dim } from 'kolorist'
 
 export class Installer {
     private gitBranch: string
@@ -37,7 +37,7 @@ export class Installer {
         clones: { from: string, to: string }[]
         scripts: { name: string, cmd: string }[]
         injects: { file: string, find: RegExp, replace: string }[]
-        shells: { cmd: string, dir: string }[]
+        shells: { cmd: string, dir: string, when: 'before' | 'after' }[]
         recommendations: string[]
     }
 
@@ -85,8 +85,13 @@ export class Installer {
 
     private printBranding(): void {
         console.log()
-        console.log(`  ${cyan('◭') + yellow(' ◬')}`)
-        console.log(`${bold('  Prisma-AppSync') + dim(' Installer')}  ${cyan(`v${this.version}`)}`)
+        console.log("    ___      _                             _               __                  ")
+        console.log("   / _ \\_ __(◭)___ _ __ ___   __ _        /_\\  _ __  _ __ / _\\_   _ _ __   ___ ")
+        console.log("  / /◭)/ '__| / __| '_ ` _ \\ / _` |_____ //◭\\\\| '_ \\| '_ \\\\ \\| | | | '_ \\ / __|")
+        console.log(" / ___/| |  | \\__ \\ | | | | | (◭| |_____/  _  \\ |◭) | |◭) |\\ \\ |_| | | | | (__ ")
+        console.log(" \\/    |_|  |_|___/_| |_| |_|\\__,_|     \\_/ \\_/ .__/| .__/\\__/\\__, |_| |_|\\___|")
+        console.log("                                              |_|   |_|       |___/            ")
+        console.log(`${bold('  ◭ Prisma-AppSync') + dim(' Installer')} ${cyan(`v${this.version}`)}`)
         console.log()
     }
 
@@ -266,18 +271,26 @@ export class Installer {
                 replace: `generator appsync {\n\tprovider = "../dist/generator.js"\n}`,
             })
         }
+        this.installConfig.scripts.push({
+            name: 'generate',
+            cmd: 'npx prisma generate'
+        })
 
         // local dev server
         if (this.userChoices.createLocalDevServer && this.userChoices.prismaSchemaPath) {
             this.installConfig.dependencies = [
                 ...this.installConfig.dependencies,
                 ...[
-                    { package: 'concurrently', dev: true },
-                    { package: 'nodemon', dev: true },
-                    { package: 'wait-on', dev: true },
                     { package: 'zx', dev: true },
+                    { package: 'pm2', dev: true },
                 ]
             ]
+
+            this.installConfig.shells.push({
+                cmd: `npx pm2 install typescript`,
+                dir: this.detected.rootPath,
+                when: 'after'
+            })
 
             this.installConfig.clones.push({
                 from: path.join(this.detected.rootPath, '../', 'packages/boilerplate/server'),
@@ -286,7 +299,7 @@ export class Installer {
 
             this.installConfig.scripts.push({
                 name: 'serve',
-                cmd: 'zx ./.server/server.mjs'
+                cmd: 'zx ./.server/server.mjs --experimental'
             })
 
             const serverTsPath = path.join(this.detected.rootPath, this.localServerDir, 'server.ts')
@@ -300,32 +313,38 @@ export class Installer {
                     path.join(path.dirname(this.userChoices.prismaSchemaPath), 'generated/prisma-appsync/schema.gql')
                 ),
             })
+            this.installConfig.injects.push({
+                file: serverTsPath,
+                find: /\{\{ relativePrismaSchemaPath \}\}/g,
+                replace: path.relative(
+                    path.join(this.detected.rootPath, this.localServerDir), 
+                    this.userChoices.prismaSchemaPath
+                ),
+            })
 
-            const concurrentlyCmd = [
-                `npx concurrently --kill-others --names "server,schema" -c "bgBlue.black,bgYellow.black"`,
-                `"npx nodemon -e ts --watch './**/*' --watch './.server/server.ts' --ignore './node_modules' --ignore '**/generated/**' ./.server/server.ts"`,
-                `"npx nodemon -e prisma,gql,yaml --watch './**/*' --ignore './node_modules' --ignore '**/generated/**' --exec 'npx prisma generate && echo \\'Running a GraphQL API server at http://localhost:${this.localServerPort}/graphql\\''"`,
-            ]
+            this.installConfig.injects.push({
+                file: serverMjsPath,
+                find: /\{\{ localServerPort \}\}/g,
+                replace: String(this.localServerPort),
+            })
 
-            if (!this.isLocalDevMode) {
-                this.installConfig.injects.push({
-                    file: serverMjsPath,
-                    find: /\{\{ concurrentlyCmd \}\}/g,
-                    replace: concurrentlyCmd.join(' '),
-                })
-            } else {
-                concurrentlyCmd[0] = `npx concurrently --kill-others --names "server,schema,packages" -c "bgBlue.black,bgYellow.black,bgGreen.black"`
-                concurrentlyCmd.push(`"wait-on tcp:${this.localServerPort} && npx nodemon -e ts --watch '../packages/**/*' --exec 'cd ../ && pnpm build && echo \\'Running a GraphQL API server at http://localhost:${this.localServerPort}/graphql\\''"`)
-
+            if (this.isLocalDevMode) {
                 this.installConfig.injects.push({
                     file: serverTsPath,
                     find: /prisma-appsync\/dist\/appsync-server/g,
                     replace: '../../dist/appsync-server',
                 })
+
                 this.installConfig.injects.push({
-                    file: serverMjsPath,
-                    find: /\{\{ concurrentlyCmd \}\}/g,
-                    replace: concurrentlyCmd.join(' '),
+                    file: serverTsPath,
+                    find: /(watch:.*{)/g,
+                    replace: [
+                        "$1",
+                        "\t\t[join(__dirname, '../../packages/')]: async ({ exec }) => {",
+                        "\t\t\tawait exec('pnpm build', { cwd: join(__dirname, '../../') })",
+                        "\t\t\tawait exec('npx prisma generate', { cwd: join(__dirname, '../') })",
+                        "\t\t},",
+                    ].join("\n")
                 })
             }
         }
@@ -334,7 +353,8 @@ export class Installer {
         if (!this.fileExists(path.join(this.detected.rootPath, 'package.json'))) {
             this.installConfig.shells.push({
                 cmd: `${this.detected.packageManager} init -y`,
-                dir: this.detected.rootPath
+                dir: this.detected.rootPath,
+                when: 'before'
             })
         }
 
@@ -342,7 +362,8 @@ export class Installer {
         if (this.userChoices.useCdkBoilerplate) {
             this.installConfig.shells.push({
                 cmd: `${this.detected.packageManager} install`,
-                dir: path.join(this.detected.rootPath, 'cdk')
+                dir: path.join(this.detected.rootPath, 'cdk'),
+                when: 'before'
             })
             this.installConfig.injects.push({
                 file: path.join(this.detected.rootPath, 'cdk/src/index.ts'),
@@ -386,7 +407,8 @@ export class Installer {
         if (this.userChoices.prismaSchemaPath) {
             this.installConfig.shells.push({
                 cmd: 'npx prisma generate',
-                dir: this.detected.rootPath
+                dir: this.detected.rootPath,
+                when: 'after'
             })
         }
     }
@@ -416,9 +438,10 @@ export class Installer {
             this.replaceInFile(inject.file, inject.find, inject.replace)
         }
 
-        // shells
-        for (let l = 0; l < this.installConfig.shells.length; l++) {
-            const shell = this.installConfig.shells[l]
+        // shells: before
+        const shellsBefore = this.installConfig.shells.filter(s => s.when === 'before')
+        for (let l = 0; l < shellsBefore.length; l++) {
+            const shell = shellsBefore[l]
             const [baseCmd, ...execs] = shell.cmd.split(' ')
 
             await execa(baseCmd, execs, {
@@ -459,6 +482,18 @@ export class Installer {
         }
 
         this.writeJson(path.join(this.detected.rootPath, 'package.json'), pkg)
+
+        // shells: after
+        const shellsAfter = this.installConfig.shells.filter(s => s.when === 'after')
+        for (let l = 0; l < shellsAfter.length; l++) {
+            const shell = shellsAfter[l]
+            const [baseCmd, ...execs] = shell.cmd.split(' ')
+
+            await execa(baseCmd, execs, {
+                stdio: 'inherit',
+                cwd: shell.dir,
+            })
+        }
 
         // recos
         for (let n = 0; n < this.installConfig.recommendations.length; n++) {

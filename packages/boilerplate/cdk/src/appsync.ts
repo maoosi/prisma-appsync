@@ -14,7 +14,7 @@ import {
 } from 'aws-cdk-lib'
 import * as appsync_alpha from '@aws-cdk/aws-appsync-alpha'
 
-export interface ApiStackProps {
+export interface AppSyncStackProps {
     resourcesPrefix: string
     cognitoUserPoolId?: string
     schema: string
@@ -32,7 +32,7 @@ export interface ApiStackProps {
 }
 
 export class AppSyncStack extends Stack {
-    private props: ApiStackProps
+    private props: AppSyncStackProps
     private resourcesPrefix: string
     private resourcesPrefixCamel: string
     private graphqlApi: appsync_alpha.GraphqlApi
@@ -43,7 +43,7 @@ export class AppSyncStack extends Stack {
         none?: appsync_alpha.NoneDataSource
     }
 
-    constructor(scope: Construct, id: string, tplProps: ApiStackProps, props?: StackProps) {
+    constructor(scope: Construct, id: string, tplProps: AppSyncStackProps, props?: StackProps) {
         super(scope, id, props)
 
         // stack naming convention
