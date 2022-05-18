@@ -7,6 +7,7 @@ import type {
     AppSyncIdentityOIDC,
     AppSyncIdentityLambda,
 } from 'aws-lambda'
+import { propertyOf } from 'lodash'
 
 // Prisma-AppSync Client Types
 
@@ -78,17 +79,16 @@ export type QueryParams = {
 export type Authorization = typeof Authorizations[keyof typeof Authorizations] | null
 
 export type QueryBuilder = {
-    prismaGet: (prismaArgs: PrismaArgs) => any
-    prismaList: (prismaArgs: PrismaArgs) => any
-    prismaCount: (prismaArgs: PrismaArgs) => any
-    prismaCreate: (prismaArgs: PrismaArgs) => any
-    prismaCreateMany: (prismaArgs: PrismaArgs) => any
-    prismaUpdate: (prismaArgs: PrismaArgs) => any
-    prismaUpdateMany: (prismaArgs: PrismaArgs) => any
-    prismaUpsert: (prismaArgs: PrismaArgs) => any
-    prismaDelete: (prismaArgs: PrismaArgs) => any
-    prismaDeleteMany: (prismaArgs: PrismaArgs) => any
-    prismaWhere: (prismaArgs: PrismaArgs, filter: any) => PrismaArgs
+    prismaGet: (...prismaArgs: PrismaArgs[]) => PrismaArgs
+    prismaList: (...prismaArgs: PrismaArgs[]) => PrismaArgs
+    prismaCount: (...prismaArgs: PrismaArgs[]) => PrismaArgs
+    prismaCreate: (...prismaArgs: PrismaArgs[]) => PrismaArgs
+    prismaCreateMany: (...prismaArgs: PrismaArgs[]) => PrismaArgs
+    prismaUpdate: (...prismaArgs: PrismaArgs[]) => PrismaArgs
+    prismaUpdateMany: (...prismaArgs: PrismaArgs[]) => PrismaArgs
+    prismaUpsert: (...prismaArgs: PrismaArgs[]) => PrismaArgs
+    prismaDelete: (...prismaArgs: PrismaArgs[]) => PrismaArgs
+    prismaDeleteMany: (...prismaArgs: PrismaArgs[]) => PrismaArgs
 }
 
 export type QueryParamsCustom = QueryParams & {
@@ -197,6 +197,8 @@ export type PrismaArgs = {
     skipDuplicates?: boolean
     select?: any
 }
+
+export type PrismaOperator = keyof Required<PrismaArgs>
 
 // AppSync-related Types
 

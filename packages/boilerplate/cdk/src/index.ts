@@ -1,16 +1,17 @@
 import { App } from 'aws-cdk-lib'
 import { AuthorizationType } from '@aws-cdk/aws-appsync-alpha'
+import { kebabCase } from 'scule'
 import { AppSyncStack } from './appsync'
 import { join } from 'path'
 
 const app = new App()
 
-new AppSyncStack(app, String(process.env.SERVICES_PREFIX), {
-    resourcesPrefix: `{{ projectName }}-api`,
-    schema: join(__dirname, `{{ relativeGqlSchemaPath }}`),
-    resolvers: join(__dirname, `{{ relativeYmlResolversPath }}`),
+new AppSyncStack(app, kebabCase('{{ projectName }}'), {
+    resourcesPrefix: '{{ projectName }}-api',
+    schema: join(process.cwd(), '{{ relativeGqlSchemaPath }}'),
+    resolvers: join(process.cwd(), '{{ relativeYmlResolversPath }}'),
     function: {
-        code: join(__dirname, '{{ relativeHandlerPath }}'),
+        code: join(process.cwd(), '{{ relativeHandlerPath }}'),
         memorySize: 1536,
         warmUp: false, // warmUp=true will incur extra costs
         environment: {
@@ -20,8 +21,13 @@ new AppSyncStack(app, String(process.env.SERVICES_PREFIX), {
         bundling: {
             minify: true,
             sourceMap: true,
+            forceDockerBundling: true,
             commandHooks: {
-                beforeBundling() { return [] },
+                beforeBundling(inputDir: string, outputDir: string): string[] {
+                    return [
+                        `cp ${inputDir}/{{ relativePrismaSchemaPath }} ${outputDir}`,
+                    ]
+                },
                 beforeInstall() { return [] },
                 afterBundling() {
                     return [
@@ -37,6 +43,7 @@ new AppSyncStack(app, String(process.env.SERVICES_PREFIX), {
                     ]
                 },
             },
+            nodeModules: ['prisma', '@prisma/client'],
             environment: {
                 NODE_ENV: 'production',
             },

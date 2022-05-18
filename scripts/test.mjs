@@ -5,8 +5,8 @@ import './env.mjs'
 import './build.mjs'
 
 // unit tests
-console.log(chalk.blue('\nTest :: Unit\n'))
-await $`vitest run tests/unit/*.spec.ts`
+console.log(chalk.blue('\nTest :: Client\n'))
+await $`vitest run tests/client/*.spec.ts`
 
 // e2e tests
 // console.log(chalk.blue('Test :: e2e\n'))

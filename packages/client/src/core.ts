@@ -13,8 +13,8 @@ import {
 import { parseError, inspect, debug, CustomError } from './inspector'
 import { getShieldAuthorization, getDepth, clarify, runHooks } from './guard'
 import { parseEvent } from './adapter'
-import { isEmpty, merge } from './utils'
-import { queryBuilder } from './resolver'
+import { isEmpty } from './utils'
+import { prismaQueryJoin } from './resolver'
 import * as queries from './resolver'
 
 /**
@@ -192,7 +192,8 @@ export class PrismaAppSync {
                 options: this.options,
                 context: QueryParams.context,
             })
-            debug('Query shield authorization:', inspect(shieldAuth))
+            if (Object.keys(shield).length === 0) debug('Query shield authorization: No Shield setup detected.')
+            else debug('Query shield authorization:', inspect(shieldAuth))
 
             // Guard :: if `canAccess` if equal to `false`, we reject the API call
             if (!shieldAuth.canAccess) {
@@ -205,7 +206,10 @@ export class PrismaAppSync {
             if (!isEmpty(shieldAuth.prismaFilter)) {
                 debug('QueryParams before adding Shield filters:', inspect(QueryParams))
 
-                QueryParams.prismaArgs = queryBuilder.prismaWhere(QueryParams.prismaArgs, shieldAuth.prismaFilter)
+                QueryParams.prismaArgs = prismaQueryJoin(
+                    [QueryParams.prismaArgs, { where: shieldAuth.prismaFilter }],
+                    ['where', 'data', 'create', 'update', 'orderBy', 'skip', 'take', 'skipDuplicates', 'select']
+                )
 
                 debug('QueryParams after adding Shield filters:', inspect(QueryParams))
             }

@@ -34,7 +34,7 @@ export class Installer {
     }
     private installConfig: {
         dependencies: { package: string, dev: boolean }[]
-        clones: { from: string, to: string }[]
+        clones: { from: string, to: string, deleteSource?: boolean }[]
         scripts: { name: string, cmd: string }[]
         injects: { file: string, find: RegExp, replace: string }[]
         shells: { cmd: string, dir: string, when: 'before' | 'after' }[]
@@ -204,19 +204,6 @@ export class Installer {
             ]
         }
 
-        // cdk boilerplate
-        if (!this.isLocalDevMode) {
-            this.installConfig.clones.push({
-                from: path.join(this.detected.tmpDirPath, 'packages/boilerplate/cdk'),
-                to: path.join(this.detected.rootPath, 'cdk'),
-            })
-        } else {
-            this.installConfig.clones.push({
-                from: path.join(this.detected.rootPath, '../', 'packages/boilerplate/cdk'),
-                to: path.join(this.detected.rootPath, 'cdk'),
-            })
-        }
-
         // handler
         if (!this.isLocalDevMode) {
             this.installConfig.clones.push({
@@ -360,6 +347,26 @@ export class Installer {
 
         // cdk deps
         if (this.userChoices.useCdkBoilerplate) {
+            if (!this.isLocalDevMode) {
+                this.installConfig.clones.push({
+                    from: path.join(this.detected.tmpDirPath, 'packages/boilerplate/cdk'),
+                    to: path.join(this.detected.rootPath, 'cdk'),
+                })
+                this.installConfig.injects.push({
+                    file: path.join(this.detected.rootPath, 'cdk/src/index.ts'),
+                    find: /nodeModules\: \[(.+)\]/g,
+                    replace: `nodeModules: [$1, 'prisma-appsync']`,
+                })
+            } else {
+                this.installConfig.clones.push({
+                    from: path.join(this.detected.rootPath, '../', 'packages/boilerplate/cdk'),
+                    to: path.join(this.detected.rootPath, 'cdk'),
+                })
+            }
+            this.installConfig.clones.push({
+                from: path.join(this.detected.rootPath, '../', 'packages/boilerplate/cdk.json'),
+                to: path.join(this.detected.rootPath, 'cdk.json'),
+            })
             this.installConfig.shells.push({
                 cmd: `${this.detected.packageManager} install`,
                 dir: path.join(this.detected.rootPath, 'cdk'),
@@ -374,13 +381,13 @@ export class Installer {
                 file: path.join(this.detected.rootPath, 'cdk/src/index.ts'),
                 find: /\{\{ relativeHandlerPath \}\}/g,
                 replace: path.relative(
-                    path.join(this.detected.rootPath, 'cdk/src'), 
+                    this.detected.rootPath, 
                     path.join(this.detected.rootPath, 'handler.ts')
                 ),
             })
             this.installConfig.scripts.push({
                 name: 'deploy',
-                cmd: 'cd cdk && cdk synth'
+                cmd: 'cdk synth && cdk bootstrap && cdk deploy'
             })
 
             if (this.userChoices.prismaSchemaPath) {
@@ -388,15 +395,23 @@ export class Installer {
                     file: path.join(this.detected.rootPath, 'cdk/src/index.ts'),
                     find: /\{\{ relativeGqlSchemaPath \}\}/g,
                     replace: path.relative(
-                        path.join(this.detected.rootPath, 'cdk/src'), 
+                        this.detected.rootPath, 
                         path.join(path.dirname(this.userChoices.prismaSchemaPath), 'generated/prisma-appsync/schema.gql')
+                    ),
+                })
+                this.installConfig.injects.push({
+                    file: path.join(this.detected.rootPath, 'cdk/src/index.ts'),
+                    find: /\{\{ relativePrismaSchemaPath \}\}/g,
+                    replace: path.relative(
+                        this.detected.rootPath, 
+                        this.userChoices.prismaSchemaPath
                     ),
                 })
                 this.installConfig.injects.push({
                     file: path.join(this.detected.rootPath, 'cdk/src/index.ts'),
                     find: /\{\{ relativeYmlResolversPath \}\}/g,
                     replace: path.relative(
-                        path.join(this.detected.rootPath, 'cdk/src'), 
+                        this.detected.rootPath, 
                         path.join(path.dirname(this.userChoices.prismaSchemaPath), 'generated/prisma-appsync/resolvers.yaml')
                     ),
                 })
@@ -430,6 +445,10 @@ export class Installer {
             }
 
             this.copy(clone.from, clone.to)
+
+            if (typeof clone.deleteSource === 'boolean' && clone.deleteSource === true) {
+                this.remove(clone.from)
+            }
         }
 
         // injects
@@ -551,6 +570,15 @@ export class Installer {
             } else {
                 fs.unlinkSync(abs)
             }
+        }
+    }
+
+    private remove(src: string) {
+        const stat = fs.lstatSync(src)
+        if (stat.isDirectory()){
+            this.removeDir(src)
+        } else {
+            fs.rmSync(src)
         }
     }
 

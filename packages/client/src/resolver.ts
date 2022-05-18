@@ -1,67 +1,76 @@
-import { PrismaClient, QueryParams, PrismaArgs, QueryBuilder } from './defs'
+import { Prisma } from '@prisma/client'
+import { PrismaClient, QueryParams, PrismaArgs, QueryBuilder, PrismaOperator } from './defs'
+import { merge } from './utils'
 
 /**
  *  #### Query Builder
  */
-export const queryBuilder: QueryBuilder = {
-    prismaGet: (prismaArgs: PrismaArgs) => ({
-        where: prismaArgs.where,
-        ...(prismaArgs.select && { select: prismaArgs.select }),
-    }),
-    prismaList: (prismaArgs: PrismaArgs) => ({
-        ...(prismaArgs.where && { where: prismaArgs.where }),
-        ...(prismaArgs.orderBy && { orderBy: prismaArgs.orderBy }),
-        ...(prismaArgs.select && { select: prismaArgs.select }),
-        ...(typeof prismaArgs.skip !== 'undefined' && { skip: prismaArgs.skip }),
-        ...(typeof prismaArgs.take !== 'undefined' && { take: prismaArgs.take }),
-    }),
-    prismaCount: (prismaArgs: PrismaArgs) => ({
-        ...(prismaArgs.where && { where: prismaArgs.where }),
-        ...(prismaArgs.orderBy && { orderBy: prismaArgs.orderBy }),
-        ...(prismaArgs.select && { select: prismaArgs.select }),
-        ...(typeof prismaArgs.skip !== 'undefined' && { skip: prismaArgs.skip }),
-        ...(typeof prismaArgs.take !== 'undefined' && { take: prismaArgs.take }),
-    }),
-    prismaCreate: (prismaArgs: PrismaArgs) => ({
-        data: prismaArgs.data,
-        ...(prismaArgs.select && { select: prismaArgs.select }),
-    }),
-    prismaCreateMany: (prismaArgs: PrismaArgs) => ({
-        data: prismaArgs.data,
-        ...(prismaArgs.skipDuplicates && { skipDuplicates: prismaArgs.skipDuplicates }),
-    }),
-    prismaUpdate: (prismaArgs: PrismaArgs) => ({
-        data: prismaArgs.data,
-        where: prismaArgs.where,
-        ...(prismaArgs.select && { select: prismaArgs.select }),
-    }),
-    prismaUpdateMany: (prismaArgs: PrismaArgs) => ({
-        data: prismaArgs.data,
-        where: prismaArgs.where,
-    }),
-    prismaUpsert: (prismaArgs: PrismaArgs) => ({
-        update: prismaArgs.data,
-        create: prismaArgs.data,
-        where: prismaArgs.where,
-        ...(prismaArgs.select && { select: prismaArgs.select }),
-    }),
-    prismaDelete: (prismaArgs: PrismaArgs) => ({
-        where: prismaArgs.where,
-        ...(prismaArgs.select && { select: prismaArgs.select }),
-    }),
-    prismaDeleteMany: (prismaArgs: PrismaArgs) => ({
-        where: prismaArgs.where,
-    }),
-    prismaWhere: (prismaArgs: PrismaArgs, filters: any | any[]) => {
-        if (!Array.isArray(filters)) filters = [filters]
-
-        filters.forEach((filter: any) => {
-            if (prismaArgs?.where?.AND) prismaArgs.where.AND.push(filter)
-            else if (prismaArgs?.where) prismaArgs.where = { AND: [prismaArgs.where, filter] }
-            else prismaArgs.where = filter
+ export function prismaQueryJoin(queries: PrismaArgs[], operators: PrismaOperator[]): PrismaArgs {
+    const prismaArgs: PrismaArgs = {}
+    
+    operators.forEach((operator: PrismaOperator) => {
+        queries.forEach((query: PrismaArgs) => {
+            if (query?.[operator]) {
+                if (operator === 'where') {
+                    if (prismaArgs[operator]?.AND) {
+                        prismaArgs[operator].AND.push(
+                            query[operator]
+                        )
+                    } else if (prismaArgs[operator]) {
+                        prismaArgs[operator] = {
+                            AND: [prismaArgs[operator], query[operator]]
+                        }
+                    } else {
+                        prismaArgs[operator] = query[operator]
+                    }
+                } else if (prismaArgs?.[operator]) {
+                    prismaArgs[operator] = merge(prismaArgs[operator], query[operator]) as never
+                } else {
+                    prismaArgs[operator] = query[operator] as never
+                }
+            }
         })
+    })
 
-        return prismaArgs
+    return prismaArgs
+}
+export const queryBuilder: QueryBuilder = {
+    prismaGet: (...prismaQueries: PrismaArgs[]) => {
+        return prismaQueryJoin(prismaQueries, ['where', 'select'])
+    },
+    prismaList: (...prismaQueries: PrismaArgs[]) => {
+        return prismaQueryJoin(prismaQueries, ['where', 'orderBy', 'select', 'skip', 'take'])
+    },
+    prismaCount: (...prismaQueries: PrismaArgs[]) => {
+        return prismaQueryJoin(prismaQueries, ['where', 'orderBy', 'select', 'skip', 'take'])
+    },
+    prismaCreate: (...prismaQueries: PrismaArgs[]) => {
+        return prismaQueryJoin(prismaQueries, ['data', 'select'])
+    },
+    prismaCreateMany: (...prismaQueries: PrismaArgs[]) => {
+        return prismaQueryJoin(prismaQueries, ['data', 'skipDuplicates'])
+    },
+    prismaUpdate: (...prismaQueries: PrismaArgs[]) => {
+        return prismaQueryJoin(prismaQueries, ['data', 'where', 'select'])
+    },
+    prismaUpdateMany: (...prismaQueries: PrismaArgs[]) => {
+        return prismaQueryJoin(prismaQueries, ['data', 'where'])
+    },
+    prismaUpsert: (...prismaQueries: PrismaArgs[]) => {
+        const prismaArgs = prismaQueryJoin(prismaQueries, ['data', 'where', 'select'])
+
+        return {
+            update: prismaArgs.data,
+            create: prismaArgs.data,
+            where: prismaArgs.where,
+            ...(prismaArgs.select && { select: prismaArgs.select }),
+        }
+    },
+    prismaDelete: (...prismaQueries: PrismaArgs[]) => {
+        return prismaQueryJoin(prismaQueries, ['where', 'select'])
+    },
+    prismaDeleteMany: (...prismaQueries: PrismaArgs[]) => {
+        return prismaQueryJoin(prismaQueries, ['where'])
     },
 }
 
