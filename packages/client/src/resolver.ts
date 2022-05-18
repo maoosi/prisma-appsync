@@ -1,4 +1,3 @@
-import { Prisma } from '@prisma/client'
 import { PrismaClient, QueryParams, PrismaArgs, QueryBuilder, PrismaOperator } from './defs'
 import { merge } from './utils'
 

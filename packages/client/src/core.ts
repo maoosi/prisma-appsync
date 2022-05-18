@@ -208,7 +208,7 @@ export class PrismaAppSync {
 
                 QueryParams.prismaArgs = prismaQueryJoin(
                     [QueryParams.prismaArgs, { where: shieldAuth.prismaFilter }],
-                    ['where', 'data', 'create', 'update', 'orderBy', 'skip', 'take', 'skipDuplicates', 'select']
+                    ['where', 'data', 'orderBy', 'skip', 'take', 'skipDuplicates', 'select']
                 )
 
                 debug('QueryParams after adding Shield filters:', inspect(QueryParams))

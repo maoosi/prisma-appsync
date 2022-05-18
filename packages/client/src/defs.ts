@@ -7,7 +7,6 @@ import type {
     AppSyncIdentityOIDC,
     AppSyncIdentityLambda,
 } from 'aws-lambda'
-import { propertyOf } from 'lodash'
 
 // Prisma-AppSync Client Types
 
