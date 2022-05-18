@@ -33,7 +33,7 @@ export {
     AWS_LAMBDA,
     OPENID_CONNECT,
     AppSyncResolverHandler,
-    AppSyncResolverEvent
+    AppSyncResolverEvent,
 } from './defs'
 
 const Helpers = {

@@ -1,0 +1,49 @@
+{
+    "todohighlight.include": ["**/*.js", "**/*.ts", "**/*.spec.ts", "**/*.md", "**/*.md"],
+    "files.eol": "\n",
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "editor.tabSize": 4,
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "eslint.validate": ["javascript", "typescript"],
+    "prettier.requireConfig": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true
+    },
+    "stylelint.configOverrides": {
+        "ignoreFiles": [
+            // All normal .cjs files
+            "**/*.cjs",
+            // .cjs files starting with a dot eg. .eslintrc.cjs
+            "**/.*.cjs"
+        ]
+    },
+    "workbench.view.alwaysShowHeaderActions": true,
+    "[markdown]": {
+        "editor.formatOnSave": false
+    },
+    "[prisma]": {
+        "editor.defaultFormatter": "Prisma.prisma",
+        "editor.formatOnSave": true
+    },
+    "workbench.colorCustomizations": {
+        "activityBar.activeBackground": "#4b38f9",
+        "activityBar.activeBorder": "#f95745",
+        "activityBar.background": "#4b38f9",
+        "activityBar.foreground": "#e7e7e7",
+        "activityBar.inactiveForeground": "#e7e7e799",
+        "activityBarBadge.background": "#f95745",
+        "activityBarBadge.foreground": "#15202b",
+        "sash.hoverBorder": "#4b38f9",
+        "statusBar.background": "#1f08f6",
+        "statusBar.foreground": "#e7e7e7",
+        "statusBarItem.hoverBackground": "#4b38f9",
+        "statusBarItem.remoteBackground": "#1f08f6",
+        "statusBarItem.remoteForeground": "#e7e7e7",
+        "titleBar.activeBackground": "#1f08f6",
+        "titleBar.activeForeground": "#e7e7e7",
+        "titleBar.inactiveBackground": "#1f08f699",
+        "titleBar.inactiveForeground": "#e7e7e799"
+    },
+    "peacock.color": "#1f08f6"
+}

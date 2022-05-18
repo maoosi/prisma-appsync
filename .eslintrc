@@ -1,0 +1,27 @@
+{
+    "root": true,
+    "extends": ["alloy", "alloy/typescript"],
+    "plugins": ["prettier"],
+    "env": {
+        "browser": false,
+        "node": true
+    },
+    "globals": {
+        "$": true,
+        "chalk": true
+    },
+    "rules": {
+        "no-unused-vars": "off",
+        "no-console": "off",
+        "comma-dangle": "off",
+        "brace-style": "off",
+        "no-param-reassign": "off",
+        "radix": ["error", "as-needed"],
+        "indent": "off",
+        "@typescript-eslint/prefer-for-of": "off",
+        "@typescript-eslint/no-unused-vars": "off",
+        "@typescript-eslint/indent": ["error", 4, { "offsetTernaryExpressions": true }],
+        "@typescript-eslint/explicit-member-accessibility": "off",
+        "ignoredNodes": ["Decorator"]
+    }
+}

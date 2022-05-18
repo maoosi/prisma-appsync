@@ -69,13 +69,13 @@ export function parseError(error: Error): CustomError {
 
 export function inspect(data: any): string {
     return nodeInspect(data, {
-        compact: true, 
-        depth: 5, 
-        breakLength: 80, 
-        maxStringLength: 300, 
+        compact: true,
+        depth: 5,
+        breakLength: 80,
+        maxStringLength: 300,
         ...(!process.env.LAMBDA_TASK_ROOT && {
-            colors: true
-        })
+            colors: true,
+        }),
     })
 }
 

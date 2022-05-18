@@ -15,21 +15,23 @@ function createServer({
     headers,
     authorization,
     port,
-    watch
+    watch,
 }: {
     schema: string
     lambdaHandler: (...args: any) => Promise<any>
-    headers?: any,
-    authorization?: Authorization,
+    headers?: any
+    authorization?: Authorization
     port?: number
     watch?: {
-        [fileOrDir:string]: (
-            { evt, name, exec }: { 
-                evt: any,
-                name: string,
-                exec: (command: string, options?: { cwd?: string}) => Promise<{ err: any, strdout: any, stderr: any }>,
-            }
-        ) => Promise<void>
+        [fileOrDir: string]: ({
+            evt,
+            name,
+            exec,
+        }: {
+            evt: any
+            name: string
+            exec: (command: string, options?: { cwd?: string }) => Promise<{ err: any; strdout: any; stderr: any }>
+        }) => Promise<void>
     }
 }) {
     const scalars = readFileSync(join(__dirname, 'gql/scalars.gql'), { encoding: 'utf-8' })
@@ -37,7 +39,7 @@ function createServer({
     const generatedSchema = readFileSync(schema, { encoding: 'utf-8' })
     const gqlSchema = buildSchema(`${scalars}\n${directives}\n${generatedSchema}`)
     const app = express()
-    
+
     app.use(
         '/graphql',
         graphqlHTTP(async (request, response, graphQLParams) => ({
@@ -48,30 +50,30 @@ function createServer({
                 pretty: true,
                 defaultQuery: [
                     `query listPosts {`,
-                        `\tlistPosts {`,
-                            `\t\tid`,
-                            `\t\ttitle`,
-                        `\t}`,
+                    `\tlistPosts {`,
+                    `\t\tid`,
+                    `\t\ttitle`,
+                    `\t}`,
                     `}`,
                     ``,
                     `mutation createPost {`,
-                        `\tcreatePost(data:{ title: "My first post" }) {`,
-                            `\t\ttitle`,
-                        `\t}`,
+                    `\tcreatePost(data:{ title: "My first post" }) {`,
+                    `\t\ttitle`,
+                    `\t}`,
                     `}`,
                 ].join('\n'),
             },
         })),
     )
-    
+
     const portNumber = port || 4000
 
     app.listen(portNumber)
     console.log(`Running a GraphQL API server at: http://localhost:${portNumber}/graphql`)
-    
+
     const getRootValue = async (request: any, response: any, graphQLParams: any) => {
         let rootValue: any = {}
-    
+
         if (graphQLParams.query && graphQLParams.operationName !== 'IntrospectionQuery') {
             const identity = mockIdentity(authorization || null, {
                 sourceIp: request?.headers['x-forwarded-for'] || request?.socket?.remoteAddress,
@@ -81,16 +83,16 @@ function createServer({
             })
 
             request.headers = {
-                ...request?.headers || {},
-                headers
+                ...(request?.headers || {}),
+                headers,
             }
-    
+
             const event = mockLambdaEvent({
                 request,
                 graphQLParams,
                 identity,
             })
-    
+
             rootValue[event.info.fieldName] = async () =>
                 await lambdaHandler(
                     event,
@@ -113,39 +115,37 @@ function createServer({
                     () => {},
                 )
         }
-    
+
         return rootValue
     }
-    
+
     if (watch) {
-        const exec = (
-            command: string,
-            options?: { cwd?: string}
-        ): Promise<{ err: any, strdout: any, stderr: any }> => new Promise((resolve) => {
-            nodeExec(
-                options?.cwd ? `cd ${options.cwd} && ${command}` : command, 
-                (err:any, strdout:any, stderr:any) => {
-                    if (err) console.error(stderr)
-                    else if (strdout) console.log(strdout)
-                    resolve({ err, strdout, stderr })
-                }
-            )
-        })
+        const exec = (command: string, options?: { cwd?: string }): Promise<{ err: any; strdout: any; stderr: any }> =>
+            new Promise((resolve) => {
+                nodeExec(
+                    options?.cwd ? `cd ${options.cwd} && ${command}` : command,
+                    (err: any, strdout: any, stderr: any) => {
+                        if (err) console.error(stderr)
+                        else if (strdout) console.log(strdout)
+                        resolve({ err, strdout, stderr })
+                    },
+                )
+            })
 
         for (const fileOrDir in watch) {
             if (Object.prototype.hasOwnProperty.call(watch, fileOrDir)) {
                 const func = watch[fileOrDir]
 
                 nodeWatch(
-                    fileOrDir, 
+                    fileOrDir,
                     {
                         recursive: true,
                         delay: 1000,
-                        filter: f => !/node_modules/.test(f)
+                        filter: (f) => !/node_modules/.test(f),
                     },
                     (evt, name) => {
                         func({ exec, evt, name })
-                    }
+                    },
                 )
             }
         }

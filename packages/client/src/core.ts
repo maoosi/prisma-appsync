@@ -8,7 +8,7 @@ import {
     AfterHookParams,
     BatchActionsList,
     DebugTestingKey,
-    InjectedConfig
+    InjectedConfig,
 } from './defs'
 import { parseError, inspect, debug, CustomError } from './inspector'
 import { getShieldAuthorization, getDepth, clarify, runHooks } from './guard'
@@ -20,7 +20,7 @@ import * as queries from './resolver'
 /**
  * ##  Auto-injected at generation time
  */
-const injectedConfig:InjectedConfig = {} //! inject:config
+const injectedConfig: InjectedConfig = {} //! inject:config
 
 /**
  * ##  Prisma-AppSync Client ʲˢ
@@ -95,17 +95,16 @@ export class PrismaAppSync {
         if (injectedConfig?.modelsMapping) {
             this.options.modelsMapping = injectedConfig.modelsMapping
         } else if (process?.env?.PRISMA_APPSYNC_INJECTED_CONFIG) {
-            try { this.options.modelsMapping = JSON.parse(process.env.PRISMA_APPSYNC_INJECTED_CONFIG).modelsMapping }
-            catch {}
+            try {
+                this.options.modelsMapping = JSON.parse(process.env.PRISMA_APPSYNC_INJECTED_CONFIG).modelsMapping
+            } catch {}
         }
 
         // Make sure injected config isn't empty
         if (Object.keys(this.options.modelsMapping).length === 0) {
-            throw new CustomError(
-                'Issue with auto-injected models mapping config.', {
-                    type: 'INTERNAL_SERVER_ERROR',
-                },
-            )
+            throw new CustomError('Issue with auto-injected models mapping config.', {
+                type: 'INTERNAL_SERVER_ERROR',
+            })
         }
 
         // Set ENV variable to indicate if debug logs should print
@@ -160,11 +159,14 @@ export class PrismaAppSync {
         let result: any = null
 
         try {
-            debug(`Resolving API request w/ event (shortened):`, inspect({
-                arguments: resolveParams.event.arguments,
-                identity: resolveParams.event.identity,
-                info: resolveParams.event.info,
-            }))
+            debug(
+                `Resolving API request w/ event (shortened):`,
+                inspect({
+                    arguments: resolveParams.event.arguments,
+                    identity: resolveParams.event.identity,
+                    info: resolveParams.event.info,
+                }),
+            )
 
             // Adapter :: parse appsync event
             let QueryParams = parseEvent(resolveParams.event, this.options, resolveParams.resolvers)
@@ -208,7 +210,7 @@ export class PrismaAppSync {
 
                 QueryParams.prismaArgs = prismaQueryJoin(
                     [QueryParams.prismaArgs, { where: shieldAuth.prismaFilter }],
-                    ['where', 'data', 'orderBy', 'skip', 'take', 'skipDuplicates', 'select']
+                    ['where', 'data', 'orderBy', 'skip', 'take', 'skipDuplicates', 'select'],
                 )
 
                 debug('QueryParams after adding Shield filters:', inspect(QueryParams))
@@ -281,7 +283,7 @@ export class PrismaAppSync {
 
             // Guard: get and run all after hooks functions matching query
             if (resolveParams?.hooks) {
-                const q:AfterHookParams = await runHooks({
+                const q: AfterHookParams = await runHooks({
                     when: 'after',
                     hooks: resolveParams.hooks,
                     prismaClient: this.prismaClient,

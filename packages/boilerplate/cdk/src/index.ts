@@ -24,11 +24,11 @@ new AppSyncStack(app, kebabCase('{{ projectName }}'), {
             forceDockerBundling: true,
             commandHooks: {
                 beforeBundling(inputDir: string, outputDir: string): string[] {
-                    return [
-                        `cp ${inputDir}/{{ relativePrismaSchemaPath }} ${outputDir}`,
-                    ]
+                    return [`cp ${inputDir}/{{ relativePrismaSchemaPath }} ${outputDir}`]
                 },
-                beforeInstall() { return [] },
+                beforeInstall() {
+                    return []
+                },
                 afterBundling() {
                     return [
                         `npx prisma generate`,
@@ -47,12 +47,12 @@ new AppSyncStack(app, kebabCase('{{ projectName }}'), {
             environment: {
                 NODE_ENV: 'production',
             },
-        }
+        },
     },
     authorizationConfig: {
         defaultAuthorization: {
             authorizationType: AuthorizationType.API_KEY,
-        }
+        },
     },
 })
 

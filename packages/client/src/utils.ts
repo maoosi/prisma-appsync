@@ -232,7 +232,7 @@ export function traverse(
  * @param {Function} iteratee
  * @returns Promise<any>
  */
- export async function traverseAsync(
+export async function traverseAsync(
     element: any,
     iteratee: (value: any, key?: string) => Promise<{ value: any; excludeChilds?: boolean }>,
 ): Promise<any> {

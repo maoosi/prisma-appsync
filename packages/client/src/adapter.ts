@@ -225,10 +225,9 @@ export function getContext({
         if (typeof options?.modelsMapping?.[context.model] !== 'undefined') {
             context.model = options.modelsMapping[context.model]
         } else {
-            throw new CustomError(
-                'Issue parsing auto-injected models mapping config.',
-                { type: 'INTERNAL_SERVER_ERROR' },
-            )
+            throw new CustomError('Issue parsing auto-injected models mapping config.', {
+                type: 'INTERNAL_SERVER_ERROR',
+            })
         }
 
         context.alias = getActionAlias({ action: context.action })

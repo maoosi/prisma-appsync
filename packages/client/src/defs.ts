@@ -23,7 +23,7 @@ export type Options = Required<PrismaAppSyncOptionsType> & {
 }
 
 export type InjectedConfig = {
-    modelsMapping?:{ [modelVariant:string]: string },
+    modelsMapping?: { [modelVariant: string]: string }
     operations?: string
 }
 
@@ -159,7 +159,9 @@ export type HooksParameters<
     Operations extends string,
     CustomResolvers extends string,
 > = {
-    [matcher in HooksParameter<HookType, Operations, CustomResolvers>]?: (props: HooksProps[HookType]) => HooksReturn[HookType]
+    [matcher in HooksParameter<HookType, Operations, CustomResolvers>]?: (
+        props: HooksProps[HookType],
+    ) => HooksReturn[HookType]
 }
 
 export type Hooks<Operations extends string, CustomResolvers extends string> =

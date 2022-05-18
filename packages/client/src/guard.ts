@@ -7,7 +7,7 @@ import {
     DebugTestingKey,
     ActionsList,
     BatchActionsList,
-    Options
+    Options,
 } from './defs'
 import { merge, encode, decode, filterXSS, isMatchingGlob, traverse, upperFirst } from './utils'
 import { CustomError } from './inspector'
@@ -87,26 +87,22 @@ export function getShieldAuthorization({
 
     if (options?.modelsMapping && modelSingular) {
         const models: any[] = Object.keys(options.modelsMapping)
-        const modelPluralMatch = models
-            .find((key:string) => {
-                return options.modelsMapping[key] === modelSingular.toLowerCase() && key !== upperFirst(modelSingular)
-            })
+        const modelPluralMatch = models.find((key: string) => {
+            return options.modelsMapping[key] === modelSingular.toLowerCase() && key !== upperFirst(modelSingular)
+        })
         if (modelPluralMatch) modelPlural = modelPluralMatch
     }
 
     const shieldPaths = paths.map((path: string) => {
         if (context.model) {
-            BatchActionsList.forEach((batchAction:string) => {
+            BatchActionsList.forEach((batchAction: string) => {
                 path = path.replace(
-                    `${batchAction}/${modelSingular.toLowerCase()}`, 
-                    `${batchAction}${upperFirst(modelPlural)}`
+                    `${batchAction}/${modelSingular.toLowerCase()}`,
+                    `${batchAction}${upperFirst(modelPlural)}`,
                 )
             })
-            ActionsList.forEach((action:string) => {
-                path = path.replace(
-                    `${action}/${modelSingular.toLowerCase()}`, 
-                    `${action}${upperFirst(modelSingular)}`
-                )
+            ActionsList.forEach((action: string) => {
+                path = path.replace(`${action}/${modelSingular.toLowerCase()}`, `${action}${upperFirst(modelSingular)}`)
             })
         }
         return path

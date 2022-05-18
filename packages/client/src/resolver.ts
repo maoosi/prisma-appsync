@@ -4,20 +4,18 @@ import { merge } from './utils'
 /**
  *  #### Query Builder
  */
- export function prismaQueryJoin(queries: PrismaArgs[], operators: PrismaOperator[]): PrismaArgs {
+export function prismaQueryJoin(queries: PrismaArgs[], operators: PrismaOperator[]): PrismaArgs {
     const prismaArgs: PrismaArgs = {}
-    
+
     operators.forEach((operator: PrismaOperator) => {
         queries.forEach((query: PrismaArgs) => {
             if (query?.[operator]) {
                 if (operator === 'where') {
                     if (prismaArgs[operator]?.AND) {
-                        prismaArgs[operator].AND.push(
-                            query[operator]
-                        )
+                        prismaArgs[operator].AND.push(query[operator])
                     } else if (prismaArgs[operator]) {
                         prismaArgs[operator] = {
-                            AND: [prismaArgs[operator], query[operator]]
+                            AND: [prismaArgs[operator], query[operator]],
                         }
                     } else {
                         prismaArgs[operator] = query[operator]
