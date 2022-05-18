@@ -192,11 +192,11 @@ export { PrismaClient }
 export type PrismaArgs = {
     where?: any
     data?: any
-    orderBy?: any
-    skip?: number
-    take?: number
-    skipDuplicates?: boolean
     select?: any
+    orderBy?: any
+    skip?: number | undefined
+    take?: number | undefined
+    skipDuplicates?: boolean | undefined
 }
 
 export type PrismaOperator = keyof Required<PrismaArgs>
