@@ -6,6 +6,8 @@ import { parseEnvValue } from '@prisma/sdk'
 // Read Prisma AppSync version
 const generatorVersion = require('../../../package.json').version
 
+console.log('generator')
+
 // Prisma AppSync Generator Handler
 generatorHandler({
     onManifest() {
@@ -17,12 +19,12 @@ generatorHandler({
         }
     },
     async onGenerate(options: any) {
+        console.log(options)
+
         if (options.generator.output) {
             try {
                 // Is debug mode enabled?
-                const debug: boolean = typeof options.generator.debug === 'boolean'
-                    ? options.generator.debug
-                    : false
+                const debug: boolean = typeof options.generator.debug === 'boolean' ? options.generator.debug : false
 
                 if (debug) {
                     console.log(`[Prisma-AppSync] Generator config: `, options.generator.config)
@@ -43,7 +45,10 @@ generatorHandler({
                 })
 
                 if (debug) {
-                    console.log(`[Prisma-AppSync] Parsed schema config: `, JSON.stringify(compiler.getConfig(), null, 2))
+                    console.log(
+                        `[Prisma-AppSync] Parsed schema config: `,
+                        JSON.stringify(compiler.getConfig(), null, 2),
+                    )
                 }
 
                 console.log(`[Prisma-AppSync] Generating client.`)

@@ -77,17 +77,32 @@ export type QueryParams = {
 
 export type Authorization = typeof Authorizations[keyof typeof Authorizations] | null
 
+export type PrismaGet = Pick<Required<PrismaArgs>, 'where'> & Pick<PrismaArgs, 'select'>
+export type PrismaList = Pick<PrismaArgs, 'where' | 'orderBy' | 'select' | 'skip' | 'take'>
+export type PrismaCount = Pick<PrismaArgs, 'where' | 'orderBy' | 'select' | 'skip' | 'take'>
+export type PrismaCreate = Pick<Required<PrismaArgs>, 'data'> & Pick<PrismaArgs, 'select'>
+export type PrismaCreateMany = Pick<Required<PrismaArgs>, 'data'> & Pick<PrismaArgs, 'skipDuplicates'>
+export type PrismaUpdate = Pick<Required<PrismaArgs>, 'data' | 'where'> & Pick<PrismaArgs, 'select'>
+export type PrismaUpdateMany = Pick<Required<PrismaArgs>, 'data' | 'where'>
+export type PrismaUpsert = Pick<Required<PrismaArgs>, 'where'> &
+    Pick<PrismaArgs, 'select'> & {
+        update: any
+        create: any
+    }
+export type PrismaDelete = Pick<Required<PrismaArgs>, 'where'> & Pick<PrismaArgs, 'select'>
+export type PrismaDeleteMany = Pick<Required<PrismaArgs>, 'where'>
+
 export type QueryBuilder = {
-    prismaGet: (...prismaArgs: PrismaArgs[]) => PrismaArgs
-    prismaList: (...prismaArgs: PrismaArgs[]) => PrismaArgs
-    prismaCount: (...prismaArgs: PrismaArgs[]) => PrismaArgs
-    prismaCreate: (...prismaArgs: PrismaArgs[]) => PrismaArgs
-    prismaCreateMany: (...prismaArgs: PrismaArgs[]) => PrismaArgs
-    prismaUpdate: (...prismaArgs: PrismaArgs[]) => PrismaArgs
-    prismaUpdateMany: (...prismaArgs: PrismaArgs[]) => PrismaArgs
-    prismaUpsert: (...prismaArgs: PrismaArgs[]) => PrismaArgs
-    prismaDelete: (...prismaArgs: PrismaArgs[]) => PrismaArgs
-    prismaDeleteMany: (...prismaArgs: PrismaArgs[]) => PrismaArgs
+    prismaGet: (...prismaArgs: PrismaArgs[]) => PrismaGet
+    prismaList: (...prismaArgs: PrismaArgs[]) => PrismaList
+    prismaCount: (...prismaArgs: PrismaArgs[]) => PrismaCount
+    prismaCreate: (...prismaArgs: PrismaArgs[]) => PrismaCreate
+    prismaCreateMany: (...prismaArgs: PrismaArgs[]) => PrismaCreateMany
+    prismaUpdate: (...prismaArgs: PrismaArgs[]) => PrismaUpdate
+    prismaUpdateMany: (...prismaArgs: PrismaArgs[]) => PrismaUpdateMany
+    prismaUpsert: (...prismaArgs: PrismaArgs[]) => PrismaUpsert
+    prismaDelete: (...prismaArgs: PrismaArgs[]) => PrismaDelete
+    prismaDeleteMany: (...prismaArgs: PrismaArgs[]) => PrismaDeleteMany
 }
 
 export type QueryParamsCustom = QueryParams & {

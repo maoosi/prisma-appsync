@@ -20,8 +20,14 @@
         "indent": "off",
         "@typescript-eslint/prefer-for-of": "off",
         "@typescript-eslint/no-unused-vars": "off",
-        "@typescript-eslint/indent": ["error", 4, { "offsetTernaryExpressions": true }],
-        "@typescript-eslint/explicit-member-accessibility": "off",
-        "ignoredNodes": ["Decorator"]
+        "@typescript-eslint/indent": [
+            "error",
+            4,
+            {
+                "offsetTernaryExpressions": true,
+                "ignoredNodes": ["TemplateLiteral *", "TSTypeParameterInstantiation"]
+            }
+        ],
+        "@typescript-eslint/explicit-member-accessibility": "off"
     }
 }

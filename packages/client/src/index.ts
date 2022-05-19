@@ -1,4 +1,3 @@
-import { queryBuilder } from './resolver'
 import {
     merge,
     clone,
@@ -18,6 +17,7 @@ import {
 
 export { PrismaAppSync } from './core'
 export { CustomError, log } from './inspector'
+export { queryBuilder } from './resolver'
 export {
     QueryParams,
     QueryParamsCustom,
@@ -36,8 +36,7 @@ export {
     AppSyncResolverEvent,
 } from './defs'
 
-const Helpers = {
-    queryBuilder,
+const _ = {
     merge,
     clone,
     decode,
@@ -54,4 +53,4 @@ const Helpers = {
     replaceAll,
 }
 
-export { Helpers }
+export { _ }

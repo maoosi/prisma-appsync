@@ -49,7 +49,6 @@ export default function (identity: Authorization, opts?: mockOptions): Identity 
                 iat: 1630837279,
                 gty: 'string',
             },
-            sourceIp: [opts?.sourceIp || 'undefined'],
             issuer: 'string',
             sub: opts?.sub || 'undefined',
         }

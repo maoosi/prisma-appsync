@@ -1,4 +1,4 @@
-import { AppSyncEvent, Identity, Helpers } from '../../../client/src'
+import { AppSyncEvent, Identity, _ } from '../../../client/src'
 import { graphQlQueryToJson } from '../gql-query-to-json'
 
 export default function ({
@@ -24,7 +24,7 @@ export default function ({
         delete selectionSet.__args
     }
 
-    const selectionSetList = Object.keys(Helpers.dotate(selectionSet)).map((selection) => selection.replace(/\./g, '/'))
+    const selectionSetList = Object.keys(_.dotate(selectionSet)).map((selection) => selection.replace(/\./g, '/'))
 
     selectionSetList.unshift('__typename')
 
@@ -40,8 +40,8 @@ export default function ({
             selectionSetGraphQL,
         },
         request: request,
-        prev: { result: null },
-        stash: null,
+        prev: { result: {} },
+        stash: {},
     }
 
     return event
