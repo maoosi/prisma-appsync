@@ -294,7 +294,7 @@ export class PrismaAppSync {
             }
         } catch (error) {
             // Return error
-            result = Promise.reject(parseError(error as Error))
+            return Promise.reject(parseError(error as Error))
         }
 
         // Guard :: clarify result (decode html)

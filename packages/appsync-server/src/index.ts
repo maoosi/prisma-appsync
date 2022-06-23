@@ -18,7 +18,7 @@ function createServer({
     watch,
 }: {
     schema: string
-    lambdaHandler: (...args: any) => Promise<any>
+    lambdaHandler: any
     headers?: any
     authorization?: Authorization
     port?: number
@@ -84,7 +84,7 @@ function createServer({
 
             request.headers = {
                 ...(request?.headers || {}),
-                headers,
+                ...headers,
             }
 
             const event = mockLambdaEvent({

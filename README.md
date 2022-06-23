@@ -19,7 +19,7 @@
 - **Support AppSync authorization modes** (API key, IAM, Cognito, Lambda, OpenID).
 - **Built-in Shield** to easily implement fine-grained access control.
 - **Errors handling and logging system** for easy debugging.
-- **XSS data sanitisation** by default.
+- **XSS data sanitisation, query depth controls and rate-limiting** by default.
 
 ## 📓 Documentation
 

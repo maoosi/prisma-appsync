@@ -34,7 +34,7 @@ new AppSyncStack(app, kebabCase('{{ projectName }}'), {
                         `npx prisma generate`,
                         'rm -rf generated',
 
-                        // yarn + npm
+                        // npm + yarn 1.x
                         'rm -rf node_modules/@prisma/engines',
                         'rm -rf node_modules/@prisma/client/node_modules',
                         'rm -rf node_modules/.bin',

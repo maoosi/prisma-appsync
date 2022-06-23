@@ -6,8 +6,6 @@ import { parseEnvValue } from '@prisma/sdk'
 // Read Prisma AppSync version
 const generatorVersion = require('../../../package.json').version
 
-console.log('generator')
-
 // Prisma AppSync Generator Handler
 generatorHandler({
     onManifest() {
@@ -19,8 +17,6 @@ generatorHandler({
         }
     },
     async onGenerate(options: any) {
-        console.log(options)
-
         if (options.generator.output) {
             try {
                 // Is debug mode enabled?
