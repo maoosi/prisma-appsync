@@ -3,14 +3,11 @@ import { PrismaAppSync } from '@client'
 import mockIdentity from '@appsync-server/mocks/identity'
 import mockLambdaEvent from '@appsync-server/mocks/lambda-event'
 import { Authorizations, Actions, ActionsAliases } from '@client/defs'
-import { Prisma } from '@prisma/client'
 
 process.env.PRISMA_APPSYNC_TESTING = 'true'
 process.env.PRISMA_APPSYNC_INJECTED_CONFIG = JSON.stringify({
     modelsMapping: { Post: 'post', Posts: 'post' },
 })
-
-const Models = Prisma.ModelName
 
 function mockAppSyncEvent(operationName: string, query: string) {
     return mockLambdaEvent({
@@ -219,7 +216,7 @@ describe('CLIENT #core', () => {
                 context: {
                     action: Actions.get,
                     alias: ActionsAliases.access,
-                    model: Models.Post.toLowerCase(),
+                    model: 'post',
                 },
                 fields: ['title', 'author/username'],
                 identity: {},

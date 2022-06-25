@@ -1,4 +1,4 @@
-import { PrismaClient, ShieldAuthorization, Shield, Context, QueryParams } from './defs';
+import { PrismaClient, ShieldAuthorization, Shield, Context, QueryParams, Options } from './defs';
 /**
  * #### Sanitize data (parse xss + encode html).
  *
@@ -22,10 +22,11 @@ export declare function clarify(data: any): any;
  * @param {Context} options.context
  * @returns ShieldAuthorization
  */
-export declare function getShieldAuthorization({ shield, paths, context, }: {
+export declare function getShieldAuthorization({ shield, paths, context, options, }: {
     shield: Shield;
     paths: string[];
     context: Context;
+    options: Options;
 }): ShieldAuthorization;
 /**
  * #### Returns GraphQL query depth for any given Query.

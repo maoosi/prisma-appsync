@@ -1,7 +1,8 @@
-import { PrismaClient, QueryParams, QueryBuilder } from './defs';
+import { PrismaClient, QueryParams, PrismaArgs, QueryBuilder, PrismaOperator } from './defs';
 /**
  *  #### Query Builder
  */
+export declare function prismaQueryJoin<T>(queries: PrismaArgs[], operators: PrismaOperator[]): T;
 export declare const queryBuilder: QueryBuilder;
 /**
  *  #### Query :: Find Unique

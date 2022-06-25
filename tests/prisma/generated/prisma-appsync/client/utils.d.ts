@@ -93,6 +93,16 @@ export declare function isUndefined(element: any): boolean;
  */
 export declare function lowerFirst(str: string): string;
 /**
+ * #### Return string with first letter uppercase.
+ *
+ * @example upperFirst("postOffice")
+ * // returns 'PostOffice'
+ *
+ * @param {string} str
+ * @returns string
+ */
+export declare function upperFirst(str: string): string;
+/**
  * #### Return true if element is an object
  *
  * @example const isObj = isObject(element)

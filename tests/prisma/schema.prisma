@@ -9,7 +9,7 @@ generator client {
 }
 
 generator appsync {
-  provider = "../../dist/generator.js"
+  provider = "./dist/generator.js"
 
   // optional params
   debug            = true

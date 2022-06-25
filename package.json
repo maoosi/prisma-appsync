@@ -14,7 +14,10 @@
         "dev": "zx scripts/dev.mjs",
         "cleans": "zx scripts/cleans.mjs",
         "publish:preview": "zx scripts/preview.mjs",
-        "publish:latest": "zx scripts/publish.mjs"
+        "publish:latest": "zx scripts/publish.mjs",
+        "docs:dev": "vitepress dev docs",
+        "docs:build": "vitepress build docs",
+        "docs:serve": "vitepress serve docs"
     },
     "engines": {
         "node": ">=14",
@@ -73,6 +76,7 @@
         "typescript": "^4.5.4",
         "vite": "^2.9.5",
         "vite-tsconfig-paths": "^3.4.1",
+        "vitepress": "1.0.0-alpha.4",
         "vitest": "^0.7.13",
         "wait-on": "^6.0.1",
         "xss": "^1.0.10"

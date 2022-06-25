@@ -3,9 +3,6 @@ import { testEach } from './_helpers'
 import * as queries from '@client/resolver'
 import { QueryParams, Authorizations, Actions, ActionsAliases } from '@client/defs'
 import mockIdentity from '@appsync-server/mocks/identity'
-import { Prisma } from '@prisma/client'
-
-const Models = Prisma.ModelName
 
 process.env.PRISMA_APPSYNC_TESTING = 'true'
 
@@ -23,7 +20,7 @@ describe('CLIENT #queries', () => {
         context: {
             action: Actions.get,
             alias: ActionsAliases.access,
-            model: Models.Post,
+            model: 'post',
         },
         prismaArgs: {
             data: { title: 'Hello World' },

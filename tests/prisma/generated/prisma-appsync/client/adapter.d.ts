@@ -1,13 +1,13 @@
-import { Options, AppsyncEvent, QueryParams, Action, Model, Context, PrismaArgs, ActionsAlias, Operation, Identity, Authorization, GraphQLType } from './defs';
+import { Options, AppSyncEvent, QueryParams, Action, Context, PrismaArgs, ActionsAlias, Identity, Authorization, GraphQLType } from './defs';
 /**
  * #### Parse AppSync direct resolver `event` and returns Query Params.
  *
- * @param  {AppsyncEvent} appsyncEvent - AppSync event received in Lambda.
+ * @param  {AppSyncEvent} appsyncEvent - AppSync event received in Lambda.
  * @param  {Required<PrismaAppSyncOptionsType>} options - PrismaAppSync Client options.
  * @param  {any|null} customResolvers? - Custom Resolvers.
  * @returns `{ type, operation, context, fields, paths, args, prismaArgs, authorization, identity }` - QueryParams
  */
-export declare function parseEvent(appsyncEvent: AppsyncEvent, options: Options, customResolvers?: any | null): QueryParams;
+export declare function parseEvent(appsyncEvent: AppSyncEvent, options: Options, customResolvers?: any | null): QueryParams;
 /**
  * #### Convert undefined's to NULL's.
  *
@@ -19,13 +19,13 @@ export declare function addNullables(data: any): any;
  * #### Returns authorization and identity.
  *
  * @param {any} options
- * @param {AppsyncEvent} options.appsyncEvent - AppSync event received in Lambda.
+ * @param {AppSyncEvent} options.appsyncEvent - AppSync event received in Lambda.
  * @returns `{ authorization, identity }`
  *
  * https://docs.aws.amazon.com/appsync/latest/devguide/resolver-context-reference.html#aws-appsync-resolver-context-reference-identity
  */
 export declare function getAuthIdentity({ appsyncEvent }: {
-    appsyncEvent: AppsyncEvent;
+    appsyncEvent: AppSyncEvent;
 }): {
     identity: Identity;
     authorization: Authorization;
@@ -35,13 +35,13 @@ export declare function getAuthIdentity({ appsyncEvent }: {
  *
  * @param  {any} options
  * @param  {any|null} options.customResolvers
- * @param  {Operation} options.operation
+ * @param  {string} options.operation
  * @param  {Options} options.options
  * @returns Context
  */
 export declare function getContext({ customResolvers, operation, options, }: {
     customResolvers?: any | null;
-    operation: Operation;
+    operation: string;
     options: Options;
 }): Context;
 /**
@@ -53,7 +53,7 @@ export declare function getContext({ customResolvers, operation, options, }: {
  */
 export declare function getOperation({ fieldName }: {
     fieldName: string;
-}): Operation;
+}): string;
 /**
  * #### Returns action (`get`, `list`, `create`, ...).
  *
@@ -62,7 +62,7 @@ export declare function getOperation({ fieldName }: {
  * @returns Action
  */
 export declare function getAction({ operation }: {
-    operation: Operation;
+    operation: string;
 }): Action;
 /**
  * #### Returns action alias (`access`, `create`, `modify`, `subscribe`).
@@ -85,7 +85,7 @@ export declare function getActionAlias({ action }: {
 export declare function getModel({ operation, action }: {
     operation: string;
     action: Action;
-}): Model;
+}): string;
 /**
  * #### Returns fields (`title`, `author`, ...).
  *

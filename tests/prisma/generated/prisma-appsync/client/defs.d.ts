@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import type { AppSyncResolverHandler, AppSyncResolverEvent, AppSyncIdentityIAM, AppSyncIdentityCognito, AppSyncIdentityOIDC, AppSyncIdentityLambda } from 'aws-lambda';
 export declare type PrismaAppSyncOptionsType = {
     connectionString?: string;
     sanitize?: boolean;
@@ -7,17 +8,23 @@ export declare type PrismaAppSyncOptionsType = {
     maxDepth?: number;
 };
 export declare type Options = Required<PrismaAppSyncOptionsType> & {
-    generatedConfig: any;
+    modelsMapping: any;
+};
+export declare type InjectedConfig = {
+    modelsMapping?: {
+        [modelVariant: string]: string;
+    };
+    operations?: string;
 };
 export declare type Action = typeof Actions[keyof typeof Actions] | string;
 export declare type ActionsAlias = typeof ActionsAliases[keyof typeof ActionsAliases] | 'custom' | null;
 export declare type ActionsAliasStr = keyof typeof ActionsAliases;
-export declare type Operation = `${Action}${Capitalize<Model>}`;
 export declare type Context = {
     action: Action;
     alias: ActionsAlias;
-    model: Model | null;
+    model: string | null;
 };
+export { AppSyncResolverHandler, AppSyncResolverEvent };
 /**
  * ### QueryParams
  *
@@ -41,7 +48,7 @@ export declare type Context = {
  */
 export declare type QueryParams = {
     type: GraphQLType;
-    operation: Operation | string;
+    operation: string;
     context: Context;
     fields: string[];
     paths: string[];
@@ -52,18 +59,30 @@ export declare type QueryParams = {
     headers: any;
 };
 export declare type Authorization = typeof Authorizations[keyof typeof Authorizations] | null;
+export declare type PrismaGet = Pick<Required<PrismaArgs>, 'where'> & Pick<PrismaArgs, 'select'>;
+export declare type PrismaList = Pick<PrismaArgs, 'where' | 'orderBy' | 'select' | 'skip' | 'take'>;
+export declare type PrismaCount = Pick<PrismaArgs, 'where' | 'orderBy' | 'select' | 'skip' | 'take'>;
+export declare type PrismaCreate = Pick<Required<PrismaArgs>, 'data'> & Pick<PrismaArgs, 'select'>;
+export declare type PrismaCreateMany = Pick<Required<PrismaArgs>, 'data'> & Pick<PrismaArgs, 'skipDuplicates'>;
+export declare type PrismaUpdate = Pick<Required<PrismaArgs>, 'data' | 'where'> & Pick<PrismaArgs, 'select'>;
+export declare type PrismaUpdateMany = Pick<Required<PrismaArgs>, 'data' | 'where'>;
+export declare type PrismaUpsert = Pick<Required<PrismaArgs>, 'where'> & Pick<PrismaArgs, 'select'> & {
+    update: any;
+    create: any;
+};
+export declare type PrismaDelete = Pick<Required<PrismaArgs>, 'where'> & Pick<PrismaArgs, 'select'>;
+export declare type PrismaDeleteMany = Pick<Required<PrismaArgs>, 'where'>;
 export declare type QueryBuilder = {
-    prismaGet: (prismaArgs: PrismaArgs) => any;
-    prismaList: (prismaArgs: PrismaArgs) => any;
-    prismaCount: (prismaArgs: PrismaArgs) => any;
-    prismaCreate: (prismaArgs: PrismaArgs) => any;
-    prismaCreateMany: (prismaArgs: PrismaArgs) => any;
-    prismaUpdate: (prismaArgs: PrismaArgs) => any;
-    prismaUpdateMany: (prismaArgs: PrismaArgs) => any;
-    prismaUpsert: (prismaArgs: PrismaArgs) => any;
-    prismaDelete: (prismaArgs: PrismaArgs) => any;
-    prismaDeleteMany: (prismaArgs: PrismaArgs) => any;
-    prismaWhere: (prismaArgs: PrismaArgs, filter: any) => PrismaArgs;
+    prismaGet: (...prismaArgs: PrismaArgs[]) => PrismaGet;
+    prismaList: (...prismaArgs: PrismaArgs[]) => PrismaList;
+    prismaCount: (...prismaArgs: PrismaArgs[]) => PrismaCount;
+    prismaCreate: (...prismaArgs: PrismaArgs[]) => PrismaCreate;
+    prismaCreateMany: (...prismaArgs: PrismaArgs[]) => PrismaCreateMany;
+    prismaUpdate: (...prismaArgs: PrismaArgs[]) => PrismaUpdate;
+    prismaUpdateMany: (...prismaArgs: PrismaArgs[]) => PrismaUpdateMany;
+    prismaUpsert: (...prismaArgs: PrismaArgs[]) => PrismaUpsert;
+    prismaDelete: (...prismaArgs: PrismaArgs[]) => PrismaDelete;
+    prismaDeleteMany: (...prismaArgs: PrismaArgs[]) => PrismaDeleteMany;
 };
 export declare type QueryParamsCustom = QueryParams & {
     prismaClient: PrismaClient;
@@ -112,12 +131,12 @@ export declare type HooksReturn = {
     before: Promise<BeforeHookParams>;
     after: Promise<AfterHookParams>;
 };
-export declare type HookPath<Models extends string, CustomResolvers> = `${ActionsAliasStr}/${Uncapitalize<Models>}` | CustomResolvers;
-export declare type HooksParameter<HookType extends 'before' | 'after', Models extends string, CustomResolvers extends string> = `${HookType}:${HookPath<Models, CustomResolvers>}` | `${HookType}:**`;
-export declare type HooksParameters<HookType extends 'before' | 'after', Models extends string, CustomResolvers extends string> = {
-    [matcher in HooksParameter<HookType, Models, CustomResolvers>]?: (props: HooksProps[HookType]) => HooksReturn[HookType];
+export declare type HookPath<Operations extends string, CustomResolvers> = Operations | CustomResolvers;
+export declare type HooksParameter<HookType extends 'before' | 'after', Operations extends string, CustomResolvers extends string> = `${HookType}:${HookPath<Operations, CustomResolvers>}` | `${HookType}:**`;
+export declare type HooksParameters<HookType extends 'before' | 'after', Operations extends string, CustomResolvers extends string> = {
+    [matcher in HooksParameter<HookType, Operations, CustomResolvers>]?: (props: HooksProps[HookType]) => HooksReturn[HookType];
 };
-export declare type Hooks<Models extends string, CustomResolvers extends string> = HooksParameters<'before', Models, CustomResolvers> | HooksParameters<'after', Models, CustomResolvers>;
+export declare type Hooks<Operations extends string, CustomResolvers extends string> = HooksParameters<'before', Operations, CustomResolvers> | HooksParameters<'after', Operations, CustomResolvers>;
 export declare type ShieldAuthorization = {
     canAccess: boolean;
     reason: Reason;
@@ -125,86 +144,34 @@ export declare type ShieldAuthorization = {
     matcher: string;
     globPattern: string;
 };
-export declare type ResolveParams<Models extends string, CustomResolvers extends string> = {
-    event: AppsyncEvent;
+export declare type ResolveParams<Operations extends string, CustomResolvers extends string> = {
+    event: AppSyncEvent;
     resolvers?: {
         [resolver in CustomResolvers]: ((props: QueryParamsCustom) => Promise<any>) | boolean;
     };
     shield?: (props: QueryParams) => Shield;
-    hooks?: Hooks<Models, CustomResolvers>;
+    hooks?: Hooks<Operations, CustomResolvers>;
 };
 export { PrismaClient };
-export declare type Model = string;
 export declare type PrismaArgs = {
     where?: any;
     data?: any;
-    orderBy?: any;
-    skip?: number;
-    take?: number;
-    skipDuplicates?: boolean;
     select?: any;
+    orderBy?: any;
+    skip?: number | undefined;
+    take?: number | undefined;
+    skipDuplicates?: boolean | undefined;
 };
-export declare type AppsyncEvent = {
-    arguments: any;
-    source: any;
-    identity: Identity;
-    request: any;
-    info: {
-        fieldName: string;
-        parentTypeName: string;
-        variables: any;
-        selectionSetList: string[];
-        selectionSetGraphQL: string;
-    };
-    prev: {
-        result: any;
-    };
-    stash: any;
-};
+export declare type PrismaOperator = keyof Required<PrismaArgs>;
+export declare type AppSyncEvent = AppSyncResolverEvent<any>;
 export declare type GraphQLType = 'Query' | 'Mutation' | 'Subscription';
 export declare type API_KEY = null | {
     [key: string]: any;
 };
-export declare type AWS_LAMBDA = {
-    resolverContext: any;
-    [key: string]: any;
-};
-export declare type AWS_IAM = {
-    accountId: string;
-    cognitoIdentityPoolId: string;
-    cognitoIdentityId: string;
-    sourceIp: string[];
-    username: string;
-    userArn: string;
-    cognitoIdentityAuthType: string;
-    cognitoIdentityAuthProvider: string;
-    [key: string]: any;
-};
-export declare type AMAZON_COGNITO_USER_POOLS = {
-    sub: string;
-    issuer: string;
-    username: string;
-    claims: any;
-    sourceIp: string[];
-    defaultAuthStrategy: string;
-    groups: string[];
-    [key: string]: any;
-};
-export declare type OPENID_CONNECT = {
-    claims: {
-        sub: string;
-        aud: string;
-        azp: string;
-        iss: string;
-        exp: number;
-        iat: number;
-        gty: string;
-    };
-    sourceIp: string[];
-    issuer: string;
-    sub: string;
-    [key: string]: any;
-};
+export declare type AWS_LAMBDA = AppSyncIdentityLambda;
+export declare type AWS_IAM = AppSyncIdentityIAM;
+export declare type AMAZON_COGNITO_USER_POOLS = AppSyncIdentityCognito;
+export declare type OPENID_CONNECT = AppSyncIdentityOIDC;
 export declare type Identity = API_KEY | AWS_LAMBDA | AWS_IAM | AMAZON_COGNITO_USER_POOLS | OPENID_CONNECT;
 export declare const ReservedPrismaKeys: string[];
 export declare enum Actions {
