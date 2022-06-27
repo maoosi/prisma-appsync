@@ -10,6 +10,8 @@ export default defineConfig({
         reactivityTransform: true,
     },
 
+    lastUpdated: true,
+
     themeConfig: {
         logo: '/logo.svg',
 
@@ -20,62 +22,60 @@ export default defineConfig({
 
         socialLinks: [{ icon: 'github', link: 'https://github.com/maoosi/prisma-appsync' }],
 
+        lastUpdatedText: 'Updated Date',
+
         footer: {
             message: 'Released under the BSD 2-Clause License.',
             copyright: 'Copyright © 2021-present Sylvain Simao',
         },
 
         nav: [
-            { text: 'Guide', link: '/guide/' },
-            { text: 'Config', link: '/config/' },
+            { text: 'Documentation', link: '/essentials/getting-started' },
+            { text: 'Changelog', link: '/changelog/' },
             {
                 text: 'Links',
                 items: [
                     {
-                        text: 'Changelog',
+                        text: 'Report a bug',
+                        link: 'https://github.com/maoosi/prisma-appsync/issues',
+                    },
+                    {
+                        text: 'Sponsor',
+                        link: 'https://github.com/sponsors/maoosi',
+                    },
+                    {
+                        text: 'Roadmap',
                         link: 'https://github.com/maoosi/prisma-appsync/blob/main/CHANGELOG.md',
+                    },
+                    {
+                        text: 'Contributing',
+                        link: '/contributing',
                     },
                 ],
             },
         ],
 
-        sidebar: {
-            '/guide/': [
-                {
-                    text: 'Guide',
-                    items: [
-                        {
-                            text: 'Why Vite',
-                            link: '/guide/concept',
-                        },
-                        {
-                            text: 'Getting Started',
-                            link: '/guide/',
-                        },
-                    ],
-                },
-                {
-                    text: 'APIs',
-                    items: [
-                        {
-                            text: 'Plugin API',
-                            link: '/guide/api-plugin',
-                        },
-                        {
-                            text: 'HMR API',
-                            link: '/guide/api-hmr',
-                        },
-                        {
-                            text: 'JavaScript API',
-                            link: '/guide/api-javascript',
-                        },
-                        {
-                            text: 'Config Reference',
-                            link: '/config/',
-                        },
-                    ],
-                },
-            ],
-        },
+        sidebar: [
+            {
+                text: 'Essentials',
+                items: [
+                    { text: '🦄 Why Prisma-AppSync?', link: '/essentials/concept' },
+                    { text: '⚡️ Getting started', link: '/essentials/getting-started' },
+                ],
+            },
+            {
+                text: 'Advanced',
+                items: [
+                    { text: '🔌 Extending the API', link: '/advanced/extending-api' },
+                    { text: '🚪 Securing the API', link: '/advanced/securing-api' },
+                    { text: '🪴 Tweaking GQL Schema', link: '/advanced/tweaking-schema' },
+                    { text: '🪝 Adding Hooks', link: '/advanced/hooks' },
+                ],
+            },
+            {
+                text: 'Changelog',
+                items: [{ text: '(latest) 1.0.0-rc.1', link: '/changelog/1.0.0-rc.1' }],
+            },
+        ],
     },
 })
