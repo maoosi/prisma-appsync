@@ -3,5 +3,11 @@
     "private": true,
     "version": "1.0.0",
     "author": "maoosi <hello@sylvainsimao.fr>",
-    "license": "BSD-2-Clause"
+    "license": "BSD-2-Clause",
+    "devDependencies": {
+        "@prisma/generator-helper": "^3.9.2",
+        "fs-extra": "^10.1.0",
+        "js-yaml": "^4.1.0",
+        "lodash": "^4.17.21"
+    }
 }

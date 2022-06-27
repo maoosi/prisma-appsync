@@ -9,6 +9,7 @@
         "deepmerge": "^4.2.2",
         "dot-object": "^2.1.4",
         "html-entities": "^2.3.2",
+        "lambda-rate-limiter": "^3.0.1",
         "micromatch": "^4.0.4",
         "xss": "^1.0.10"
     }

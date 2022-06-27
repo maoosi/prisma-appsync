@@ -16,6 +16,7 @@ export type PrismaAppSyncOptionsType = {
     debug?: boolean
     defaultPagination?: number | false
     maxDepth?: number
+    maxReqPerUserMinute?: number | false
 }
 
 export type Options = Required<PrismaAppSyncOptionsType> & {

@@ -13,7 +13,17 @@ import {
     DMMFPAS_CustomResolver,
 } from './types'
 import { join, extname, basename, dirname } from 'path'
-import { readFile, outputFile, writeFile, writeFileSync, readFileSync, copy, openSync, writeSync, close } from 'fs-extra'
+import {
+    readFile,
+    outputFile,
+    writeFile,
+    writeFileSync,
+    readFileSync,
+    copy,
+    openSync,
+    writeSync,
+    close,
+} from 'fs-extra'
 import flow from 'lodash/flow'
 import camelCase from 'lodash/camelCase'
 import upperFirst from 'lodash/upperFirst'
@@ -36,9 +46,11 @@ export class PrismaAppSyncCompiler {
 
     // Class constructor (entry point)
     constructor(dmmf: DMMF.Document, options: CompilerOptions) {
+        const schemaPath = options.schemaPath || process.cwd()
+
         this.options = {
-            schemaPath: options.schemaPath || process.cwd(),
-            outputDir: options.outputDir || join(process.cwd(), 'generated/prisma-appsync'),
+            schemaPath,
+            outputDir: options.outputDir || join(dirname(schemaPath), '/generated/prisma-appsync'),
             defaultDirective: options.defaultDirective || String(),
             debug: typeof options.debug !== 'undefined' ? options.debug : false,
             template: {
@@ -60,97 +72,97 @@ export class PrismaAppSyncCompiler {
                 create: {
                     label: ({ name }) => `create${name}`,
                     directives: ['create', 'mutations', 'model'],
-                    type: 'Mutation'
+                    type: 'Mutation',
                 },
                 createMany: {
                     label: ({ pluralizedName }) => `createMany${pluralizedName}`,
                     directives: ['createMany', 'mutations', 'model'],
-                    type: 'Mutation'
+                    type: 'Mutation',
                 },
                 update: {
                     label: ({ name }) => `update${name}`,
                     directives: ['update', 'mutations', 'model'],
-                    type: 'Mutation'
+                    type: 'Mutation',
                 },
                 updateMany: {
                     label: ({ pluralizedName }) => `updateMany${pluralizedName}`,
                     directives: ['updateMany', 'mutations', 'model'],
-                    type: 'Mutation'
+                    type: 'Mutation',
                 },
                 upsert: {
                     label: ({ name }) => `upsert${name}`,
                     directives: ['upsert', 'mutations', 'model'],
-                    type: 'Mutation'
+                    type: 'Mutation',
                 },
                 delete: {
                     label: ({ name }) => `delete${name}`,
                     directives: ['delete', 'mutations', 'model'],
-                    type: 'Mutation'
+                    type: 'Mutation',
                 },
                 deleteMany: {
                     label: ({ pluralizedName }) => `deleteMany${pluralizedName}`,
                     directives: ['deleteMany', 'mutations', 'model'],
-                    type: 'Mutation'
+                    type: 'Mutation',
                 },
                 get: {
                     label: ({ name }) => `get${name}`,
                     directives: ['get', 'queries', 'model'],
-                    type: 'Query'
+                    type: 'Query',
                 },
                 list: {
                     label: ({ pluralizedName }) => `list${pluralizedName}`,
                     directives: ['list', 'queries', 'model'],
-                    type: 'Query'
+                    type: 'Query',
                 },
                 count: {
                     label: ({ pluralizedName }) => `count${pluralizedName}`,
                     directives: ['count', 'queries', 'model'],
-                    type: 'Query'
+                    type: 'Query',
                 },
                 onCreated: {
                     label: ({ name }) => `onCreated${name}`,
                     directives: ['onCreated', 'subscriptions', 'model'],
-                    type: 'Subscription'
+                    type: 'Subscription',
                 },
                 onUpdated: {
                     label: ({ name }) => `onUpdated${name}`,
                     directives: ['onUpdated', 'subscriptions', 'model'],
-                    type: 'Subscription'
+                    type: 'Subscription',
                 },
                 onUpserted: {
                     label: ({ name }) => `onUpserted${name}`,
                     directives: ['onUpserted', 'subscriptions', 'model'],
-                    type: 'Subscription'
+                    type: 'Subscription',
                 },
                 onDeleted: {
                     label: ({ name }) => `onDeleted${name}`,
                     directives: ['onDeleted', 'subscriptions', 'model'],
-                    type: 'Subscription'
+                    type: 'Subscription',
                 },
                 onMutated: {
                     label: ({ name }) => `onMutated${name}`,
                     directives: ['onMutated', 'subscriptions', 'model'],
-                    type: 'Subscription'
+                    type: 'Subscription',
                 },
                 onCreatedMany: {
                     label: ({ pluralizedName }) => `onCreatedMany${pluralizedName}`,
                     directives: ['onCreatedMany', 'subscriptions', 'model'],
-                    type: 'Subscription'
+                    type: 'Subscription',
                 },
                 onUpdatedMany: {
                     label: ({ pluralizedName }) => `onUpdatedMany${pluralizedName}`,
                     directives: ['onUpdatedMany', 'subscriptions', 'model'],
-                    type: 'Subscription'
+                    type: 'Subscription',
                 },
                 onMutatedMany: {
                     label: ({ pluralizedName }) => `onMutatedMany${pluralizedName}`,
                     directives: ['onMutatedMany', 'subscriptions', 'model'],
-                    type: 'Subscription'
+                    type: 'Subscription',
                 },
                 onDeletedMany: {
                     label: ({ pluralizedName }) => `onDeletedMany${pluralizedName}`,
                     directives: ['onDeletedMany', 'subscriptions', 'model'],
-                    type: 'Subscription'
+                    type: 'Subscription',
                 },
             },
         }
@@ -175,7 +187,7 @@ export class PrismaAppSyncCompiler {
     // Return config
     public getConfig() {
         return {
-            models: this.data.models.map((m:DMMFPAS_Model) => {
+            models: this.data.models.map((m: DMMFPAS_Model) => {
                 return omit(m, ['fields'])
             }),
             enums: this.data.enums,
@@ -237,12 +249,12 @@ export class PrismaAppSyncCompiler {
     }
 
     public getInjectedConfig(): Required<InjectedConfig> {
-        const injectedConfig:Required<InjectedConfig> = {
+        const injectedConfig: Required<InjectedConfig> = {
             modelsMapping: {},
-            operations: String()
+            operations: String(),
         }
 
-        const operationsList:string[] = []
+        const operationsList: string[] = []
 
         for (let i = 0; i < this.data.models.length; i++) {
             const model = this.data.models[i]
@@ -258,13 +270,16 @@ export class PrismaAppSyncCompiler {
                 const operation = model.gql[key]
 
                 if (typeof operation === 'string') {
-                   if (!operationsList.includes(operation)) operationsList.push(operation)
+                    if (!operationsList.includes(operation)) operationsList.push(operation)
                 }
             }
         }
 
-        injectedConfig.operations = operationsList.sort().map((o:string) => `"${o}"`).join(' | ')
-        
+        injectedConfig.operations = operationsList
+            .sort()
+            .map((o: string) => `"${o}"`)
+            .join(' | ')
+
         return injectedConfig
     }
 
@@ -300,7 +315,11 @@ export class PrismaAppSyncCompiler {
         const injectedConfig = this.getInjectedConfig()
 
         this.replaceInFile(clientPath, /((?: )*{}\;*\s*\/\/\!\s+inject:config)/g, JSON.stringify(injectedConfig))
-        this.replaceInFile(coreDefPath, /((?: )*(\'|\")\/\/\!\s+inject:type:operations(\'|\"))/g, injectedConfig.operations)
+        this.replaceInFile(
+            coreDefPath,
+            /((?: )*(\'|\")\/\/\!\s+inject:type:operations(\'|\"))/g,
+            injectedConfig.operations,
+        )
 
         return this
     }
@@ -365,7 +384,7 @@ export class PrismaAppSyncCompiler {
             _usesQueries: boolean
             _usesMutations: boolean
             _usesSubscriptions: boolean
-            [key:string]: any
+            [key: string]: any
         } = {
             _model: gqlObject?.model !== null,
             _fields: gqlObject?.fields || {},
@@ -445,7 +464,7 @@ export class PrismaAppSyncCompiler {
                 if (directive?.groups && Array.isArray(directive.groups)) {
                     outputDirectives.push(
                         `@aws_cognito_user_pools(cognito_groups: [${directive.groups
-                            .map((g:string) => `"${g}"`)
+                            .map((g: string) => `"${g}"`)
                             .join(', ')}])`,
                     )
                 } else {
@@ -718,15 +737,15 @@ export class PrismaAppSyncCompiler {
         try {
             outputContent = parserOpt
                 ? prettier.format(outputContent, {
-                    semi: false,
-                    parser: parserOpt,
-                    tabWidth: 4,
-                    trailingComma: 'none',
-                    singleQuote: true,
-                    printWidth: 60,
-                })
+                      semi: false,
+                      parser: parserOpt,
+                      tabWidth: 4,
+                      trailingComma: 'none',
+                      singleQuote: true,
+                      printWidth: 60,
+                  })
                 : outputContent
-        } catch(err) {
+        } catch (err) {
             console.error(err)
             console.log(outputContent)
         }

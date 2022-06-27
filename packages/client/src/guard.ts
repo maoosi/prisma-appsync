@@ -11,6 +11,7 @@ import {
 } from './defs'
 import { merge, encode, decode, filterXSS, isMatchingGlob, traverse, upperFirst } from './utils'
 import { CustomError } from './inspector'
+import lambdaRateLimiter from 'lambda-rate-limiter'
 
 /**
  * #### Sanitize data (parse xss + encode html).
@@ -227,4 +228,37 @@ export async function runHooks({
     }
 
     return result
+}
+
+export async function preventDDoS({
+    callerUuid,
+    maxReqPerMinute,
+}: {
+    callerUuid: string
+    maxReqPerMinute: number
+}): Promise<{
+    limitExceeded: boolean
+    count: number
+}> {
+    let limitExceeded = false
+    let count = -1
+
+    const interval = 60 * 1000 // 60 seconds = 1 minute
+    const uniqueTokenPerInterval = 500 //
+
+    try {
+        const limiter = lambdaRateLimiter({
+            interval,
+            uniqueTokenPerInterval,
+        })
+        count = await limiter.check(maxReqPerMinute, callerUuid)
+    } catch (error) {
+        limitExceeded = true
+        count = maxReqPerMinute
+    }
+
+    return {
+        limitExceeded,
+        count,
+    }
 }

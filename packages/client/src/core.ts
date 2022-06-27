@@ -11,7 +11,7 @@ import {
     InjectedConfig,
 } from './defs'
 import { parseError, inspect, debug, CustomError } from './inspector'
-import { getShieldAuthorization, getDepth, clarify, runHooks } from './guard'
+import { getShieldAuthorization, getDepth, clarify, runHooks, preventDDoS } from './guard'
 import { parseEvent } from './adapter'
 import { isEmpty } from './utils'
 import { prismaQueryJoin } from './resolver'
@@ -87,6 +87,8 @@ export class PrismaAppSync {
             debug: typeof options?.debug !== 'undefined' ? options.debug : true,
             defaultPagination: typeof options?.defaultPagination !== 'undefined' ? options.defaultPagination : 50,
             maxDepth: typeof options?.maxDepth !== 'undefined' ? options.maxDepth : 3,
+            maxReqPerUserMinute:
+                typeof options?.maxReqPerUserMinute !== 'undefined' ? options.maxReqPerUserMinute : 200,
         }
 
         this.options.modelsMapping = {}
@@ -171,6 +173,27 @@ export class PrismaAppSync {
             // Adapter :: parse appsync event
             let QueryParams = parseEvent(resolveParams.event, this.options, resolveParams.resolvers)
             debug(`Parsed event:`, inspect(QueryParams))
+
+            // Guard :: rate limiting
+            const callerUuid =
+                (QueryParams.identity as any)?.sourceIp ||
+                (QueryParams.identity as any)?.sub ||
+                JSON.stringify(QueryParams.identity)
+            if (this.options.maxReqPerUserMinute && callerUuid) {
+                const { limitExceeded, count } = await preventDDoS({
+                    callerUuid,
+                    maxReqPerMinute: this.options.maxReqPerUserMinute,
+                })
+                debug('Rate limting:', inspect({ limitExceeded, count }))
+                if (limitExceeded) {
+                    throw new CustomError(
+                        `Rate limit (maxReqPerUserMinute=${this.options.maxReqPerUserMinute}) exceeded for caller "${callerUuid}".`,
+                        {
+                            type: 'TOO_MANY_REQUESTS',
+                        },
+                    )
+                }
+            }
 
             // Guard :: block queries with a depth > maxDepth
             const depth = getDepth({ paths: QueryParams.paths, context: QueryParams.context })

@@ -4,6 +4,7 @@ const errorCodes = {
     FORBIDDEN: 401,
     BAD_USER_INPUT: 400,
     INTERNAL_SERVER_ERROR: 500,
+    TOO_MANY_REQUESTS: 429,
 }
 
 type ErrorExtensions = {
