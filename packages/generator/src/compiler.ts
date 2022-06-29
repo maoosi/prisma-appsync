@@ -463,9 +463,7 @@ export class PrismaAppSyncCompiler {
             } else if (directive?.allow === 'userPools') {
                 if (directive?.groups && Array.isArray(directive.groups)) {
                     outputDirectives.push(
-                        `@aws_cognito_user_pools(cognito_groups: [${directive.groups
-                            .map((g: string) => `"${g}"`)
-                            .join(', ')}])`,
+                        `@aws_auth(cognito_groups: [${directive.groups.map((g: string) => `"${g}"`).join(', ')}])`,
                     )
                 } else {
                     outputDirectives.push('@aws_cognito_user_pools')
