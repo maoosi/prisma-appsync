@@ -1,5 +1,5 @@
 # 🪝 Adding Hooks
 
-::: tip IN PROGRESS
+::: info IN PROGRESS
 Documentation coming soon...
 :::

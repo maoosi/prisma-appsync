@@ -2,7 +2,7 @@
 
 In some cases, it might be useful to extend the GraphQL CRUD API that is being generated, using custom Types and Resolvers.
 
-::: tip EXAMPLE
+::: tip USE CASE
 To illustrate this, let's assume we have an existing model `Post` with a field `views`. We want to add a custom mutation `incrementPostsViews` and build a custom resolver to increment post views on every call.
 :::
 
@@ -66,8 +66,6 @@ return await prismaAppSync.resolve<'incrementPostsViews'>({
   }
 })
 ```
-
-See full list of options in the **[Reference](https://www.notion.so/Reference-680f732890314b17b97a5a9def654d8c)** section.
 
 ## 👉 4. AppSyncStack function bundling
 

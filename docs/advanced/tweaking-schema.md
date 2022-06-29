@@ -1,5 +1,5 @@
 # 🪴 Tweaking the GraphQL Schema
 
-::: tip IN PROGRESS
+::: info IN PROGRESS
 Documentation coming soon...
 :::
