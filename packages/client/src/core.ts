@@ -11,7 +11,7 @@ import {
     InjectedConfig,
 } from './defs'
 import { parseError, inspect, debug, CustomError } from './inspector'
-import { getShieldAuthorization, getDepth, clarify, runHooks, preventDDoS } from './guard'
+import { getShieldAuthorization, getDepth, clarify, runHooks, preventDOS } from './guard'
 import { parseEvent } from './adapter'
 import { isEmpty } from './utils'
 import { prismaQueryJoin } from './resolver'
@@ -180,7 +180,7 @@ export class PrismaAppSync {
                 (QueryParams.identity as any)?.sub ||
                 JSON.stringify(QueryParams.identity)
             if (this.options.maxReqPerUserMinute && callerUuid) {
-                const { limitExceeded, count } = await preventDDoS({
+                const { limitExceeded, count } = await preventDOS({
                     callerUuid,
                     maxReqPerMinute: this.options.maxReqPerUserMinute,
                 })

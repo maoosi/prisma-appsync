@@ -230,7 +230,7 @@ export async function runHooks({
     return result
 }
 
-export async function preventDDoS({
+export async function preventDOS({
     callerUuid,
     maxReqPerMinute,
 }: {
