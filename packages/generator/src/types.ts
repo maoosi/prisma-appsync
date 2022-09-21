@@ -26,7 +26,8 @@ export type DMMFPAS_Model = {
     directives: any
     isEditable: boolean
     gql: any
-    idFields: string[]
+    uniqueFields: DMMFPAS_UniqueFields[]
+    uniqueIndexes: DMMFPAS_UniqueIndexes[]
     operationFields: DMMFPAS_Field[]
     subscriptionFields: DMMFPAS_Field[]
 }
@@ -46,6 +47,13 @@ export type DMMFPAS_Field = {
     directives?: any
     relation?: DMMFPAS_Relation
     sample: any
+}
+
+export type DMMFPAS_UniqueFields = string[]
+
+export type DMMFPAS_UniqueIndexes = {
+    name: string
+    fields: string[]
 }
 
 export type DMMFPAS_Enum = {

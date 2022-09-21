@@ -11,6 +11,7 @@ import {
     CompilerOptions,
     CompilerOptionsPrivate,
     DMMFPAS_CustomResolver,
+    DMMFPAS_UniqueIndexes,
 } from './types'
 import { join, extname, basename, dirname } from 'path'
 import {
@@ -549,14 +550,15 @@ export class PrismaAppSyncCompiler {
                     pluralizedName,
                     prismaRef: model.name.charAt(0).toLowerCase() + model.name.slice(1),
                     directives,
-                    idFields: model.idFields,
+                    uniqueIndexes: model.uniqueIndexes,
+                    uniqueFields: model.uniqueFields,
                     fields: fields,
                     operationFields: fields.filter(
                         (f) => f.isEditable && !f.relation && ['Int', 'Float'].includes(f.scalar),
                     ),
                     gql: gqlConfig,
                     isEditable: fields.filter((f) => f.isEditable).length > 0,
-                    subscriptionFields: this.filterSubscriptionFields(fields, model.idFields),
+                    subscriptionFields: this.filterSubscriptionFields(fields, model.uniqueIndexes),
                 })
             }
         })
@@ -607,7 +609,10 @@ export class PrismaAppSyncCompiler {
     }
 
     // Return fields for subscription
-    private filterSubscriptionFields(fields: DMMFPAS_Field[], idFields?: string[]): DMMFPAS_Field[] {
+    private filterSubscriptionFields(
+        fields: DMMFPAS_Field[],
+        uniqueIndexes?: DMMFPAS_UniqueIndexes[],
+    ): DMMFPAS_Field[] {
         const subFields: DMMFPAS_Field[] = []
         const maxFields: number = 5
 
@@ -635,16 +640,18 @@ export class PrismaAppSyncCompiler {
                 const destroyIndex = subFields.findIndex((s) => s.name === 'uuid')
                 if (destroyIndex > -1) subFields.splice(destroyIndex, 1)
                 shouldContinue = true
-            } else if (hasRemainingFields && !isBelowMaxFieldsLimit && idFields && idFields.length > 0) {
-                subFields.push({
-                    name: idFields.join('_'),
-                    scalar: `${idFields.join('_')}FieldsInput!`,
-                    isEnum: false,
-                    isRequired: true,
-                    isEditable: false,
-                    isUnique: true,
-                    sample: `2`,
-                })
+            } else if (hasRemainingFields && !isBelowMaxFieldsLimit && uniqueIndexes && uniqueIndexes.length > 0) {
+                uniqueIndexes.forEach((i) =>
+                    subFields.push({
+                        name: i.name || i.fields.join('_'),
+                        scalar: `${i.fields.join('_')}FieldsInput!`,
+                        isEnum: false,
+                        isRequired: true,
+                        isEditable: false,
+                        isUnique: true,
+                        sample: `2`,
+                    }),
+                )
             }
         }
 
