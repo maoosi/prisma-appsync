@@ -32,14 +32,14 @@ enum OrderByArg {
 
 {% for model in models %}
     {% if model.uniqueIndexes | length -%}
-        {% for uniqueIndex in uniqueIndexes %}
-        input {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput {
-            {% for field in model.fields -%}
-                {% if field.name in uniqueIndex.fields -%}
-                    {{ field.name }}: {{ field.scalar }}
-                {% endif -%}
-            {% endfor %}
-        }
+        {% for uniqueIndex in model.uniqueIndexes %}
+            input {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput {
+                {% for field in model.fields -%}
+                    {% if field.name in uniqueIndex.fields -%}
+                        {{ field.name }}: {{ field.scalar }}
+                    {% endif -%}
+                {% endfor %}
+            }
         {% endfor %}
     {% endif %}
 
