@@ -840,8 +840,11 @@ export class PrismaAppSyncCompiler {
                 }
             }
         }
-        else if (typeof field.type === 'string') {
+        else if (this.isFieldEnum(field)) {
             type = field.type
+        }
+        else if (typeof field.type === 'string') {
+            type = pascalCase(field.type)
         }
 
         return type
