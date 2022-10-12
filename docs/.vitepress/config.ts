@@ -45,7 +45,7 @@ export default defineConfig({
                     },
                     {
                         text: 'Roadmap',
-                        link: 'https://github.com/maoosi/prisma-appsync/blob/main/CHANGELOG.md',
+                        link: 'https://maoosi.notion.site/9fd581e171fe41aea45a2fa7492972d7',
                     },
                     {
                         text: 'Contributing',
