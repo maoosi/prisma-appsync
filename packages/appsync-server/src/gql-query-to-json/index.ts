@@ -196,17 +196,19 @@ function checkEachVariableInQueryIsDefined(defintion: ActualDefinitionNode, vari
             },
         ]
     }, [])
+
     Object.entries(variables).forEach(([variableKey, variableValue]) => {
         const idx = varsList?.findIndex((element) => {
             return element.key === variableKey
         })
-        if (idx !== -1 && varsList && idx && typeof varsList[idx] !== 'undefined')
+        if (idx !== -1 && varsList && typeof idx !== 'undefined' && typeof varsList[idx] !== 'undefined')
             varsList[idx].value = variableValue
     })
 
     const undefinedVariable = varsList?.find((varInQuery) => {
         return varInQuery.value === undefinedVariableConst
     })
+
     if (undefinedVariable) {
         throw new Error(
             'The query you want to parse is using variables. This means that you have to supply for every variable that is used in the query a corresponding value. You can parse these values as a second parameter on the options object, on the "variables" key.',
