@@ -58,7 +58,7 @@ export declare function runHooks({ when, hooks, prismaClient, QueryParams, resul
     QueryParams: QueryParams;
     result?: any | any[];
 }): Promise<void | any>;
-export declare function preventDDoS({ callerUuid, maxReqPerMinute, }: {
+export declare function preventDOS({ callerUuid, maxReqPerMinute, }: {
     callerUuid: string;
     maxReqPerMinute: number;
 }): Promise<{

@@ -27,7 +27,6 @@ yarn-error.log*
 # Workspace
 pnpm-workspace.yaml
 vite.config.ts
-nodemon.json
 
 # Editor directories and files
 .idea

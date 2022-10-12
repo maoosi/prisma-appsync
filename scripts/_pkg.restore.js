@@ -6,14 +6,16 @@ const ORIG_PKG_PATH = path.resolve(__dirname, '../package.json')
 const CACHED_PKG_PATH = path.resolve(__dirname, '../package-cache.json')
 
 // Obtain original/cached contents from `cached-package.json`.
-const pkgData = JSON.stringify(require(CACHED_PKG_PATH), null, 4) + '\n'
+const pkgData = `${JSON.stringify(require(CACHED_PKG_PATH), null, 4)}\n`
 
 // Write data from `cached-package.json` back to original `package.json`.
-fs.writeFile(ORIG_PKG_PATH, pkgData, function (err) {
-    if (err) throw err
+fs.writeFile(ORIG_PKG_PATH, pkgData, (err) => {
+    if (err)
+        throw err
 })
 
 // Delete the temporary `cached-package.json` file.
-fs.unlink(CACHED_PKG_PATH, function (err) {
-    if (err) throw err
+fs.unlink(CACHED_PKG_PATH, (err) => {
+    if (err)
+        throw err
 })

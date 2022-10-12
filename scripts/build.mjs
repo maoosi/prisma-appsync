@@ -33,6 +33,7 @@ try {
     // copy AppSync-server Client TS Declarations
     console.log(chalk.blue('\nBuild :: AppSync-server TS Declarations\n'))
     await $`cp packages/appsync-server/src/index.d.ts dist/appsync-server/index.d.ts && cp -R packages/appsync-server/src/gql dist/appsync-server && chmod -R 755 dist`
-} catch (error) {
-    console.log(chalk.red('\nBuild :: Error\n\n' + error))
+}
+catch (error) {
+    console.log(chalk.red(`\nBuild :: Error\n\n${error}`))
 }

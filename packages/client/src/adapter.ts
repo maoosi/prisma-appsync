@@ -1,23 +1,25 @@
 import { CustomError, inspect } from './inspector'
 import { sanitize } from './guard'
-import { merge, dotate, isEmpty, isUndefined, lowerFirst, clone, traverse, isObject } from './utils'
-import {
-    Options,
-    AppSyncEvent,
-    QueryParams,
+import { clone, dotate, isEmpty, isObject, isUndefined, lowerFirst, merge, traverse } from './utils'
+import type {
     Action,
-    Actions,
-    Context,
-    PrismaArgs,
-    ActionsAliasesList,
     ActionsAlias,
-    ReservedPrismaKeys,
-    BatchActionsList,
-    Identity,
+    AppSyncEvent,
     Authorization,
-    Authorizations,
+    Context,
     GraphQLType,
+    Identity,
+    Options,
+    PrismaArgs,
+    QueryParams,
+} from './defs'
+import {
+    Actions,
+    ActionsAliasesList,
+    Authorizations,
+    BatchActionsList,
     DebugTestingKey,
+    ReservedPrismaKeys,
 } from './defs'
 
 /**
@@ -30,13 +32,12 @@ import {
  */
 export function parseEvent(appsyncEvent: AppSyncEvent, options: Options, customResolvers?: any | null): QueryParams {
     if (
-        isEmpty(appsyncEvent?.info?.fieldName) ||
-        isEmpty(appsyncEvent?.info?.selectionSetList) ||
-        isEmpty(appsyncEvent?.info?.parentTypeName) ||
-        isUndefined(appsyncEvent?.arguments)
-    ) {
-        throw new CustomError(`Error reading required parameters from appsyncEvent.`, { type: 'INTERNAL_SERVER_ERROR' })
-    }
+        isEmpty(appsyncEvent?.info?.fieldName)
+        || isEmpty(appsyncEvent?.info?.selectionSetList)
+        || isEmpty(appsyncEvent?.info?.parentTypeName)
+        || isUndefined(appsyncEvent?.arguments)
+    )
+        throw new CustomError('Error reading required parameters from appsyncEvent.', { type: 'INTERNAL_SERVER_ERROR' })
 
     const operation = getOperation({ fieldName: appsyncEvent.info.fieldName })
 
@@ -100,12 +101,11 @@ export function addNullables(data: any): any {
     return traverse(data, (value, key) => {
         let excludeChilds = false
 
-        if (typeof key === 'string' && key === DebugTestingKey) {
+        if (typeof key === 'string' && key === DebugTestingKey)
             excludeChilds = true
-        }
-        if (value === undefined) {
+
+        if (value === undefined)
             value = null
-        }
 
         return { value, excludeChilds }
     })
@@ -131,51 +131,51 @@ export function getAuthIdentity({ appsyncEvent }: { appsyncEvent: AppSyncEvent }
     if (isEmpty(appsyncEvent?.identity)) {
         authorization = Authorizations.API_KEY
         identity = {
-            ...(appsyncEvent?.request?.headers &&
-                typeof appsyncEvent.request.headers['x-api-key'] !== 'undefined' && {
-                    requestApiKey: appsyncEvent.request.headers['x-api-key'],
-                }),
-            ...(appsyncEvent?.request?.headers &&
-                typeof appsyncEvent.request.headers['user-agent'] !== 'undefined' && {
-                    requestUserAgent: appsyncEvent.request.headers['user-agent'],
-                }),
+            ...(appsyncEvent?.request?.headers
+                && typeof appsyncEvent.request.headers['x-api-key'] !== 'undefined' && {
+                requestApiKey: appsyncEvent.request.headers['x-api-key'],
+            }),
+            ...(appsyncEvent?.request?.headers
+                && typeof appsyncEvent.request.headers['user-agent'] !== 'undefined' && {
+                requestUserAgent: appsyncEvent.request.headers['user-agent'],
+            }),
         }
     }
     // AWS_LAMBDA authorization
-    else if (appsyncEvent?.identity && typeof appsyncEvent.identity['resolverContext'] !== 'undefined') {
+    else if (appsyncEvent?.identity && typeof (appsyncEvent.identity as any).resolverContext !== 'undefined') {
         authorization = Authorizations.AWS_LAMBDA
         identity = appsyncEvent.identity
     }
     // AWS_IAM authorization
     else if (
-        appsyncEvent?.identity &&
-        typeof appsyncEvent.identity['cognitoIdentityAuthType'] !== 'undefined' &&
-        typeof appsyncEvent.identity['cognitoIdentityAuthProvider'] !== 'undefined' &&
-        typeof appsyncEvent.identity['cognitoIdentityPoolId'] !== 'undefined' &&
-        typeof appsyncEvent.identity['cognitoIdentityId'] !== 'undefined'
+        appsyncEvent?.identity
+        && typeof (appsyncEvent.identity as any).cognitoIdentityAuthType !== 'undefined'
+        && typeof (appsyncEvent.identity as any).cognitoIdentityAuthProvider !== 'undefined'
+        && typeof (appsyncEvent.identity as any).cognitoIdentityPoolId !== 'undefined'
+        && typeof (appsyncEvent.identity as any).cognitoIdentityId !== 'undefined'
     ) {
         authorization = Authorizations.AWS_IAM
         identity = appsyncEvent.identity
     }
     // AMAZON_COGNITO_USER_POOLS authorization
     else if (
-        appsyncEvent?.identity &&
-        typeof appsyncEvent.identity['sub'] !== 'undefined' &&
-        typeof appsyncEvent.identity['issuer'] !== 'undefined' &&
-        typeof appsyncEvent.identity['username'] !== 'undefined' &&
-        typeof appsyncEvent.identity['claims'] !== 'undefined' &&
-        typeof appsyncEvent.identity['sourceIp'] !== 'undefined' &&
-        typeof appsyncEvent.identity['defaultAuthStrategy'] !== 'undefined'
+        appsyncEvent?.identity
+        && typeof (appsyncEvent.identity as any).sub !== 'undefined'
+        && typeof (appsyncEvent.identity as any).issuer !== 'undefined'
+        && typeof (appsyncEvent.identity as any).username !== 'undefined'
+        && typeof (appsyncEvent.identity as any).claims !== 'undefined'
+        && typeof (appsyncEvent.identity as any).sourceIp !== 'undefined'
+        && typeof (appsyncEvent.identity as any).defaultAuthStrategy !== 'undefined'
     ) {
         authorization = Authorizations.AMAZON_COGNITO_USER_POOLS
         identity = appsyncEvent.identity
     }
     // OPENID_CONNECT authorization
     else if (
-        appsyncEvent?.identity &&
-        typeof appsyncEvent.identity['sub'] !== 'undefined' &&
-        typeof appsyncEvent.identity['issuer'] !== 'undefined' &&
-        typeof appsyncEvent.identity['claims'] !== 'undefined'
+        appsyncEvent?.identity
+        && typeof (appsyncEvent.identity as any).sub !== 'undefined'
+        && typeof (appsyncEvent.identity as any).issuer !== 'undefined'
+        && typeof (appsyncEvent.identity as any).claims !== 'undefined'
     ) {
         authorization = Authorizations.OPENID_CONNECT
         identity = appsyncEvent.identity
@@ -218,13 +218,15 @@ export function getContext({
         context.action = operation
         context.alias = 'custom'
         context.model = null
-    } else {
+    }
+    else {
         context.action = getAction({ operation })
         context.model = getModel({ operation, action: context.action })
 
         if (typeof options?.modelsMapping?.[context.model] !== 'undefined') {
             context.model = options.modelsMapping[context.model]
-        } else {
+        }
+        else {
             throw new CustomError('Issue parsing auto-injected models mapping config.', {
                 type: 'INTERNAL_SERVER_ERROR',
             })
@@ -247,7 +249,7 @@ export function getOperation({ fieldName }: { fieldName: string }): string {
     const operation = fieldName
 
     if (!(operation.length > 0))
-        throw new CustomError(`Error parsing 'operation' from input event.`, { type: 'INTERNAL_SERVER_ERROR' })
+        throw new CustomError('Error parsing \'operation\' from input event.', { type: 'INTERNAL_SERVER_ERROR' })
 
     return operation
 }
@@ -266,11 +268,12 @@ export function getAction({ operation }: { operation: string }): Action {
         return operation.toLowerCase().startsWith(String(action).toLowerCase())
     }) as Action
 
-    if (!(typeof action !== 'undefined' && String(action).length > 0))
+    if (!(typeof action !== 'undefined' && String(action).length > 0)) {
         throw new CustomError(
-            `Error parsing 'action' from input event. If you are trying to query a custom resolver, make sure it is properly declared inside 'prismaAppSync.resolve({ event, resolvers: { /* HERE */ } })'.`,
+            'Error parsing \'action\' from input event. If you are trying to query a custom resolver, make sure it is properly declared inside \'prismaAppSync.resolve({ event, resolvers: { /* HERE */ } })\'.',
             { type: 'INTERNAL_SERVER_ERROR' },
         )
+    }
 
     return action
 }
@@ -294,9 +297,8 @@ export function getActionAlias({ action }: { action: Action }): ActionsAlias {
         }
     }
 
-    if (!(typeof action !== 'undefined' && String(action).length > 0)) {
-        throw new CustomError(`Error parsing 'actionAlias' from input event.`, { type: 'INTERNAL_SERVER_ERROR' })
-    }
+    if (!(typeof action !== 'undefined' && String(action).length > 0))
+        throw new CustomError('Error parsing \'actionAlias\' from input event.', { type: 'INTERNAL_SERVER_ERROR' })
 
     return actionAlias
 }
@@ -313,7 +315,7 @@ export function getModel({ operation, action }: { operation: string; action: Act
     const model = operation.replace(String(action), '')
 
     if (!(model.length > 0))
-        throw new CustomError(`Error parsing 'model' from input event.`, { type: 'INTERNAL_SERVER_ERROR' })
+        throw new CustomError('Error parsing \'model\' from input event.', { type: 'INTERNAL_SERVER_ERROR' })
 
     return model
 }
@@ -330,9 +332,8 @@ export function getFields({ _selectionSetList }: { _selectionSetList: string[] }
 
     _selectionSetList.forEach((item: string) => {
         const field = item.split('/')[0]
-        if (!fields.includes(field) && !field.startsWith('__')) {
+        if (!fields.includes(field) && !field.startsWith('__'))
             fields.push(item)
-        }
     })
 
     return fields
@@ -348,9 +349,8 @@ export function getFields({ _selectionSetList }: { _selectionSetList: string[] }
 export function getType({ _parentTypeName }: { _parentTypeName: string }): GraphQLType {
     const type = _parentTypeName
 
-    if (!['Query', 'Mutation', 'Subscription'].includes(type)) {
-        throw new CustomError(`Error parsing 'type' from input event.`, { type: 'INTERNAL_SERVER_ERROR' })
-    }
+    if (!['Query', 'Mutation', 'Subscription'].includes(type))
+        throw new CustomError('Error parsing \'type\' from input event.', { type: 'INTERNAL_SERVER_ERROR' })
 
     return type as GraphQLType
 }
@@ -379,31 +379,35 @@ export function getPrismaArgs({
     const prismaArgs: PrismaArgs = {}
 
     if (typeof _arguments.data !== 'undefined' && typeof _arguments.operation !== 'undefined') {
-        throw new CustomError(`Using 'data' and 'operation' together is not possible.`, {
+        throw new CustomError('Using \'data\' and \'operation\' together is not possible.', {
             type: 'BAD_USER_INPUT',
         })
     }
 
-    if (typeof _arguments.data !== 'undefined') prismaArgs.data = _arguments.data
-    else if (typeof _arguments.operation !== 'undefined') prismaArgs.data = _arguments.operation
+    if (typeof _arguments.data !== 'undefined')
+        prismaArgs.data = _arguments.data
+    else if (typeof _arguments.operation !== 'undefined')
+        prismaArgs.data = _arguments.operation
 
-    if (typeof _arguments.where !== 'undefined') prismaArgs.where = _arguments.where
-    if (typeof _arguments.orderBy !== 'undefined') prismaArgs.orderBy = parseOrderBy(_arguments.orderBy)
-    if (typeof _arguments.skipDuplicates !== 'undefined') prismaArgs.skipDuplicates = _arguments.skipDuplicates
+    if (typeof _arguments.where !== 'undefined')
+        prismaArgs.where = _arguments.where
+    if (typeof _arguments.orderBy !== 'undefined')
+        prismaArgs.orderBy = parseOrderBy(_arguments.orderBy)
+    if (typeof _arguments.skipDuplicates !== 'undefined')
+        prismaArgs.skipDuplicates = _arguments.skipDuplicates
 
-    if (typeof _selectionSetList !== 'undefined') {
+    if (typeof _selectionSetList !== 'undefined')
         prismaArgs.select = parseSelectionList(_selectionSetList)
-    }
 
-    if (typeof _arguments.skip !== 'undefined') prismaArgs.skip = parseInt(_arguments.skip)
-    else if (defaultPagination !== false && action === Actions.list) {
+    if (typeof _arguments.skip !== 'undefined')
+        prismaArgs.skip = parseInt(_arguments.skip)
+    else if (defaultPagination !== false && action === Actions.list)
         prismaArgs.skip = 0
-    }
 
-    if (typeof _arguments.take !== 'undefined') prismaArgs.take = parseInt(_arguments.take)
-    else if (defaultPagination !== false && action === Actions.list) {
+    if (typeof _arguments.take !== 'undefined')
+        prismaArgs.take = parseInt(_arguments.take)
+    else if (defaultPagination !== false && action === Actions.list)
         prismaArgs.take = defaultPagination
-    }
 
     return prismaArgs
 }
@@ -415,9 +419,8 @@ export function getPrismaArgs({
  * @returns any
  */
 function getOrderBy(sortObj: any): any {
-    if (Object.keys(sortObj).length > 1) {
-        throw new CustomError(`Wrong 'orderBy' input format.`, { type: 'BAD_USER_INPUT' })
-    }
+    if (Object.keys(sortObj).length > 1)
+        throw new CustomError('Wrong \'orderBy\' input format.', { type: 'BAD_USER_INPUT' })
 
     const key: any = Object.keys(sortObj)[0]
     const value = typeof sortObj[key] === 'object' ? getOrderBy(sortObj[key]) : sortObj[key].toLowerCase()
@@ -489,14 +492,16 @@ function parseSelectionList(selectionSetList: any): any {
         const parts = path.split('/')
 
         if (!parts.includes('__typename')) {
-            if (parts.length > 1) prismaArgs = merge(prismaArgs, getInclude(parts))
+            if (parts.length > 1)
+                prismaArgs = merge(prismaArgs, getInclude(parts))
             else prismaArgs = merge(prismaArgs, getSelect(parts))
         }
     }
 
     if (prismaArgs.include) {
         for (const include in prismaArgs.include) {
-            if (typeof prismaArgs.select[include] !== 'undefined') delete prismaArgs.select[include]
+            if (typeof prismaArgs.select[include] !== 'undefined')
+                delete prismaArgs.select[include]
         }
 
         prismaArgs.select = merge(prismaArgs.select, prismaArgs.include)
@@ -535,7 +540,8 @@ export function getPaths({
                 for (const key in objectPaths) {
                     const item = key.split('.').join('/')
                     const path = `/${lowerFirst(context.action)}/${lowerFirst(item)}`
-                    if (!paths.includes(path)) paths.push(path)
+                    if (!paths.includes(path))
+                        paths.push(path)
                 }
             }
         }
@@ -554,26 +560,29 @@ export function getPaths({
                     for (const key in objectPaths) {
                         const item = key
                             .split('.')
-                            .filter((k) => !ReservedPrismaKeys.includes(k))
+                            .filter(k => !ReservedPrismaKeys.includes(k))
                             .join('/')
                         const path = `/${lowerFirst(context.action)}/${lowerFirst(context.model!)}/${lowerFirst(item)}`
-                        if (!paths.includes(path)) paths.push(path)
+                        if (!paths.includes(path))
+                            paths.push(path)
                     }
                 })
-            } else if (key === 'select') {
+            }
+            else if (key === 'select') {
                 const objectPaths = isObject(value) ? dotate(value) : { [key]: value }
 
                 for (const key in objectPaths) {
                     const item = key
                         .split('.')
-                        .filter((k) => !ReservedPrismaKeys.includes(k))
+                        .filter(k => !ReservedPrismaKeys.includes(k))
                         .join('/')
                     const selectAction = BatchActionsList.includes(context.action) ? Actions.list : Actions.get
-                    const path =
-                        context.model !== null
+                    const path
+                        = context.model !== null
                             ? `/${lowerFirst(selectAction)}/${lowerFirst(context.model)}/${lowerFirst(item)}`
                             : `/${lowerFirst(context.action)}/${lowerFirst(item)}`
-                    if (!paths.includes(path)) paths.push(path)
+                    if (!paths.includes(path))
+                        paths.push(path)
                 }
             }
         }

@@ -18,7 +18,8 @@ const { tag } = await prompts({
     initial: 0,
 })
 
-if (!tag) process.exit()
+if (!tag)
+    process.exit()
 
 const latestPublished = String(await $`npm show prisma-appsync@${tag} version`).trim()
 
@@ -34,7 +35,8 @@ const { publishVersion } = await prompts({
     initial: possibleFutureVersion,
 })
 
-if (!publishVersion || publishVersion === latestPublished) process.exit()
+if (!publishVersion || publishVersion === latestPublished)
+    process.exit()
 
 const { versionOk } = await prompts({
     type: 'confirm',
@@ -56,7 +58,7 @@ if (versionOk) {
         {
             title: `Setting publish version to ${publishVersion}`,
             task: async () => {
-                let pkg = await fs.readJson('./package.json')
+                const pkg = await fs.readJson('./package.json')
                 pkg.version = publishVersion
                 await fs.writeJson('./package.json', pkg)
             },

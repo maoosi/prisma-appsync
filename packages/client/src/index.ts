@@ -1,18 +1,18 @@
 import {
-    merge,
     clone,
     decode,
-    encode,
     dotate,
-    isMatchingGlob,
+    encode,
     filterXSS,
     isEmpty,
+    isMatchingGlob,
+    isObject,
     isUndefined,
     lowerFirst,
-    isObject,
+    merge,
+    replaceAll,
     traverse,
     traverseAsync,
-    replaceAll,
 } from './utils'
 
 export { PrismaAppSync } from './core'

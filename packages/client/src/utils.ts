@@ -101,12 +101,12 @@ export function filterXSS(str: string): string {
  */
 export function isEmpty(element: any): boolean {
     return (
-        element === null ||
-        element === undefined ||
-        typeof element === 'undefined' ||
-        (typeof element === 'string' && element.trim() === '') ||
-        (Array.isArray(element) && element.length === 0) ||
-        (Object.getPrototypeOf(element) === Object.prototype && Object.keys(element).length === 0)
+        element === null
+        || element === undefined
+        || typeof element === 'undefined'
+        || (typeof element === 'string' && element.trim() === '')
+        || (Array.isArray(element) && element.length === 0)
+        || (Object.getPrototypeOf(element) === Object.prototype && Object.keys(element).length === 0)
     )
 }
 
@@ -132,7 +132,8 @@ export function isUndefined(element: any): boolean {
  * @returns string
  */
 export function lowerFirst(str: string): string {
-    if (str) return str.charAt(0).toLowerCase() + str.slice(1)
+    if (str)
+        return str.charAt(0).toLowerCase() + str.slice(1)
     else return String()
 }
 
@@ -146,7 +147,8 @@ export function lowerFirst(str: string): string {
  * @returns string
  */
 export function upperFirst(str: string): string {
-    if (str) return str.charAt(0).toUpperCase() + str.slice(1)
+    if (str)
+        return str.charAt(0).toUpperCase() + str.slice(1)
     else return String()
 }
 
@@ -160,11 +162,11 @@ export function upperFirst(str: string): string {
  */
 export function isObject(element): boolean {
     return (
-        typeof element === 'object' &&
-        !Array.isArray(element) &&
-        typeof element !== 'function' &&
-        element !== null &&
-        !(element instanceof Date)
+        typeof element === 'object'
+        && !Array.isArray(element)
+        && typeof element !== 'function'
+        && element !== null
+        && !(element instanceof Date)
     )
 }
 
@@ -193,12 +195,14 @@ export function traverse(
 
                 // object
                 if (isObject(value)) {
-                    if (excludeChilds) outputData[key] = clone(value)
+                    if (excludeChilds)
+                        outputData[key] = clone(value)
                     else outputData[key] = traverse(value, iteratee)
                 }
                 // array
                 else if (Array.isArray(value)) {
-                    if (excludeChilds) outputData[key] = [...value]
+                    if (excludeChilds)
+                        outputData[key] = [...value]
                     else outputData[key] = traverse(value, iteratee)
                 }
                 // anything else
@@ -248,12 +252,14 @@ export async function traverseAsync(
 
                 // object
                 if (isObject(value)) {
-                    if (excludeChilds) outputData[key] = clone(value)
+                    if (excludeChilds)
+                        outputData[key] = clone(value)
                     else outputData[key] = await traverseAsync(value, iteratee)
                 }
                 // array
                 else if (Array.isArray(value)) {
-                    if (excludeChilds) outputData[key] = [...value]
+                    if (excludeChilds)
+                        outputData[key] = [...value]
                     else outputData[key] = await traverseAsync(value, iteratee)
                 }
                 // anything else
@@ -267,9 +273,8 @@ export async function traverseAsync(
     else if (Array.isArray(element)) {
         const { value } = await iteratee(element)
         outputData = [...value]
-        for (let index = 0; index < outputData.length; index++) {
+        for (let index = 0; index < outputData.length; index++)
             outputData[index] = await traverseAsync(outputData[index], iteratee)
-        }
     }
     // anything else
     else {
@@ -292,7 +297,7 @@ export async function traverseAsync(
  */
 export function replaceAll(str: string, findArray: string[], replaceArray: string[]): string {
     let regex: string[] | string = []
-    let map = {}
+    const map = {}
 
     for (let i = 0; i < findArray.length; i++) {
         regex.push(findArray[i].replace(/([-[\]{}()*+?.\\^$|#,])/g, '\\$1'))

@@ -8,7 +8,7 @@ import './build.mjs'
 const playgroundPath = 'playground'
 
 // reset
-if (Boolean(argv?.reset)) {
+if (argv?.reset) {
     console.log(chalk.blue('\nDev :: Delete existing Playground directory\n'))
     await fs.remove(playgroundPath)
 }
@@ -19,12 +19,13 @@ const playgroundExists = await fs.pathExists(playgroundPath)
 if (!playgroundExists) {
     console.log(chalk.blue('\nDev :: Create Playground directory\n'))
     await fs.ensureDir(playgroundPath)
-    
+
     console.log(chalk.blue('\nDev :: Run Prisma-AppSync Installer\n'))
     cd(playgroundPath)
     process.env.PRISMAAPPSYNC_CREATEAPP_MODE = 'dev'
     await $`node ../dist/create-app`
-} else {
+}
+else {
     console.log(chalk.blue('\nDev :: Run npx prisma generate\n'))
     cd(playgroundPath)
     await $`npx prisma generate`

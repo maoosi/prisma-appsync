@@ -1,31 +1,6 @@
 {
-    "todohighlight.include": ["**/*.js", "**/*.ts", "**/*.spec.ts", "**/*.md", "**/*.md"],
-    "files.eol": "\n",
-    "typescript.tsdk": "node_modules/typescript/lib",
-    "editor.tabSize": 4,
-    "editor.formatOnSave": true,
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "eslint.validate": ["javascript", "typescript"],
-    "prettier.requireConfig": true,
-    "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": true
-    },
-    "stylelint.configOverrides": {
-        "ignoreFiles": [
-            // All normal .cjs files
-            "**/*.cjs",
-            // .cjs files starting with a dot eg. .eslintrc.cjs
-            "**/.*.cjs"
-        ]
-    },
-    "workbench.view.alwaysShowHeaderActions": true,
-    "[markdown]": {
-        "editor.formatOnSave": false
-    },
-    "[prisma]": {
-        "editor.defaultFormatter": "Prisma.prisma",
-        "editor.formatOnSave": true
-    },
+    // Visuals
+    "peacock.color": "#1f08f6",
     "workbench.colorCustomizations": {
         "activityBar.activeBackground": "#4b38f9",
         "activityBar.activeBorder": "#f95745",
@@ -43,7 +18,53 @@
         "titleBar.activeBackground": "#1f08f6",
         "titleBar.activeForeground": "#e7e7e7",
         "titleBar.inactiveBackground": "#1f08f699",
-        "titleBar.inactiveForeground": "#e7e7e799"
+        "titleBar.inactiveForeground": "#e7e7e799",
+        "commandCenter.border": "#e7e7e799"
     },
-    "peacock.color": "#1f08f6"
+
+    // ESLint config
+    "eslint.codeAction.showDocumentation": {
+        "enable": true
+    },
+    "eslint.probe": [
+        "javascript",
+        "typescript",
+        "javascriptreact",
+        "typescriptreact",
+        "vue",
+        "html",
+        "markdown",
+        "json",
+        "jsonc",
+        "json5"
+    ],
+    "prettier.enable": false,
+
+    // Editor
+    "editor.formatOnSave": true,
+    "editor.accessibilitySupport": "off",
+    "editor.cursorSmoothCaretAnimation": true,
+    "editor.find.addExtraSpaceOnTop": false,
+    "editor.guides.bracketPairs": "active",
+    "editor.inlineSuggest.enabled": true,
+    "editor.lineNumbers": "interval",
+    "editor.multiCursorModifier": "ctrlCmd",
+    "editor.renderWhitespace": "boundary",
+    "editor.suggestSelection": "first",
+    "editor.tabSize": 4,
+    "editor.unicodeHighlight.invisibleCharacters": false,
+    "editor.codeActionsOnSave": {
+        "source.fixAll": false,
+        "source.fixAll.eslint": true, // this allows ESLint to auto fix on save
+        "source.organizeImports": false
+    },
+    "[markdown]": {
+        "editor.formatOnSave": false
+    },
+    "[prisma]": {
+        "editor.defaultFormatter": "Prisma.prisma",
+        "editor.formatOnSave": true
+    },
+    "files.eol": "\n",
+    "typescript.tsdk": "node_modules/typescript/lib"
 }

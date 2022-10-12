@@ -13,17 +13,7 @@ import {
     DMMFPAS_CustomResolver,
 } from './types'
 import { join, extname, basename, dirname } from 'path'
-import {
-    readFile,
-    outputFile,
-    writeFile,
-    writeFileSync,
-    readFileSync,
-    copy,
-    openSync,
-    writeSync,
-    close,
-} from 'fs-extra'
+import { readFile, outputFile, writeFile, writeFileSync, readFileSync, copy } from 'fs-extra'
 import flow from 'lodash/flow'
 import camelCase from 'lodash/camelCase'
 import upperFirst from 'lodash/upperFirst'
@@ -463,7 +453,9 @@ export class PrismaAppSyncCompiler {
             } else if (directive?.allow === 'userPools') {
                 if (directive?.groups && Array.isArray(directive.groups)) {
                     outputDirectives.push(
-                        `@aws_auth(cognito_groups: [${directive.groups.map((g: string) => `"${g}"`).join(', ')}])`,
+                        `@aws_cognito_user_pools(cognito_groups: [${directive.groups
+                            .map((g: string) => `"${g}"`)
+                            .join(', ')}])`,
                     )
                 } else {
                     outputDirectives.push('@aws_cognito_user_pools')

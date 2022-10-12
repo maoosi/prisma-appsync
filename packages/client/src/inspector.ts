@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { inspect as nodeInspect } from 'util'
 
 const errorCodes = {
@@ -7,13 +8,13 @@ const errorCodes = {
     TOO_MANY_REQUESTS: 429,
 }
 
-type ErrorExtensions = {
+interface ErrorExtensions {
     type: keyof typeof errorCodes
     trace?: string[]
     [key: string]: any
 }
 
-type ErrorDetails = {
+interface ErrorDetails {
     error: string
     type: ErrorExtensions['type']
     code: number
@@ -33,10 +34,11 @@ export class CustomError extends Error {
         this.error = message
         this.type = extensions.type
         this.trace = extensions?.trace || []
-        this.code =
-            typeof errorCodes[this.type] !== 'undefined' ? errorCodes[this.type] : errorCodes['INTERNAL_SERVER_ERROR']
+        this.code
+            = typeof errorCodes[this.type] !== 'undefined' ? errorCodes[this.type] : errorCodes.INTERNAL_SERVER_ERROR
 
-        if (this.stack && this.stack.length > 0) this.trace.unshift(this.stack)
+        if (this.stack && this.stack.length > 0)
+            this.trace.unshift(this.stack)
 
         this.message = JSON.stringify({
             error: this.error,
@@ -51,16 +53,16 @@ export class CustomError extends Error {
             trace: this.trace,
         }
 
-        if (!(process?.env?.PRISMA_APPSYNC_TESTING === 'true')) {
+        if (!(process?.env?.PRISMA_APPSYNC_TESTING === 'true'))
             log([this.details], 'ERROR')
-        }
     }
 }
 
 export function parseError(error: Error): CustomError {
     if (error instanceof CustomError) {
         return error
-    } else {
+    }
+    else {
         return new CustomError(error.message, {
             type: 'INTERNAL_SERVER_ERROR',
             trace: error?.stack ? [error.stack] : [],
@@ -81,9 +83,8 @@ export function inspect(data: any): string {
 }
 
 export function debug(...data): void {
-    if (process.env.PRISMA_APPSYNC_DEBUG === 'true' && !(process?.env?.PRISMA_APPSYNC_TESTING === 'true')) {
+    if (process.env.PRISMA_APPSYNC_DEBUG === 'true' && !(process?.env?.PRISMA_APPSYNC_TESTING === 'true'))
         log([...data])
-    }
 }
 
 export function log(data: any, level?: 'ERROR' | 'WARN' | 'INFO'): void {
@@ -93,10 +94,13 @@ export function log(data: any, level?: 'ERROR' | 'WARN' | 'INFO'): void {
 
     dataList.forEach((logData: any, index: number) => {
         let log = typeof logData === 'string' ? logData : inspect(logData)
-        if (index === 0) log = `${logPrefix} ${log}`
+        if (index === 0)
+            log = `${logPrefix} ${log}`
 
-        if (level === 'ERROR') console.error(log)
-        else if (level === 'WARN') console.warn(log)
+        if (level === 'ERROR')
+            console.error(log)
+        else if (level === 'WARN')
+            console.warn(log)
         else console.info(log)
     })
 }

@@ -1,25 +1,8 @@
 {
     "root": true,
-    "extends": ["alloy", "alloy/typescript"],
-    "plugins": ["prettier"],
-    "env": {
-        "browser": false,
-        "node": true
-    },
-    "globals": {
-        "$": true,
-        "chalk": true
-    },
+    "extends": "@antfu",
     "rules": {
-        "no-unused-vars": "off",
-        "no-console": "off",
-        "comma-dangle": "off",
-        "brace-style": "off",
-        "no-param-reassign": "off",
-        "radix": ["error", "as-needed"],
-        "indent": "off",
-        "@typescript-eslint/prefer-for-of": "off",
-        "@typescript-eslint/no-unused-vars": "off",
+        "jsonc/indent": ["error", 4, {}],
         "@typescript-eslint/indent": [
             "error",
             4,
@@ -27,7 +10,37 @@
                 "offsetTernaryExpressions": true,
                 "ignoredNodes": ["TemplateLiteral *", "TSTypeParameterInstantiation"]
             }
-        ],
-        "@typescript-eslint/explicit-member-accessibility": "off"
+        ]
+    },
+    "globals": {
+        "$": true,
+        "chalk": true,
+        "cd": true,
+        "argv": true,
+        "fs": true
     }
+    // "env": {
+    //     "browser": false,
+    //     "node": true
+    // },
+    // "rules": {
+    //     "no-unused-vars": "off",
+    //     "no-console": "off",
+    //     "comma-dangle": "off",
+    //     "brace-style": "off",
+    //     "no-param-reassign": "off",
+    //     "radix": ["error", "as-needed"],
+    //     "indent": "off",
+    //     "@typescript-eslint/prefer-for-of": "off",
+    //     "@typescript-eslint/no-unused-vars": "off",
+        // "@typescript-eslint/indent": [
+        //     "error",
+        //     4,
+        //     {
+        //         "offsetTernaryExpressions": true,
+        //         "ignoredNodes": ["TemplateLiteral *", "TSTypeParameterInstantiation"]
+        //     }
+        // ],
+    //     "@typescript-eslint/explicit-member-accessibility": "off"
+    // }
 }

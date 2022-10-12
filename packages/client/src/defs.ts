@@ -1,16 +1,16 @@
 import { PrismaClient } from '@prisma/client'
 import type {
-    AppSyncResolverHandler,
-    AppSyncResolverEvent,
-    AppSyncIdentityIAM,
     AppSyncIdentityCognito,
-    AppSyncIdentityOIDC,
+    AppSyncIdentityIAM,
     AppSyncIdentityLambda,
+    AppSyncIdentityOIDC,
+    AppSyncResolverEvent,
+    AppSyncResolverHandler,
 } from 'aws-lambda'
 
 // Prisma-AppSync Client Types
 
-export type PrismaAppSyncOptionsType = {
+export interface PrismaAppSyncOptionsType {
     connectionString?: string
     sanitize?: boolean
     debug?: boolean
@@ -23,7 +23,7 @@ export type Options = Required<PrismaAppSyncOptionsType> & {
     modelsMapping: any
 }
 
-export type InjectedConfig = {
+export interface InjectedConfig {
     modelsMapping?: { [modelVariant: string]: string }
     operations?: string
 }
@@ -34,7 +34,7 @@ export type ActionsAlias = typeof ActionsAliases[keyof typeof ActionsAliases] | 
 
 export type ActionsAliasStr = keyof typeof ActionsAliases
 
-export type Context = {
+export interface Context {
     action: Action
     alias: ActionsAlias
     model: string | null
@@ -63,7 +63,7 @@ export { AppSyncResolverHandler, AppSyncResolverEvent }
  * }
  * ```
  */
-export type QueryParams = {
+export interface QueryParams {
     type: GraphQLType
     operation: string
     context: Context
@@ -86,14 +86,14 @@ export type PrismaCreateMany = Pick<Required<PrismaArgs>, 'data'> & Pick<PrismaA
 export type PrismaUpdate = Pick<Required<PrismaArgs>, 'data' | 'where'> & Pick<PrismaArgs, 'select'>
 export type PrismaUpdateMany = Pick<Required<PrismaArgs>, 'data' | 'where'>
 export type PrismaUpsert = Pick<Required<PrismaArgs>, 'where'> &
-    Pick<PrismaArgs, 'select'> & {
-        update: any
-        create: any
-    }
+Pick<PrismaArgs, 'select'> & {
+    update: any
+    create: any
+}
 export type PrismaDelete = Pick<Required<PrismaArgs>, 'where'> & Pick<PrismaArgs, 'select'>
 export type PrismaDeleteMany = Pick<Required<PrismaArgs>, 'where'>
 
-export type QueryBuilder = {
+export interface QueryBuilder {
     prismaGet: (...prismaArgs: PrismaArgs[]) => PrismaGet
     prismaList: (...prismaArgs: PrismaArgs[]) => PrismaList
     prismaCount: (...prismaArgs: PrismaArgs[]) => PrismaCount
@@ -143,21 +143,21 @@ export type AfterHookParams = QueryParams & {
 
 export type Reason = string | ((context: Context) => string)
 
-export type Shield = {
+export interface Shield {
     [matcher: string]:
-        | boolean
-        | {
-              rule: boolean | any
-              reason?: Reason
-          }
+    | boolean
+    | {
+        rule: boolean | any
+        reason?: Reason
+    }
 }
 
-export type HooksProps = {
+export interface HooksProps {
     before: BeforeHookParams
     after: AfterHookParams
 }
 
-export type HooksReturn = {
+export interface HooksReturn {
     before: Promise<BeforeHookParams>
     after: Promise<AfterHookParams>
 }
@@ -184,7 +184,7 @@ export type Hooks<Operations extends string, CustomResolvers extends string> =
     | HooksParameters<'before', Operations, CustomResolvers>
     | HooksParameters<'after', Operations, CustomResolvers>
 
-export type ShieldAuthorization = {
+export interface ShieldAuthorization {
     canAccess: boolean
     reason: Reason
     prismaFilter: any
@@ -192,7 +192,7 @@ export type ShieldAuthorization = {
     globPattern: string
 }
 
-export type ResolveParams<Operations extends string, CustomResolvers extends string> = {
+export interface ResolveParams<Operations extends string, CustomResolvers extends string> {
     event: AppSyncEvent
     resolvers?: {
         [resolver in CustomResolvers]: ((props: QueryParamsCustom) => Promise<any>) | boolean
@@ -205,7 +205,7 @@ export type ResolveParams<Operations extends string, CustomResolvers extends str
 
 export { PrismaClient }
 
-export type PrismaArgs = {
+export interface PrismaArgs {
     where?: any
     data?: any
     select?: any
@@ -352,11 +352,11 @@ let actionsListMultiple: Action[] = []
 let actionsListSingle: Action[] = []
 
 for (const actionAlias in ActionsAliasesList) {
-    if (actionAlias.startsWith('batch')) {
+    if (actionAlias.startsWith('batch'))
         actionsListMultiple = actionsListMultiple.concat(ActionsAliasesList[actionAlias])
-    } else {
+
+    else
         actionsListSingle = actionsListSingle.concat(ActionsAliasesList[actionAlias])
-    }
 }
 
 export const ActionsList = actionsListSingle.filter((item, pos) => actionsListSingle.indexOf(item) === pos)

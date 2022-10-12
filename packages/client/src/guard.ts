@@ -1,17 +1,19 @@
-import {
-    PrismaClient,
-    ShieldAuthorization,
-    Shield,
+import lambdaRateLimiter from 'lambda-rate-limiter'
+import type {
     Context,
+    Options,
+    PrismaClient,
     QueryParams,
-    DebugTestingKey,
+    Shield,
+    ShieldAuthorization,
+} from './defs'
+import {
     ActionsList,
     BatchActionsList,
-    Options,
+    DebugTestingKey,
 } from './defs'
-import { merge, encode, decode, filterXSS, isMatchingGlob, traverse, upperFirst } from './utils'
+import { decode, encode, filterXSS, isMatchingGlob, merge, traverse, upperFirst } from './utils'
 import { CustomError } from './inspector'
-import lambdaRateLimiter from 'lambda-rate-limiter'
 
 /**
  * #### Sanitize data (parse xss + encode html).
@@ -23,12 +25,11 @@ export function sanitize(data: any): any {
     return traverse(data, (value, key) => {
         let excludeChilds = false
 
-        if (typeof key === 'string' && key === DebugTestingKey) {
+        if (typeof key === 'string' && key === DebugTestingKey)
             excludeChilds = true
-        }
-        if (typeof value === 'string') {
+
+        if (typeof value === 'string')
             value = encode(filterXSS(value))
-        }
 
         return { value, excludeChilds }
     })
@@ -44,12 +45,11 @@ export function clarify(data: any): any {
     return traverse(data, (value, key) => {
         let excludeChilds = false
 
-        if (typeof key === 'string' && key === DebugTestingKey) {
+        if (typeof key === 'string' && key === DebugTestingKey)
             excludeChilds = true
-        }
-        if (typeof value === 'string') {
+
+        if (typeof value === 'string')
             value = decode(value)
-        }
 
         return { value, excludeChilds }
     })
@@ -83,7 +83,7 @@ export function getShieldAuthorization({
         globPattern: String(),
     }
 
-    let modelSingular = context.model ? upperFirst(context.model!) : String()
+    const modelSingular = context.model ? upperFirst(context.model!) : String()
     let modelPlural = modelSingular
 
     if (options?.modelsMapping && modelSingular) {
@@ -91,7 +91,8 @@ export function getShieldAuthorization({
         const modelPluralMatch = models.find((key: string) => {
             return options.modelsMapping[key] === modelSingular.toLowerCase() && key !== upperFirst(modelSingular)
         })
-        if (modelPluralMatch) modelPlural = modelPluralMatch
+        if (modelPluralMatch)
+            modelPlural = modelPluralMatch
     }
 
     const shieldPaths = paths.map((path: string) => {
@@ -110,30 +111,32 @@ export function getShieldAuthorization({
     })
 
     for (let i = shieldPaths.length - 1; i >= 0; i--) {
-        let shieldPath: string = shieldPaths[i]
+        const shieldPath: string = shieldPaths[i]
 
         for (const matcher in shield) {
             let globPattern = matcher
 
-            if (!globPattern.startsWith('/') && globPattern !== '**') globPattern = `/${globPattern}`
+            if (!globPattern.startsWith('/') && globPattern !== '**')
+                globPattern = `/${globPattern}`
 
             if (isMatchingGlob(shieldPath, globPattern)) {
                 const shieldRule = shield[matcher]
 
                 if (typeof shieldRule === 'boolean') {
                     authorization.canAccess = shield[matcher] as boolean
-                } else {
-                    if (typeof shieldRule.rule === 'undefined') {
-                        throw new CustomError(`Badly formed shield rule.`, { type: 'INTERNAL_SERVER_ERROR' })
-                    }
+                }
+                else {
+                    if (typeof shieldRule.rule === 'undefined')
+                        throw new CustomError('Badly formed shield rule.', { type: 'INTERNAL_SERVER_ERROR' })
 
                     if (typeof shieldRule.rule === 'boolean') {
                         authorization.canAccess = shieldRule.rule
-                    } else {
+                    }
+                    else {
                         authorization.canAccess = true
-                        if (!authorization.prismaFilter) {
+                        if (!authorization.prismaFilter)
                             authorization.prismaFilter = {}
-                        }
+
                         authorization.prismaFilter = merge(authorization.prismaFilter, shieldRule.rule)
                     }
                 }
@@ -144,11 +147,11 @@ export function getShieldAuthorization({
                 const isReasonDefined = typeof shieldRule !== 'boolean' && typeof shieldRule.reason !== 'undefined'
                 let reason = `Matcher: ${authorization.matcher}`
 
-                if (isReasonDefined && typeof shieldRule.reason === 'function') {
+                if (isReasonDefined && typeof shieldRule.reason === 'function')
                     reason = shieldRule.reason(context)
-                } else if (isReasonDefined && typeof shieldRule.reason === 'string') {
+
+                else if (isReasonDefined && typeof shieldRule.reason === 'string')
                     reason = shieldRule.reason
-                }
 
                 authorization.reason = reason
             }
@@ -171,10 +174,12 @@ export function getDepth({ paths, context }: { paths: string[]; context: Context
 
     paths.forEach((path: string) => {
         const pathDepth = path.split('/').length - 3
-        if (pathDepth > depth) depth = pathDepth
+        if (pathDepth > depth)
+            depth = pathDepth
     })
 
-    if (context.model === null) depth += 1
+    if (context.model === null)
+        depth += 1
 
     return depth
 }
@@ -252,7 +257,8 @@ export async function preventDOS({
             uniqueTokenPerInterval,
         })
         count = await limiter.check(maxReqPerMinute, callerUuid)
-    } catch (error) {
+    }
+    catch (error) {
         limitExceeded = true
         count = maxReqPerMinute
     }
