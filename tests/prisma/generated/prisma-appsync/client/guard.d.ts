@@ -1,4 +1,4 @@
-import { PrismaClient, ShieldAuthorization, Shield, Context, QueryParams, Options } from './defs';
+import type { Context, Options, PrismaClient, QueryParams, Shield, ShieldAuthorization } from './defs';
 /**
  * #### Sanitize data (parse xss + encode html).
  *

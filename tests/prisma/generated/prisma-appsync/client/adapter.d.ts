@@ -1,4 +1,4 @@
-import { Options, AppSyncEvent, QueryParams, Action, Context, PrismaArgs, ActionsAlias, Identity, Authorization, GraphQLType } from './defs';
+import type { Action, ActionsAlias, AppSyncEvent, Authorization, Context, GraphQLType, Identity, Options, PrismaArgs, QueryParams } from './defs';
 /**
  * #### Parse AppSync direct resolver `event` and returns Query Params.
  *

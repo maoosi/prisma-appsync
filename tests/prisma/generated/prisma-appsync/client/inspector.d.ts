@@ -4,17 +4,17 @@ declare const errorCodes: {
     INTERNAL_SERVER_ERROR: number;
     TOO_MANY_REQUESTS: number;
 };
-declare type ErrorExtensions = {
+interface ErrorExtensions {
     type: keyof typeof errorCodes;
     trace?: string[];
     [key: string]: any;
-};
-declare type ErrorDetails = {
+}
+interface ErrorDetails {
     error: string;
     type: ErrorExtensions['type'];
     code: number;
     trace: ErrorExtensions['trace'];
-};
+}
 export declare class CustomError extends Error {
     error: ErrorDetails['error'];
     type: ErrorDetails['type'];
