@@ -31,14 +31,16 @@ enum OrderByArg {
 }
 
 {% for model in models %}
-    {% if model.idFields | length -%}
-        input {{ model.idFields | join(" ") | pascalCase }}FieldsInput {
-            {% for field in model.fields -%}
-                {% if field.name in model.idFields -%}
-                    {{ field.name }}: {{ field.scalar }}
-                {% endif -%}
-            {% endfor %}
-        }
+    {% if model.uniqueIndexes | length -%}
+        {% for uniqueIndex in model.uniqueIndexes %}
+            input {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput {
+                {% for field in model.fields -%}
+                    {% if field.name in uniqueIndex.fields -%}
+                        {{ field.name }}: {{ field.scalar }}
+                    {% endif -%}
+                {% endfor %}
+            }
+        {% endfor %}
     {% endif %}
 
     input {{ model.name }}Filter {
@@ -91,9 +93,10 @@ enum OrderByArg {
                 {{ field.name }}: {{ field.scalar }}
             {% endif -%}
         {% endfor %}
-        {% if model.idFields | length -%}
-            {{ model.idFields | join("_") }}: 
-                {{ model.idFields | join(" ") | pascalCase }}FieldsInput!
+        {% if model.uniqueIndexes | length -%}
+            {% for uniqueIndex in model.uniqueIndexes -%}
+                {{ uniqueIndex.fields | join("_") }}: {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput!
+            {% endfor %}
         {% endif %}
     }
 
@@ -443,9 +446,10 @@ type Subscription {
             Triggered from `{{ model.gql.create }}` mutation (excl. `{{ model.gql.createMany }}` and `{{ model.gql.upsert }}`).
             """
             {{ model.gql.onCreated }}(
-                {% if model.idFields | length -%}
-                    {{ model.idFields | join("_") }}: 
-                        {{ model.idFields | join(" ") | pascalCase }}FieldsInput!
+                {% if model.uniqueIndexes | length -%}
+                    {% for uniqueIndex in model.uniqueIndexes -%}
+                        {{ uniqueIndex.fields | join("_") }}: {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput!
+                    {% endfor %}
                 {% endif %}
                 {% for field in model.subscriptionFields -%}
                     {{ field.name }}: {{ field.scalar }}
@@ -458,9 +462,10 @@ type Subscription {
             Triggered from `{{ model.gql.update }}` mutation (excl. `{{ model.gql.updateMany }}` and `{{ model.gql.upsert }}`).
             """
             {{ model.gql.onUpdated }}(
-                {% if model.idFields | length -%}
-                    {{ model.idFields | join("_") }}: 
-                        {{ model.idFields | join(" ") | pascalCase }}FieldsInput!
+                {% if model.uniqueIndexes | length -%}
+                    {% for uniqueIndex in model.uniqueIndexes -%}
+                        {{ uniqueIndex.fields | join("_") }}: {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput!
+                    {% endfor %}
                 {% endif %}
                 {% for field in model.subscriptionFields -%}
                     {{ field.name }}: {{ field.scalar }}
@@ -473,9 +478,10 @@ type Subscription {
             Triggered from `{{ model.gql.upsert }}` mutation.
             """
             {{ model.gql.onUpserted }}(
-                {% if model.idFields | length -%}
-                    {{ model.idFields | join("_") }}: 
-                        {{ model.idFields | join(" ") | pascalCase }}FieldsInput!
+                {% if model.uniqueIndexes | length -%}
+                    {% for uniqueIndex in model.uniqueIndexes -%}
+                        {{ uniqueIndex.fields | join("_") }}: {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput!
+                    {% endfor %}
                 {% endif %}
                 {% for field in model.subscriptionFields -%}
                     {{ field.name }}: {{ field.scalar }}
@@ -488,9 +494,10 @@ type Subscription {
             Triggered from `{{ model.gql.delete }}` mutation (excl. `{{ model.gql.deleteMany }}`).
             """
             {{ model.gql.onDeleted }}(
-                {% if model.idFields | length -%}
-                    {{ model.idFields | join("_") }}:
-                        {{ model.idFields | join(" ") | pascalCase }}FieldsInput!
+                {% if model.uniqueIndexes | length -%}
+                    {% for uniqueIndex in model.uniqueIndexes -%}
+                        {{ uniqueIndex.fields | join("_") }}: {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput!
+                    {% endfor %}
                 {% endif %}
                 {% for field in model.subscriptionFields -%}
                     {{ field.name }}: {{ field.scalar }}
@@ -503,9 +510,10 @@ type Subscription {
             Triggered from ANY SINGLE record mutation.
             """
             {{ model.gql.onMutated }}(
-                {% if model.idFields | length -%}
-                    {{ model.idFields | join("_") }}:
-                        {{ model.idFields | join(" ") | pascalCase }}FieldsInput!
+                {% if model.uniqueIndexes | length -%}
+                    {% for uniqueIndex in model.uniqueIndexes -%}
+                        {{ uniqueIndex.fields | join("_") }}: {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput!
+                    {% endfor %}
                 {% endif %}
                 {% for field in model.subscriptionFields -%}
                     {{ field.name }}: {{ field.scalar }}
