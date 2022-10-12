@@ -236,7 +236,9 @@ export class PrismaAppSyncCompiler {
 
     private replaceInFile(file: string, findRegex: RegExp, replace: string) {
         const content = readFileSync(file, 'utf-8')
-        writeFileSync(file, content.replace(findRegex, replace), 'utf-8')
+        const newContent = content.replace(findRegex, replace)
+        writeFileSync(file, newContent, 'utf-8')
+        return newContent
     }
 
     public getInjectedConfig(): Required<InjectedConfig> {

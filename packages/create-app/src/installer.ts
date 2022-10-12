@@ -1,12 +1,12 @@
 /* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-var-requires */
-import fs from 'fs-extra'
 import path from 'path'
+import fs from 'fs-extra'
 import prompts from 'prompts'
 import degit from 'degit'
 import execa from 'execa'
 import { detect as detectPackageManager } from 'detect-package-manager'
-import { cyan, bold, dim } from 'kolorist'
+import { bold, cyan, dim } from 'kolorist'
 
 export class Installer {
     private gitBranch: string
@@ -24,6 +24,7 @@ export class Installer {
         packageManager: 'npm' | 'yarn' | 'pnpm'
         tmpDirPath: string
     }
+
     private userChoices: {
         projectDirectory: string
         useExistingSchema: boolean
@@ -32,6 +33,7 @@ export class Installer {
         createLocalDevServer: boolean
         useCdkBoilerplate: boolean
     }
+
     private installConfig: {
         dependencies: { package: string; dev: boolean }[]
         clones: { from: string; to: string; deleteSource?: boolean }[]
@@ -87,7 +89,7 @@ export class Installer {
         console.log()
         console.log('    ___      _                             _               __                  ')
         console.log('   / _ \\_ __(◭)___ _ __ ___   __ _        /_\\  _ __  _ __ / _\\_   _ _ __   ___ ')
-        console.log("  / /◭)/ '__| / __| '_ ` _ \\ / _` |_____ //◭\\\\| '_ \\| '_ \\\\ \\| | | | '_ \\ / __|")
+        console.log('  / /◭)/ \'__| / __| \'_ ` _ \\ / _` |_____ //◭\\\\| \'_ \\| \'_ \\\\ \\| | | | \'_ \\ / __|')
         console.log(' / ___/| |  | \\__ \\ | | | | | (◭| |_____/  _  \\ |◭) | |◭) |\\ \\ |_| | | | | (__ ')
         console.log(' \\/    |_|  |_|___/_| |_| |_|\\__,_|     \\_/ \\_/ .__/| .__/\\__/\\__, |_| |_|\\___|')
         console.log('                                              |_|   |_|       |___/            ')
@@ -126,9 +128,8 @@ export class Installer {
                     })
                 ).useExistingSchema
 
-                if (this.userChoices.useExistingSchema) {
+                if (this.userChoices.useExistingSchema)
                     this.userChoices.prismaSchemaPath = this.detected.prismaSchemaPath
-                }
             }
 
             if (!this.userChoices.useExistingSchema) {
@@ -137,15 +138,15 @@ export class Installer {
                         type: 'confirm',
                         name: 'generateSchema',
                         initial: true,
-                        message: `Generate new \`prisma/prisma.schema\` file?`,
+                        message: 'Generate new `prisma/prisma.schema` file?',
                     })
                 ).generateSchema
 
-                if (this.userChoices.generateSchema) {
+                if (this.userChoices.generateSchema)
                     this.userChoices.prismaSchemaPath = path.join(this.detected.rootPath, 'prisma/schema.prisma')
-                }
             }
-        } else {
+        }
+        else {
             this.userChoices.useExistingSchema = false
             this.userChoices.generateSchema = true
             this.userChoices.prismaSchemaPath = path.join(this.detected.rootPath, 'prisma/schema.prisma')
@@ -161,7 +162,8 @@ export class Installer {
                     message: 'Use provided CDK boilerplate to deploy on AWS?',
                 })
             ).useCdkBoilerplate
-        } else {
+        }
+        else {
             this.userChoices.useCdkBoilerplate = true
         }
 
@@ -175,7 +177,8 @@ export class Installer {
                     message: 'Create local dev server?',
                 })
             ).createLocalDevServer
-        } else {
+        }
+        else {
             this.userChoices.createLocalDevServer = true
         }
     }
@@ -194,7 +197,8 @@ export class Installer {
                     { package: this.installPackage, dev: true },
                 ],
             ]
-        } else {
+        }
+        else {
             this.installConfig.dependencies = [
                 ...this.installConfig.dependencies,
                 ...[
@@ -210,7 +214,8 @@ export class Installer {
                 from: path.join(this.detected.tmpDirPath, 'packages/boilerplate/handler.ts'),
                 to: path.join(this.detected.rootPath, 'handler.ts'),
             })
-        } else {
+        }
+        else {
             this.installConfig.clones.push({
                 from: path.join(this.detected.rootPath, '../', 'packages/boilerplate/handler.ts'),
                 to: path.join(this.detected.rootPath, 'handler.ts'),
@@ -226,7 +231,7 @@ export class Installer {
                     this.installConfig.injects.push({
                         file: this.userChoices.prismaSchemaPath,
                         find: /((?: )*generator\s+client\s+{[^}]*})/g,
-                        replace: `$1\n\ngenerator appsync {\n\tprovider = "prisma-appsync"\n}`,
+                        replace: '$1\n\ngenerator appsync {\n\tprovider = "prisma-appsync"\n}',
                     })
                 }
 
@@ -234,20 +239,23 @@ export class Installer {
                     this.installConfig.injects.push({
                         file: this.userChoices.prismaSchemaPath,
                         find: /( *)provider\s*=\s*"prisma-client-js"(?:\r|\n)/g,
-                        replace: `$1provider = "prisma-client-js"\n$1binaryTargets = ["native", "rhel-openssl-1.0.x"]\n`,
+                        replace: '$1provider = "prisma-client-js"\n$1binaryTargets = ["native", "rhel-openssl-1.0.x"]\n',
                     })
-                } else {
+                }
+                else {
                     this.installConfig.recommendations.push(
                         'Make sure the `binaryTargets` inside your `schema.prisma` file include both "native" and "rhel-openssl-1.0.x"',
                     )
                 }
-            } else if (this.userChoices.generateSchema) {
+            }
+            else if (this.userChoices.generateSchema) {
                 this.installConfig.clones.push({
                     from: path.join(this.detected.tmpDirPath, 'packages/boilerplate/prisma/schema.prisma'),
                     to: this.userChoices.prismaSchemaPath,
                 })
             }
-        } else if (this.userChoices.prismaSchemaPath) {
+        }
+        else if (this.userChoices.prismaSchemaPath) {
             this.installConfig.clones.push({
                 from: path.join(this.detected.rootPath, '../', 'packages/boilerplate/prisma/schema.prisma'),
                 to: this.userChoices.prismaSchemaPath,
@@ -255,7 +263,7 @@ export class Installer {
             this.installConfig.injects.push({
                 file: this.userChoices.prismaSchemaPath,
                 find: /((?: )*generator\s+appsync\s+{[^}]*})/g,
-                replace: `generator appsync {\n\tprovider = "../dist/generator.js"\n}`,
+                replace: 'generator appsync {\n\tprovider = "../dist/generator.js"\n}',
             })
         }
         this.installConfig.scripts.push({
@@ -274,7 +282,7 @@ export class Installer {
             ]
 
             this.installConfig.shells.push({
-                cmd: `npx pm2 install typescript`,
+                cmd: 'npx pm2 install typescript',
                 dir: this.detected.rootPath,
                 when: 'after',
             })
@@ -327,9 +335,9 @@ export class Installer {
                     find: /(watch:.*{)/g,
                     replace: [
                         '$1',
-                        "\t\t[join(__dirname, '../../packages/')]: async ({ exec }) => {",
-                        "\t\t\tawait exec('pnpm build', { cwd: join(__dirname, '../../') })",
-                        "\t\t\tawait exec('npx prisma generate', { cwd: join(__dirname, '../') })",
+                        '\t\t[join(__dirname, \'../../packages/\')]: async ({ exec }) => {',
+                        '\t\t\tawait exec(\'pnpm build\', { cwd: join(__dirname, \'../../\') })',
+                        '\t\t\tawait exec(\'npx prisma generate\', { cwd: join(__dirname, \'../\') })',
                         '\t\t},',
                     ].join('\n'),
                 })
@@ -355,9 +363,10 @@ export class Installer {
                 this.installConfig.injects.push({
                     file: path.join(this.detected.rootPath, 'cdk/src/index.ts'),
                     find: /nodeModules\: \[(.+)\]/g,
-                    replace: `nodeModules: [$1, 'prisma-appsync']`,
+                    replace: 'nodeModules: [$1, \'prisma-appsync\']',
                 })
-            } else {
+            }
+            else {
                 this.installConfig.clones.push({
                     from: path.join(this.detected.rootPath, '../', 'packages/boilerplate/cdk'),
                     to: path.join(this.detected.rootPath, 'cdk'),
@@ -442,16 +451,15 @@ export class Installer {
                     clone.to,
                     [
                         ...parts.splice(0, parts.length > 1 ? parts.length - 1 : 0),
-                        ...['legacy_' + this.timestamp + '_' + parts[parts.length - 1]],
+                        ...[`legacy_${this.timestamp}_${parts[parts.length - 1]}`],
                     ].join('/'),
                 )
             }
 
             this.copy(clone.from, clone.to)
 
-            if (typeof clone.deleteSource === 'boolean' && clone.deleteSource === true) {
+            if (typeof clone.deleteSource === 'boolean' && clone.deleteSource === true)
                 this.remove(clone.from)
-            }
         }
 
         // injects
@@ -461,7 +469,7 @@ export class Installer {
         }
 
         // shells: before
-        const shellsBefore = this.installConfig.shells.filter((s) => s.when === 'before')
+        const shellsBefore = this.installConfig.shells.filter(s => s.when === 'before')
         for (let l = 0; l < shellsBefore.length; l++) {
             const shell = shellsBefore[l]
             const [baseCmd, ...execs] = shell.cmd.split(' ')
@@ -473,8 +481,8 @@ export class Installer {
         }
 
         // dependencies
-        const devDeps = this.installConfig.dependencies.filter((d) => d.dev === true).map((d) => d.package)
-        const deps = this.installConfig.dependencies.filter((d) => d.dev !== true).map((d) => d.package)
+        const devDeps = this.installConfig.dependencies.filter(d => d.dev === true).map(d => d.package)
+        const deps = this.installConfig.dependencies.filter(d => d.dev !== true).map(d => d.package)
 
         if (devDeps.length > 0) {
             await execa(this.detected.packageManager, [add, ...devDeps, saveDev], {
@@ -491,14 +499,14 @@ export class Installer {
 
         // scripts
         const pkg = this.readJson(path.join(this.detected.rootPath, 'package.json'))
-        if (typeof pkg?.scripts === 'undefined') pkg['scripts'] = {}
+        if (typeof pkg?.scripts === 'undefined')
+            pkg.scripts = {}
 
         for (let m = 0; m < this.installConfig.scripts.length; m++) {
             const script = this.installConfig.scripts[m]
 
-            if (typeof pkg?.scripts?.[script.name] !== 'undefined') {
+            if (typeof pkg?.scripts?.[script.name] !== 'undefined')
                 pkg.scripts[`legacy:${this.timestamp}:${script.name}`] = pkg.scripts[script.name]
-            }
 
             pkg.scripts[script.name] = script.cmd
         }
@@ -506,7 +514,7 @@ export class Installer {
         this.writeJson(path.join(this.detected.rootPath, 'package.json'), pkg)
 
         // shells: after
-        const shellsAfter = this.installConfig.shells.filter((s) => s.when === 'after')
+        const shellsAfter = this.installConfig.shells.filter(s => s.when === 'after')
         for (let l = 0; l < shellsAfter.length; l++) {
             const shell = shellsAfter[l]
             const [baseCmd, ...execs] = shell.cmd.split(' ')
@@ -543,7 +551,8 @@ export class Installer {
         const stat = fs.statSync(src)
         if (stat.isDirectory()) {
             this.copyDir(src, dest)
-        } else {
+        }
+        else {
             const parentDir = path.dirname(dest)
             fs.ensureDirSync(parentDir)
             fs.copyFileSync(src, dest)
@@ -562,7 +571,8 @@ export class Installer {
     }
 
     private emptyDir(dir: string) {
-        if (!fs.existsSync(dir)) return
+        if (!fs.existsSync(dir))
+            return
 
         for (const file of fs.readdirSync(dir)) {
             const abs = path.resolve(dir, file)
@@ -570,7 +580,8 @@ export class Installer {
             if (fs.lstatSync(abs).isDirectory()) {
                 this.emptyDir(abs)
                 fs.rmdirSync(abs)
-            } else {
+            }
+            else {
                 fs.unlinkSync(abs)
             }
         }
@@ -578,11 +589,11 @@ export class Installer {
 
     private remove(src: string) {
         const stat = fs.lstatSync(src)
-        if (stat.isDirectory()) {
+        if (stat.isDirectory())
             this.removeDir(src)
-        } else {
+
+        else
             fs.rmSync(src)
-        }
     }
 
     private removeDir(dir: string) {
@@ -607,15 +618,16 @@ export class Installer {
             const filename = path.join(dir, files[i])
             const stat = fs.lstatSync(filename)
 
-            if (stat.isDirectory()) {
+            if (stat.isDirectory())
                 results = [...results, ...this.findFilesInDir(filename, findRegex)]
-            } else if (filename.match(findRegex)) {
+
+            else if (filename.match(findRegex))
                 results.push(filename)
-            }
         }
 
         return results
     }
 }
 
+// eslint-disable-next-line no-new
 new Installer()

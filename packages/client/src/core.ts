@@ -24,7 +24,8 @@ import * as queries from './resolver'
 /**
  * ##  Auto-injected at generation time
  */
-const injectedConfig: InjectedConfig = {} // ! inject:config
+// eslint-disable-next-line spaced-comment
+const injectedConfig: InjectedConfig = {} //! inject:config
 
 /**
  * ##  Prisma-AppSync Client ʲˢ
@@ -182,10 +183,7 @@ export class PrismaAppSync {
    * Read more in our [docs](https://prisma-appsync.vercel.app).
    */
     public async resolve<CustomResolvers = void>(
-        resolveParams: ResolveParams<
-      '//! inject:type:operations',
-      Extract<CustomResolvers, string>
-    >,
+        resolveParams: ResolveParams<'//! inject:type:operations', Extract<CustomResolvers, string>>,
     ): Promise<any> {
         let result: any = null
 
