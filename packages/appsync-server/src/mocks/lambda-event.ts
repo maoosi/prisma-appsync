@@ -1,4 +1,5 @@
-import { AppSyncEvent, Identity, _ } from '../../../client/src'
+import type { AppSyncEvent, AppSyncIdentity, Identity } from '../../../client/src'
+import { _ } from '../../../client/src'
 import { graphQlQueryToJson } from '../gql-query-to-json'
 
 export default function ({
@@ -20,18 +21,17 @@ export default function ({
     const selectionSet = query[parentType][fieldName]
     const args = typeof selectionSet.__args !== 'undefined' ? selectionSet.__args : {}
 
-    if (Object.keys(args).length > 0) {
+    if (Object.keys(args).length > 0)
         delete selectionSet.__args
-    }
 
-    const selectionSetList = Object.keys(_.dotate(selectionSet)).map((selection) => selection.replace(/\./g, '/'))
+    const selectionSetList = Object.keys(_.dotate(selectionSet)).map(selection => selection.replace(/\./g, '/'))
 
     selectionSetList.unshift('__typename')
 
     const event: AppSyncEvent = {
         arguments: args,
         source: null,
-        identity,
+        identity: identity as AppSyncIdentity,
         info: {
             parentTypeName,
             fieldName,
@@ -39,7 +39,7 @@ export default function ({
             selectionSetList,
             selectionSetGraphQL,
         },
-        request: request,
+        request,
         prev: { result: {} },
         stash: {},
     }

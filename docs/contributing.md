@@ -103,10 +103,10 @@ VS Code's `settings.json`
 
 ```json
 {
-  "editor.codeActionsOnSave": {
-    "source.fixAll": false,
-    "source.fixAll.eslint": true
-  }
+    "editor.codeActionsOnSave": {
+        "source.fixAll": false,
+        "source.fixAll.eslint": true
+    }
 }
 ```
 

@@ -4,7 +4,7 @@ import { parse } from 'graphql'
 import { EnumType } from 'json-to-graphql-query'
 import mapValues from 'lodash/mapValues'
 
-type variablesObject = {
+interface variablesObject {
     [variableName: string]: any
 }
 
@@ -73,22 +73,32 @@ interface ActualDefinitionNode {
 const undefinedVariableConst = 'undefined_variable'
 const isVariableDropinConst = '_____isVariableDropinConst'
 
-export const flatMap = (arg: any, callback: any) =>
-    arg.reduce((callbackFn: any, initialValue: any) => callbackFn.concat(callback(initialValue)), [])
-export const isString = (arg: any): boolean => typeof arg === 'string'
 export const isArray = Array.isArray
-export const isObject = (arg: any): boolean => arg instanceof Object
 
-const getArgumentObject = (argumentFields: Argument[]) => {
+export function flatMap(arg: any, callback: any) {
+    return arg.reduce((callbackFn: any, initialValue: any) => callbackFn.concat(callback(initialValue)), [])
+}
+
+export function isString(arg: any): boolean {
+    return typeof arg === 'string'
+}
+
+export function isObject(arg: any): boolean {
+    return arg instanceof Object
+}
+
+function getArgumentObject(argumentFields: Argument[]) {
     const argObj: any = {}
     argumentFields.forEach((arg) => {
         if (arg.value.kind === 'ObjectValue' && arg?.value?.fields) {
             argObj[arg.name.value] = getArgumentObject(arg.value.fields)
-        } else if (arg.value.kind === 'ListValue') {
+        }
+        else if (arg.value.kind === 'ListValue') {
             argObj[arg.name.value] = flatMap(arg.value.values, (element: any) => {
                 if (element.value) {
                     return element.value
-                } else if (element.fields) {
+                }
+                else if (element.fields) {
                     const args = getArguments(element.fields)
                     const value: any = {}
 
@@ -99,35 +109,44 @@ const getArgumentObject = (argumentFields: Argument[]) => {
                     return value
                 }
             })
-        } else if (arg.value.kind === 'IntValue') {
+        }
+        else if (arg.value.kind === 'IntValue') {
             argObj[arg.name.value] = parseInt(arg.value.value)
-        } else if (arg.value.kind === 'Variable') {
+        }
+        else if (arg.value.kind === 'Variable') {
             argObj[arg.name.value] = `${arg?.value?.name?.value}${isVariableDropinConst}`
-        } else {
+        }
+        else {
             argObj[arg.name.value] = arg.value.value
         }
     })
     return argObj
 }
 
-const getArguments = (args: any) => {
+function getArguments(args: any) {
     const argsObj: any = {}
     args.forEach((arg: any) => {
         if (arg.value.kind === 'ObjectValue') {
             argsObj[arg.name.value] = getArgumentObject(arg.value.fields)
-        } else if (arg.value.kind === 'Variable') {
+        }
+        else if (arg.value.kind === 'Variable') {
             argsObj[arg.name.value] = `${arg.value.name.value}${isVariableDropinConst}`
-        } else if (arg.selectionSet) {
+        }
+        else if (arg.selectionSet) {
             argsObj[arg.name.value] = getSelections(arg.selectionSet.selections)
-        } else if (arg.value.kind === 'EnumValue') {
+        }
+        else if (arg.value.kind === 'EnumValue') {
             argsObj[arg.name.value] = new EnumType(arg.value.value)
-        } else if (arg.value.kind === 'IntValue') {
+        }
+        else if (arg.value.kind === 'IntValue') {
             argsObj[arg.name.value] = parseInt(arg.value.value)
-        } else if (arg.value.kind === 'ListValue') {
+        }
+        else if (arg.value.kind === 'ListValue') {
             argsObj[arg.name.value] = flatMap(arg.value.values, (element: any) => {
                 if (element.value) {
                     return element.value
-                } else if (element.fields) {
+                }
+                else if (element.fields) {
                     const args = getArguments(element.fields)
                     const value: any = {}
 
@@ -138,7 +157,8 @@ const getArguments = (args: any) => {
                     return value
                 }
             })
-        } else {
+        }
+        else {
             argsObj[arg.name.value] = arg.value.value
         }
     })
@@ -146,7 +166,7 @@ const getArguments = (args: any) => {
     return argsObj
 }
 
-const getSelections = (selections: Selection[]) => {
+function getSelections(selections: Selection[]) {
     const selObj: any = {}
 
     selections.forEach((selection) => {
@@ -154,21 +174,19 @@ const getSelections = (selections: Selection[]) => {
         const selectionName = selectionHasAlias ? selection.alias.value : selection.name.value
         if (selection.selectionSet) {
             selObj[selectionName] = getSelections(selection.selectionSet.selections)
-            if (selectionHasAlias) {
+            if (selectionHasAlias)
                 selObj[selection.alias.value].__aliasFor = selection.name.value
-            }
         }
-        if (selection.arguments && selection.arguments.length > 0) {
+        if (selection.arguments && selection.arguments.length > 0)
             selObj[selectionName].__args = getArguments(selection.arguments)
-        }
-        if (!selection.selectionSet && (!selection.arguments || !selection.arguments.length)) {
+
+        if (!selection.selectionSet && (!selection.arguments || !selection.arguments.length))
             selObj[selectionName] = true
-        }
     })
     return selObj
 }
 
-const checkEachVariableInQueryIsDefined = (defintion: ActualDefinitionNode, variables: variablesObject) => {
+function checkEachVariableInQueryIsDefined(defintion: ActualDefinitionNode, variables: variablesObject) {
     const varsList = defintion?.variableDefinitions?.reduce((prev: any, curr: any) => {
         return [
             ...prev,
@@ -182,9 +200,8 @@ const checkEachVariableInQueryIsDefined = (defintion: ActualDefinitionNode, vari
         const idx = varsList?.findIndex((element) => {
             return element.key === variableKey
         })
-        if (idx !== -1 && varsList && idx && typeof varsList[idx] !== 'undefined') {
+        if (idx !== -1 && varsList && idx && typeof varsList[idx] !== 'undefined')
             varsList[idx].value = variableValue
-        }
     })
 
     const undefinedVariable = varsList?.find((varInQuery) => {
@@ -192,27 +209,29 @@ const checkEachVariableInQueryIsDefined = (defintion: ActualDefinitionNode, vari
     })
     if (undefinedVariable) {
         throw new Error(
-            `The query you want to parse is using variables. This means that you have to supply for every variable that is used in the query a corresponding value. You can parse these values as a second parameter on the options object, on the "variables" key.`,
+            'The query you want to parse is using variables. This means that you have to supply for every variable that is used in the query a corresponding value. You can parse these values as a second parameter on the options object, on the "variables" key.',
         )
     }
 
     return varsList
 }
 
-const replaceVariables = (obj: any, variables: any): any => {
+function replaceVariables(obj: any, variables: any): any {
     return mapValues(obj, (value) => {
         if (isString(value) && new RegExp(`${isVariableDropinConst}$`).test(value)) {
             const variableName = value.replace(isVariableDropinConst, '')
             return variables[variableName]
-        } else if (isObject(value) && !isArray(value)) {
+        }
+        else if (isObject(value) && !isArray(value)) {
             return replaceVariables(value, variables)
-        } else {
+        }
+        else {
             return value
         }
     })
 }
 
-export const graphQlQueryToJson = (
+export function graphQlQueryToJson(
     query: string,
     options: {
         variables: variablesObject
@@ -221,9 +240,10 @@ export const graphQlQueryToJson = (
         variables: {},
         operationName: String(),
     },
-) => {
+) {
     const jsonObject: any = {}
-    if (!query) return jsonObject
+    if (!query)
+        return jsonObject
 
     const parsedQuery = parse(query)
 
@@ -231,7 +251,7 @@ export const graphQlQueryToJson = (
         return options.operationName === q?.name?.value
     }) || parsedQuery.definitions?.[0]
 
-    // @ts-ignore
+    // @ts-expect-error: Type 'InputObjectTypeExtensionNode' is missing the following properties from type 'ActualDefinitionNode': operation, selectionSet
     const definition = operationDefinition as ActualDefinitionNode
     const operation = definition.operation
 

@@ -34,6 +34,7 @@ export {
     OPENID_CONNECT,
     AppSyncResolverHandler,
     AppSyncResolverEvent,
+    AppSyncIdentity,
 } from './defs'
 
 const _ = {

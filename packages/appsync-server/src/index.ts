@@ -1,13 +1,15 @@
+/* eslint-disable no-console */
+import { readFileSync } from 'fs'
+import { join } from 'path'
+import { exec as nodeExec } from 'child_process'
 import express from 'express'
 import { buildSchema } from 'graphql'
 import { graphqlHTTP } from 'express-graphql'
-import { readFileSync } from 'fs'
-import { join } from 'path'
+import nodeWatch from 'node-watch'
+import type { Authorization } from '../../client/src'
+import { Authorizations } from '../../client/src'
 import mockIdentity from './mocks/identity'
 import mockLambdaEvent from './mocks/lambda-event'
-import { Authorization, Authorizations } from '../../client/src'
-import nodeWatch from 'node-watch'
-import { exec as nodeExec } from 'child_process'
 
 function createServer({
     schema,
@@ -40,39 +42,8 @@ function createServer({
     const gqlSchema = buildSchema(`${scalars}\n${directives}\n${generatedSchema}`)
     const app = express()
 
-    app.use(
-        '/graphql',
-        graphqlHTTP(async (request, response, graphQLParams) => ({
-            schema: gqlSchema,
-            rootValue: await getRootValue(request, response, graphQLParams),
-            graphiql: {
-                headerEditorEnabled: true,
-                pretty: true,
-                defaultQuery: [
-                    `query listPosts {`,
-                    `\tlistPosts {`,
-                    `\t\tid`,
-                    `\t\ttitle`,
-                    `\t}`,
-                    `}`,
-                    ``,
-                    `mutation createPost {`,
-                    `\tcreatePost(data:{ title: "My first post" }) {`,
-                    `\t\ttitle`,
-                    `\t}`,
-                    `}`,
-                ].join('\n'),
-            },
-        })),
-    )
-
-    const portNumber = port || 4000
-
-    app.listen(portNumber)
-    console.log(`Running a GraphQL API server at: http://localhost:${portNumber}/graphql`)
-
     const getRootValue = async (request: any, response: any, graphQLParams: any) => {
-        let rootValue: any = {}
+        const rootValue: any = {}
 
         if (graphQLParams.query && graphQLParams.operationName !== 'IntrospectionQuery') {
             const identity = mockIdentity(authorization || null, {
@@ -119,14 +90,47 @@ function createServer({
         return rootValue
     }
 
+    app.use(
+        '/graphql',
+        graphqlHTTP(async (request, response, graphQLParams) => ({
+            schema: gqlSchema,
+            rootValue: await getRootValue(request, response, graphQLParams),
+            graphiql: {
+                headerEditorEnabled: true,
+                pretty: true,
+                defaultQuery: [
+                    'query listPosts {',
+                    '\tlistPosts {',
+                    '\t\tid',
+                    '\t\ttitle',
+                    '\t}',
+                    '}',
+                    '',
+                    'mutation createPost {',
+                    '\tcreatePost(data:{ title: "My first post" }) {',
+                    '\t\ttitle',
+                    '\t}',
+                    '}',
+                ].join('\n'),
+            },
+        })),
+    )
+
+    const portNumber = port || 4000
+
+    app.listen(portNumber)
+    console.log(`Running a GraphQL API server at: http://localhost:${portNumber}/graphql`)
+
     if (watch) {
         const exec = (command: string, options?: { cwd?: string }): Promise<{ err: any; strdout: any; stderr: any }> =>
             new Promise((resolve) => {
                 nodeExec(
                     options?.cwd ? `cd ${options.cwd} && ${command}` : command,
                     (err: any, strdout: any, stderr: any) => {
-                        if (err) console.error(stderr)
-                        else if (strdout) console.log(strdout)
+                        if (err)
+                            console.error(stderr)
+                        else if (strdout)
+                            console.log(strdout)
                         resolve({ err, strdout, stderr })
                     },
                 )
@@ -141,7 +145,7 @@ function createServer({
                     {
                         recursive: true,
                         delay: 1000,
-                        filter: (f) => !/node_modules/.test(f),
+                        filter: f => !/node_modules/.test(f),
                     },
                     (evt, name) => {
                         func({ exec, evt, name })

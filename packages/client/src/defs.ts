@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import type {
+    AppSyncIdentity,
     AppSyncIdentityCognito,
     AppSyncIdentityIAM,
     AppSyncIdentityLambda,
@@ -40,7 +41,7 @@ export interface Context {
     model: string | null
 }
 
-export { AppSyncResolverHandler, AppSyncResolverEvent }
+export type { AppSyncResolverHandler, AppSyncResolverEvent, AppSyncIdentity }
 
 /**
  * ### QueryParams
