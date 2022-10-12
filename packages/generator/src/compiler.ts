@@ -1,29 +1,31 @@
-import * as nunjucks from 'nunjucks'
-import * as prettier from 'prettier'
-import { plural } from 'pluralize'
-import { DMMF } from '@prisma/generator-helper'
+/* eslint-disable no-console */
+import { basename, dirname, extname, join } from 'path'
 import { load as loadYaml } from 'js-yaml'
-import {
-    DMMFPAS,
-    DMMFPAS_Field,
-    DMMFPAS_Comments,
-    DMMFPAS_Model,
-    CompilerOptions,
-    CompilerOptionsPrivate,
-    DMMFPAS_CustomResolver,
-} from './types'
-import { join, extname, basename, dirname } from 'path'
-import { readFile, outputFile, writeFile, writeFileSync, readFileSync, copy } from 'fs-extra'
+import type { DMMF } from '@prisma/generator-helper'
+import { plural } from 'pluralize'
+import * as prettier from 'prettier'
+import * as nunjucks from 'nunjucks'
+import { copy, outputFile, readFile, readFileSync, writeFile, writeFileSync } from 'fs-extra'
 import flow from 'lodash/flow'
 import camelCase from 'lodash/camelCase'
 import upperFirst from 'lodash/upperFirst'
 import merge from 'lodash/merge'
 import omit from 'lodash/omit'
 // import { inspect } from 'util'
-import { replaceAll, isUndefined, isObject } from '@client/utils'
-import { InjectedConfig } from '@client/defs'
+import { isObject, isUndefined, replaceAll } from '@client/utils'
+import type { InjectedConfig } from '@client/defs'
+import type {
+    CompilerOptions,
+    CompilerOptionsPrivate,
+    DMMFPAS,
+    DMMFPAS_Comments,
+    DMMFPAS_CustomResolver,
+    DMMFPAS_Field,
+    DMMFPAS_Model,
+} from './types'
 
 // AppSync schema helper
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const { convertSchemas } = require('appsync-schema-converter')
 
 // Custom lodash function
@@ -167,9 +169,8 @@ export class PrismaAppSyncCompiler {
             usesSubscriptions: false,
         }
 
-        if (!(process?.env?.PRISMA_APPSYNC === 'false')) {
+        if (!(process?.env?.PRISMA_APPSYNC === 'false'))
             this.parseDMMF()
-        }
 
         return this
     }
@@ -197,7 +198,7 @@ export class PrismaAppSyncCompiler {
         if (customSchemaPath) {
             if (this.options.debug) {
                 console.log(
-                    `[Prisma-AppSync] Adding custom schema: `,
+                    '[Prisma-AppSync] Adding custom schema: ',
                     join(dirname(this.options.schemaPath), customSchemaPath),
                 )
             }
@@ -249,9 +250,8 @@ export class PrismaAppSyncCompiler {
         for (let i = 0; i < this.data.models.length; i++) {
             const model = this.data.models[i]
 
-            if (model.name !== model.pluralizedName) {
+            if (model.name !== model.pluralizedName)
                 injectedConfig.modelsMapping[model.pluralizedName] = model.prismaRef
-            }
 
             injectedConfig.modelsMapping[model.name] = model.prismaRef
 
@@ -260,7 +260,8 @@ export class PrismaAppSyncCompiler {
                 const operation = model.gql[key]
 
                 if (typeof operation === 'string') {
-                    if (!operationsList.includes(operation)) operationsList.push(operation)
+                    if (!operationsList.includes(operation))
+                        operationsList.push(operation)
                 }
             }
         }
@@ -278,7 +279,7 @@ export class PrismaAppSyncCompiler {
         if (customResolversPath) {
             if (this.options.debug) {
                 console.log(
-                    `[Prisma-AppSync] Adding custom resolver: `,
+                    '[Prisma-AppSync] Adding custom resolver: ',
                     join(dirname(this.options.schemaPath), customResolversPath),
                 )
             }
@@ -349,7 +350,8 @@ export class PrismaAppSyncCompiler {
             if (gqlDirectives) {
                 for (let i = 0; i < gqlDirectives.length; i++) {
                     const str = replaceAll(gqlDirectives[i].replace(gqlRegex, '$1'), find, replace)
-                    gql = merge({}, gql, new Function('return ({' + str + '})')())
+                    // eslint-disable-next-line no-new-func
+                    gql = merge({}, gql, new Function(`return ({${str}})`)())
                 }
             }
 
@@ -358,7 +360,8 @@ export class PrismaAppSyncCompiler {
             if (authDirectives) {
                 for (let j = 0; j < authDirectives.length; j++) {
                     const str = replaceAll(authDirectives[j].replace(authRegex, '$1'), find, replace)
-                    auth = merge({}, auth, new Function('return ({' + str + '})')())
+                    // eslint-disable-next-line no-new-func
+                    auth = merge({}, auth, new Function(`return ({${str}})`)())
                 }
             }
         }
@@ -385,10 +388,10 @@ export class PrismaAppSyncCompiler {
 
         for (const key in this.options.template) {
             if (
-                Object.prototype.hasOwnProperty.call(this.options.template, key) &&
-                !isUndefined(this.options.template?.[key]?.directives) &&
-                !isUndefined(this.options.template[key]?.label) &&
-                !isUndefined(this.options.template[key]?.type)
+                Object.prototype.hasOwnProperty.call(this.options.template, key)
+                && !isUndefined(this.options.template?.[key]?.directives)
+                && !isUndefined(this.options.template[key]?.label)
+                && !isUndefined(this.options.template[key]?.type)
             ) {
                 const groups = this.options.template[key].directives
                 const defaultValue = this.options.template[key].label!({ name, pluralizedName })
@@ -408,9 +411,9 @@ export class PrismaAppSyncCompiler {
                     }
                     // Example: @gql(queries: { count: "county" })
                     else if (
-                        childGroup !== undefined &&
-                        !isUndefined(gqlObject?.[group]?.[childGroup]) &&
-                        !isObject(gqlObject[group][childGroup])
+                        childGroup !== undefined
+                        && !isUndefined(gqlObject?.[group]?.[childGroup])
+                        && !isObject(gqlObject[group][childGroup])
                     ) {
                         gqlOutput[key] = gqlObject[group][childGroup]
 
@@ -418,21 +421,19 @@ export class PrismaAppSyncCompiler {
                     }
                 }
 
-                if (type === 'Query' && gqlOutput._usesQueries === false && gqlOutput[key] !== null) {
+                if (type === 'Query' && gqlOutput._usesQueries === false && gqlOutput[key] !== null)
                     gqlOutput._usesQueries = true
-                }
-                if (type === 'Mutation' && gqlOutput._usesMutations === false && gqlOutput[key] !== null) {
+
+                if (type === 'Mutation' && gqlOutput._usesMutations === false && gqlOutput[key] !== null)
                     gqlOutput._usesMutations = true
-                }
-                if (type === 'Subscription' && gqlOutput._usesSubscriptions === false && gqlOutput[key] !== null) {
+
+                if (type === 'Subscription' && gqlOutput._usesSubscriptions === false && gqlOutput[key] !== null)
                     gqlOutput._usesSubscriptions = true
-                }
             }
         }
 
-        if (gqlOutput._usesMutations === false) {
+        if (gqlOutput._usesMutations === false)
             gqlOutput._usesSubscriptions = false
-        }
 
         return gqlOutput
     }
@@ -446,18 +447,22 @@ export class PrismaAppSyncCompiler {
 
             if (directive?.allow === 'apiKey') {
                 outputDirectives.push('@aws_api_key')
-            } else if (directive?.allow === 'iam') {
+            }
+            else if (directive?.allow === 'iam') {
                 outputDirectives.push('@aws_iam')
-            } else if (directive?.allow === 'oidc') {
+            }
+            else if (directive?.allow === 'oidc') {
                 outputDirectives.push('@aws_oidc')
-            } else if (directive?.allow === 'userPools') {
+            }
+            else if (directive?.allow === 'userPools') {
                 if (directive?.groups && Array.isArray(directive.groups)) {
                     outputDirectives.push(
                         `@aws_cognito_user_pools(cognito_groups: [${directive.groups
                             .map((g: string) => `"${g}"`)
                             .join(', ')}])`,
                     )
-                } else {
+                }
+                else {
                     outputDirectives.push('@aws_cognito_user_pools')
                 }
             }
@@ -501,7 +506,7 @@ export class PrismaAppSyncCompiler {
         // models
         this.dmmf.datamodel.models.forEach((model: DMMF.Model) => {
             const fields: DMMFPAS_Field[] = []
-            const comments: DMMFPAS_Comments = this.parseComments(model['documentation'])
+            const comments: DMMFPAS_Comments = this.parseComments(model.documentation)
             const name = pascalCase(model.name)
             const pluralizedName = pascalCase(plural(model.name))
             const directives: any = this.getDirectives({ ...defaultDirective.auth, ...comments.auth })
@@ -542,12 +547,12 @@ export class PrismaAppSyncCompiler {
                     prismaRef: model.name.charAt(0).toLowerCase() + model.name.slice(1),
                     directives,
                     idFields: model.idFields,
-                    fields: fields,
+                    fields,
                     operationFields: fields.filter(
-                        (f) => f.isEditable && !f.relation && ['Int', 'Float'].includes(f.scalar),
+                        f => f.isEditable && !f.relation && ['Int', 'Float'].includes(f.scalar),
                     ),
                     gql: gqlConfig,
-                    isEditable: fields.filter((f) => f.isEditable).length > 0,
+                    isEditable: fields.filter(f => f.isEditable).length > 0,
                     subscriptionFields: this.filterSubscriptionFields(fields, model.idFields),
                 })
             }
@@ -555,7 +560,7 @@ export class PrismaAppSyncCompiler {
 
         // enums
         this.dmmf.datamodel.enums.forEach((enumerated: DMMF.DatamodelEnum) => {
-            const enumValues: string[] = enumerated.values.map((v) => v.name)
+            const enumValues: string[] = enumerated.values.map(v => v.name)
 
             this.data.enums.push({
                 name: enumerated.name,
@@ -571,7 +576,8 @@ export class PrismaAppSyncCompiler {
                         return searchModel.name === field?.relation?.type
                     })
 
-                    if (!Boolean(modelExists)) return false
+                    if (!modelExists)
+                        return false
                 }
 
                 return true
@@ -582,15 +588,14 @@ export class PrismaAppSyncCompiler {
 
         // usesQueries / usesMutations / usesSubscriptions
         this.data.models.forEach((model: DMMFPAS_Model) => {
-            if (this.data.usesQueries === false && model.gql._usesQueries === true) {
+            if (this.data.usesQueries === false && model.gql._usesQueries === true)
                 this.data.usesQueries = true
-            }
-            if (this.data.usesMutations === false && model.gql._usesMutations === true) {
+
+            if (this.data.usesMutations === false && model.gql._usesMutations === true)
                 this.data.usesMutations = true
-            }
-            if (this.data.usesSubscriptions === false && model.gql._usesSubscriptions === true) {
+
+            if (this.data.usesSubscriptions === false && model.gql._usesSubscriptions === true)
                 this.data.usesSubscriptions = true
-            }
         })
 
         // console.log(inspect(this.data, false, null, true))
@@ -601,33 +606,36 @@ export class PrismaAppSyncCompiler {
     // Return fields for subscription
     private filterSubscriptionFields(fields: DMMFPAS_Field[], idFields?: string[]): DMMFPAS_Field[] {
         const subFields: DMMFPAS_Field[] = []
-        const maxFields: number = 5
+        const maxFields = 5
 
-        let shouldContinue: boolean = true
-        let currentIndex: number = 0
+        let shouldContinue = true
+        let currentIndex = 0
 
         while (shouldContinue) {
             shouldContinue = false
 
             const field: DMMFPAS_Field = fields[currentIndex]
 
-            if (typeof field !== 'undefined' && !field.relation && field.isUnique) {
+            if (typeof field !== 'undefined' && !field.relation && field.isUnique)
                 subFields.push(field)
-            }
+
             currentIndex++
 
             const hasRemainingFields: boolean = currentIndex < fields.length
             const isBelowMaxFieldsLimit: boolean = subFields.length < maxFields
-            const hasMultipleIds: boolean =
-                subFields.findIndex((s) => s.name === 'uuid') > -1 && subFields.findIndex((s) => s.name === 'id') > -1
+            const hasMultipleIds: boolean
+                = subFields.findIndex(s => s.name === 'uuid') > -1 && subFields.findIndex(s => s.name === 'id') > -1
 
             if (hasRemainingFields && isBelowMaxFieldsLimit) {
                 shouldContinue = true
-            } else if (hasRemainingFields && !isBelowMaxFieldsLimit && hasMultipleIds) {
-                const destroyIndex = subFields.findIndex((s) => s.name === 'uuid')
-                if (destroyIndex > -1) subFields.splice(destroyIndex, 1)
+            }
+            else if (hasRemainingFields && !isBelowMaxFieldsLimit && hasMultipleIds) {
+                const destroyIndex = subFields.findIndex(s => s.name === 'uuid')
+                if (destroyIndex > -1)
+                    subFields.splice(destroyIndex, 1)
                 shouldContinue = true
-            } else if (hasRemainingFields && !isBelowMaxFieldsLimit && idFields && idFields.length > 0) {
+            }
+            else if (hasRemainingFields && !isBelowMaxFieldsLimit && idFields && idFields.length > 0) {
                 subFields.push({
                     name: idFields.join('_'),
                     scalar: `${idFields.join('_')}FieldsInput!`,
@@ -635,7 +643,7 @@ export class PrismaAppSyncCompiler {
                     isRequired: true,
                     isEditable: false,
                     isUnique: true,
-                    sample: `2`,
+                    sample: '2',
                 })
             }
         }
@@ -662,9 +670,9 @@ export class PrismaAppSyncCompiler {
     private isFieldImmutable(searchField: DMMF.Field): boolean {
         const defaultValue: any = searchField?.default || null
         return (
-            defaultValue?.name === 'autoincrement' ||
-            searchField.isUpdatedAt ||
-            ['updatedAt', 'createdAt'].includes(searchField.name)
+            defaultValue?.name === 'autoincrement'
+            || searchField.isUpdatedAt
+            || ['updatedAt', 'createdAt'].includes(searchField.name)
         )
     }
 
@@ -692,57 +700,58 @@ export class PrismaAppSyncCompiler {
             outputFileOptions && outputFileOptions.data ? outputFileOptions.data : this.data,
         )
 
-        const outputFilename: string =
-            outputFileOptions && outputFileOptions.outputFilename
+        const outputFilename: string
+            = outputFileOptions && outputFileOptions.outputFilename
                 ? outputFileOptions.outputFilename
                 : basename(inputFile.replace('.njk', ''))
 
         let parserOpt: prettier.RequiredOptions['parser'] | boolean
 
         switch (extname(outputFilename)) {
-            case '.ts':
-                parserOpt = 'typescript'
-                break
-            case '.json':
-                parserOpt = 'json'
-                break
-            case '.gql':
-                parserOpt = 'graphql'
-                break
-            case '.md':
-                parserOpt = 'markdown'
-                break
-            case '.yaml':
-                parserOpt = 'yaml'
-                break
-            case '.js':
-                parserOpt = 'babel'
-                break
-            default:
-                parserOpt = false
-                break
+        case '.ts':
+            parserOpt = 'typescript'
+            break
+        case '.json':
+            parserOpt = 'json'
+            break
+        case '.gql':
+            parserOpt = 'graphql'
+            break
+        case '.md':
+            parserOpt = 'markdown'
+            break
+        case '.yaml':
+            parserOpt = 'yaml'
+            break
+        case '.js':
+            parserOpt = 'babel'
+            break
+        default:
+            parserOpt = false
+            break
         }
 
         // pretiffy output
         try {
             outputContent = parserOpt
                 ? prettier.format(outputContent, {
-                      semi: false,
-                      parser: parserOpt,
-                      tabWidth: 4,
-                      trailingComma: 'none',
-                      singleQuote: true,
-                      printWidth: 60,
-                  })
+                    semi: false,
+                    parser: parserOpt,
+                    tabWidth: 4,
+                    trailingComma: 'none',
+                    singleQuote: true,
+                    printWidth: 60,
+                })
                 : outputContent
-        } catch (err) {
+        }
+        catch (err) {
             console.error(err)
             console.log(outputContent)
         }
 
         const outputFilePath = join(
             this.options.outputDir,
-            outputFileOptions && outputFileOptions.outputDir ? outputFileOptions.outputDir : ``,
+            outputFileOptions && outputFileOptions.outputDir ? outputFileOptions.outputDir : '',
             outputFilename,
         )
 
@@ -754,20 +763,20 @@ export class PrismaAppSyncCompiler {
     // Return field sample for demo/docs
     private getFieldSample(field: DMMF.Field): any {
         switch (field.type) {
-            case 'Int':
-                return `2`
-            case 'String':
-                return `"Foo"`
-            case 'Json':
-                return { foo: 'bar' }
-            case 'Float':
-                return `2.5`
-            case 'Boolean':
-                return `false`
-            case 'DateTime':
-                return `"dd/mm/YYYY"`
-            default:
-                return field.type
+        case 'Int':
+            return '2'
+        case 'String':
+            return '"Foo"'
+        case 'Json':
+            return { foo: 'bar' }
+        case 'Float':
+            return '2.5'
+        case 'Boolean':
+            return 'false'
+        case 'DateTime':
+            return '"dd/mm/YYYY"'
+        default:
+            return field.type
         }
     }
 
@@ -786,7 +795,8 @@ export class PrismaAppSyncCompiler {
         let scalar: string = this.getFieldType(field)
 
         if (field.isList) {
-            if (field.isRequired) scalar = `${scalar}!`
+            if (field.isRequired)
+                scalar = `${scalar}!`
             scalar = `[${scalar}]`
         }
 
@@ -795,41 +805,42 @@ export class PrismaAppSyncCompiler {
 
     // Get AppSync type from Prisma type
     private getFieldType(field: DMMF.Field): string {
-        let type: string = 'String'
+        let type = 'String'
 
         if (field.kind === 'scalar' && typeof field.type === 'string') {
             switch (field.type.toLocaleLowerCase()) {
-                case 'int':
-                    type = 'Int'
-                    break
-                case 'datetime':
-                    type = 'AWSDateTime'
-                    break
-                case 'json':
-                    type = 'AWSJSON'
-                    break
-                case 'float':
-                    type = 'Float'
-                    break
-                case 'boolean':
-                    type = 'Boolean'
-                    break
-                case 'string':
-                    type = 'String'
-                    break
+            case 'int':
+                type = 'Int'
+                break
+            case 'datetime':
+                type = 'AWSDateTime'
+                break
+            case 'json':
+                type = 'AWSJSON'
+                break
+            case 'float':
+                type = 'Float'
+                break
+            case 'boolean':
+                type = 'Boolean'
+                break
+            case 'string':
+                type = 'String'
+                break
             }
 
             if (type === 'String') {
                 switch (field.name.toLocaleLowerCase()) {
-                    case 'email':
-                        type = 'AWSEmail'
-                        break
-                    case 'url':
-                        type = 'AWSURL'
-                        break
+                case 'email':
+                    type = 'AWSEmail'
+                    break
+                case 'url':
+                    type = 'AWSURL'
+                    break
                 }
             }
-        } else if (typeof field.type === 'string') {
+        }
+        else if (typeof field.type === 'string') {
             type = field.type
         }
 
