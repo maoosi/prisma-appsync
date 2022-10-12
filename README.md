@@ -23,7 +23,7 @@
 
 ## 📓 Documentation
 
-[Read the documentation](https://prisma-appsync.simple.ink) to get started with Prisma-AppSync.
+[Read the documentation](https://prisma-appsync.vercel.app) to get started with Prisma-AppSync.
 
 ## 🧙‍♂️ Contributors
 
