@@ -1,8 +1,9 @@
+/* eslint-disable no-new */
+import { join } from 'path'
 import { App } from 'aws-cdk-lib'
 import { AuthorizationType } from '@aws-cdk/aws-appsync-alpha'
 import { kebabCase } from 'scule'
 import { AppSyncStack } from './appsync'
-import { join } from 'path'
 
 const app = new App()
 
@@ -31,7 +32,7 @@ new AppSyncStack(app, kebabCase('{{ projectName }}'), {
                 },
                 afterBundling() {
                     return [
-                        `npx prisma generate`,
+                        'npx prisma generate',
                         'rm -rf generated',
 
                         // npm + yarn 1.x

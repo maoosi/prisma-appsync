@@ -1,4 +1,5 @@
-import { PrismaAppSync, AppSyncResolverEvent } from './prisma/generated/prisma-appsync/client'
+import type { AppSyncResolverEvent } from './prisma/generated/prisma-appsync/client'
+import { PrismaAppSync } from './prisma/generated/prisma-appsync/client'
 
 // Instantiate Prisma-AppSync Client
 const prismaAppSync = new PrismaAppSync()

@@ -134,7 +134,8 @@ export function isUndefined(element: any): boolean {
 export function lowerFirst(str: string): string {
     if (str)
         return str.charAt(0).toLowerCase() + str.slice(1)
-    else return String()
+    else
+        return String()
 }
 
 /**
@@ -197,13 +198,15 @@ export function traverse(
                 if (isObject(value)) {
                     if (excludeChilds)
                         outputData[key] = clone(value)
-                    else outputData[key] = traverse(value, iteratee)
+                    else
+                        outputData[key] = traverse(value, iteratee)
                 }
                 // array
                 else if (Array.isArray(value)) {
                     if (excludeChilds)
                         outputData[key] = [...value]
-                    else outputData[key] = traverse(value, iteratee)
+                    else
+                        outputData[key] = traverse(value, iteratee)
                 }
                 // anything else
                 else {
@@ -254,13 +257,15 @@ export async function traverseAsync(
                 if (isObject(value)) {
                     if (excludeChilds)
                         outputData[key] = clone(value)
-                    else outputData[key] = await traverseAsync(value, iteratee)
+                    else
+                        outputData[key] = await traverseAsync(value, iteratee)
                 }
                 // array
                 else if (Array.isArray(value)) {
                     if (excludeChilds)
                         outputData[key] = [...value]
-                    else outputData[key] = await traverseAsync(value, iteratee)
+                    else
+                        outputData[key] = await traverseAsync(value, iteratee)
                 }
                 // anything else
                 else {

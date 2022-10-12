@@ -1,4 +1,4 @@
-import { PrismaClient, QueryParams, PrismaArgs, QueryBuilder, PrismaOperator } from './defs';
+import type { PrismaArgs, PrismaClient, PrismaOperator, QueryBuilder, QueryParams } from './defs';
 /**
  *  #### Query Builder
  */

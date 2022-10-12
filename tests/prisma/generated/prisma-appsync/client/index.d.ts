@@ -1,4 +1,4 @@
-import { merge, clone, decode, encode, dotate, isMatchingGlob, filterXSS, isEmpty, isUndefined, lowerFirst, isObject, traverse, traverseAsync, replaceAll } from './utils';
+import { clone, decode, dotate, encode, filterXSS, isEmpty, isMatchingGlob, isObject, isUndefined, lowerFirst, merge, replaceAll, traverse, traverseAsync } from './utils';
 export { PrismaAppSync } from './core';
 export { CustomError, log } from './inspector';
 export { queryBuilder } from './resolver';
