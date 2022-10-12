@@ -106,12 +106,82 @@ const prismaAppSync = new PrismaAppSync({ maxDepth: 4 })
 
 ## 👉 AppSync Authorization modes
 
-::: info IN PROGRESS
-Documentation coming soon...
-:::
+AWS AppSync provides [authz directives ↗](https://docs.aws.amazon.com/appsync/latest/devguide/security-authz.html) for configuring security and data protection on GraphQL API's.
 
-## 👉 Fine-Grained Access Control
+Prisma-AppSync enables authz directives directy inside the `schema.prisma` file, via the `defaultDirective` generator option (applies to all generated Types):
 
-::: info IN PROGRESS
-Documentation coming soon...
-:::
+```json
+generator appsync {
+    provider = "prisma-appsync"
+    defaultDirective = "@auth(model: [{ allow: iam }, { allow: apiKey }])"
+}
+```
+
+And/or via AST comments before each model (overrides the default directive):
+
+```json
+/// @auth(model: [{ allow: iam }, { allow: apiKey }])
+model Post {
+  id       Int       @id @default(autoincrement())
+  title    String
+}
+```
+
+| Supported `model` authorization modes: |
+|:------------- |
+| [API_KEY Authorization ↗](https://docs.aws.amazon.com/appsync/latest/devguide/security-authz.html#api-key-authorization)<br>`/// @auth(model: [{ allow: apiKey }])` |
+| [AWS_IAM ↗](https://docs.aws.amazon.com/appsync/latest/devguide/security-authz.html#aws-iam-authorization)<br>`/// @auth(model: [{ allow: iam }])` |
+| [OPENID_CONNECT ↗](https://docs.aws.amazon.com/appsync/latest/devguide/security-authz.html#openid-connect-authorization)<br>`/// @auth(model: [{ allow: oidc }])` |
+| [AMAZON_COGNITO_USER_POOLS ↗](https://docs.aws.amazon.com/appsync/latest/devguide/security-authz.html#amazon-cognito-user-pools-authorization)<br>`/// @auth(model: [{ allow: userPools }])` |
+| [AMAZON_COGNITO_USER_POOLS ↗](https://docs.aws.amazon.com/appsync/latest/devguide/security-authz.html#amazon-cognito-user-pools-authorization) using groups<br>`/// @auth(model: [{ allow: userPools, groups: ["users", "admins"] }])`<br> |
+
+## 👉 Fine-grained access control
+
+Prisma-AppSync allows to implement fine-grained access control. For example, we might want to only allow access to 'PUBLISHED' posts:
+
+```ts
+return await prismaAppSync.resolve({
+  event,
+  shield: ({ prismaClient }) => {
+    // Prisma filtering syntax
+    // https://www.prisma.io/docs/concepts/components/prisma-client/filtering-and-sorting
+    const isPublished = { status: { equals: 'PUBLISHED' } }
+
+    return {
+      // Micromatch syntax
+      // https://github.com/micromatch/micromatch
+      'access/post{,/**}': {
+        rule: isPublished,
+        reason: () => `Unpublished Posts cannot be accessed.`,
+      },
+    }
+  },
+})
+```
+
+Combining fine-grained access control with [AppSync Authorization modes](#👉-appsync-authorization-modes) allows to implement powerful controls around data.
+
+To illustrate this with a more advanced example, let's assume we want to restrict API access to users logged-in via `AMAZON_COGNITO_USER_POOLS` and only allow the owner of a given Post to update it:
+
+```ts
+return await prismaAppSync.resolve({
+  event,
+  shield: ({ authorization, identity }: QueryParams) => {
+    const isCognitoAuth = authorization === Authorizations.AMAZON_COGNITO_USER_POOLS
+    const isOwner = { owner: { cognitoSub: identity?.sub } }
+
+    return {
+      '**': {
+        rule: isCognitoAuth,
+        reason: ({ model }) => `${model} access is restricted to logged-in users.`,
+      },
+      'modify/post{,/**}': {
+        rule: isOwner,
+        reason: ({ model }) => `${model} can only be modified by their owner.`,
+      },
+    }
+  },
+})
+```
+
+ > The above example implies using Cognito User Pools Authorization. Plus having set up an `Owner` relation on the `Post` model, and a `cognitoSub` field on the `User` model (containing all users `sub`).
