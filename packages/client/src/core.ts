@@ -62,6 +62,7 @@ export class PrismaAppSync {
    * @param {boolean} options.debug? - Enable debug logs (visible in CloudWatch).
    * @param {number|false} options.defaultPagination? - Default pagination for list Query (items per page).
    * @param {number} options.maxDepth? - Maximum allowed GraphQL query depth.
+   * @param {number} options.maxReqPerUserMinute? - Maximum allowed requests per user, per minute.
    *
    * @default
    * ```
@@ -71,6 +72,7 @@ export class PrismaAppSync {
    *   debug: true,
    *   defaultPagination: 50,
    *   maxDepth: 3,
+   *   maxReqPerUserMinute: 200
    * }
    * ```
    *
@@ -87,17 +89,25 @@ export class PrismaAppSync {
             modelsMapping: {},
             connectionString: String(process.env.DATABASE_URL),
             sanitize:
-        typeof options?.sanitize !== 'undefined' ? options.sanitize : true,
-            debug: typeof options?.debug !== 'undefined' ? options.debug : true,
+                typeof options?.sanitize !== 'undefined'
+                    ? options.sanitize
+                    : true,
+            debug:
+                typeof options?.debug !== 'undefined'
+                    ? options.debug
+                    : true,
             defaultPagination:
-        typeof options?.defaultPagination !== 'undefined'
-            ? options.defaultPagination
-            : 50,
-            maxDepth: typeof options?.maxDepth !== 'undefined' ? options.maxDepth : 3,
+                typeof options?.defaultPagination !== 'undefined'
+                    ? options.defaultPagination
+                    : 50,
+            maxDepth:
+                typeof options?.maxDepth !== 'undefined'
+                    ? options.maxDepth
+                    : 3,
             maxReqPerUserMinute:
-        typeof options?.maxReqPerUserMinute !== 'undefined'
-            ? options.maxReqPerUserMinute
-            : 200,
+                typeof options?.maxReqPerUserMinute !== 'undefined'
+                    ? options.maxReqPerUserMinute
+                    : 200,
         }
 
         this.options.modelsMapping = {}
@@ -132,6 +142,7 @@ export class PrismaAppSync {
         if (process?.env?.PRISMA_APPSYNC_TESTING === 'true') {
             if (!global.prisma)
                 global.prisma = new PrismaClient()
+
             this.prismaClient = global.prisma
         }
         else {
@@ -197,10 +208,10 @@ export class PrismaAppSync {
             debug('Parsed event:', inspect(QueryParams))
 
             // Guard :: rate limiting
-            const callerUuid
-        = (QueryParams.identity as any)?.sourceIp
-        || (QueryParams.identity as any)?.sub
-        || JSON.stringify(QueryParams.identity)
+            const callerUuid = (QueryParams.identity as any)?.sourceIp
+                || (QueryParams.identity as any)?.sub
+                || JSON.stringify(QueryParams.identity)
+
             if (this.options.maxReqPerUserMinute && callerUuid) {
                 const { limitExceeded, count } = await preventDOS({
                     callerUuid,
@@ -209,10 +220,10 @@ export class PrismaAppSync {
                 debug('Rate limting:', inspect({ limitExceeded, count }))
                 if (limitExceeded) {
                     throw new CustomError(
-            `Rate limit (maxReqPerUserMinute=${this.options.maxReqPerUserMinute}) exceeded for caller "${callerUuid}".`,
-            {
-                type: 'TOO_MANY_REQUESTS',
-            },
+                        `Rate limit (maxReqPerUserMinute=${this.options.maxReqPerUserMinute}) exceeded for caller "${callerUuid}".`,
+                        {
+                            type: 'TOO_MANY_REQUESTS',
+                        },
                     )
                 }
             }
@@ -222,15 +233,13 @@ export class PrismaAppSync {
                 paths: QueryParams.paths,
                 context: QueryParams.context,
             })
-            debug(
-        `Query has depth of ${depth} (max allowed is ${this.options.maxDepth}).`,
-            )
+            debug(`Query has depth of ${depth} (max allowed is ${this.options.maxDepth}).`)
             if (depth > this.options.maxDepth) {
                 throw new CustomError(
-          `Query has depth of ${depth}, which exceeds max depth of ${this.options.maxDepth}.`,
-          {
-              type: 'FORBIDDEN',
-          },
+                    `Query has depth of ${depth}, which exceeds max depth of ${this.options.maxDepth}.`,
+                    {
+                        type: 'FORBIDDEN',
+                    },
                 )
             }
 
@@ -248,14 +257,14 @@ export class PrismaAppSync {
             })
             if (Object.keys(shield).length === 0)
                 debug('Query shield authorization: No Shield setup detected.')
-            else debug('Query shield authorization:', inspect(shieldAuth))
+            else
+                debug('Query shield authorization:', inspect(shieldAuth))
 
             // Guard :: if `canAccess` if equal to `false`, we reject the API call
             if (!shieldAuth.canAccess) {
-                const reason
-          = typeof shieldAuth.reason === 'string'
-              ? shieldAuth.reason
-              : shieldAuth.reason(QueryParams.context)
+                const reason = typeof shieldAuth.reason === 'string'
+                    ? shieldAuth.reason
+                    : shieldAuth.reason(QueryParams.context)
                 throw new CustomError(reason, { type: 'FORBIDDEN' })
             }
 
@@ -316,26 +325,25 @@ export class PrismaAppSync {
 
                 if (isBatchAction)
                     result = [getTestResult(), getTestResult()]
-                else result = getTestResult()
+                else
+                    result = getTestResult()
             }
             // Resolver :: query is disabled
             else if (
                 resolveParams?.resolvers
-        && typeof resolveParams.resolvers[QueryParams.operation] === 'boolean'
-        && resolveParams.resolvers[QueryParams.operation] === false
+                && typeof resolveParams.resolvers[QueryParams.operation] === 'boolean'
+                && resolveParams.resolvers[QueryParams.operation] === false
             ) {
                 throw new CustomError(
-          `Query resolver for ${QueryParams.operation} is disabled.`,
-          { type: 'FORBIDDEN' },
+                    `Query resolver for ${QueryParams.operation} is disabled.`,
+                    { type: 'FORBIDDEN' },
                 )
             }
             // Resolver :: resolve query with Custom Resolver
             else if (
                 typeof resolveParams?.resolvers?.[QueryParams.operation] === 'function'
             ) {
-                debug(
-          `Resolving query for Custom Resolver "${QueryParams.operation}".`,
-                )
+                debug(`Resolving query for Custom Resolver "${QueryParams.operation}".`)
                 const customResolverFn = resolveParams.resolvers[
                     QueryParams.operation
                 ] as Function
@@ -346,9 +354,7 @@ export class PrismaAppSync {
             }
             // Resolver :: resolve query with built-in CRUD
             else if (!isEmpty(QueryParams?.context?.model)) {
-                debug(
-          `Resolving query for built-in CRUD operation "${QueryParams.operation}".`,
-                )
+                debug(`Resolving query for built-in CRUD operation "${QueryParams.operation}".`)
                 result = await queries[`${QueryParams.context.action}Query`](
                     this.prismaClient,
                     QueryParams,
@@ -357,10 +363,10 @@ export class PrismaAppSync {
             // Resolver :: query resolver not found
             else {
                 throw new CustomError(
-          `Query resolver for ${QueryParams.operation} could not be found.`,
-          {
-              type: 'INTERNAL_SERVER_ERROR',
-          },
+                    `Query resolver for ${QueryParams.operation} could not be found.`,
+                    {
+                        type: 'INTERNAL_SERVER_ERROR',
+                    },
                 )
             }
 
@@ -385,10 +391,7 @@ export class PrismaAppSync {
         debug('Result before sanitize:', inspect(result))
         const resultClarified = this.options.sanitize ? clarify(result) : result
 
-        debug(
-            'Returning response to API request w/ result:',
-            inspect(resultClarified),
-        )
+        debug('Returning response to API request w/ result:', inspect(resultClarified))
         return resultClarified
     }
 }

@@ -94,6 +94,7 @@ export function log(data: any, level?: 'ERROR' | 'WARN' | 'INFO'): void {
 
     dataList.forEach((logData: any, index: number) => {
         let log = typeof logData === 'string' ? logData : inspect(logData)
+
         if (index === 0)
             log = `${logPrefix} ${log}`
 
@@ -101,6 +102,7 @@ export function log(data: any, level?: 'ERROR' | 'WARN' | 'INFO'): void {
             console.error(log)
         else if (level === 'WARN')
             console.warn(log)
-        else console.info(log)
+        else
+            console.info(log)
     })
 }

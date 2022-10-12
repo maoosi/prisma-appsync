@@ -1,16 +1,17 @@
-import { Construct } from 'constructs'
-import { pascalCase, kebabCase, camelCase } from 'scule'
+/* eslint-disable no-new */
 import { readFileSync } from 'fs'
+import type { Construct } from 'constructs'
+import { camelCase, kebabCase, pascalCase } from 'scule'
 import { load } from 'js-yaml'
+import type { StackProps } from 'aws-cdk-lib'
 import {
-    Stack,
-    StackProps,
     Duration,
     RemovalPolicy,
-    aws_iam as iam,
-    aws_lambda_nodejs as lambdaNodejs,
-    aws_lambda as lambda,
+    Stack,
     aws_appsync as appsync,
+    aws_iam as iam,
+    aws_lambda as lambda,
+    aws_lambda_nodejs as lambdaNodejs,
 } from 'aws-cdk-lib'
 import * as appsync_alpha from '@aws-cdk/aws-appsync-alpha'
 
@@ -94,14 +95,14 @@ export class AppSyncStack extends Stack {
             roleName: `${this.resourcesPrefix}_fn-exec-role`,
             assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
             managedPolicies: [iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole')],
-            ...(this.props.function?.policies &&
-                this.props.function.policies.length > 0 && {
-                    inlinePolicies: {
-                        customApiFunctionPolicy: new iam.PolicyDocument({
-                            statements: this.props.function.policies,
-                        }),
-                    },
-                }),
+            ...(this.props.function?.policies
+                && this.props.function.policies.length > 0 && {
+                inlinePolicies: {
+                    customApiFunctionPolicy: new iam.PolicyDocument({
+                        statements: this.props.function.policies,
+                    }),
+                },
+            }),
         })
 
         // create lambda function datasource
@@ -166,7 +167,8 @@ export class AppSyncStack extends Stack {
                         fieldName: resolver.fieldName,
                         dataSource: this.dataSources.lambda,
                     })
-                } else if (resolver.dataSource === 'none' && this.dataSources.none) {
+                }
+                else if (resolver.dataSource === 'none' && this.dataSources.none) {
                     new appsync_alpha.Resolver(this, resolvername, {
                         api: this.graphqlApi,
                         typeName: resolver.typeName,
