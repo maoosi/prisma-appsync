@@ -40,7 +40,7 @@
                 </a>
             </div>
             <div>
-                <a href="https://www.buymeacoffee.com/maoosi" target="_blank"><sub>☕ Buy me a coffee</sub></a>
+                <iframe src="https://github.com/sponsors/maoosi/button" title="Sponsor maoosi" height="35" width="116" style="border: 0;"></iframe>
             </div>
         </td>
     </tr>
