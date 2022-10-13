@@ -40,7 +40,7 @@
                 </a>
             </div>
             <div>
-                <iframe src="https://github.com/sponsors/maoosi/button" title="Sponsor maoosi" height="35" width="116" style="border: 0;"></iframe>
+                <a href="https://github.com/sponsors/maoosi"><sub>💚 Sponsor</sub></a>
             </div>
         </td>
     </tr>
@@ -54,7 +54,7 @@
             <a href="https://travistravis.co" target="_blank">
                 <img src="https://prisma-appsync.vercel.app/travistravis.co.png" width="160px;" alt="travistravis.co"/>
                 <br /><b>Travis</b>
-                <br /><sub style="line-height: 0;vertical-align: baseline;">Travis makes travel planning visual, social and collaborative.</sub>
+                <br /><sub style="line-height: 0;vertical-align: baseline;">Collaborative moodboards for travel planning.</sub>
             </a>
         </td>
     </tr>
