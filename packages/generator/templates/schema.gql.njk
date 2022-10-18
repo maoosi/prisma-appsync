@@ -32,7 +32,7 @@ enum OrderByArg {
 
 {% for model in models %}
     {% if model.uniqueIndexes | length -%}
-        {% for uniqueIndex in model.uniqueIndexes %}
+        {% for uniqueIndex in model.uniqueIndexes -%}
             input {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput {
                 {% for field in model.fields -%}
                     {% if field.name in uniqueIndex.fields -%}
@@ -93,10 +93,10 @@ enum OrderByArg {
                 {{ field.name }}: {{ field.scalar }}
             {% endif -%}
         {% endfor %}
-        {% if model.uniqueIndexes | length -%}
+        {%- if model.uniqueIndexes | length -%}
             {% for uniqueIndex in model.uniqueIndexes -%}
                 {{ uniqueIndex.fields | join("_") }}: {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput!
-            {% endfor %}
+            {% endfor -%}
         {% endif %}
     }
 
@@ -104,7 +104,7 @@ enum OrderByArg {
         {% for field in model.fields -%}
             {% if not field.relation -%}
                 {{ field.name }}: OrderByArg
-            {% else %}
+            {% else -%}
                 {{ field.name }}: {{ field.relation.type }}OrderByInput
             {% endif -%}
         {% endfor %}
@@ -148,7 +148,7 @@ enum OrderByArg {
                 {{ field.name }}: {{ field.scalar }}Operation
             {% endfor %}
         }
-        {% endif -%}
+        {% endif %}
 
         input {{ model.name }}UpdateUniqueInput {
             data: {{ model.name }}UpdateInput!
@@ -351,7 +351,7 @@ type Mutation {
                 {% if model.operationFields  | length -%}
                 data: {{ model.name }}UpdateInput,
                 operation: {{ model.name }}OperationInput,
-                {% else %}
+                {% else -%}
                 data: {{ model.name }}UpdateInput,
                 {% endif %}
             ): {{ model.name }} {{ model.directives.update | safe }}
@@ -365,7 +365,7 @@ type Mutation {
                 {% if model.operationFields  | length -%}
                 data: {{ model.name }}UpdateInput,
                 operation: {{ model.name }}OperationInput,
-                {% else %}
+                {% else -%}
                 data: {{ model.name }}UpdateInput,
                 {% endif %}
             ): BatchPayload {{ model.directives.updateMany | safe }}
@@ -449,8 +449,8 @@ type Subscription {
                 {% if model.uniqueIndexes | length -%}
                     {% for uniqueIndex in model.uniqueIndexes -%}
                         {{ uniqueIndex.fields | join("_") }}: {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput!
-                    {% endfor %}
-                {% endif %}
+                    {% endfor -%}
+                {% endif -%}
                 {% for field in model.subscriptionFields -%}
                     {{ field.name }}: {{ field.scalar }}
                 {% endfor %}
@@ -465,8 +465,8 @@ type Subscription {
                 {% if model.uniqueIndexes | length -%}
                     {% for uniqueIndex in model.uniqueIndexes -%}
                         {{ uniqueIndex.fields | join("_") }}: {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput!
-                    {% endfor %}
-                {% endif %}
+                    {% endfor -%}
+                {% endif -%}
                 {% for field in model.subscriptionFields -%}
                     {{ field.name }}: {{ field.scalar }}
                 {% endfor %}
@@ -481,8 +481,8 @@ type Subscription {
                 {% if model.uniqueIndexes | length -%}
                     {% for uniqueIndex in model.uniqueIndexes -%}
                         {{ uniqueIndex.fields | join("_") }}: {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput!
-                    {% endfor %}
-                {% endif %}
+                    {% endfor -%}
+                {% endif -%}
                 {% for field in model.subscriptionFields -%}
                     {{ field.name }}: {{ field.scalar }}
                 {% endfor %}
@@ -497,8 +497,8 @@ type Subscription {
                 {% if model.uniqueIndexes | length -%}
                     {% for uniqueIndex in model.uniqueIndexes -%}
                         {{ uniqueIndex.fields | join("_") }}: {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput!
-                    {% endfor %}
-                {% endif %}
+                    {% endfor -%}
+                {% endif -%}
                 {% for field in model.subscriptionFields -%}
                     {{ field.name }}: {{ field.scalar }}
                 {% endfor %}
@@ -513,8 +513,8 @@ type Subscription {
                 {% if model.uniqueIndexes | length -%}
                     {% for uniqueIndex in model.uniqueIndexes -%}
                         {{ uniqueIndex.fields | join("_") }}: {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput!
-                    {% endfor %}
-                {% endif %}
+                    {% endfor -%}
+                {% endif -%}
                 {% for field in model.subscriptionFields -%}
                     {{ field.name }}: {{ field.scalar }}
                 {% endfor %}
