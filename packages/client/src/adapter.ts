@@ -1,4 +1,4 @@
-import { CustomError, inspect } from './inspector'
+import { CustomError } from './inspector'
 import { sanitize } from './guard'
 import { clone, dotate, isEmpty, isObject, isUndefined, lowerFirst, merge, traverse } from './utils'
 import type {
@@ -182,7 +182,7 @@ export function getAuthIdentity({ appsyncEvent }: { appsyncEvent: AppSyncEvent }
     }
     // ERROR
     else {
-        throw new CustomError(`Couldn't detect caller identity from: ${inspect(appsyncEvent.identity)}`, {
+        throw new CustomError('Couldn\'t detect caller identity.', {
             type: 'INTERNAL_SERVER_ERROR',
         })
     }

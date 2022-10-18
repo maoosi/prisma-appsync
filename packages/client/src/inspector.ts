@@ -21,6 +21,8 @@ interface ErrorDetails {
     trace: ErrorExtensions['trace']
 }
 
+export type logLevel = 'INFO' | 'WARN' | 'ERROR'
+
 export class CustomError extends Error {
     public error: ErrorDetails['error']
     public type: ErrorDetails['type']
@@ -54,7 +56,7 @@ export class CustomError extends Error {
         }
 
         if (!(process?.env?.PRISMA_APPSYNC_TESTING === 'true'))
-            log([this.details], 'ERROR')
+            log(message, this.details, 'ERROR')
     }
 }
 
@@ -70,39 +72,46 @@ export function parseError(error: Error): CustomError {
     }
 }
 
-export function inspect(data: any): string {
-    return nodeInspect(data, {
-        compact: true,
-        depth: 5,
-        breakLength: 80,
-        maxStringLength: 300,
-        ...(!process.env.LAMBDA_TASK_ROOT && {
-            colors: true,
-        }),
-    })
+export function log(message: string, obj?: any, level?: logLevel): void {
+    const debug = process.env.PRISMA_APPSYNC_DEBUG === 'true'
+    const usePrint = debug || ['WARN', 'ERROR'].includes(level || 'INFO')
+
+    if (usePrint && !(process?.env?.PRISMA_APPSYNC_TESTING === 'true')) {
+        printLog(message, level || 'INFO')
+
+        if (obj) {
+            console.log(
+                nodeInspect(obj, {
+                    compact: false,
+                    depth: 5,
+                    breakLength: 80,
+                    maxStringLength: 300,
+                    ...(!process.env.LAMBDA_TASK_ROOT && {
+                        colors: true,
+                    }),
+                }),
+            )
+        }
+    }
 }
 
-export function debug(...data): void {
-    if (process.env.PRISMA_APPSYNC_DEBUG === 'true' && !(process?.env?.PRISMA_APPSYNC_TESTING === 'true'))
-        log([...data])
-}
-
-export function log(data: any, level?: 'ERROR' | 'WARN' | 'INFO'): void {
-    const logLevel = typeof level !== 'undefined' ? level : 'INFO'
-    const logPrefix = `◭ Prisma-AppSync :: <<${logLevel}>>`
-    const dataList = Array.isArray(data) ? data : []
-
-    dataList.forEach((logData: any, index: number) => {
-        let log = typeof logData === 'string' ? logData : inspect(logData)
-
-        if (index === 0)
-            log = `${logPrefix} ${log}`
-
-        if (level === 'ERROR')
-            console.error(log)
-        else if (level === 'WARN')
-            console.warn(log)
-        else
-            console.info(log)
+export function printLog(message: any, level: logLevel): void {
+    const timestamp = new Date().toLocaleString(undefined, {
+        day: 'numeric',
+        month: 'numeric',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
     })
+    const prefix = `◭ ${timestamp} <<${level}>>`
+    const log = [prefix, message].join(' ')
+    const debug = process.env.PRISMA_APPSYNC_DEBUG === 'true'
+
+    if (level === 'ERROR')
+        console.error(`\x1B[31m${log}`)
+    else if (level === 'WARN')
+        console.warn(`\x1B[33m${log}`)
+    else if (debug)
+        console.info(`\x1B[36m${log}`)
 }

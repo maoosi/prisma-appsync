@@ -2,13 +2,14 @@ import type {
     AfterHookParams,
     InjectedConfig,
     Options,
+    Prisma,
     PrismaAppSyncOptionsType,
     ResolveParams,
     Shield,
     ShieldAuthorization,
 } from './defs'
 import { BatchActionsList, DebugTestingKey, PrismaClient } from './defs'
-import { CustomError, debug, inspect, parseError } from './inspector'
+import { CustomError, log, parseError } from './inspector'
 import {
     clarify,
     getDepth,
@@ -17,7 +18,7 @@ import {
     runHooks,
 } from './guard'
 import { parseEvent } from './adapter'
-import { isEmpty } from './utils'
+import { isEmpty, omit } from './utils'
 import { prismaQueryJoin } from './resolver'
 import * as queries from './resolver'
 
@@ -64,6 +65,7 @@ export class PrismaAppSync {
    * @param {number|false} options.defaultPagination? - Default pagination for list Query (items per page).
    * @param {number} options.maxDepth? - Maximum allowed GraphQL query depth.
    * @param {number} options.maxReqPerUserMinute? - Maximum allowed requests per user, per minute.
+   * @param {'INFO' | 'WARN' | 'ERROR'} options.logLevel? - Maximum allowed requests per user, per minute.
    *
    * @default
    * ```
@@ -137,18 +139,48 @@ export class PrismaAppSync {
         process.env.PRISMA_APPSYNC_DEBUG = this.options.debug ? 'true' : 'false'
 
         // Debug logs
-        debug('New instance created using:', inspect(this.options))
+        log('New Prisma-AppSync instance created using:', this.options)
+
+        // Prisma client options
+        const prismaLogDef: Prisma.LogDefinition[] = [
+            {
+                emit: 'event',
+                level: 'query',
+            },
+            {
+                emit: 'event',
+                level: 'error',
+            },
+            {
+                emit: 'event',
+                level: 'info',
+            },
+            {
+                emit: 'event',
+                level: 'warn',
+            },
+        ]
 
         // Create new Prisma Client
         if (process?.env?.PRISMA_APPSYNC_TESTING === 'true') {
             if (!global.prisma)
-                global.prisma = new PrismaClient()
+                global.prisma = new PrismaClient({ log: prismaLogDef })
 
             this.prismaClient = global.prisma
         }
         else {
-            this.prismaClient = new PrismaClient()
+            this.prismaClient = new PrismaClient({ log: prismaLogDef })
         }
+
+        // Prisma logs
+        // @ts-expect-error: 'query' event isn't being recognised
+        this.prismaClient.$on('query', (e: any) => log('Prisma Client query:', e, 'INFO'))
+        // @ts-expect-error: 'info' event isn't being recognised
+        this.prismaClient.$on('info', (e: any) => log('Prisma Client info:', e, 'INFO'))
+        // @ts-expect-error: 'warn' event isn't being recognised
+        this.prismaClient.$on('warn', (e: any) => log('Prisma Client warn:', e, 'WARN'))
+        // @ts-expect-error: 'error' event isn't being recognised
+        this.prismaClient.$on('error', (e: any) => log('Prisma Client error:', e, 'ERROR'))
     }
 
     /**
@@ -188,14 +220,11 @@ export class PrismaAppSync {
         let result: any = null
 
         try {
-            debug(
-                'Resolving API request w/ event (shortened):',
-                inspect({
-                    arguments: resolveParams.event.arguments,
-                    identity: resolveParams.event.identity,
-                    info: resolveParams.event.info,
-                }),
-            )
+            log('Resolving API request w/ event (truncated):', {
+                arguments: resolveParams.event.arguments,
+                identity: resolveParams.event.identity,
+                info: omit(resolveParams.event.info, 'selectionSetGraphQL'),
+            })
 
             // Adapter :: parse appsync event
             let QueryParams = parseEvent(
@@ -203,10 +232,12 @@ export class PrismaAppSync {
                 this.options,
                 resolveParams.resolvers,
             )
-            debug('Parsed event:', inspect(QueryParams))
+            log('Parsed event:', QueryParams)
 
             // Guard :: rate limiting
-            const callerUuid = (QueryParams.identity as any)?.sourceIp
+            const callerUuid
+                = (QueryParams.identity as any)?.sourceIp?.[0]
+                || (QueryParams.identity as any)?.sourceIp
                 || (QueryParams.identity as any)?.sub
                 || JSON.stringify(QueryParams.identity)
 
@@ -215,7 +246,6 @@ export class PrismaAppSync {
                     callerUuid,
                     maxReqPerMinute: this.options.maxReqPerUserMinute,
                 })
-                debug('Rate limting:', inspect({ limitExceeded, count }))
                 if (limitExceeded) {
                     throw new CustomError(
                         `Rate limit (maxReqPerUserMinute=${this.options.maxReqPerUserMinute}) exceeded for caller "${callerUuid}".`,
@@ -224,6 +254,9 @@ export class PrismaAppSync {
                         },
                     )
                 }
+                else {
+                    log(`Rate limit check for caller "${callerUuid}" returned ${count}/${this.options.maxReqPerUserMinute} (last minute).`)
+                }
             }
 
             // Guard :: block queries with a depth > maxDepth
@@ -231,7 +264,6 @@ export class PrismaAppSync {
                 paths: QueryParams.paths,
                 context: QueryParams.context,
             })
-            debug(`Query has depth of ${depth} (max allowed is ${this.options.maxDepth}).`)
             if (depth > this.options.maxDepth) {
                 throw new CustomError(
                     `Query has depth of ${depth}, which exceeds max depth of ${this.options.maxDepth}.`,
@@ -239,6 +271,9 @@ export class PrismaAppSync {
                         type: 'FORBIDDEN',
                     },
                 )
+            }
+            else {
+                log(`Query has depth of ${depth} (max allowed is ${this.options.maxDepth}).`)
             }
 
             // Guard :: create shield from config
@@ -254,9 +289,9 @@ export class PrismaAppSync {
                 context: QueryParams.context,
             })
             if (Object.keys(shield).length === 0)
-                debug('Query shield authorization: No Shield setup detected.')
+                log('Query shield authorization: No Shield setup detected.', null, 'WARN')
             else
-                debug('Query shield authorization:', inspect(shieldAuth))
+                log('Query shield authorization:', shieldAuth)
 
             // Guard :: if `canAccess` if equal to `false`, we reject the API call
             if (!shieldAuth.canAccess) {
@@ -268,10 +303,7 @@ export class PrismaAppSync {
 
             // Guard :: if `prismaFilter` is set, combine with current Prisma query
             if (!isEmpty(shieldAuth.prismaFilter)) {
-                debug(
-                    'QueryParams before adding Shield filters:',
-                    inspect(QueryParams),
-                )
+                log('QueryParams before adding Shield filters:', QueryParams)
 
                 QueryParams.prismaArgs = prismaQueryJoin(
                     [QueryParams.prismaArgs, { where: shieldAuth.prismaFilter }],
@@ -286,7 +318,7 @@ export class PrismaAppSync {
                     ],
                 )
 
-                debug('QueryParams after adding Shield filters:', inspect(QueryParams))
+                log('QueryParams after adding Shield filters:', QueryParams)
             }
 
             // Guard: get and run all before hooks functions matching query
@@ -301,7 +333,8 @@ export class PrismaAppSync {
 
             // Resolver :: resolve query for UNIT TESTS
             if (process?.env?.PRISMA_APPSYNC_TESTING === 'true') {
-                debug('Resolving query for UNIT TESTS.')
+                log('Resolving query for UNIT TESTS.')
+
                 const isBatchAction = BatchActionsList.includes(
                     QueryParams?.context?.action,
                 )
@@ -341,7 +374,7 @@ export class PrismaAppSync {
             else if (
                 typeof resolveParams?.resolvers?.[QueryParams.operation] === 'function'
             ) {
-                debug(`Resolving query for Custom Resolver "${QueryParams.operation}".`)
+                log(`Resolving query for Custom Resolver "${QueryParams.operation}".`)
                 const customResolverFn = resolveParams.resolvers[
                     QueryParams.operation
                 ] as Function
@@ -352,11 +385,25 @@ export class PrismaAppSync {
             }
             // Resolver :: resolve query with built-in CRUD
             else if (!isEmpty(QueryParams?.context?.model)) {
-                debug(`Resolving query for built-in CRUD operation "${QueryParams.operation}".`)
-                result = await queries[`${QueryParams.context.action}Query`](
-                    this.prismaClient,
-                    QueryParams,
-                )
+                log(`Resolving query for built-in CRUD operation "${QueryParams.operation}".`)
+
+                try {
+                    result = await queries[`${QueryParams.context.action}Query`](
+                        this.prismaClient,
+                        QueryParams,
+                    )
+                }
+                catch (err: any) {
+                    const truncate = err?.message?.length > 500
+                    const message = truncate
+                        ? `... ${err.message.slice(err.message.length - 500)}`
+                        : err.message
+
+                    throw new CustomError(
+                        message.split('\n').pop() || 'Unknown error during query.',
+                        { type: 'INTERNAL_SERVER_ERROR' },
+                    )
+                }
             }
             // Resolver :: query resolver not found
             else {
@@ -386,10 +433,9 @@ export class PrismaAppSync {
         }
 
         // Guard :: clarify result (decode html)
-        debug('Result before sanitize:', inspect(result))
         const resultClarified = this.options.sanitize ? clarify(result) : result
+        log('Returning response to API request w/ result:', resultClarified)
 
-        debug('Returning response to API request w/ result:', inspect(resultClarified))
         return resultClarified
     }
 }

@@ -1,3 +1,4 @@
+import type { Prisma } from '@prisma/client'
 import { PrismaClient } from '@prisma/client'
 import type {
     AppSyncIdentity,
@@ -204,6 +205,7 @@ export interface ResolveParams<Operations extends string, CustomResolvers extend
 
 // Prisma-related Types
 
+export type { Prisma }
 export { PrismaClient }
 
 export interface PrismaArgs {

@@ -1,20 +1,21 @@
 import { describe, expect, test } from 'vitest'
-import { testEach } from './_helpers'
 import {
     getAction,
-    getOperation,
-    getModel,
-    getFields,
-    getContext,
-    getType,
-    getPrismaArgs,
-    getPaths,
     getAuthIdentity,
+    getContext,
+    getFields,
+    getModel,
+    getOperation,
+    getPaths,
+    getPrismaArgs,
+    getType,
 } from '@client/adapter'
-import { Actions, Action, ActionsAliases, Authorization, Authorizations } from '@client/defs'
+import type { Action, Authorization } from '@client/defs'
+import { Actions, ActionsAliases, Authorizations } from '@client/defs'
 import { Prisma } from '@prisma/client'
 import mockIdentity from '@appsync-server/mocks/identity'
 import mockLambdaEvent from '@appsync-server/mocks/lambda-event'
+import { testEach } from './_helpers'
 
 process.env.PRISMA_APPSYNC_TESTING = 'true'
 
@@ -24,7 +25,7 @@ function mockAppSyncEvent(identity: NonNullable<Authorization>) {
     return mockLambdaEvent({
         request: {},
         graphQLParams: {
-            query: `query getPost { getPost { title } }`,
+            query: 'query getPost { getPost { title } }',
             variables: {},
             operationName: 'getPost',
             raw: {},
@@ -109,7 +110,7 @@ describe('CLIENT #adapter', () => {
             return [action, 'People']
         })
         testEach(cases)('when operation is "{0}People", expect model to equal "{1}"', (action: Action, expected) => {
-            const result = getModel({ operation: `${action}People`, action: action })
+            const result = getModel({ operation: `${action}People`, action })
             expect(result).toEqual(expected)
         })
     })
