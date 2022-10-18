@@ -67,6 +67,23 @@ export function dotate(source: any): any {
 }
 
 /**
+ * #### Return an object ommitting one to multiple keys.
+ *
+ * @example omit({ foo: 'foo', bar: 'bar' }, 'foo')
+ * // returns { foo: 'foo' }
+ *
+ * @param {any} obj
+ * @param {string | string[]} omitKey
+ * @returns any
+ */
+export function omit(obj: any, omitKey: string | string[]): any {
+    const newObj = clone(obj)
+    const omitKeys = !Array.isArray(omitKey) ? [omitKey] : omitKey
+    omitKeys.forEach(k => delete newObj?.[k])
+    return newObj
+}
+
+/**
  * #### Returns true if specified path matches any of the glob patterns.
  *
  * @example isMatchingGlob('get/post/title', ['get/post{,/**}'])

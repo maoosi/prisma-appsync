@@ -1,18 +1,19 @@
 import { describe, expect, test } from 'vitest'
 import {
-    merge,
     clone,
     decode,
-    encode,
     dotate,
-    isMatchingGlob,
-    isEmpty,
+    encode,
     filterXSS,
-    isUndefined,
-    upperFirst,
-    lowerFirst,
+    isEmpty,
+    isMatchingGlob,
     isObject,
+    isUndefined,
+    lowerFirst,
+    merge,
+    omit,
     traverse,
+    upperFirst,
 } from '@client/utils'
 
 process.env.PRISMA_APPSYNC_TESTING = 'true'
@@ -50,34 +51,34 @@ describe('CLIENT #utils', () => {
                 },
             })
         })
-        
+
         test('expect merge to deep merge objects with array', () => {
             const obj1 = {
-                where: { collectionUuid: "a" },
+                where: { collectionUuid: 'a' },
                 data: {
                     pins: [
-                        { uuid: "b", order: 2 },
-                        { uuid: "c", order: 5 },
-                    ]
-                }
+                        { uuid: 'b', order: 2 },
+                        { uuid: 'c', order: 5 },
+                    ],
+                },
             }
             const obj2 = {
                 select: {
                     uuid: true,
-                    order: true
+                    order: true,
                 },
             }
             expect(merge(obj1, obj2)).toEqual({
-                where: { collectionUuid: "a" },
+                where: { collectionUuid: 'a' },
                 data: {
                     pins: [
-                        { uuid: "b", order: 2 },
-                        { uuid: "c", order: 5 },
-                    ]
+                        { uuid: 'b', order: 2 },
+                        { uuid: 'c', order: 5 },
+                    ],
                 },
                 select: {
                     uuid: true,
-                    order: true
+                    order: true,
                 },
             })
         })
@@ -96,15 +97,21 @@ describe('CLIENT #utils', () => {
         })
         test('expect clone to deep clone object with array', () => {
             const obj1 = {
-                where: { collectionUuid: "a" },
+                where: { collectionUuid: 'a' },
                 data: {
                     pins: [
-                        { uuid: "b", order: 2 },
-                        { uuid: "c", order: 5 },
-                    ]
+                        { uuid: 'b', order: 2 },
+                        { uuid: 'c', order: 5 },
+                    ],
                 },
             }
             expect(clone(obj1)).toEqual(obj1)
+        })
+    })
+    describe('.omit?', () => {
+        test('expect omit to delete object keys', () => {
+            const result = omit({ a: 'a', b: 'b', c: 'c' }, ['a', 'c'])
+            expect(result).toEqual({ b: 'b' })
         })
     })
     describe('.decode?', () => {
@@ -211,7 +218,8 @@ describe('CLIENT #utils', () => {
                     },
                 },
                 (value) => {
-                    if (typeof value === 'boolean') value = !value
+                    if (typeof value === 'boolean')
+                        value = !value
                     return { value }
                 },
             )
@@ -240,8 +248,10 @@ describe('CLIENT #utils', () => {
                 },
                 (value, key) => {
                     let excludeChilds = false
-                    if (typeof key === 'string' && key === 'authors') excludeChilds = true
-                    if (typeof value === 'boolean') value = !value
+                    if (typeof key === 'string' && key === 'authors')
+                        excludeChilds = true
+                    if (typeof value === 'boolean')
+                        value = !value
                     return { value, excludeChilds }
                 },
             )
@@ -258,7 +268,8 @@ describe('CLIENT #utils', () => {
         })
         test('expect traverse to allow traverse an modify an Array', () => {
             const result = traverse([{ authors: { username: true } }, { comments: { username: true } }], (value) => {
-                if (typeof value === 'boolean') value = !value
+                if (typeof value === 'boolean')
+                    value = !value
                 return { value }
             })
             expect(result).toEqual([{ authors: { username: false } }, { comments: { username: false } }])
@@ -268,7 +279,8 @@ describe('CLIENT #utils', () => {
                 [{ authors: { username: true } }, { comments: { username: true } }],
                 (value, key) => {
                     const excludeChilds = !!(typeof key === 'string' && key === 'comments')
-                    if (typeof value === 'boolean') value = !value
+                    if (typeof value === 'boolean')
+                        value = !value
                     return { value, excludeChilds }
                 },
             )
