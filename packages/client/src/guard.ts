@@ -15,6 +15,11 @@ import {
 import { decode, encode, filterXSS, isMatchingGlob, merge, traverse, upperFirst } from './utils'
 import { CustomError } from './inspector'
 
+// https:// github.com/blackflux/lambda-rate-limiter
+const limiter = lambdaRateLimiter({
+    interval: 60 * 1000, // 60 seconds = 1 minute
+})
+
 /**
  * #### Sanitize data (parse xss + encode html).
  *
@@ -248,14 +253,7 @@ export async function preventDOS({
     let limitExceeded = false
     let count = -1
 
-    const interval = 60 * 1000 // 60 seconds = 1 minute
-    const uniqueTokenPerInterval = 500 //
-
     try {
-        const limiter = lambdaRateLimiter({
-            interval,
-            uniqueTokenPerInterval,
-        })
         count = await limiter.check(maxReqPerMinute, callerUuid)
     }
     catch (error) {
