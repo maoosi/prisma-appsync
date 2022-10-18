@@ -2,7 +2,7 @@
 import './env.mjs'
 
 // build
-import './build.mjs'
+await $`zx scripts/build.mjs`
 
 // prisma client for tests
 console.log(chalk.blue('\nTest :: Generate Prisma Client\n'))

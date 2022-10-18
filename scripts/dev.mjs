@@ -2,7 +2,7 @@
 import './env.mjs'
 
 // build project
-import './build.mjs'
+await $`zx scripts/build.mjs`
 
 // path
 const playgroundPath = 'playground'
