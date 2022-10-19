@@ -1,8 +1,9 @@
 import { describe, expect } from 'vitest'
-import { testEach } from './_helpers'
 import * as queries from '@client/resolver'
-import { QueryParams, Authorizations, Actions, ActionsAliases } from '@client/defs'
+import type { QueryParams } from '@client/defs'
+import { Actions, ActionsAliases, Authorizations } from '@client/defs'
 import mockIdentity from '@appsync-server/mocks/identity'
+import { testEach } from './_helpers'
 
 process.env.PRISMA_APPSYNC_TESTING = 'true'
 

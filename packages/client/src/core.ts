@@ -61,18 +61,17 @@ export class PrismaAppSync {
    * @param {PrismaAppSyncOptionsType} options
    * @param {string} options.connectionString? - Prisma connection string (database connection URL).
    * @param {boolean} options.sanitize? - Enable sanitize inputs (parse xss + encode html).
-   * @param {boolean} options.debug? - Enable debug logs (visible in CloudWatch).
+   * @param {'INFO' | 'WARN' | 'ERROR'} options.logLevel? - Server logs level (visible in CloudWatch).
    * @param {number|false} options.defaultPagination? - Default pagination for list Query (items per page).
    * @param {number} options.maxDepth? - Maximum allowed GraphQL query depth.
    * @param {number} options.maxReqPerUserMinute? - Maximum allowed requests per user, per minute.
-   * @param {'INFO' | 'WARN' | 'ERROR'} options.logLevel? - Maximum allowed requests per user, per minute.
    *
    * @default
    * ```
    * {
    *   connectionString: process.env.DATABASE_URL,
    *   sanitize: true,
-   *   debug: true,
+   *   logLevel: 'INFO',
    *   defaultPagination: 50,
    *   maxDepth: 3,
    *   maxReqPerUserMinute: 200
@@ -95,10 +94,10 @@ export class PrismaAppSync {
                 typeof options?.sanitize !== 'undefined'
                     ? options.sanitize
                     : true,
-            debug:
-                typeof options?.debug !== 'undefined'
-                    ? options.debug
-                    : true,
+            logLevel:
+                typeof options?.logLevel !== 'undefined'
+                    ? options.logLevel
+                    : 'INFO',
             defaultPagination:
                 typeof options?.defaultPagination !== 'undefined'
                     ? options.defaultPagination
@@ -135,8 +134,8 @@ export class PrismaAppSync {
             })
         }
 
-        // Set ENV variable to indicate if debug logs should print
-        process.env.PRISMA_APPSYNC_DEBUG = this.options.debug ? 'true' : 'false'
+        // Set ENV variable for log level
+        process.env.PRISMA_APPSYNC_LOG_LEVEL = this.options.logLevel
 
         // Debug logs
         log('New Prisma-AppSync instance created using:', this.options)

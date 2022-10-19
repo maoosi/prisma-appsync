@@ -32,7 +32,7 @@ export declare class PrismaAppSync {
    * @param {PrismaAppSyncOptionsType} options
    * @param {string} options.connectionString? - Prisma connection string (database connection URL).
    * @param {boolean} options.sanitize? - Enable sanitize inputs (parse xss + encode html).
-   * @param {boolean} options.debug? - Enable debug logs (visible in CloudWatch).
+   * @param {'INFO' | 'WARN' | 'ERROR'} options.logLevel? - Server logs level (visible in CloudWatch).
    * @param {number|false} options.defaultPagination? - Default pagination for list Query (items per page).
    * @param {number} options.maxDepth? - Maximum allowed GraphQL query depth.
    * @param {number} options.maxReqPerUserMinute? - Maximum allowed requests per user, per minute.
@@ -42,7 +42,7 @@ export declare class PrismaAppSync {
    * {
    *   connectionString: process.env.DATABASE_URL,
    *   sanitize: true,
-   *   debug: true,
+   *   logLevel: 'INFO',
    *   defaultPagination: 50,
    *   maxDepth: 3,
    *   maxReqPerUserMinute: 200

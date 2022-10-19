@@ -1,15 +1,16 @@
+import type { logLevel } from './defs';
 declare const errorCodes: {
     FORBIDDEN: number;
     BAD_USER_INPUT: number;
     INTERNAL_SERVER_ERROR: number;
     TOO_MANY_REQUESTS: number;
 };
-interface ErrorExtensions {
+export interface ErrorExtensions {
     type: keyof typeof errorCodes;
     trace?: string[];
     [key: string]: any;
 }
-interface ErrorDetails {
+export interface ErrorDetails {
     error: string;
     type: ErrorExtensions['type'];
     code: number;
@@ -24,7 +25,6 @@ export declare class CustomError extends Error {
     constructor(message: string, extensions: ErrorExtensions);
 }
 export declare function parseError(error: Error): CustomError;
-export declare function inspect(data: any): string;
-export declare function debug(...data: any[]): void;
-export declare function log(data: any, level?: 'ERROR' | 'WARN' | 'INFO'): void;
+export declare function log(message: string, obj?: any, level?: logLevel): void;
+export declare function printLog(message: any, level: logLevel): void;
 export {};

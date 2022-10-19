@@ -12,10 +12,12 @@ import type {
 
 // Prisma-AppSync Client Types
 
+export type logLevel = 'INFO' | 'WARN' | 'ERROR'
+
 export interface PrismaAppSyncOptionsType {
     connectionString?: string
     sanitize?: boolean
-    debug?: boolean
+    logLevel?: logLevel
     defaultPagination?: number | false
     maxDepth?: number
     maxReqPerUserMinute?: number | false

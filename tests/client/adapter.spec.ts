@@ -126,10 +126,11 @@ describe('CLIENT #adapter', () => {
                 options: {
                     connectionString: 'xxx',
                     sanitize: true,
-                    debug: false,
+                    logLevel: 'INFO',
                     defaultPagination: false,
                     maxDepth: 3,
                     modelsMapping: {},
+                    maxReqPerUserMinute: 200,
                 },
                 operation: 'notify',
             })

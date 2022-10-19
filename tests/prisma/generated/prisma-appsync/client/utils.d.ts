@@ -46,6 +46,17 @@ export declare function encode(str: string): string;
  */
 export declare function dotate(source: any): any;
 /**
+ * #### Return an object ommitting one to multiple keys.
+ *
+ * @example omit({ foo: 'foo', bar: 'bar' }, 'foo')
+ * // returns { foo: 'foo' }
+ *
+ * @param {any} obj
+ * @param {string | string[]} omitKey
+ * @returns any
+ */
+export declare function omit(obj: any, omitKey: string | string[]): any;
+/**
  * #### Returns true if specified path matches any of the glob patterns.
  *
  * @example isMatchingGlob('get/post/title', ['get/post{,/**}'])

@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest'
 import { getShieldAuthorization, runHooks } from '@client/guard'
-import { Actions, ActionsAliases, Authorizations, Options } from '@client/defs'
+import type { Options } from '@client/defs'
+import { Actions, ActionsAliases, Authorizations } from '@client/defs'
 import { Prisma, PrismaClient } from '@prisma/client'
 
 const Models = Prisma.ModelName
@@ -8,13 +9,14 @@ const Models = Prisma.ModelName
 process.env.DATABASE_URL = 'postgresql://USER:PASSWORD@HOST:PORT/DATABASE'
 process.env.PRISMA_APPSYNC_TESTING = 'true'
 
-const options:Options = {
+const options: Options = {
     connectionString: 'xxx',
     sanitize: true,
-    debug: false,
+    logLevel: 'INFO',
     defaultPagination: false,
     maxDepth: 3,
     modelsMapping: { Post: 'post', Posts: 'post' },
+    maxReqPerUserMinute: 200,
 }
 
 describe('CLIENT #guard', () => {
@@ -28,7 +30,7 @@ describe('CLIENT #guard', () => {
                     alias: ActionsAliases.modify,
                     model: Models.Post,
                 },
-                options
+                options,
             })
 
             expect(authorization).toEqual({
@@ -49,7 +51,7 @@ describe('CLIENT #guard', () => {
                     alias: ActionsAliases.modify,
                     model: Models.Post,
                 },
-                options
+                options,
             })
 
             expect(authorization).toEqual({
@@ -70,7 +72,7 @@ describe('CLIENT #guard', () => {
                     alias: ActionsAliases.modify,
                     model: Models.Post,
                 },
-                options
+                options,
             })
 
             expect(authorization).toEqual({
@@ -97,7 +99,7 @@ describe('CLIENT #guard', () => {
                     alias: ActionsAliases.modify,
                     model: Models.Post,
                 },
-                options
+                options,
             })
 
             expect(authorization).toEqual({
@@ -121,7 +123,7 @@ describe('CLIENT #guard', () => {
                     alias: ActionsAliases.modify,
                     model: Models.Post,
                 },
-                options
+                options,
             })
 
             expect(authorization).toEqual({
@@ -147,7 +149,7 @@ describe('CLIENT #guard', () => {
                     alias: ActionsAliases.modify,
                     model: Models.Post,
                 },
-                options
+                options,
             })
 
             expect(authorization).toEqual({

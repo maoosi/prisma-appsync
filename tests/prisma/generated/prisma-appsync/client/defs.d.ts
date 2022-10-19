@@ -1,9 +1,11 @@
+import type { Prisma } from '@prisma/client';
 import { PrismaClient } from '@prisma/client';
-import type { AppSyncIdentityCognito, AppSyncIdentityIAM, AppSyncIdentityLambda, AppSyncIdentityOIDC, AppSyncResolverEvent, AppSyncResolverHandler } from 'aws-lambda';
+import type { AppSyncIdentity, AppSyncIdentityCognito, AppSyncIdentityIAM, AppSyncIdentityLambda, AppSyncIdentityOIDC, AppSyncResolverEvent, AppSyncResolverHandler } from 'aws-lambda';
+export declare type logLevel = 'INFO' | 'WARN' | 'ERROR';
 export interface PrismaAppSyncOptionsType {
     connectionString?: string;
     sanitize?: boolean;
-    debug?: boolean;
+    logLevel?: logLevel;
     defaultPagination?: number | false;
     maxDepth?: number;
     maxReqPerUserMinute?: number | false;
@@ -25,7 +27,7 @@ export interface Context {
     alias: ActionsAlias;
     model: string | null;
 }
-export { AppSyncResolverHandler, AppSyncResolverEvent };
+export type { AppSyncResolverHandler, AppSyncResolverEvent, AppSyncIdentity };
 /**
  * ### QueryParams
  *
@@ -153,6 +155,7 @@ export interface ResolveParams<Operations extends string, CustomResolvers extend
     shield?: (props: QueryParams) => Shield;
     hooks?: Hooks<Operations, CustomResolvers>;
 }
+export type { Prisma };
 export { PrismaClient };
 export interface PrismaArgs {
     where?: any;

@@ -1,8 +1,9 @@
+/* eslint-disable no-new */
 import { describe, expect, test } from 'vitest'
 import { PrismaAppSync } from '@client'
 import mockIdentity from '@appsync-server/mocks/identity'
 import mockLambdaEvent from '@appsync-server/mocks/lambda-event'
-import { Authorizations, Actions, ActionsAliases } from '@client/defs'
+import { Actions, ActionsAliases, Authorizations } from '@client/defs'
 
 process.env.PRISMA_APPSYNC_TESTING = 'true'
 process.env.PRISMA_APPSYNC_INJECTED_CONFIG = JSON.stringify({
@@ -18,8 +19,8 @@ function mockAppSyncEvent(operationName: string, query: string) {
         },
         identity: mockIdentity(Authorizations.API_KEY),
         graphQLParams: {
-            operationName: operationName,
-            query: query,
+            operationName,
+            query,
         },
     })
 }
@@ -27,12 +28,12 @@ function mockAppSyncEvent(operationName: string, query: string) {
 describe('CLIENT #core', () => {
     describe('.connectionString?', () => {
         test('expect Connection String to be configurable via Class options', () => {
-            const connectionString = 'postgres://' + (+new Date()).toString(36).slice(-5)
+            const connectionString = `postgres://${(+new Date()).toString(36).slice(-5)}`
             new PrismaAppSync({ connectionString })
             expect(process.env.DATABASE_URL).toEqual(connectionString)
         })
         test('expect Connection String to be configurable via DATABASE_URL env var', () => {
-            process.env.DATABASE_URL = 'postgres://' + (+new Date()).toString(36).slice(-5)
+            process.env.DATABASE_URL = `postgres://${(+new Date()).toString(36).slice(-5)}`
             const prismaAppSync = new PrismaAppSync()
             expect(prismaAppSync.options.connectionString).toEqual(process.env.DATABASE_URL)
         })
@@ -118,7 +119,7 @@ describe('CLIENT #core', () => {
             )
             const result = await prismaAppSync.resolve({ event })
             const maliciousXss = result?.__prismaAppsync?.QueryParams?.prismaArgs?.data?.title
-            expect(maliciousXss).toEqual(`<IMG SRC="javascript:alert('XSS');">`)
+            expect(maliciousXss).toEqual('<IMG SRC="javascript:alert(\'XSS\');">')
         })
         test('expect outputs to be de-sanitize automatically', async () => {
             const prismaAppSync = new PrismaAppSync({
@@ -141,16 +142,16 @@ describe('CLIENT #core', () => {
         })
     })
 
-    describe('.debug?', () => {
-        test('expect Debug Logs to be TRUE by default', () => {
+    describe('.logLevel?', () => {
+        test('expect Logging Level to be INFO by default', () => {
             new PrismaAppSync({
                 connectionString: 'postgresql://USER:PASSWORD@HOST:PORT/DATABASE',
             })
-            expect(process.env.PRISMA_APPSYNC_DEBUG).toEqual(String(true))
+            expect(process.env.PRISMA_APPSYNC_LOG_LEVEL).toEqual('INFO')
         })
-        test('expect Debug Logs to be configurable via Class options', () => {
-            new PrismaAppSync({ connectionString: 'postgresql://USER:PASSWORD@HOST:PORT/DATABASE', debug: false })
-            expect(process.env.PRISMA_APPSYNC_DEBUG).toEqual(String(false))
+        test('expect Logging Level to be configurable via Class options', () => {
+            new PrismaAppSync({ connectionString: 'postgresql://USER:PASSWORD@HOST:PORT/DATABASE', logLevel: 'WARN' })
+            expect(process.env.PRISMA_APPSYNC_LOG_LEVEL).toEqual('WARN')
         })
     })
 

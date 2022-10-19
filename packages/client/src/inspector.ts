@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 import { inspect as nodeInspect } from 'util'
+import type { logLevel } from './defs'
 
 const errorCodes = {
     FORBIDDEN: 401,
@@ -8,20 +9,18 @@ const errorCodes = {
     TOO_MANY_REQUESTS: 429,
 }
 
-interface ErrorExtensions {
+export interface ErrorExtensions {
     type: keyof typeof errorCodes
     trace?: string[]
     [key: string]: any
 }
 
-interface ErrorDetails {
+export interface ErrorDetails {
     error: string
     type: ErrorExtensions['type']
     code: number
     trace: ErrorExtensions['trace']
 }
-
-export type logLevel = 'INFO' | 'WARN' | 'ERROR'
 
 export class CustomError extends Error {
     public error: ErrorDetails['error']
@@ -73,10 +72,7 @@ export function parseError(error: Error): CustomError {
 }
 
 export function log(message: string, obj?: any, level?: logLevel): void {
-    const debug = process.env.PRISMA_APPSYNC_DEBUG === 'true'
-    const usePrint = debug || ['WARN', 'ERROR'].includes(level || 'INFO')
-
-    if (usePrint && !(process?.env?.PRISMA_APPSYNC_TESTING === 'true')) {
+    if (canPrintLog(level || 'INFO')) {
         printLog(message, level || 'INFO')
 
         if (obj) {
@@ -106,12 +102,22 @@ export function printLog(message: any, level: logLevel): void {
     })
     const prefix = `◭ ${timestamp} <<${level}>>`
     const log = [prefix, message].join(' ')
-    const debug = process.env.PRISMA_APPSYNC_DEBUG === 'true'
 
-    if (level === 'ERROR')
+    if (level === 'ERROR' && canPrintLog(level))
         console.error(`\x1B[31m${log}`)
-    else if (level === 'WARN')
+    else if (level === 'WARN' && canPrintLog(level))
         console.warn(`\x1B[33m${log}`)
-    else if (debug)
+    else if (level === 'INFO' && canPrintLog(level))
         console.info(`\x1B[36m${log}`)
+}
+
+function canPrintLog(level: logLevel): Boolean {
+    if (process?.env?.PRISMA_APPSYNC_TESTING === 'true')
+        return false
+
+    const logLevel = String(process.env.PRISMA_APPSYNC_LOG_LEVEL) as logLevel
+
+    return (logLevel === 'ERROR' && level === 'ERROR')
+        || (logLevel === 'WARN' && ['WARN', 'ERROR'].includes(level))
+        || (logLevel === 'INFO')
 }
