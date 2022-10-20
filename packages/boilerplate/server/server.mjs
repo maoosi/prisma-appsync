@@ -1,4 +1,5 @@
 #!/usr/bin/env zx
+/* eslint-disable no-console */
 
 process.env.FORCE_COLOR = 3
 process.env.DATABASE_URL = 'postgresql://prisma:prisma@localhost:5433/dev'

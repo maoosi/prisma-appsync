@@ -45,14 +45,18 @@ export class Installer {
 
     constructor() {
         // defaults
-        this.gitBranch = 'maoosi/prisma-appsync#maoosi/dev'
-        this.installPackage = 'prisma-appsync@preview'
+        this.gitBranch = String(process.env?.MODE) === 'preview'
+            ? 'maoosi/prisma-appsync#dev'
+            : 'maoosi/prisma-appsync#main'
+        this.installPackage = String(process.env?.MODE) === 'preview'
+            ? 'prisma-appsync@preview'
+            : 'prisma-appsync'
         this.version = String(require('../package.json')?.version)
         this.localServerDir = '.server'
         this.localServerPort = 4000
         this.cwd = process.cwd()
         this.timestamp = new Date().getTime()
-        this.isLocalDevMode = String(process.env.PRISMAAPPSYNC_CREATEAPP_MODE) === 'dev'
+        this.isLocalDevMode = String(process.env?.PRISMA_APPSYNC_CREATEAPP_MODE) === 'dev'
         this.detected = {
             projectName: '',
             rootPath: this.cwd,

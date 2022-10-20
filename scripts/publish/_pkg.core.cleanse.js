@@ -2,9 +2,9 @@ const fs = require('fs')
 const path = require('path')
 
 // Define absolute paths for original pkg and temporary pkg.
-const ORIG_PKG_PATH = path.resolve(__dirname, '../package.json')
-const PUBLISH_PKG_PATH = path.resolve(__dirname, '../package-publish.json')
-const CACHED_PKG_PATH = path.resolve(__dirname, '../package-cache.json')
+const ORIG_PKG_PATH = path.resolve(__dirname, '../../package.json')
+const PUBLISH_PKG_PATH = path.resolve(__dirname, '../../package-publish.json')
+const CACHED_PKG_PATH = path.resolve(__dirname, '../../package-cache.json')
 
 // Obtain original `package.json` contents.
 const pkgData = require(ORIG_PKG_PATH)

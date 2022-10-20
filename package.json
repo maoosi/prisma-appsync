@@ -28,7 +28,8 @@
         "test": "zx scripts/test.mjs",
         "dev": "zx scripts/dev.mjs",
         "cleans": "zx scripts/cleans.mjs",
-        "publish": "zx scripts/publish.mjs",
+        "publish": "zx scripts/publish/core.mjs",
+        "publish:installer": "zx scripts/publish/installer.mjs",
         "docs:dev": "vitepress dev docs",
         "docs:build": "vitepress build docs",
         "docs:serve": "vitepress serve docs"

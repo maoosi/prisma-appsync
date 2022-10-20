@@ -7,6 +7,7 @@ packages/
 scripts/
 tests/
 playground/
+docs/
 .editorconfig
 .eslintrc
 .markdownlint.json
@@ -28,9 +29,13 @@ yarn-error.log*
 pnpm-workspace.yaml
 vite.config.ts
 
+# Installer
+dist/installer
+
 # Editor directories and files
 .idea
 .vscode
+.github
 *.suo
 *.ntvs*
 *.njsproj

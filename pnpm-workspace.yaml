@@ -1,5 +1,5 @@
 packages:
-    - 'packages/appsync-server'
-    - 'packages/client'
-    - 'packages/create-app'
-    - 'packages/generator'
+    - "packages/appsync-server"
+    - "packages/client"
+    - "packages/installer"
+    - "packages/generator"

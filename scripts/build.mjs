@@ -22,9 +22,9 @@ try {
     console.log(chalk.blue('\nBuild :: Generator template files\n'))
     await $`cp -R packages/generator/templates dist/templates && chmod -R 755 dist`
 
-    // build create-app
+    // build installer
     console.log(chalk.blue('\nBuild :: Create app\n'))
-    await $`esbuild packages/create-app/src/index.ts --bundle --platform=node --target=node14 --external:fsevents --external:_http_common --outfile=dist/create-app.js`
+    await $`esbuild packages/installer/src/index.ts --bundle --define:process.env.NODE_ENV="production" --format=cjs --minify --keep-names --platform=node --target=node14 --external:fsevents --external:_http_common --outfile=dist/installer/bin/index.js`
 
     // build appsync-server
     console.log(chalk.blue('\nBuild :: AppSync-server\n'))

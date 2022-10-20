@@ -17,30 +17,7 @@
         "chalk": true,
         "cd": true,
         "argv": true,
-        "fs": true
+        "fs": true,
+        "nothrow": true
     }
-    // "env": {
-    //     "browser": false,
-    //     "node": true
-    // },
-    // "rules": {
-    //     "no-unused-vars": "off",
-    //     "no-console": "off",
-    //     "comma-dangle": "off",
-    //     "brace-style": "off",
-    //     "no-param-reassign": "off",
-    //     "radix": ["error", "as-needed"],
-    //     "indent": "off",
-    //     "@typescript-eslint/prefer-for-of": "off",
-    //     "@typescript-eslint/no-unused-vars": "off",
-        // "@typescript-eslint/indent": [
-        //     "error",
-        //     4,
-        //     {
-        //         "offsetTernaryExpressions": true,
-        //         "ignoredNodes": ["TemplateLiteral *", "TSTypeParameterInstantiation"]
-        //     }
-        // ],
-    //     "@typescript-eslint/explicit-member-accessibility": "off"
-    // }
 }
