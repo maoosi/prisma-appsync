@@ -85,6 +85,7 @@ Here are some examples:
 | Docs update | `docs: fix typo inside home` |
 
 ## 👉 Coding guidelines
+
 ### ESLint
 
 We use [ESLint ↗](https://eslint.org/) for both linting and formatting.
