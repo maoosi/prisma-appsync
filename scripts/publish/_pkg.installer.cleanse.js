@@ -20,7 +20,7 @@ delete pkgData.devDependencies
 // Remove private tag
 delete pkgData.private
 
-// Overwrite original `package.json` with new data (i.e. minus the specific data).
+// Create new `package.json` with new data (i.e. minus the specific data).
 fs.writeFile(DEST_PKG_PATH, JSON.stringify(pkgData, null, 4), (err) => {
     if (err)
         throw err

@@ -62,20 +62,20 @@ if (versionOk) {
             task: async () => await $`zx scripts/test.mjs`,
         },
         {
-            title: `Setting publish version to ${publishVersion}`,
-            task: async () => {
-                const pkg = await fs.readJson('./packages/installer/package.json')
-                pkg.version = publishVersion
-                await fs.writeJson('./packages/installer/package.json', pkg)
-            },
-        },
-        {
             title: 'Copy + Cleanse package.json',
             task: async () => await $`node scripts/publish/_pkg.installer.cleanse`,
         },
-        // {
-        //     title: 'Publishing on NPM',
-        //     task: async () => await $`cd ./packages/installer/ && npm publish create-prisma-appsync-app --tag ${tag}`,
-        // },
+        {
+            title: `Setting publish version to ${publishVersion}`,
+            task: async () => {
+                const pkg = await fs.readJson('./dist/installer/package.json')
+                pkg.version = publishVersion
+                await fs.writeJson('./dist/installer/package.json', pkg)
+            },
+        },
+        {
+            title: 'Publishing on NPM',
+            task: async () => await $`cd ./dist/installer/ && npm publish create-prisma-appsync-app --tag ${tag}`,
+        },
     ]).run()
 }

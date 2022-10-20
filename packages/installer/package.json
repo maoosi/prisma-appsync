@@ -1,5 +1,5 @@
 {
-    "name": "prisma-appsync-installer",
+    "name": "create-prisma-appsync-app",
     "private": true,
     "version": "1.0.0",
     "author": "maoosi <hello@sylvainsimao.fr>",
