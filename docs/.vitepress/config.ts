@@ -4,7 +4,7 @@ export default defineConfig({
     title: 'Prisma-AppSync',
     description: 'GraphQL API Generator for AWS and ◭ Prisma',
 
-    head: [['link', { rel: 'icon', type: 'image/svg+xml', href: '/logo.png' }]],
+    head: [['link', { rel: 'icon', type: 'image/svg+xml', href: '/logo.svg' }]],
 
     vue: {
         reactivityTransform: true,

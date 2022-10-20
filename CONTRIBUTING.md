@@ -1,1 +1,1 @@
-[prisma-appsync.vercel.app/contributing](https://prisma-appsync.vercel.app/contributing)
+[prisma-appsync.vercel.app/contributing.html](https://prisma-appsync.vercel.app/contributing.html)
