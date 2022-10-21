@@ -27,9 +27,7 @@ try {
     latestPublished = String(await $`npm show prisma-appsync@${tag} version`)?.trim()
 }
 catch (err) {
-    try {
-        latestPublished = String(await $`npm show prisma-appsync version`)?.trim()
-    }
+    try { latestPublished = String(await $`npm show prisma-appsync version`)?.trim() }
     catch (err) {}
 }
 
@@ -65,7 +63,6 @@ if (versionOk) {
             title: 'Cleansing package.json',
             task: async () => {
                 await $`node scripts/publish/_pkg.core.cleanse`
-                await $`eslint package.json --fix`
             },
         },
         {
@@ -78,8 +75,6 @@ if (versionOk) {
                 const pkgAfter = await fs.readJson('./package-afterPublish.json')
                 pkgAfter.version = publishVersion
                 await fs.writeJson('./package-afterPublish.json', pkgAfter)
-
-                await $`eslint package.json package-beforePublish.json package-afterPublish.json --fix`
             },
         },
         {
@@ -90,9 +85,7 @@ if (versionOk) {
             title: 'Restoring package.json',
             task: async () => await $`node scripts/publish/_pkg.core.restore`,
         },
-        {
-            title: 'Prettifying package.json',
-            task: async () => await $`eslint package.json --fix`,
-        },
-    ]).run()
+    ]).run().catch((err) => {
+        console.error(err)
+    })
 }

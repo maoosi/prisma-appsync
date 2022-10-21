@@ -23,7 +23,7 @@ if (!playgroundExists) {
     console.log(chalk.blue('\nDev :: Run Prisma-AppSync Installer\n'))
     cd(playgroundPath)
     process.env.PRISMA_APPSYNC_CREATEAPP_MODE = 'dev'
-    await $`node ../dist/installer`
+    await $`node ../dist/installer/bin/index.js`
 }
 else {
     console.log(chalk.blue('\nDev :: Run npx prisma generate\n'))

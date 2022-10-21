@@ -27,9 +27,7 @@ try {
     latestPublished = String(await $`npm show create-prisma-appsync-app@${tag} version`)?.trim()
 }
 catch (err) {
-    try {
-        latestPublished = String(await $`npm show create-prisma-appsync-app version`)?.trim()
-    }
+    try { latestPublished = String(await $`npm show create-prisma-appsync-app version`)?.trim() }
     catch (err) {}
 }
 
@@ -71,12 +69,13 @@ if (versionOk) {
                 const pkg = await fs.readJson('./dist/installer/package.json')
                 pkg.version = publishVersion
                 await fs.writeJson('./dist/installer/package.json', pkg)
-                await $`eslint ./dist/installer/package.json --fix`
             },
         },
-        // {
-        //     title: 'Publishing on NPM',
-        //     task: async () => await $`cd ./dist/installer/ && pnpm publish --tag ${tag} --no-git-checks`,
-        // },
-    ]).run()
+        {
+            title: 'Publishing on NPM',
+            task: async () => await $`cd ./dist/installer/ && pnpm publish --tag ${tag} --no-git-checks`,
+        },
+    ]).run().catch((err) => {
+        console.error(err)
+    })
 }

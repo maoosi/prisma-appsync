@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-/* eslint-disable @typescript-eslint/no-var-requires */
+
 import path from 'path'
 import fs from 'fs-extra'
 import prompts from 'prompts'
@@ -11,7 +11,6 @@ import { bold, cyan, dim } from 'kolorist'
 export class Installer {
     private gitBranch: string
     private installPackage: string
-    private version: string
     private localServerDir: string
     private localServerPort: number
     private cwd: string
@@ -51,7 +50,6 @@ export class Installer {
         this.installPackage = String(process.env?.MODE) === 'preview'
             ? 'prisma-appsync@preview'
             : 'prisma-appsync'
-        this.version = String(require('../package.json')?.version)
         this.localServerDir = '.server'
         this.localServerPort = 4000
         this.cwd = process.cwd()
@@ -89,7 +87,20 @@ export class Installer {
         await this.install()
     }
 
-    private printBranding(): void {
+    private async printBranding(): Promise<void> {
+        let version = 'Undefined Version'
+
+        if (!this.isLocalDevMode) {
+            try {
+                const detectedVersion = (await fs.readJson(path.join(__dirname, '../package.json')))?.version
+                version = `v${detectedVersion}`
+            }
+            catch {}
+        }
+        else {
+            version = 'Local Version'
+        }
+
         console.log()
         console.log('    ___      _                             _               __                  ')
         console.log('   / _ \\_ __(◭)___ _ __ ___   __ _        /_\\  _ __  _ __ / _\\_   _ _ __   ___ ')
@@ -97,7 +108,7 @@ export class Installer {
         console.log(' / ___/| |  | \\__ \\ | | | | | (◭| |_____/  _  \\ |◭) | |◭) |\\ \\ |_| | | | | (__ ')
         console.log(' \\/    |_|  |_|___/_| |_| |_|\\__,_|     \\_/ \\_/ .__/| .__/\\__/\\__, |_| |_|\\___|')
         console.log('                                              |_|   |_|       |___/            ')
-        console.log(`${bold('  ◭ Prisma-AppSync') + dim(' Installer')} ${cyan(`v${this.version}`)}`)
+        console.log(`${bold('  ◭ Prisma-AppSync') + dim(' Installer')} ${cyan(version)}`)
         console.log()
     }
 
@@ -291,10 +302,18 @@ export class Installer {
                 when: 'after',
             })
 
-            this.installConfig.clones.push({
-                from: path.join(this.detected.rootPath, '../', 'packages/boilerplate/server'),
-                to: path.join(this.detected.rootPath, this.localServerDir),
-            })
+            if (!this.isLocalDevMode) {
+                this.installConfig.clones.push({
+                    from: path.join(this.detected.tmpDirPath, 'packages/boilerplate/server'),
+                    to: path.join(this.detected.rootPath, this.localServerDir),
+                })
+            }
+            else {
+                this.installConfig.clones.push({
+                    from: path.join(this.detected.rootPath, '../', 'packages/boilerplate/server'),
+                    to: path.join(this.detected.rootPath, this.localServerDir),
+                })
+            }
 
             this.installConfig.scripts.push({
                 name: 'serve',
@@ -369,17 +388,22 @@ export class Installer {
                     find: /nodeModules\: \[(.+)\]/g,
                     replace: 'nodeModules: [$1, \'prisma-appsync\']',
                 })
+                this.installConfig.clones.push({
+                    from: path.join(this.detected.tmpDirPath, 'packages/boilerplate/cdk.json'),
+                    to: path.join(this.detected.rootPath, 'cdk.json'),
+                })
             }
             else {
                 this.installConfig.clones.push({
                     from: path.join(this.detected.rootPath, '../', 'packages/boilerplate/cdk'),
                     to: path.join(this.detected.rootPath, 'cdk'),
                 })
+                this.installConfig.clones.push({
+                    from: path.join(this.detected.rootPath, '../', 'packages/boilerplate/cdk.json'),
+                    to: path.join(this.detected.rootPath, 'cdk.json'),
+                })
             }
-            this.installConfig.clones.push({
-                from: path.join(this.detected.rootPath, '../', 'packages/boilerplate/cdk.json'),
-                to: path.join(this.detected.rootPath, 'cdk.json'),
-            })
+
             this.installConfig.shells.push({
                 cmd: `${this.detected.packageManager} install`,
                 dir: path.join(this.detected.rootPath, 'cdk'),

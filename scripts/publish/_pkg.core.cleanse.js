@@ -10,13 +10,13 @@ const RESTORE_PKG_PATH = path.resolve(__dirname, '../../package-afterPublish.jso
 const pkgData = require(ORIG_PKG_PATH)
 
 // Write/cache the original `package.json` data to `package-beforePublish.json` file.
-fs.writeFile(BACKUP_PKG_PATH, JSON.stringify(pkgData), (err) => {
+fs.writeFile(BACKUP_PKG_PATH, JSON.stringify(pkgData, null, 4), (err) => {
     if (err)
         throw err
 })
 
 // Write/cache the original `package.json` data to `package-afterPublish.json` file.
-fs.writeFile(RESTORE_PKG_PATH, JSON.stringify(pkgData), (err) => {
+fs.writeFile(RESTORE_PKG_PATH, JSON.stringify(pkgData, null, 4), (err) => {
     if (err)
         throw err
 })

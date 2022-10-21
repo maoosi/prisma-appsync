@@ -4,6 +4,7 @@
     "version": "1.0.0",
     "author": "maoosi <hello@sylvainsimao.fr>",
     "license": "BSD-2-Clause",
+    "bin": "./bin/index.js",
     "dependencies": {
         "degit": "^2.8.4",
         "detect-package-manager": "^2.0.1",
