@@ -51,7 +51,7 @@ if (!publishVersion || publishVersion === latestPublished)
 const { versionOk } = await prompts({
     type: 'confirm',
     name: 'versionOk',
-    message: `Run "npm publish create-prisma-appsync-app --tag ${tag}" with pkg version "${publishVersion}"?`,
+    message: `Run "npm publish --tag ${tag} --no-git-checks" with pkg version "${publishVersion}"?`,
     initial: false,
 })
 
@@ -71,11 +71,12 @@ if (versionOk) {
                 const pkg = await fs.readJson('./dist/installer/package.json')
                 pkg.version = publishVersion
                 await fs.writeJson('./dist/installer/package.json', pkg)
+                await $`eslint ./dist/installer/package.json --fix`
             },
         },
-        {
-            title: 'Publishing on NPM',
-            task: async () => await $`cd ./dist/installer/ && npm publish create-prisma-appsync-app --tag ${tag}`,
-        },
+        // {
+        //     title: 'Publishing on NPM',
+        //     task: async () => await $`cd ./dist/installer/ && pnpm publish --tag ${tag} --no-git-checks`,
+        // },
     ]).run()
 }

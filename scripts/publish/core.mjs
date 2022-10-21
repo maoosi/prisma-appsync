@@ -51,7 +51,7 @@ if (!publishVersion || publishVersion === latestPublished)
 const { versionOk } = await prompts({
     type: 'confirm',
     name: 'versionOk',
-    message: `Run "npm publish prisma-appsync --tag ${tag}" with pkg version "${publishVersion}"?`,
+    message: `Run "pnpm publish --tag ${tag} --no-git-checks" with pkg version "${publishVersion}"?`,
     initial: false,
 })
 
@@ -63,7 +63,10 @@ if (versionOk) {
         },
         {
             title: 'Cleansing package.json',
-            task: async () => await $`node scripts/publish/_pkg.core.cleanse`,
+            task: async () => {
+                await $`node scripts/publish/_pkg.core.cleanse`
+                await $`eslint package.json --fix`
+            },
         },
         {
             title: `Setting publish version to ${publishVersion}`,
@@ -71,15 +74,25 @@ if (versionOk) {
                 const pkg = await fs.readJson('./package.json')
                 pkg.version = publishVersion
                 await fs.writeJson('./package.json', pkg)
+
+                const pkgAfter = await fs.readJson('./package-afterPublish.json')
+                pkgAfter.version = publishVersion
+                await fs.writeJson('./package-afterPublish.json', pkgAfter)
+
+                await $`eslint package.json package-beforePublish.json package-afterPublish.json --fix`
             },
         },
         {
-            title: 'Publishing on NPM',
-            task: async () => await $`npm publish prisma-appsync --tag ${tag}`,
+            title: `Publishing on NPM with tag ${tag}`,
+            task: async () => await $`pnpm publish --tag ${tag} --no-git-checks`,
         },
         {
             title: 'Restoring package.json',
             task: async () => await $`node scripts/publish/_pkg.core.restore`,
+        },
+        {
+            title: 'Prettifying package.json',
+            task: async () => await $`eslint package.json --fix`,
         },
     ]).run()
 }
