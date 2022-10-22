@@ -13,6 +13,7 @@ export class Installer {
     private installPackage: string
     private cwd: string
     private isContribDevMode: boolean
+    private localServerDir: string
     private timestamp: number
     private detected: {
         projectName: string
@@ -42,15 +43,16 @@ export class Installer {
 
     constructor() {
         // defaults
-        this.gitBranch = String(process.env?.MODE) === 'preview'
+        this.gitBranch = ['preview', 'contrib'].includes(String(process.env?.INSTALL_MODE))
             ? 'maoosi/prisma-appsync#dev'
             : 'maoosi/prisma-appsync#main'
-        this.installPackage = String(process.env?.MODE) === 'preview'
+        this.installPackage = ['preview', 'contrib'].includes(String(process.env?.INSTALL_MODE))
             ? 'prisma-appsync@preview'
             : 'prisma-appsync'
         this.cwd = process.cwd()
         this.timestamp = new Date().getTime()
-        this.isContribDevMode = String(process.env?.PRISMA_APPSYNC_CREATEAPP_MODE) === 'dev'
+        this.localServerDir = '.server'
+        this.isContribDevMode = String(process.env?.INSTALL_MODE) === 'contrib'
         this.detected = {
             projectName: '',
             rootPath: this.cwd,
@@ -119,7 +121,7 @@ export class Installer {
         console.log()
         console.log(bold('  ◭ Prisma-AppSync Install Done!'))
         console.log()
-        console.log(`  1. Run ${devCmd}`)
+        console.log(`  1. Run '${devCmd}'`)
         console.log('  2. Enjoy!')
         console.log()
     }
@@ -300,77 +302,41 @@ export class Installer {
 
         // local dev server
         if (this.userChoices.createLocalDevServer && this.userChoices.prismaSchemaPath) {
-            this.installConfig.dependencies = [
-                ...this.installConfig.dependencies,
-                ...[
-                    { package: 'zx', dev: true },
-                    { package: 'ts-node-dev', dev: true },
-                ],
-            ]
-
             if (!this.isContribDevMode) {
                 this.installConfig.clones.push({
-                    from: path.join(this.detected.tmpDirPath, 'packages/boilerplate/server/server.mjs'),
-                    to: path.join(this.detected.rootPath, 'server.mjs'),
+                    from: path.join(this.detected.tmpDirPath, 'packages/boilerplate/server/server.ts'),
+                    to: path.join(this.detected.rootPath, 'server.ts'),
+                })
+
+                const databaseUrl = 'file:dev.db'
+
+                this.installConfig.scripts.push({
+                    name: 'dev',
+                    cmd: `npx prisma generate && DATABASE_URL='${databaseUrl}' npx prisma db push --accept-data-loss && DATABASE_URL='${databaseUrl}' npx ts-node-dev ./server.ts --transpile-only --schema ${path.relative(path.join(this.detected.rootPath), path.join(path.dirname(this.userChoices.prismaSchemaPath), 'generated/prisma-appsync/schema.gql'))}`,
                 })
             }
             else {
                 this.installConfig.clones.push({
-                    from: path.join(this.detected.rootPath, '../', 'packages/boilerplate/server/server.mjs'),
-                    to: path.join(this.detected.rootPath, 'server.mjs'),
+                    from: path.join(this.detected.rootPath, '../', 'packages/boilerplate/server/server.ts'),
+                    to: path.join(this.detected.rootPath, 'server.ts'),
                 })
+
                 this.installConfig.clones.push({
                     from: path.join(this.detected.rootPath, '../', 'packages/boilerplate/server/docker-compose.yml'),
                     to: path.join(this.detected.rootPath, 'docker-compose.yml'),
                 })
-            }
 
-            this.installConfig.scripts.push({
-                name: 'dev',
-                cmd: 'zx ./server.mjs --experimental',
-            })
+                const databaseUrl = 'postgresql://prisma:prisma@localhost:5433/dev'
 
-            const serverMjsPath = path.join(this.detected.rootPath, 'server.mjs')
-
-            if (!this.isContribDevMode) {
-                this.installConfig.injects.push({
-                    file: serverMjsPath,
-                    find: /\{\{ relativeGqlSchemaPath \}\}/g,
-                    replace: path.relative(
-                        path.join(this.detected.rootPath),
-                        path.join(path.dirname(this.userChoices.prismaSchemaPath), 'generated/prisma-appsync/schema.gql'),
-                    ),
+                this.installConfig.scripts.push({
+                    name: 'dev',
+                    cmd: `docker-compose up -d && npx prisma generate && DATABASE_URL='${databaseUrl}' npx prisma db push --accept-data-loss && DATABASE_URL='${databaseUrl}' npx ts-node-dev ./server.ts --transpile-only --schema ${path.relative(path.join(this.detected.rootPath), path.join(path.dirname(this.userChoices.prismaSchemaPath), 'generated/prisma-appsync/schema.gql'))}`,
                 })
 
                 this.installConfig.injects.push({
-                    file: serverMjsPath,
-                    find: /\{\{ relativePrismaAppSyncServerPath \}\}/g,
-                    replace: 'node_modules/prisma-appsync-server/index.ts',
-                })
-            }
-            else {
-                this.installConfig.injects.push({
-                    file: serverMjsPath,
-                    find: /\{\{ relativeGqlSchemaPath \}\}/g,
-                    replace: path.relative(
-                        path.join(this.detected.rootPath),
-                        path.join(path.dirname(this.userChoices.prismaSchemaPath), 'generated/prisma-appsync/schema.gql'),
-                    ),
-                })
-
-                this.installConfig.injects.push({
-                    file: serverMjsPath,
-                    find: /\{\{ relativePrismaAppSyncServerPath \}\}/g,
-                    replace: path.relative(
-                        path.join(this.detected.rootPath),
-                        path.join(this.detected.rootPath, '../packages/server/src/index.ts'),
-                    ),
-                })
-
-                this.installConfig.injects.push({
-                    file: serverMjsPath,
-                    find: /process\.env\.DATABASE_URL\s*=\s*['|"|`].+['|"|`]/g,
-                    replace: 'process.env.DATABASE_URL = \'postgresql://prisma:prisma@localhost:5433/dev\'',
+                    file: path.join(this.detected.rootPath, 'server.ts'),
+                    find: /prisma-appsync\/dist\/server/g,
+                    replace: '../dist/server',
                 })
             }
         }

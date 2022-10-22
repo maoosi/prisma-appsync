@@ -87,10 +87,10 @@ async function publishCore({ publishVersion, tag }) {
                 await fs.writeJson('./package-afterPublish.json', pkgAfter)
             },
         },
-        // {
-        //     title: `Publishing on NPM with tag ${tag}`,
-        //     task: async () => await $`pnpm publish --tag ${tag} --no-git-checks`,
-        // },
+        {
+            title: `Publishing on NPM with tag ${tag}`,
+            task: async () => await $`pnpm publish --tag ${tag} --no-git-checks`,
+        },
         {
             title: 'Restoring package.json',
             task: async () => await $`node scripts/publish/_pkg.core.restore`,
@@ -116,35 +116,10 @@ async function publishInstaller({ publishVersion, tag }) {
                 await fs.writeJson('./dist/installer/package.json', pkg)
             },
         },
-        // {
-        //     title: 'Publishing on NPM',
-        //     task: async () => await $`cd ./dist/installer/ && pnpm publish --tag ${tag} --no-git-checks`,
-        // },
-    ]).run().catch((err) => {
-        console.error(err)
-    })
-}
-
-async function publishServer({ publishVersion, tag }) {
-    console.log('# Server')
-
-    await new Listr([
         {
-            title: 'Copy + Cleanse package.json',
-            task: async () => await $`node scripts/publish/_pkg.server.cleanse`,
+            title: 'Publishing on NPM',
+            task: async () => await $`cd ./dist/installer/ && pnpm publish --tag ${tag} --no-git-checks`,
         },
-        {
-            title: `Setting publish version to ${publishVersion}`,
-            task: async () => {
-                const pkg = await fs.readJson('./dist/server/package.json')
-                pkg.version = publishVersion
-                await fs.writeJson('./dist/server/package.json', pkg)
-            },
-        },
-        // {
-        //     title: 'Publishing on NPM',
-        //     task: async () => await $`cd ./dist/server/ && pnpm publish --tag ${tag} --no-git-checks`,
-        // },
     ]).run().catch((err) => {
         console.error(err)
     })
@@ -160,7 +135,6 @@ if (publishConfig.versionOk) {
         choices: [
             { title: 'Core', value: 'core', selected: true },
             { title: 'Installer', value: 'installer', selected: true },
-            { title: 'Server', value: 'server', selected: true },
         ],
     })
 
@@ -169,7 +143,4 @@ if (publishConfig.versionOk) {
 
     if (publishList.includes('installer'))
         await publishInstaller(publishConfig)
-
-    if (publishList.includes('server'))
-        await publishServer(publishConfig)
 }

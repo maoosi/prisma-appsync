@@ -1,16 +1,15 @@
 import { join } from 'path'
 import { readFileSync } from 'fs'
-import { cli } from 'cleye'
 import { buildSchema } from 'graphql'
 import type { Plugin } from '@envelop/types'
-import { createServer } from '@graphql-yoga/node'
+import { createServer as graphqlServer } from '@graphql-yoga/node'
+import { cli as cleye } from 'cleye'
 import { Authorizations } from '../../client/src'
 import useLambdaIdentity from './utils/useLambdaIdentity'
 import useLambdaEvent from './utils/useLambdaEvent'
 
-const argv = cli({
+export const argv = cleye({
     name: 'prisma-appsync-server',
-
     flags: {
         handler: {
             type: String,
@@ -35,33 +34,14 @@ const argv = cli({
     },
 })
 
-const defaultQuery
-= /* GraphQL */`query listPosts {
-    listPosts {
-        id
-        title
-    }
-}
-    
-mutation createPost {
-    createPost(data:{ title: "My first post" }) {
-        title
-    }
-}
-`
-
-async function main() {
-    const lambdaHandler: any = await import(join(process.cwd(), argv.flags.handler))
+export async function createServer({ defaultQuery, lambdaHandler, port, schema }: ServerOptions) {
+    process.on('SIGTERM', () => process.exit(0))
 
     if (!process?.env?.DATABASE_URL)
         throw new Error('Missing "DATABASE_URL" env var.')
 
     if (!lambdaHandler?.main)
         throw new Error('Handler has no exported function "main".')
-
-    const schema = join(process.cwd(), argv.flags.schema)
-    const appsyncScalars = join(__dirname, 'gql/appsync-scalars.gql')
-    const appsyncDirectives = join(__dirname, 'gql/appsync-directives.gql')
 
     const useLambdaFunction = (): Plugin => {
         return {
@@ -122,13 +102,13 @@ async function main() {
         }
     }
 
-    const server = createServer({
-        port: argv.flags.port,
+    const server = graphqlServer({
+        port,
         schema: {
             typeDefs: buildSchema([
-                readFileSync(appsyncScalars, { encoding: 'utf-8' }),
-                readFileSync(appsyncDirectives, { encoding: 'utf-8' }),
-                readFileSync(schema, { encoding: 'utf-8' }),
+                readFileSync(join(__dirname, 'gql/appsync-scalars.gql'), { encoding: 'utf-8' }),
+                readFileSync(join(__dirname, 'gql/appsync-directives.gql'), { encoding: 'utf-8' }),
+                schema,
             ].join('\n')),
         },
         graphiql: {
@@ -143,6 +123,9 @@ async function main() {
     server.start()
 }
 
-process.on('SIGTERM', () => process.exit(0))
-
-main()
+interface ServerOptions {
+    schema: string
+    defaultQuery: string
+    lambdaHandler: any
+    port: number
+}

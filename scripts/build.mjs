@@ -26,9 +26,17 @@ try {
     console.log(chalk.blue('\nBuild :: Create app\n'))
     await $`esbuild packages/installer/src/index.ts --bundle --define:process.env.NODE_ENV="production" --format=cjs --minify --keep-names --platform=node --target=node14 --external:fsevents --external:_http_common --outfile=dist/installer/bin/index.js`
 
-    // copy server files
-    console.log(chalk.blue('\nBuild :: AppSync-server\n'))
-    await $`cp -R packages/server/src dist/server && chmod -R 755 dist`
+    // build server
+    console.log(chalk.blue('\nBuild :: Server\n'))
+    await $`esbuild packages/server/src/index.ts --bundle --format=cjs --minify --keep-names --platform=node --target=node14 --external:fsevents --external:_http_common --outfile=dist/server/index.js`
+
+    // build server TS Declarations
+    console.log(chalk.blue('\nBuild :: Server TS Declarations\n'))
+    await $`cp packages/server/src/index.d.ts dist/server/index.d.ts && chmod -R 755 dist`
+
+    // copy server files into build folder
+    console.log(chalk.blue('\nBuild :: Server files\n'))
+    await $`cp -R packages/server/src/gql dist/server/gql && chmod -R 755 dist`
 }
 catch (error) {
     console.log(chalk.red(`\nBuild :: Error\n\n${error}`))
