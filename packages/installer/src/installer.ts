@@ -81,6 +81,7 @@ export class Installer {
         await this.askQuestions()
         await this.prepare()
         await this.install()
+        await this.printQuickstart()
     }
 
     private async printBranding(): Promise<void> {
@@ -105,6 +106,21 @@ export class Installer {
         console.log(' \\/    |_|  |_|___/_| |_| |_|\\__,_|     \\_/ \\_/ .__/| .__/\\__/\\__, |_| |_|\\___|')
         console.log('                                              |_|   |_|       |___/            ')
         console.log(`${bold('  ◭ Prisma-AppSync') + dim(' Installer')} ${cyan(version)}`)
+        console.log()
+    }
+
+    private async printQuickstart(): Promise<void> {
+        const devCmd = this.detected.packageManager === 'pnpm'
+            ? 'pnpm run dev'
+            : this.detected.packageManager === 'yarn'
+                ? 'yarn run dev'
+                : 'npm run dev'
+
+        console.log()
+        console.log(bold('  ◭ Prisma-AppSync Install Done!'))
+        console.log()
+        console.log(`  1. Run ${devCmd}`)
+        console.log('  2. Enjoy!')
         console.log()
     }
 
@@ -310,7 +326,7 @@ export class Installer {
             }
 
             this.installConfig.scripts.push({
-                name: 'serve',
+                name: 'dev',
                 cmd: 'zx ./server.mjs --experimental',
             })
 
@@ -329,7 +345,7 @@ export class Installer {
                 this.installConfig.injects.push({
                     file: serverMjsPath,
                     find: /\{\{ relativePrismaAppSyncServerPath \}\}/g,
-                    replace: 'node_modules/prisma-appsync/server/index.js',
+                    replace: 'node_modules/prisma-appsync-server/index.ts',
                 })
             }
             else {

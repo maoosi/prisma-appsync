@@ -31,5 +31,5 @@ else {
     await $`npx prisma generate`
 }
 
-// serve
-await $`yarn serve`
+// start dev server
+await $`yarn dev`
