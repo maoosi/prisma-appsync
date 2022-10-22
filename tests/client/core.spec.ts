@@ -1,8 +1,8 @@
 /* eslint-disable no-new */
 import { describe, expect, test } from 'vitest'
 import { PrismaAppSync } from '@client'
-import mockIdentity from '@appsync-server/mocks/identity'
-import mockLambdaEvent from '@appsync-server/mocks/lambda-event'
+import useLambdaIdentity from '@appsync-server/useLambdaIdentity'
+import useLambdaEvent from '@appsync-server/useLambdaEvent'
 import { Actions, ActionsAliases, Authorizations } from '@client/defs'
 
 process.env.PRISMA_APPSYNC_TESTING = 'true'
@@ -11,13 +11,13 @@ process.env.PRISMA_APPSYNC_INJECTED_CONFIG = JSON.stringify({
 })
 
 function mockAppSyncEvent(operationName: string, query: string) {
-    return mockLambdaEvent({
+    return useLambdaEvent({
         request: {
             headers: {
                 'x-fingerprint': 'fingerprint:abcdef',
             },
         },
-        identity: mockIdentity(Authorizations.API_KEY),
+        identity: useLambdaIdentity(Authorizations.API_KEY),
         graphQLParams: {
             operationName,
             query,
