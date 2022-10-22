@@ -302,6 +302,14 @@ export class Installer {
 
         // local dev server
         if (this.userChoices.createLocalDevServer && this.userChoices.prismaSchemaPath) {
+            
+            this.installConfig.dependencies = [
+                ...this.installConfig.dependencies,
+                ...[
+                    { package: '@types/node', dev: true }
+                ],
+            ]
+
             if (!this.isContribDevMode) {
                 this.installConfig.clones.push({
                     from: path.join(this.detected.tmpDirPath, 'packages/boilerplate/server/server.ts'),
