@@ -1,5 +1,4 @@
 packages:
-    - "packages/appsync-server"
     - "packages/server"
     - "packages/client"
     - "packages/installer"

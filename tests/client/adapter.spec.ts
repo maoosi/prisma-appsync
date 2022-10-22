@@ -13,8 +13,8 @@ import {
 import type { Action, Authorization } from '@client/defs'
 import { Actions, ActionsAliases, Authorizations } from '@client/defs'
 import { Prisma } from '@prisma/client'
-import mockIdentity from '@appsync-server/mocks/identity'
-import mockLambdaEvent from '@appsync-server/mocks/lambda-event'
+import useLambdaIdentity from '@appsync-server/useLambdaIdentity'
+import useLambdaEvent from '@appsync-server/useLambdaEvent'
 import { testEach } from './_helpers'
 
 process.env.PRISMA_APPSYNC_TESTING = 'true'
@@ -22,7 +22,7 @@ process.env.PRISMA_APPSYNC_TESTING = 'true'
 const Models = Prisma.ModelName
 
 function mockAppSyncEvent(identity: NonNullable<Authorization>) {
-    return mockLambdaEvent({
+    return useLambdaEvent({
         request: {},
         graphQLParams: {
             query: 'query getPost { getPost { title } }',
@@ -30,7 +30,7 @@ function mockAppSyncEvent(identity: NonNullable<Authorization>) {
             operationName: 'getPost',
             raw: {},
         },
-        identity: mockIdentity(identity, {
+        identity: useLambdaIdentity(identity, {
             sourceIp: 'xxx.xxx.xxx.xxx',
             username: 'johndoe',
             sub: 'xxxxxx',

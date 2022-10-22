@@ -11,10 +11,8 @@ import { bold, cyan, dim } from 'kolorist'
 export class Installer {
     private gitBranch: string
     private installPackage: string
-    private localServerDir: string
-    private localServerPort: number
     private cwd: string
-    private isLocalDevMode: boolean
+    private isContribDevMode: boolean
     private timestamp: number
     private detected: {
         projectName: string
@@ -50,11 +48,9 @@ export class Installer {
         this.installPackage = String(process.env?.MODE) === 'preview'
             ? 'prisma-appsync@preview'
             : 'prisma-appsync'
-        this.localServerDir = '.server'
-        this.localServerPort = 4000
         this.cwd = process.cwd()
         this.timestamp = new Date().getTime()
-        this.isLocalDevMode = String(process.env?.PRISMA_APPSYNC_CREATEAPP_MODE) === 'dev'
+        this.isContribDevMode = String(process.env?.PRISMA_APPSYNC_CREATEAPP_MODE) === 'dev'
         this.detected = {
             projectName: '',
             rootPath: this.cwd,
@@ -90,7 +86,7 @@ export class Installer {
     private async printBranding(): Promise<void> {
         let version = 'Undefined Version'
 
-        if (!this.isLocalDevMode) {
+        if (!this.isContribDevMode) {
             try {
                 const detectedVersion = (await fs.readJson(path.join(__dirname, '../package.json')))?.version
                 version = `v${detectedVersion}`
@@ -98,7 +94,7 @@ export class Installer {
             catch {}
         }
         else {
-            version = 'Local Version'
+            version = 'Contrib Mode'
         }
 
         console.log()
@@ -114,7 +110,7 @@ export class Installer {
 
     private async askQuestions(): Promise<void> {
         // project dir
-        if (!this.isLocalDevMode) {
+        if (!this.isContribDevMode) {
             this.userChoices.projectDirectory = (
                 await prompts({
                     type: 'text',
@@ -132,7 +128,7 @@ export class Installer {
         this.detected.tmpDirPath = path.join(this.detected.rootPath, '.prisma-appsync')
 
         // prisma schema
-        if (!this.isLocalDevMode) {
+        if (!this.isContribDevMode) {
             if (this.detected.prismaSchemaPath) {
                 this.userChoices.useExistingSchema = (
                     await prompts({
@@ -168,7 +164,7 @@ export class Installer {
         }
 
         // cdk boilerplate
-        if (!this.isLocalDevMode) {
+        if (!this.isContribDevMode) {
             this.userChoices.useCdkBoilerplate = (
                 await prompts({
                     type: 'confirm',
@@ -183,7 +179,7 @@ export class Installer {
         }
 
         // local dev server
-        if (!this.isLocalDevMode) {
+        if (!this.isContribDevMode) {
             this.userChoices.createLocalDevServer = (
                 await prompts({
                     type: 'confirm',
@@ -203,7 +199,7 @@ export class Installer {
         await emitter.clone(this.detected.tmpDirPath)
 
         // core deps
-        if (!this.isLocalDevMode) {
+        if (!this.isContribDevMode) {
             this.installConfig.dependencies = [
                 ...this.installConfig.dependencies,
                 ...[
@@ -224,7 +220,7 @@ export class Installer {
         }
 
         // handler
-        if (!this.isLocalDevMode) {
+        if (!this.isContribDevMode) {
             this.installConfig.clones.push({
                 from: path.join(this.detected.tmpDirPath, 'packages/boilerplate/handler.ts'),
                 to: path.join(this.detected.rootPath, 'handler.ts'),
@@ -238,7 +234,7 @@ export class Installer {
         }
 
         // prisma schema
-        if (!this.isLocalDevMode && this.userChoices.prismaSchemaPath) {
+        if (!this.isContribDevMode && this.userChoices.prismaSchemaPath) {
             if (this.userChoices.useExistingSchema) {
                 const schemaContent = fs.readFileSync(this.userChoices.prismaSchemaPath, 'utf-8')
 
@@ -292,89 +288,73 @@ export class Installer {
                 ...this.installConfig.dependencies,
                 ...[
                     { package: 'zx', dev: true },
-                    { package: 'pm2', dev: true },
+                    { package: 'ts-node-dev', dev: true },
                 ],
             ]
 
-            this.installConfig.shells.push({
-                cmd: 'npx pm2 install typescript',
-                dir: this.detected.rootPath,
-                when: 'after',
-            })
-
-            if (!this.isLocalDevMode) {
+            if (!this.isContribDevMode) {
                 this.installConfig.clones.push({
-                    from: path.join(this.detected.tmpDirPath, 'packages/boilerplate/server/server.ts'),
-                    to: path.join(this.detected.rootPath, this.localServerDir, 'server.ts'),
-                })
-                this.installConfig.clones.push({
-                    from: path.join(this.detected.tmpDirPath, 'packages/boilerplate/server/sqlite.mjs'),
-                    to: path.join(this.detected.rootPath, this.localServerDir, 'server.mjs'),
+                    from: path.join(this.detected.tmpDirPath, 'packages/boilerplate/server/server.mjs'),
+                    to: path.join(this.detected.rootPath, 'server.mjs'),
                 })
             }
             else {
                 this.installConfig.clones.push({
-                    from: path.join(this.detected.rootPath, '../', 'packages/boilerplate/server/server.ts'),
-                    to: path.join(this.detected.rootPath, this.localServerDir, 'server.ts'),
-                })
-                this.installConfig.clones.push({
-                    from: path.join(this.detected.rootPath, '../', 'packages/boilerplate/server/postgres.mjs'),
-                    to: path.join(this.detected.rootPath, this.localServerDir, 'server.mjs'),
+                    from: path.join(this.detected.rootPath, '../', 'packages/boilerplate/server/server.mjs'),
+                    to: path.join(this.detected.rootPath, 'server.mjs'),
                 })
                 this.installConfig.clones.push({
                     from: path.join(this.detected.rootPath, '../', 'packages/boilerplate/server/docker-compose.yml'),
-                    to: path.join(this.detected.rootPath, this.localServerDir, 'docker-compose.yml'),
+                    to: path.join(this.detected.rootPath, 'docker-compose.yml'),
                 })
             }
 
             this.installConfig.scripts.push({
                 name: 'serve',
-                cmd: 'zx ./.server/server.mjs --experimental',
+                cmd: 'zx ./server.mjs --experimental',
             })
 
-            const serverTsPath = path.join(this.detected.rootPath, this.localServerDir, 'server.ts')
-            const serverMjsPath = path.join(this.detected.rootPath, this.localServerDir, 'server.mjs')
+            const serverMjsPath = path.join(this.detected.rootPath, 'server.mjs')
 
-            this.installConfig.injects.push({
-                file: serverTsPath,
-                find: /\{\{ relativeGqlSchemaPath \}\}/g,
-                replace: path.relative(
-                    path.join(this.detected.rootPath, this.localServerDir),
-                    path.join(path.dirname(this.userChoices.prismaSchemaPath), 'generated/prisma-appsync/schema.gql'),
-                ),
-            })
-            this.installConfig.injects.push({
-                file: serverTsPath,
-                find: /\{\{ relativePrismaSchemaPath \}\}/g,
-                replace: path.relative(
-                    path.join(this.detected.rootPath, this.localServerDir),
-                    this.userChoices.prismaSchemaPath,
-                ),
-            })
-
-            this.installConfig.injects.push({
-                file: serverMjsPath,
-                find: /\{\{ localServerPort \}\}/g,
-                replace: String(this.localServerPort),
-            })
-
-            if (this.isLocalDevMode) {
+            if (!this.isContribDevMode) {
                 this.installConfig.injects.push({
-                    file: serverTsPath,
-                    find: /prisma-appsync\/dist\/appsync-server/g,
-                    replace: '../../dist/appsync-server',
+                    file: serverMjsPath,
+                    find: /\{\{ relativeGqlSchemaPath \}\}/g,
+                    replace: path.relative(
+                        path.join(this.detected.rootPath),
+                        path.join(path.dirname(this.userChoices.prismaSchemaPath), 'generated/prisma-appsync/schema.gql'),
+                    ),
                 })
 
                 this.installConfig.injects.push({
-                    file: serverTsPath,
-                    find: /(watch:.*{)/g,
-                    replace: [
-                        '$1',
-                        '\t\t[join(__dirname, \'../../packages/\')]: async ({ exec }) => {',
-                        '\t\t\tawait exec(\'pnpm build\', { cwd: join(__dirname, \'../../\') })',
-                        '\t\t\tawait exec(\'npx prisma generate\', { cwd: join(__dirname, \'../\') })',
-                        '\t\t},',
-                    ].join('\n'),
+                    file: serverMjsPath,
+                    find: /\{\{ relativePrismaAppSyncServerPath \}\}/g,
+                    replace: 'node_modules/prisma-appsync/server/index.js',
+                })
+            }
+            else {
+                this.installConfig.injects.push({
+                    file: serverMjsPath,
+                    find: /\{\{ relativeGqlSchemaPath \}\}/g,
+                    replace: path.relative(
+                        path.join(this.detected.rootPath),
+                        path.join(path.dirname(this.userChoices.prismaSchemaPath), 'generated/prisma-appsync/schema.gql'),
+                    ),
+                })
+
+                this.installConfig.injects.push({
+                    file: serverMjsPath,
+                    find: /\{\{ relativePrismaAppSyncServerPath \}\}/g,
+                    replace: path.relative(
+                        path.join(this.detected.rootPath),
+                        path.join(this.detected.rootPath, '../packages/server/src/index.ts'),
+                    ),
+                })
+
+                this.installConfig.injects.push({
+                    file: serverMjsPath,
+                    find: /process\.env\.DATABASE_URL\s*=\s*['|"|`].+['|"|`]/g,
+                    replace: 'process.env.DATABASE_URL = \'postgresql://prisma:prisma@localhost:5433/dev\'',
                 })
             }
         }
@@ -390,7 +370,7 @@ export class Installer {
 
         // cdk deps
         if (this.userChoices.useCdkBoilerplate) {
-            if (!this.isLocalDevMode) {
+            if (!this.isContribDevMode) {
                 this.installConfig.clones.push({
                     from: path.join(this.detected.tmpDirPath, 'packages/boilerplate/cdk'),
                     to: path.join(this.detected.rootPath, 'cdk'),
@@ -491,7 +471,7 @@ export class Installer {
                     clone.to,
                     [
                         ...parts.splice(0, parts.length > 1 ? parts.length - 1 : 0),
-                        ...[`legacy_${this.timestamp}_${parts[parts.length - 1]}`],
+                        ...[`previous_${this.timestamp}_${parts[parts.length - 1]}`],
                     ].join('/'),
                 )
             }
@@ -546,7 +526,7 @@ export class Installer {
             const script = this.installConfig.scripts[m]
 
             if (typeof pkg?.scripts?.[script.name] !== 'undefined')
-                pkg.scripts[`legacy:${this.timestamp}:${script.name}`] = pkg.scripts[script.name]
+                pkg.scripts[`previous:${this.timestamp}:${script.name}`] = pkg.scripts[script.name]
 
             pkg.scripts[script.name] = script.cmd
         }

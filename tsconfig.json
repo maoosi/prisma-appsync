@@ -24,9 +24,9 @@
         "paths": {
             "@client": ["packages/client/src/index"],
             "@client/*": ["packages/client/src/*"],
-            "prisma-appsync/dist/appsync-server": ["dist/appsync-server"],
-            "@appsync-server": ["packages/appsync-server/src/index"],
-            "@appsync-server/*": ["packages/appsync-server/src/*"]
+            "prisma-appsync/dist/server": ["dist/server"],
+            "@appsync-server": ["packages/server/src/index"],
+            "@appsync-server/*": ["packages/server/src/*"]
         },
         "types": ["node", "lodash"],
         "plugins": [
