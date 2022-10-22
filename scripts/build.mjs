@@ -12,11 +12,11 @@ try {
 
     // build Prisma-AppSync Client
     console.log(chalk.blue('\nBuild :: Client\n'))
-    await $`esbuild packages/client/src/index.ts --bundle --define:process.env.NODE_ENV="production" --format=cjs --minify --keep-names --platform=node --target=node14 --external:fsevents --external:@prisma/client --outfile=dist/prisma-appsync/index.js --legal-comments=inline`
+    await $`esbuild packages/client/src/index.ts --bundle --define:process.env.NODE_ENV="production" --format=cjs --minify --keep-names --platform=node --target=node14 --external:fsevents --external:@prisma/client --outfile=dist/client/index.js --legal-comments=inline`
 
     // build Prisma-AppSync Client TS Declarations
     console.log(chalk.blue('\nBuild :: Client TS Declarations\n'))
-    await $`tsc packages/client/src/*.ts --outDir dist/prisma-appsync/ --declaration --emitDeclarationOnly --esModuleInterop`
+    await $`tsc packages/client/src/*.ts --outDir dist/client/ --declaration --emitDeclarationOnly --esModuleInterop`
 
     // copy Prisma-AppSync Generator template files into build folder
     console.log(chalk.blue('\nBuild :: Generator template files\n'))
@@ -26,9 +26,9 @@ try {
     console.log(chalk.blue('\nBuild :: Create app\n'))
     await $`esbuild packages/installer/src/index.ts --bundle --define:process.env.NODE_ENV="production" --format=cjs --minify --keep-names --platform=node --target=node14 --external:fsevents --external:_http_common --outfile=dist/installer/bin/index.js`
 
-    // build server
+    // copy server files
     console.log(chalk.blue('\nBuild :: AppSync-server\n'))
-    await $`esbuild packages/server/src/index.ts --bundle --format=cjs --keep-names --platform=node --target=node14 --external:fsevents --external:_http_common --outfile=dist/server/index.js`
+    await $`cp -R packages/server/src dist/server && chmod -R 755 dist`
 }
 catch (error) {
     console.log(chalk.red(`\nBuild :: Error\n\n${error}`))

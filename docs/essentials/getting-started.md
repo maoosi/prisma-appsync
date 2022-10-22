@@ -7,7 +7,7 @@
 Run the following command and follow the prompts 🙂
 
 ```bash
-npx create prisma-appsync-app
+npx create-prisma-appsync-app@preview
 ```
 
 ### Method 2: Manual Install
@@ -56,7 +56,7 @@ const prismaAppSync = new PrismaAppSync()
 
 // Lambda handler (AppSync Direct Lambda Resolver)
 export const main = async (event: any) => {
-  return await prismaAppSync.resolve({ event })
+    return await prismaAppSync.resolve({ event })
 }
 ```
 

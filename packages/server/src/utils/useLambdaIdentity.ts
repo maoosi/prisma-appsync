@@ -6,10 +6,10 @@ import type {
     Authorization,
     Identity,
     OPENID_CONNECT,
-} from '../../client/src'
+} from '../../../client/src'
 import {
     Authorizations,
-} from '../../client/src'
+} from '../../../client/src'
 
 export default function useLambdaIdentity(identity: Authorization, opts?: mockOptions): Identity {
     if (identity === Authorizations.AWS_IAM) {

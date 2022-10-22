@@ -301,7 +301,7 @@ export class PrismaAppSyncCompiler {
 
     // Generate client code for the Lambda resolver
     public async makeClient(): Promise<this> {
-        await copy(join(__dirname, './prisma-appsync'), join(this.options.outputDir, 'client'))
+        await copy(join(__dirname, './client'), join(this.options.outputDir, 'client'))
 
         // edit output to inject configs
         const clientPath = join(this.options.outputDir, 'client', 'index.js')

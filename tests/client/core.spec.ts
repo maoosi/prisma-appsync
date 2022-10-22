@@ -1,8 +1,8 @@
 /* eslint-disable no-new */
 import { describe, expect, test } from 'vitest'
 import { PrismaAppSync } from '@client'
-import useLambdaIdentity from '@appsync-server/useLambdaIdentity'
-import useLambdaEvent from '@appsync-server/useLambdaEvent'
+import useLambdaIdentity from '@appsync-server/utils/useLambdaIdentity'
+import useLambdaEvent from '@appsync-server/utils/useLambdaEvent'
 import { Actions, ActionsAliases, Authorizations } from '@client/defs'
 
 process.env.PRISMA_APPSYNC_TESTING = 'true'

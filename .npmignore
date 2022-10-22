@@ -29,8 +29,9 @@ yarn-error.log*
 pnpm-workspace.yaml
 vite.config.ts
 
-# Installer
+# Installer + Server
 dist/installer
+dist/server
 
 # Editor directories and files
 .idea

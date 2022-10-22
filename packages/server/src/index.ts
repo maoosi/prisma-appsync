@@ -5,8 +5,8 @@ import { buildSchema } from 'graphql'
 import type { Plugin } from '@envelop/types'
 import { createServer } from '@graphql-yoga/node'
 import { Authorizations } from '../../client/src'
-import useLambdaIdentity from './useLambdaIdentity'
-import useLambdaEvent from './useLambdaEvent'
+import useLambdaIdentity from './utils/useLambdaIdentity'
+import useLambdaEvent from './utils/useLambdaEvent'
 
 const argv = cli({
     name: 'prisma-appsync-server',
@@ -60,8 +60,8 @@ async function main() {
         throw new Error('Handler has no exported function "main".')
 
     const schema = join(process.cwd(), argv.flags.schema)
-    const appsyncScalars = join(__dirname, 'appsync-scalars.gql')
-    const appsyncDirectives = join(__dirname, 'appsync-directives.gql')
+    const appsyncScalars = join(__dirname, 'gql/appsync-scalars.gql')
+    const appsyncDirectives = join(__dirname, 'gql/appsync-directives.gql')
 
     const useLambdaFunction = (): Plugin => {
         return {

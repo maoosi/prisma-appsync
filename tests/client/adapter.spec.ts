@@ -13,8 +13,8 @@ import {
 import type { Action, Authorization } from '@client/defs'
 import { Actions, ActionsAliases, Authorizations } from '@client/defs'
 import { Prisma } from '@prisma/client'
-import useLambdaIdentity from '@appsync-server/useLambdaIdentity'
-import useLambdaEvent from '@appsync-server/useLambdaEvent'
+import useLambdaIdentity from '@appsync-server/utils/useLambdaIdentity'
+import useLambdaEvent from '@appsync-server/utils/useLambdaEvent'
 import { testEach } from './_helpers'
 
 process.env.PRISMA_APPSYNC_TESTING = 'true'

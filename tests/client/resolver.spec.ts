@@ -2,7 +2,7 @@ import { describe, expect } from 'vitest'
 import * as queries from '@client/resolver'
 import type { QueryParams } from '@client/defs'
 import { Actions, ActionsAliases, Authorizations } from '@client/defs'
-import useLambdaIdentity from '@appsync-server/useLambdaIdentity'
+import useLambdaIdentity from '@appsync-server/utils/useLambdaIdentity'
 import { testEach } from './_helpers'
 
 process.env.PRISMA_APPSYNC_TESTING = 'true'
