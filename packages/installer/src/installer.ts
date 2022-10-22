@@ -153,7 +153,7 @@ export class Installer {
                         type: 'confirm',
                         name: 'generateSchema',
                         initial: true,
-                        message: 'Generate new `prisma/prisma.schema` file?',
+                        message: 'Generate new `prisma/schema.prisma` file?',
                     })
                 ).generateSchema
 
@@ -265,14 +265,14 @@ export class Installer {
             }
             else if (this.userChoices.generateSchema) {
                 this.installConfig.clones.push({
-                    from: path.join(this.detected.tmpDirPath, 'packages/boilerplate/prisma/schema.prisma'),
+                    from: path.join(this.detected.tmpDirPath, 'packages/boilerplate/prisma/sqlite.prisma'),
                     to: this.userChoices.prismaSchemaPath,
                 })
             }
         }
         else if (this.userChoices.prismaSchemaPath) {
             this.installConfig.clones.push({
-                from: path.join(this.detected.rootPath, '../', 'packages/boilerplate/prisma/schema.prisma'),
+                from: path.join(this.detected.rootPath, '../', 'packages/boilerplate/prisma/postgres.prisma'),
                 to: this.userChoices.prismaSchemaPath,
             })
             this.installConfig.injects.push({
@@ -304,14 +304,26 @@ export class Installer {
 
             if (!this.isLocalDevMode) {
                 this.installConfig.clones.push({
-                    from: path.join(this.detected.tmpDirPath, 'packages/boilerplate/server'),
-                    to: path.join(this.detected.rootPath, this.localServerDir),
+                    from: path.join(this.detected.tmpDirPath, 'packages/boilerplate/server/server.ts'),
+                    to: path.join(this.detected.rootPath, this.localServerDir, 'server.ts'),
+                })
+                this.installConfig.clones.push({
+                    from: path.join(this.detected.tmpDirPath, 'packages/boilerplate/server/sqlite.mjs'),
+                    to: path.join(this.detected.rootPath, this.localServerDir, 'server.mjs'),
                 })
             }
             else {
                 this.installConfig.clones.push({
-                    from: path.join(this.detected.rootPath, '../', 'packages/boilerplate/server'),
-                    to: path.join(this.detected.rootPath, this.localServerDir),
+                    from: path.join(this.detected.rootPath, '../', 'packages/boilerplate/server/server.ts'),
+                    to: path.join(this.detected.rootPath, this.localServerDir, 'server.ts'),
+                })
+                this.installConfig.clones.push({
+                    from: path.join(this.detected.rootPath, '../', 'packages/boilerplate/server/postgres.mjs'),
+                    to: path.join(this.detected.rootPath, this.localServerDir, 'server.mjs'),
+                })
+                this.installConfig.clones.push({
+                    from: path.join(this.detected.rootPath, '../', 'packages/boilerplate/server/docker-compose.yml'),
+                    to: path.join(this.detected.rootPath, this.localServerDir, 'docker-compose.yml'),
                 })
             }
 

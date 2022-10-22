@@ -1,5 +1,5 @@
 datasource db {
-    provider = "postgresql"
+    provider = "sqlite"
     url      = env("DATABASE_URL")
 }
 
@@ -14,25 +14,19 @@ generator appsync {
 
 model User {
     id        Int      @id @default(autoincrement())
-    createdAt DateTime @default(now())
     email     String   @unique
-    name      String?
-    role      Role     @default(USER)
+    fullname  String?
     posts     Post[]
+    createdAt DateTime @default(now())
 }
 
 model Post {
     id        Int      @id @default(autoincrement())
     author    User?    @relation(fields: [authorId], references: [id])
     authorId  Int?
-    title     String   @db.VarChar(255)
+    title     String
     views     Int?     @default(1)
     published Boolean? @default(false)
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
-}
-
-enum Role {
-    USER
-    ADMIN
 }

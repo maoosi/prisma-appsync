@@ -32,7 +32,8 @@
         "publish:installer": "zx scripts/publish/installer.mjs",
         "docs:dev": "vitepress dev docs",
         "docs:build": "vitepress build docs",
-        "docs:serve": "vitepress serve docs"
+        "docs:serve": "vitepress serve docs",
+        "server": "DATABASE_URL='postgresql://prisma:prisma@localhost:5433/dev' npx ts-node-dev packages/server/src/index.ts --handler playground/handler.ts --schema playground/prisma/generated/prisma-appsync/schema.gql"
     },
     "devDependencies": {
         "@antfu/eslint-config": "^0.25.2",

@@ -1,0 +1,15 @@
+{
+    "name": "prisma-appsync-server",
+    "version": "1.0.0",
+    "private": true,
+    "author": "maoosi <hello@sylvainsimao.fr>",
+    "license": "BSD-2-Clause",
+    "devDependencies": {
+        "@envelop/types": "^3.0.0",
+        "@graphql-yoga/node": "^2.13.13",
+        "cleye": "^1.2.1",
+        "graphql": "^16.3.0",
+        "json-to-graphql-query": "^2.2.4",
+        "lodash": "^4.17.21"
+    }
+}
