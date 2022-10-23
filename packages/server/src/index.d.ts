@@ -2,14 +2,18 @@ export const argv: any
 
 export function createServer({
     schema,
-    defaultQuery,
     lambdaHandler,
     port,
+    defaultQuery,
+    watch,
+    exec
 }: {
     schema: string
-    defaultQuery: string
     lambdaHandler: any
     port: number
+    defaultQuery?: string
+    watch?: string[]
+    exec?: string
 }): void
 
 

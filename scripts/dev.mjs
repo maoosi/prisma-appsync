@@ -1,9 +1,6 @@
 #!/usr/bin/env zx
 import './env.mjs'
 
-// build project
-await $`zx scripts/build.mjs`
-
 // path
 const playgroundPath = 'playground'
 
@@ -12,6 +9,9 @@ if (argv?.reset) {
     console.log(chalk.blue('\nDev :: Delete existing Playground directory\n'))
     await fs.remove(playgroundPath)
 }
+
+// build project
+await $`zx scripts/build.mjs`
 
 // install
 const playgroundExists = await fs.pathExists(playgroundPath)
@@ -22,7 +22,7 @@ if (!playgroundExists) {
 
     console.log(chalk.blue('\nDev :: Run Prisma-AppSync Installer\n'))
     cd(playgroundPath)
-    process.env.INSTALL_MODE = 'contrib'
+    process.env.INSTALL_MODE = 'contributor'
     await $`node ../dist/installer/bin/index.js`
 }
 else {

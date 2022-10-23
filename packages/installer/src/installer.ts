@@ -12,8 +12,7 @@ export class Installer {
     private gitBranch: string
     private installPackage: string
     private cwd: string
-    private isContribDevMode: boolean
-    private localServerDir: string
+    private isContributorMode: boolean
     private timestamp: number
     private detected: {
         projectName: string
@@ -43,16 +42,15 @@ export class Installer {
 
     constructor() {
         // defaults
-        this.gitBranch = ['preview', 'contrib'].includes(String(process.env?.INSTALL_MODE))
+        this.gitBranch = ['preview', 'contributor'].includes(String(process.env?.INSTALL_MODE))
             ? 'maoosi/prisma-appsync#dev'
             : 'maoosi/prisma-appsync#main'
-        this.installPackage = ['preview', 'contrib'].includes(String(process.env?.INSTALL_MODE))
+        this.installPackage = ['preview', 'contributor'].includes(String(process.env?.INSTALL_MODE))
             ? 'prisma-appsync@preview'
             : 'prisma-appsync'
         this.cwd = process.cwd()
         this.timestamp = new Date().getTime()
-        this.localServerDir = '.server'
-        this.isContribDevMode = String(process.env?.INSTALL_MODE) === 'contrib'
+        this.isContributorMode = String(process.env?.INSTALL_MODE) === 'contributor'
         this.detected = {
             projectName: '',
             rootPath: this.cwd,
@@ -83,13 +81,15 @@ export class Installer {
         await this.askQuestions()
         await this.prepare()
         await this.install()
-        await this.printQuickstart()
+
+        if (!this.isContributorMode)
+            await this.printQuickstart()
     }
 
     private async printBranding(): Promise<void> {
-        let version = 'Undefined Version'
+        let version = '> Undefined Version'
 
-        if (!this.isContribDevMode) {
+        if (!this.isContributorMode) {
             try {
                 const detectedVersion = (await fs.readJson(path.join(__dirname, '../package.json')))?.version
                 version = `v${detectedVersion}`
@@ -97,7 +97,7 @@ export class Installer {
             catch {}
         }
         else {
-            version = 'Contrib Mode'
+            version = '> Contributor Mode'
         }
 
         console.log()
@@ -128,7 +128,7 @@ export class Installer {
 
     private async askQuestions(): Promise<void> {
         // project dir
-        if (!this.isContribDevMode) {
+        if (!this.isContributorMode) {
             this.userChoices.projectDirectory = (
                 await prompts({
                     type: 'text',
@@ -146,7 +146,7 @@ export class Installer {
         this.detected.tmpDirPath = path.join(this.detected.rootPath, '.prisma-appsync')
 
         // prisma schema
-        if (!this.isContribDevMode) {
+        if (!this.isContributorMode) {
             if (this.detected.prismaSchemaPath) {
                 this.userChoices.useExistingSchema = (
                     await prompts({
@@ -182,7 +182,7 @@ export class Installer {
         }
 
         // cdk boilerplate
-        if (!this.isContribDevMode) {
+        if (!this.isContributorMode) {
             this.userChoices.useCdkBoilerplate = (
                 await prompts({
                     type: 'confirm',
@@ -197,7 +197,7 @@ export class Installer {
         }
 
         // local dev server
-        if (!this.isContribDevMode) {
+        if (!this.isContributorMode) {
             this.userChoices.createLocalDevServer = (
                 await prompts({
                     type: 'confirm',
@@ -217,7 +217,7 @@ export class Installer {
         await emitter.clone(this.detected.tmpDirPath)
 
         // core deps
-        if (!this.isContribDevMode) {
+        if (!this.isContributorMode) {
             this.installConfig.dependencies = [
                 ...this.installConfig.dependencies,
                 ...[
@@ -238,7 +238,7 @@ export class Installer {
         }
 
         // handler
-        if (!this.isContribDevMode) {
+        if (!this.isContributorMode) {
             this.installConfig.clones.push({
                 from: path.join(this.detected.tmpDirPath, 'packages/boilerplate/handler.ts'),
                 to: path.join(this.detected.rootPath, 'handler.ts'),
@@ -252,7 +252,7 @@ export class Installer {
         }
 
         // prisma schema
-        if (!this.isContribDevMode && this.userChoices.prismaSchemaPath) {
+        if (!this.isContributorMode && this.userChoices.prismaSchemaPath) {
             if (this.userChoices.useExistingSchema) {
                 const schemaContent = fs.readFileSync(this.userChoices.prismaSchemaPath, 'utf-8')
 
@@ -302,15 +302,14 @@ export class Installer {
 
         // local dev server
         if (this.userChoices.createLocalDevServer && this.userChoices.prismaSchemaPath) {
-
             this.installConfig.dependencies = [
                 ...this.installConfig.dependencies,
                 ...[
-                    { package: '@types/node', dev: true }
+                    { package: '@types/node', dev: true },
                 ],
             ]
 
-            if (!this.isContribDevMode) {
+            if (!this.isContributorMode) {
                 this.installConfig.clones.push({
                     from: path.join(this.detected.tmpDirPath, 'packages/boilerplate/server/server.ts'),
                     to: path.join(this.detected.rootPath, 'server.ts'),
@@ -318,9 +317,20 @@ export class Installer {
 
                 const databaseUrl = 'file:dev.db'
 
+                const gqlSchemaPath = path.relative(
+                    path.join(this.detected.rootPath),
+                    path.join(path.dirname(this.userChoices.prismaSchemaPath), 'generated/prisma-appsync/schema.gql'),
+                )
+
+                const devCmd = [
+                    'npx prisma generate',
+                    `DATABASE_URL='${databaseUrl}' npx prisma db push --accept-data-loss`,
+                    `DATABASE_URL='${databaseUrl}' npx ts-node-dev --rs --transpile-only -- ./server.ts --schema ${gqlSchemaPath}`,
+                ]
+
                 this.installConfig.scripts.push({
                     name: 'dev',
-                    cmd: `npx prisma generate && DATABASE_URL='${databaseUrl}' npx prisma db push --accept-data-loss && DATABASE_URL='${databaseUrl}' npx ts-node-dev ./server.ts --transpile-only --schema ${path.relative(path.join(this.detected.rootPath), path.join(path.dirname(this.userChoices.prismaSchemaPath), 'generated/prisma-appsync/schema.gql'))}`,
+                    cmd: devCmd.join(' && '),
                 })
             }
             else {
@@ -336,15 +346,27 @@ export class Installer {
 
                 const databaseUrl = 'postgresql://prisma:prisma@localhost:5433/dev'
 
+                const gqlSchemaPath = path.relative(
+                    path.join(this.detected.rootPath),
+                    path.join(path.dirname(this.userChoices.prismaSchemaPath), 'generated/prisma-appsync/schema.gql'),
+                )
+
+                const devCmd = [
+                    'docker-compose up -d',
+                    'npx prisma generate',
+                    `DATABASE_URL='${databaseUrl}' npx prisma db push --accept-data-loss`,
+                    `DATABASE_URL='${databaseUrl}' npx ts-node-dev --rs --transpile-only --ignore-watch ['../packages/(client|generator)/**'] --watch './handler.ts','./server.ts' -- ./server.ts --schema ${gqlSchemaPath} --watcher-paths '../packages/(client|generator)/**' --watcher-exec 'cd ../ && pnpm run build --ignoreServer && cd playground && npx prisma generate'`,
+                ]
+
                 this.installConfig.scripts.push({
                     name: 'dev',
-                    cmd: `docker-compose up -d && npx prisma generate && DATABASE_URL='${databaseUrl}' npx prisma db push --accept-data-loss && DATABASE_URL='${databaseUrl}' npx ts-node-dev ./server.ts --transpile-only --schema ${path.relative(path.join(this.detected.rootPath), path.join(path.dirname(this.userChoices.prismaSchemaPath), 'generated/prisma-appsync/schema.gql'))}`,
+                    cmd: devCmd.join(' && '),
                 })
 
                 this.installConfig.injects.push({
                     file: path.join(this.detected.rootPath, 'server.ts'),
                     find: /prisma-appsync\/dist\/server/g,
-                    replace: '../dist/server',
+                    replace: '../packages/server/src',
                 })
             }
         }
@@ -360,7 +382,7 @@ export class Installer {
 
         // cdk deps
         if (this.userChoices.useCdkBoilerplate) {
-            if (!this.isContribDevMode) {
+            if (!this.isContributorMode) {
                 this.installConfig.clones.push({
                     from: path.join(this.detected.tmpDirPath, 'packages/boilerplate/cdk'),
                     to: path.join(this.detected.rootPath, 'cdk'),
