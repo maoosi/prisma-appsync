@@ -138,7 +138,7 @@ export class PrismaAppSync {
         process.env.PRISMA_APPSYNC_LOG_LEVEL = this.options.logLevel
 
         // Debug logs
-        log('New Prisma-AppSync instance:', this.options)
+        log('New Prisma-AppSync instance created:', this.options)
 
         // Prisma client options
         const prismaLogDef: Prisma.LogDefinition[] = [

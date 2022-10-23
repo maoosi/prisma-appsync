@@ -5,15 +5,13 @@ export function createServer({
     lambdaHandler,
     port,
     defaultQuery,
-    watch,
-    exec
+    watchers
 }: {
     schema: string
     lambdaHandler: any
     port: number
     defaultQuery?: string
-    watch?: string[]
-    exec?: string
+    watchers?: { watch: string, exec: string }[]
 }): void
 
 

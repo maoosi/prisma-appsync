@@ -325,7 +325,7 @@ export class Installer {
                 const devCmd = [
                     'npx prisma generate',
                     `DATABASE_URL='${databaseUrl}' npx prisma db push --accept-data-loss`,
-                    `DATABASE_URL='${databaseUrl}' npx ts-node-dev --rs --transpile-only -- ./server.ts --schema ${gqlSchemaPath}`,
+                    `DATABASE_URL='${databaseUrl}' npx ts-node-dev --rs --transpile-only --watch './*.ts' -- ./server.ts --schema ${gqlSchemaPath} --watchers '[{"watch":"**.prisma","exec":"npx prisma generate && touch ./server.ts"}]'`,
                 ]
 
                 this.installConfig.scripts.push({
@@ -355,7 +355,7 @@ export class Installer {
                     'docker-compose up -d',
                     'npx prisma generate',
                     `DATABASE_URL='${databaseUrl}' npx prisma db push --accept-data-loss`,
-                    `DATABASE_URL='${databaseUrl}' npx ts-node-dev --rs --transpile-only --ignore-watch ['../packages/(client|generator)/**'] --watch './handler.ts','./server.ts' -- ./server.ts --schema ${gqlSchemaPath} --watcher-paths '../packages/(client|generator)/**' --watcher-exec 'cd ../ && pnpm run build --ignoreServer && cd playground && npx prisma generate'`,
+                    `DATABASE_URL='${databaseUrl}' npx ts-node-dev --rs --transpile-only --ignore-watch ['../packages/(client|generator)/**'] --watch './*.ts','../packages/server/**' -- ./server.ts --schema ${gqlSchemaPath} --watchers '[{"watch":"../packages/(client|generator)/**","exec":"cd ../ && pnpm run build --ignoreServer && cd playground && npx prisma generate && touch ./server.ts"},{"watch":"**.prisma","exec":"npx prisma generate && touch ./server.ts"}]'`,
                 ]
 
                 this.installConfig.scripts.push({

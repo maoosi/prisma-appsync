@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import { join } from 'path'
-import { closeSync, openSync, readFileSync, utimesSync } from 'fs'
+import { readFileSync } from 'fs'
 import { exec as nodeExec } from 'child_process'
 import { buildSchema } from 'graphql'
 import type { Plugin } from '@envelop/types'
@@ -20,35 +20,30 @@ import useLambdaEvent from './utils/useLambdaEvent'
 export const argv = cleye({
     name: 'prisma-appsync-server',
     flags: {
-        'handler': {
+        handler: {
             type: String,
             description: 'Lambda handler',
             default: 'handler.ts',
         },
-        'schema': {
+        schema: {
             type: String,
             description: 'GraphQL schema',
             default: 'prisma/generated/prisma-appsync/schema.gql',
         },
-        'port': {
+        port: {
             type: Number,
             description: 'Server port',
             default: 4000,
         },
-        'watcher-paths': {
-            type: [String],
-            description: 'Files to watch',
-            default: [],
-        },
-        'watcher-exec': {
+        watchers: {
             type: String,
-            description: 'Exec on watcher detecting changes',
+            description: 'Watchers config',
             default: '',
         },
     },
 })
 
-export async function createServer({ defaultQuery, lambdaHandler, port, schema, watch, exec }: ServerOptions) {
+export async function createServer({ defaultQuery, lambdaHandler, port, schema, watchers }: ServerOptions) {
     process.on('SIGTERM', () => process.exit(0))
 
     if (!process?.env?.DATABASE_URL)
@@ -136,7 +131,7 @@ export async function createServer({ defaultQuery, lambdaHandler, port, schema, 
 
     server.start()
 
-    if (watch?.length) {
+    if (watchers?.length) {
         const shell = (command: string): Promise<{ err: any; strdout: any; stderr: any }> =>
             new Promise((resolve) => {
                 nodeExec(
@@ -152,30 +147,20 @@ export async function createServer({ defaultQuery, lambdaHandler, port, schema, 
                 )
             })
 
-        const touch = (path) => {
-            const time = new Date()
-            try {
-                utimesSync(path, time, time)
-            }
-            catch (err) {
-                closeSync(openSync(path, 'w'))
-            }
-        }
+        watchers.forEach(({ watch, exec }) => {
+            chokidar.watch(watch, {
+                ignored: '**/node_modules/**',
+                ignoreInitial: true,
+                awaitWriteFinish: true,
+            })
+                .on('change', async (path) => {
+                    console.log(`Change detected on ${path}`)
 
-        const watcher = chokidar.watch(watch, {
-            ignored: '**/node_modules/**',
-            ignoreInitial: true,
-            awaitWriteFinish: true,
-        })
-
-        watcher.on('change', async (path) => {
-            console.log(`Change detected on ${path}`)
-
-            if (exec) {
-                console.log(`Executing ${exec}`)
-                await shell(exec)
-                touch(__filename)
-            }
+                    if (exec) {
+                        console.log(`Executing ${exec}`)
+                        await shell(exec)
+                    }
+                })
         })
     }
 }
@@ -185,6 +170,5 @@ interface ServerOptions {
     lambdaHandler: any
     port: number
     defaultQuery?: string
-    watch?: string[]
-    exec?: string
+    watchers?: { watch: string; exec: string }[]
 }
