@@ -142,7 +142,7 @@ export class Installer {
         this.detected.projectName = String(path.join(this.cwd, this.userChoices.projectDirectory).split(/\/|\\/).pop())
         this.detected.rootPath = path.join(this.cwd, this.userChoices.projectDirectory)
         this.detected.packageManager = await detectPackageManager({ cwd: this.cwd })
-        this.detected.prismaSchemaPath = this.findFilesInDir(this.detected.rootPath, /.+\.prisma/)?.[0] || null
+        this.detected.prismaSchemaPath = this.findFilesInDir(this.detected.rootPath, /(\w+)\.prisma/)?.[0] || null
         this.detected.tmpDirPath = path.join(this.detected.rootPath, '.prisma-appsync')
 
         // prisma schema
@@ -302,7 +302,7 @@ export class Installer {
 
         // local dev server
         if (this.userChoices.createLocalDevServer && this.userChoices.prismaSchemaPath) {
-            
+
             this.installConfig.dependencies = [
                 ...this.installConfig.dependencies,
                 ...[
@@ -628,7 +628,7 @@ export class Installer {
             const filename = path.join(dir, files[i])
             const stat = fs.lstatSync(filename)
 
-            if (stat.isDirectory())
+            if (stat.isDirectory() && !filename.includes('node_modules'))
                 results = [...results, ...this.findFilesInDir(filename, findRegex)]
 
             else if (filename.match(findRegex))
