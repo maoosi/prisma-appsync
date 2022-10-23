@@ -11,7 +11,7 @@ export function createServer({
     lambdaHandler: any
     port: number
     defaultQuery?: string
-    watchers?: { watch: string, exec: string }[]
+    watchers?: { watch: string | string[]; exec: string }[]
 }): void
 
 
