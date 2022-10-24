@@ -8,7 +8,7 @@ import { AppSyncStack } from './appsync'
 const app = new App()
 
 new AppSyncStack(app, kebabCase('{{ projectName }}'), {
-    resourcesPrefix: '{{ projectName }}-api',
+    resourcesPrefix: '{{ projectName }}',
     schema: join(process.cwd(), '{{ relativeGqlSchemaPath }}'),
     resolvers: join(process.cwd(), '{{ relativeYmlResolversPath }}'),
     function: {
