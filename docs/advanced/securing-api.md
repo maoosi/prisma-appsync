@@ -1,7 +1,7 @@
-# 🚪 Securing the API
+# 🚨 Securing the API
 
 ::: warning IMPORTANT
-Security must never be taken for granted. Prisma-AppSync implements basic mechanism to help mitigate some common issues. However, accuracy is not guaranteed and you should always test your own API security implementation.
+Security must never be taken for granted. Prisma-AppSync implements a basic mechanism to help mitigate some common issues. However, accuracy is not guaranteed and you should always test your own API security implementation.
 :::
 
 ## 👉 Data sanitizer (XSS)
@@ -24,13 +24,13 @@ mutation maliciousPost($title: String!) {
 
 ```json
 {
-  "title": "<IMG SRC=\"javascript:alert('XSS');\">"
+    "title": "<IMG SRC=\"javascript:alert('XSS');\">"
 }
 ```
 
 </td></tr><tr><td>
 
-2/ Prisma-AppSync will automatically remove the malicious code and encode html, before storing anything into the database:
+2/ Prisma-AppSync will automatically remove the malicious code and encode Html, before storing anything in the database:
 
 | Column name | Value |
 | ------------- |:-------------|
@@ -57,7 +57,7 @@ const prismaAppSync = new PrismaAppSync({ sanitize: false })
 By default, Prisma-AppSync will try to protect your Database from most common DOS attacks, by using in-memory rate-limiting.
 
 ::: warning DOWNSIDE
-Limits are kept in-memory and are not shared between function instantiations. This means limits can reset arbitrarily when new instances get spawned or different instances are used to serve requests.
+Limits are kept in memory and are not shared between function instantiations. This means limits can reset arbitrarily when new instances get spawned or different instances are used to serve requests.
 :::
 
 To change the default value (default to 200 requests per user, per minute), you can adjust the `maxReqPerUserMinute` option when instantiating the Client:
@@ -106,9 +106,9 @@ const prismaAppSync = new PrismaAppSync({ maxDepth: 4 })
 
 ## 👉 AppSync Authorization modes
 
-AWS AppSync provides [authz directives ↗](https://docs.aws.amazon.com/appsync/latest/devguide/security-authz.html) for configuring security and data protection on GraphQL API's.
+AWS AppSync provides [authz directives ↗](https://docs.aws.amazon.com/appsync/latest/devguide/security-authz.html) for configuring security and data protection on GraphQL APIs.
 
-Prisma-AppSync enables authz directives directy inside the `schema.prisma` file, via the `defaultDirective` generator option (applies to all generated Types):
+Prisma-AppSync enables authz directives directly inside the `schema.prisma` file, via the `defaultDirective` generator option (applies to all generated Types):
 
 ```json
 generator appsync {
@@ -137,50 +137,50 @@ model Post {
 
 ## 👉 Fine-grained access control
 
-Prisma-AppSync allows to implement fine-grained access control. For example, we might want to only allow access to 'PUBLISHED' posts:
+Prisma-AppSync allows to implementation of fine-grained access control. For example, we might want to only allow access to 'PUBLISHED' posts:
 
 ```ts
 return await prismaAppSync.resolve({
-  event,
-  shield: ({ prismaClient }) => {
+    event,
+    shield: ({ prismaClient }) => {
     // Prisma filtering syntax
     // https://www.prisma.io/docs/concepts/components/prisma-client/filtering-and-sorting
-    const isPublished = { status: { equals: 'PUBLISHED' } }
+        const isPublished = { status: { equals: 'PUBLISHED' } }
 
-    return {
-      // Micromatch syntax
-      // https://github.com/micromatch/micromatch
-      'access/post{,/**}': {
-        rule: isPublished,
-        reason: () => `Unpublished Posts cannot be accessed.`,
-      },
-    }
-  },
+        return {
+            // Micromatch syntax
+            // https://github.com/micromatch/micromatch
+            'access/post{,/**}': {
+                rule: isPublished,
+                reason: () => 'Unpublished Posts cannot be accessed.',
+            },
+        }
+    },
 })
 ```
 
 Combining fine-grained access control with [AppSync Authorization modes](#👉-appsync-authorization-modes) allows to implement powerful controls around data.
 
-To illustrate this with a more advanced example, let's assume we want to restrict API access to users logged-in via `AMAZON_COGNITO_USER_POOLS` and only allow the owner of a given Post to update it:
+To illustrate this with a more advanced example, let's assume we want to restrict API access to users logged in via `AMAZON_COGNITO_USER_POOLS` and only allow the owner of a given Post to update it:
 
 ```ts
 return await prismaAppSync.resolve({
-  event,
-  shield: ({ authorization, identity }: QueryParams) => {
-    const isCognitoAuth = authorization === Authorizations.AMAZON_COGNITO_USER_POOLS
-    const isOwner = { owner: { cognitoSub: identity?.sub } }
+    event,
+    shield: ({ authorization, identity }: QueryParams) => {
+        const isCognitoAuth = authorization === Authorizations.AMAZON_COGNITO_USER_POOLS
+        const isOwner = { owner: { cognitoSub: identity?.sub } }
 
-    return {
-      '**': {
-        rule: isCognitoAuth,
-        reason: ({ model }) => `${model} access is restricted to logged-in users.`,
-      },
-      'modify/post{,/**}': {
-        rule: isOwner,
-        reason: ({ model }) => `${model} can only be modified by their owner.`,
-      },
-    }
-  },
+        return {
+            '**': {
+                rule: isCognitoAuth,
+                reason: ({ model }) => `${model} access is restricted to logged-in users.`,
+            },
+            'modify/post{,/**}': {
+                rule: isOwner,
+                reason: ({ model }) => `${model} can only be modified by their owner.`,
+            },
+        }
+    },
 })
 ```
 

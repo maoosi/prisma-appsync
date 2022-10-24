@@ -1,12 +1,10 @@
 # 🧬 Contributing
 
-::: tip HEY THERE!
-Thanks for your interest in contributing. Please make sure to take a moment and read through the following guide.
-:::
+Thanks for your interest in contributing! Please make sure to take a moment and read through [Prisma-AppSync concept](/essentials/concept.html), as well as the following guide:
 
 ## 👉 Repository setup
 
-We use `pnpm` as core package manager, `yarn` and `docker` for creating the AWS CDK bundle before deploy, `zx` for running scripts, `aws` and `cdk` CLIs for deployment.
+We use `pnpm` as the core package manager, `yarn` and `docker` for creating the AWS CDK bundle before deployment, `zx` for running scripts, `aws` and `cdk` CLIs for deployment.
 
 **Start with cloning the repo on your local machine:**
 
@@ -96,7 +94,7 @@ We use [ESLint ↗](https://eslint.org/) for both linting and formatting.
 
 We recommend using [VS Code ↗](https://code.visualstudio.com/) along with the [ESLint extension ↗](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint).
 
-With the settings on the right, you can have auto fix and formatting when you save the code you are editing.
+With the settings on the right, you can have auto-fix and formatting when you save the code you are editing.
 
 </td><td width="500px"><br>
 
@@ -119,4 +117,4 @@ Since ESLint is already configured to format the code, there is no need to dupli
 
 ## 👉 Legal
 
-By submitting your code to the Prisma-AppSync project, you are granting the project maintainers a right to use that code and provide it to others under the BSD 2-Clause License attached to the project. You are also certifying that you wrote it, and that you are allowed to license it to us.
+By submitting your code to the Prisma-AppSync project, you are granting the project maintainers a right to use that code and provide it to others under the BSD 2-Clause License attached to the project. You are also certifying that you wrote it and that you are allowed to license it to us.

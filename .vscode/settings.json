@@ -66,5 +66,44 @@
         "editor.formatOnSave": true
     },
     "files.eol": "\n",
-    "typescript.tsdk": "node_modules/typescript/lib"
+    "typescript.tsdk": "node_modules/typescript/lib",
+
+    // Grammarly
+    "grammarly.selectors": [
+        {
+            "language": "markdown",
+            "scheme": "file",
+            "pattern": "docs/changelog/1.0.0-rc.1.md"
+        },
+        {
+            "language": "markdown",
+            "scheme": "file",
+            "pattern": "docs/contributing.md"
+        },
+        {
+            "language": "markdown",
+            "scheme": "file",
+            "pattern": "docs/essentials/concept.md"
+        },
+        {
+            "language": "markdown",
+            "scheme": "file",
+            "pattern": "docs/essentials/getting-started.md"
+        },
+        {
+            "language": "markdown",
+            "scheme": "file",
+            "pattern": "docs/advanced/securing-api.md"
+        },
+        {
+            "language": "markdown",
+            "scheme": "file",
+            "pattern": "docs/advanced/extending-api.md"
+        },
+        {
+            "language": "markdown",
+            "scheme": "file",
+            "pattern": "README.md"
+        }
+    ]
 }

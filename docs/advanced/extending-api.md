@@ -3,7 +3,7 @@
 In some cases, it might be useful to extend the GraphQL CRUD API that is being generated, using custom Types and Resolvers.
 
 ::: tip USE CASE
-To illustrate this, let's assume we have an existing model `Post` with a field `views`. We want to add a custom mutation `incrementPostsViews` and build a custom resolver to increment post views on every call.
+To illustrate this, let's assume we have an existing model `Post` with field `views`. We want to add a custom mutation `incrementPostsViews` and build a custom resolver to increment post views on every call.
 :::
 
 ## 👉 1. Extending `schema.gql`
@@ -19,7 +19,7 @@ extend type Mutation {
 }
 ```
 
-Next time we run `npx prisma generate`, we want Prisma-AppSync to merge our `custom-schema.gql` with the default schema output. To do so, we edit the generator config as following:
+Next time we run `npx prisma generate`, we want Prisma-AppSync to merge our `custom-schema.gql` with the default schema output. To do so, we edit the generator config as follows:
 
 ```json{3}
 generator appsync {
@@ -30,11 +30,10 @@ generator appsync {
 
 ## 👉 2. Extending `resolvers.yaml`
 
-We want AWS AppSync to make the link between our new `incrementPostsViews` mutation (added at previous step) and our Lambda function resolver. To do so, we create a new `custom-resolvers.yaml` file at the same location as our `schema.prisma` file:
+We want AWS AppSync to make the link between our new `incrementPostsViews` mutation (added in the previous step) and our Lambda function resolver. To do so, we create a new `custom-resolvers.yaml` file at the same location as our `schema.prisma` file:
 
 ```yaml
-- 
-  typeName: Mutation
+- typeName: Mutation
   fieldName: incrementPostsViews
   dataSource: prisma-appsync
 ```
@@ -55,15 +54,15 @@ For our Lambda function handler (= API resolver function) to process our newly c
 
 ```ts
 return await prismaAppSync.resolve<'incrementPostsViews'>({
-  event,
-  resolvers: {
-    incrementPostsViews: async ({ args, prismaClient }: QueryParamsCustom) => {
-      return await prismaClient.post.update({
-        data: { views: { increment: 1 } },
-        where: { id: args.postId }
-      })
-    },
-  }
+    event,
+    resolvers: {
+        incrementPostsViews: async ({ args, prismaClient }: QueryParamsCustom) => {
+            return await prismaClient.post.update({
+                data: { views: { increment: 1 } },
+                where: { id: args.postId }
+            })
+        },
+    }
 })
 ```
 
@@ -73,7 +72,7 @@ return await prismaAppSync.resolve<'incrementPostsViews'>({
 This step only applies if using the AWS CDK boilerplate provided with Prisma-AppSync.
 :::
 
-Finally, we want to make sure that `custom-schema.gql` and `custom-resolvers.yaml` are both part of the bundle uploaded on AWS Lambda. To do so, we update the beforeBundling function inside `cdk/index.ts` with the below (adjust paths as necessary):
+Finally, we want to make sure that `custom-schema.gql` and `custom-resolvers.yaml` are both parts of the bundle uploaded on AWS Lambda. To do so, we update the beforeBundling function inside `cdk/index.ts` with the below (adjust paths as necessary):
 
 ```ts
 function: {

@@ -67,14 +67,17 @@ export default defineConfig({
                 text: 'Advanced',
                 items: [
                     { text: '🔌 Extending the API', link: '/advanced/extending-api' },
-                    { text: '🚪 Securing the API', link: '/advanced/securing-api' },
+                    { text: '🚨 Securing the API', link: '/advanced/securing-api' },
                     { text: '🪴 Tweaking GQL Schema', link: '/advanced/tweaking-schema' },
                     { text: '🪝 Adding Hooks', link: '/advanced/hooks' },
                 ],
             },
             {
                 text: 'Changelog',
-                items: [{ text: '(latest) 1.0.0-rc.1', link: '/changelog/1.0.0-rc.1' }],
+                items: [
+                    { text: '(latest) 1.0.0-rc.1', link: '/changelog/1.0.0-rc.1' },
+                    { text: 'Contributing', link: '/contributing' },
+                ],
             },
         ],
     },

@@ -1,5 +1,7 @@
 # ⚡️ Getting started
 
+Please make sure to read [Prisma-AppSync core concepts](/essentials/concept) first.
+
 ## 👉 Installation
 
 ### Method 1: Using the CLI Installer
@@ -7,8 +9,10 @@
 Run the following command and follow the prompts 🙂
 
 ```bash
-npx create-prisma-appsync-app@preview
+npx create-prisma-appsync-app
 ```
+
+🚀🚀🚀 Done! 
 
 ### Method 2: Manual Install
 
@@ -60,7 +64,7 @@ export const main = async (event: any) => {
 }
 ```
 
-Either copy the AWS CDK boilerplate provided with Prisma-AppSync into your project, OR simply use it as reference for your own CDK config:
+Either copy the AWS CDK boilerplate provided with Prisma-AppSync into your project, OR simply use it as a reference for your own CDK config:
 
 ```bash
 # path to cdk boilerplate
@@ -90,7 +94,7 @@ project/
 
 ### Generating the API
 
-All the files inside the `prisma/generated` directory will be auto-generated each time you run `npx prisma generate`. Theses files contains everything required to deploy and run your API.
+All the files inside the `prisma/generated` directory will be auto-generated each time you run `npx prisma generate`. These files contain everything required to deploy and run your API.
 
 Updating fields or adding a new model? Simply update your `schema.prisma` file, then run:
 
