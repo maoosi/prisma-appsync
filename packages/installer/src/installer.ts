@@ -4,7 +4,7 @@ import path from 'path'
 import fs from 'fs-extra'
 import prompts from 'prompts'
 import degit from 'degit'
-import execa from 'execa'
+import { execa } from 'execa'
 import { detect as detectPackageManager } from 'detect-package-manager'
 import { bold, cyan, dim } from 'kolorist'
 

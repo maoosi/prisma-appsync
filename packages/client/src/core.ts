@@ -172,14 +172,16 @@ export class PrismaAppSync {
         }
 
         // Prisma logs
-        // @ts-expect-error: 'query' event isn't being recognised
-        this.prismaClient.$on('query', (e: any) => log('Prisma Client query:', e, 'INFO'))
-        // @ts-expect-error: 'info' event isn't being recognised
-        this.prismaClient.$on('info', (e: any) => log('Prisma Client info:', e, 'INFO'))
-        // @ts-expect-error: 'warn' event isn't being recognised
-        this.prismaClient.$on('warn', (e: any) => log('Prisma Client warn:', e, 'WARN'))
-        // @ts-expect-error: 'error' event isn't being recognised
-        this.prismaClient.$on('error', (e: any) => log('Prisma Client error:', e, 'ERROR'))
+        if (!(process?.env?.PRISMA_APPSYNC_TESTING === 'true')) {
+            // @ts-expect-error: 'query' event isn't being recognised
+            this.prismaClient.$on('query', (e: any) => log('Prisma Client query:', e, 'INFO'))
+            // @ts-expect-error: 'info' event isn't being recognised
+            this.prismaClient.$on('info', (e: any) => log('Prisma Client info:', e, 'INFO'))
+            // @ts-expect-error: 'warn' event isn't being recognised
+            this.prismaClient.$on('warn', (e: any) => log('Prisma Client warn:', e, 'WARN'))
+            // @ts-expect-error: 'error' event isn't being recognised
+            this.prismaClient.$on('error', (e: any) => log('Prisma Client error:', e, 'ERROR'))
+        }
     }
 
     /**

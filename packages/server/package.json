@@ -7,10 +7,10 @@
     "devDependencies": {
         "@envelop/types": "^3.0.0",
         "@graphql-yoga/node": "^2.13.13",
-        "@types/lodash": "^4.14.182",
+        "@types/lodash": "^4.14.186",
         "chokidar": "^3.5.3",
         "cleye": "^1.2.1",
-        "graphql": "^16.3.0",
+        "graphql": "^16.6.0",
         "json-to-graphql-query": "^2.2.4",
         "lodash": "^4.17.21"
     }

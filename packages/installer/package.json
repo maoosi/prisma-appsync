@@ -7,12 +7,12 @@
     "bin": "./bin/index.js",
     "devDependencies": {
         "@types/degit": "^2.8.3",
-        "@types/prompts": "^2.0.14",
+        "@types/prompts": "^2.4.1",
         "degit": "^2.8.4",
         "detect-package-manager": "^2.0.1",
-        "execa": "5.1.1",
+        "execa": "6.1.0",
         "fs-extra": "^10.1.0",
-        "kolorist": "^1.5.0",
+        "kolorist": "^1.6.0",
         "prompts": "^2.4.2"
     }
 }
