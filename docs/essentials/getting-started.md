@@ -4,7 +4,7 @@ Please make sure to read [Prisma-AppSync core concepts](/essentials/concept) fir
 
 ## 👉 Installation
 
-### Method 1: Using the CLI Installer
+### Method 1: Using the CLI Installer (recommended)
 
 Run the following command and follow the prompts 🙂
 
@@ -15,6 +15,8 @@ npx create-prisma-appsync-app
 🚀🚀🚀 Done! 
 
 ### Method 2: Manual Install
+
+::: details Click to reveal
 
 Add `prisma-appsync` to your project dependencies.
 
@@ -73,10 +75,12 @@ Either copy the AWS CDK boilerplate provided with Prisma-AppSync into your proje
 
 Refer to [AWS CDK Toolkit docs ↗](https://docs.aws.amazon.com/cdk/v2/guide/cli.html) for more info.
 
+:::
+
 ## 👉 Usage
 
 ::: warning NOTE
-Folder structure and deploy approach might differ if installing Prisma-AppSync manually, instead of using the recommended CLI Installer.
+Folder structure, local server access, and deployment instructions might differ depending on your installation choices, or if installing Prisma-AppSync manually.
 :::
 
 ### Folder structure
@@ -86,6 +90,7 @@ After running the installation command, you should end up with the following str
 ```bash
 project/
   |__ handler.ts  # lambda function handler (API resolver)
+  |__ server.ts   # local server (for dev)
   |__ cdk/        # AWS CDK deploy boilerplate
   |__ prisma/
     |__ schema.prisma  # prisma schema (data source)
@@ -102,12 +107,26 @@ Updating fields or adding a new model? Simply update your `schema.prisma` file, 
 npx prisma generate
 ```
 
-### Deploying the API
+### Local server
 
-Make sure to install and configure the AWS CLI and the AWS CDK CLI on your local machine. Then simply run the below CDK CLI command:
+To run the local server shipped with Prisma-AppSync, simply run the below command:
 
 ```bash
-yarn deploy
+yarn run dev
 ```
+
+> By default, this will synchronize your Prisma Schema will a local SQLite database and launch a local GraphQL IDE server (with auto-reload and TS support).
+
+### Deploying the API
+
+Make sure to install the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html), the [AWS CDK CLI](https://docs.aws.amazon.com/cdk/v2/guide/getting_started.html#getting_started_install), and [Docker](https://docs.docker.com/get-docker/) on your local machine. Configure your local environment to use your AWS Account: [refer to the guide here](https://docs.aws.amazon.com/cdk/v2/guide/cli.html#cli-environment). 
+
+Then simply run the below CDK CLI command:
+
+```bash
+DATABASE_URL=[url] yarn deploy
+```
+
+> Replace `[url]` with your [database connection url](https://www.prisma.io/docs/reference/database-reference/connection-urls)
 
 **🚀🚀🚀 Done! Your GraphQL API is now ready to use.**
