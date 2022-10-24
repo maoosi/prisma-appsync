@@ -24,6 +24,6 @@ features:
     title: AWS AppSync Features
     details: Fully managed, real-time subscriptions, authorizations, high availability, scalability and more.
   - icon: ⚡️
-    title: Lightning Fast Developement
+    title: Lightning Fast Development
     details: Build and deploy a fully working and secure GraphQL API in under 10 minutes.
 ---
