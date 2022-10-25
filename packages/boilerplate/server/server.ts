@@ -7,6 +7,7 @@ import { argv, createServer } from 'prisma-appsync/dist/server'
     const lambdaHandler = await import(join(process.cwd(), argv.flags.handler))
     const port = argv.flags.port
     const watchers = argv.flags.watchers ? JSON.parse(argv.flags.watchers) : []
+    const headers = argv.flags.headers ? JSON.parse(argv.flags.headers) : {}
 
     const defaultQuery
 = /* GraphQL */`query listPosts {
@@ -29,5 +30,6 @@ mutation createPost {
         defaultQuery,
         port,
         watchers,
+        headers,
     })
 })()

@@ -40,10 +40,15 @@ export const argv = cleye({
             description: 'Watchers config',
             default: '',
         },
+        headers: {
+            type: String,
+            description: 'HTTP headers',
+            default: '',
+        },
     },
 })
 
-export async function createServer({ defaultQuery, lambdaHandler, port, schema, watchers }: ServerOptions) {
+export async function createServer({ defaultQuery, lambdaHandler, port, schema, watchers, headers }: ServerOptions) {
     process.on('SIGTERM', () => process.exit(0))
 
     if (!process?.env?.DATABASE_URL)
@@ -71,6 +76,11 @@ export async function createServer({ defaultQuery, lambdaHandler, port, schema, 
                                 sub: 'xxxxxx',
                                 resolverContext: {},
                             })
+
+                            request.headers = {
+                                ...(request?.headers || {}),
+                                ...headers,
+                            }
 
                             const event = useLambdaEvent({
                                 request,
@@ -170,5 +180,6 @@ interface ServerOptions {
     lambdaHandler: any
     port: number
     defaultQuery?: string
+    headers?: any
     watchers?: { watch: string | string[]; exec: string }[]
 }
