@@ -7,6 +7,7 @@ import type { Plugin } from '@envelop/types'
 import { createServer as graphqlServer } from '@graphql-yoga/node'
 import { cli as cleye } from 'cleye'
 import chokidar from 'chokidar'
+import prettier from 'prettier'
 import { Authorizations } from '../../client/src'
 import useLambdaIdentity from './utils/useLambdaIdentity'
 import useLambdaEvent from './utils/useLambdaEvent'
@@ -113,7 +114,7 @@ export async function createServer({ defaultQuery, lambdaHandler, port, schema, 
                                 () => {},
                             )
 
-                            setResult({ data: { [operationName]: lambdaResult } })
+                            setResult({ data: { [event.info.fieldName]: lambdaResult } })
                         }
                     },
                 }
@@ -132,7 +133,8 @@ export async function createServer({ defaultQuery, lambdaHandler, port, schema, 
         },
         graphiql: {
             title: 'Prisma-AppSync',
-            defaultQuery,
+            defaultQuery: defaultQuery ? prettier.format(defaultQuery, { parser: 'graphql' }) : undefined,
+            defaultVariableEditorOpen: false,
         },
         plugins: [
             useLambdaFunction(),
