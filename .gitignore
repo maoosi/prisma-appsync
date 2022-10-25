@@ -10,7 +10,8 @@ playground/
 dist/
 
 # Docs
-docs/.vuepress/dist/
+docs/.vitepress/dist/
+tmp.md
 
 # Boilerplate files
 packages/boilerplate/cdk/*.lock
