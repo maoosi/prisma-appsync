@@ -45,7 +45,7 @@ export default defineConfig({
                     },
                     {
                         text: 'Roadmap',
-                        link: 'https://maoosi.notion.site/9fd581e171fe41aea45a2fa7492972d7',
+                        link: 'https://github.com/users/maoosi/projects/1',
                     },
                     {
                         text: 'Contributing',
