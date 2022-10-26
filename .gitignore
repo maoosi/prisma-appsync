@@ -2,18 +2,20 @@
 node_modules/
 */**/node_modules/
 
-# Test files
-test/generated/
+# Testing
+tests/e2e/prisma/generated/
+playground/
 
 # Dist folder
 dist/
 
 # Docs
-docs/.vuepress/dist/
+docs/.vitepress/dist/
+tmp.md
 
 # Boilerplate files
-Boilerplate/cdk/*.lock
-Boilerplate/cdk/cdk.out
+packages/boilerplate/cdk/*.lock
+packages/boilerplate/cdk/cdk.out
 
 # Log files
 npm-debug.log*
@@ -22,7 +24,6 @@ yarn-error.log*
 
 # Editor directories and files
 .idea
-.vscode
 *.suo
 *.ntvs*
 *.njsproj

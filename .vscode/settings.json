@@ -1,0 +1,109 @@
+{
+    // Visuals
+    "peacock.color": "#1f08f6",
+    "workbench.colorCustomizations": {
+        "activityBar.activeBackground": "#4b38f9",
+        "activityBar.activeBorder": "#f95745",
+        "activityBar.background": "#4b38f9",
+        "activityBar.foreground": "#e7e7e7",
+        "activityBar.inactiveForeground": "#e7e7e799",
+        "activityBarBadge.background": "#f95745",
+        "activityBarBadge.foreground": "#15202b",
+        "sash.hoverBorder": "#4b38f9",
+        "statusBar.background": "#1f08f6",
+        "statusBar.foreground": "#e7e7e7",
+        "statusBarItem.hoverBackground": "#4b38f9",
+        "statusBarItem.remoteBackground": "#1f08f6",
+        "statusBarItem.remoteForeground": "#e7e7e7",
+        "titleBar.activeBackground": "#1f08f6",
+        "titleBar.activeForeground": "#e7e7e7",
+        "titleBar.inactiveBackground": "#1f08f699",
+        "titleBar.inactiveForeground": "#e7e7e799",
+        "commandCenter.border": "#e7e7e799"
+    },
+
+    // ESLint config
+    "eslint.codeAction.showDocumentation": {
+        "enable": true
+    },
+    "eslint.probe": [
+        "javascript",
+        "typescript",
+        "javascriptreact",
+        "typescriptreact",
+        "vue",
+        "html",
+        "markdown",
+        "json",
+        "jsonc",
+        "json5"
+    ],
+    "prettier.enable": false,
+
+    // Editor
+    "editor.formatOnSave": true,
+    "editor.accessibilitySupport": "off",
+    "editor.cursorSmoothCaretAnimation": true,
+    "editor.find.addExtraSpaceOnTop": false,
+    "editor.guides.bracketPairs": "active",
+    "editor.inlineSuggest.enabled": true,
+    "editor.lineNumbers": "interval",
+    "editor.multiCursorModifier": "ctrlCmd",
+    "editor.renderWhitespace": "boundary",
+    "editor.suggestSelection": "first",
+    "editor.tabSize": 4,
+    "editor.unicodeHighlight.invisibleCharacters": false,
+    "editor.codeActionsOnSave": {
+        "source.fixAll": false,
+        "source.fixAll.eslint": true, // this allows ESLint to auto fix on save
+        "source.organizeImports": false
+    },
+    "[markdown]": {
+        "editor.formatOnSave": false
+    },
+    "[prisma]": {
+        "editor.defaultFormatter": "Prisma.prisma",
+        "editor.formatOnSave": true
+    },
+    "files.eol": "\n",
+    "typescript.tsdk": "node_modules/typescript/lib",
+
+    // Grammarly
+    "grammarly.selectors": [
+        {
+            "language": "markdown",
+            "scheme": "file",
+            "pattern": "docs/changelog/1.0.0-rc.1.md"
+        },
+        {
+            "language": "markdown",
+            "scheme": "file",
+            "pattern": "docs/contributing.md"
+        },
+        {
+            "language": "markdown",
+            "scheme": "file",
+            "pattern": "docs/essentials/concept.md"
+        },
+        {
+            "language": "markdown",
+            "scheme": "file",
+            "pattern": "docs/essentials/getting-started.md"
+        },
+        {
+            "language": "markdown",
+            "scheme": "file",
+            "pattern": "docs/advanced/securing-api.md"
+        },
+        {
+            "language": "markdown",
+            "scheme": "file",
+            "pattern": "docs/advanced/extending-api.md"
+        },
+        {
+            "language": "markdown",
+            "scheme": "file",
+            "pattern": "README.md"
+        }
+    ]
+}

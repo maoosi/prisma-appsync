@@ -2,22 +2,40 @@
 node_modules/
 */**/node_modules/
 
-# Excl. project files
+# Source files
+packages/
+scripts/
+tests/
+playground/
 docs/
-test/
-src/
 .editorconfig
-*.config.js
-tsconfig.*.json
+.eslintrc
+.markdownlint.json
+.prettierignore
+.prettierrc.cjs
+tsconfig.json
+
+# Package cache files
+package-*.json
+pnpm-*.yaml
 
 # Log files
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.pnpm-debug.log*
+
+# Workspace
+pnpm-workspace.yaml
+vite.config.ts
+
+# Installer
+dist/installer
 
 # Editor directories and files
 .idea
 .vscode
+.github
 *.suo
 *.ntvs*
 *.njsproj

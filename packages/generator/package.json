@@ -1,0 +1,20 @@
+{
+    "name": "prisma-appsync-generator",
+    "private": true,
+    "version": "1.0.0",
+    "author": "maoosi <hello@sylvainsimao.fr>",
+    "license": "BSD-2-Clause",
+    "devDependencies": {
+        "@prisma/generator-helper": "^4.5.0",
+        "@types/pluralize": "^0.0.29",
+        "@types/prettier": "^2.7.1",
+        "appsync-schema-converter": "^2.0.0",
+        "fs-extra": "^10.1.0",
+        "graphql": "^16.6.0",
+        "js-yaml": "^4.1.0",
+        "lodash": "^4.17.21",
+        "nunjucks": "^3.2.3",
+        "pluralize": "^8.0.0",
+        "prettier": "^2.7.1"
+    }
+}

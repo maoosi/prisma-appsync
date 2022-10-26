@@ -1,0 +1,16 @@
+{
+    "name": "prisma-appsync-client",
+    "private": true,
+    "version": "1.0.0",
+    "author": "maoosi <hello@sylvainsimao.fr>",
+    "license": "BSD-2-Clause",
+    "devDependencies": {
+        "@types/aws-lambda": "^8.10.108",
+        "deepmerge": "^4.2.2",
+        "dot-object": "^2.1.4",
+        "html-entities": "^2.3.3",
+        "lambda-rate-limiter": "^3.0.1",
+        "micromatch": "^4.0.5",
+        "xss": "^1.0.14"
+    }
+}

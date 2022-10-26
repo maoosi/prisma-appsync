@@ -1,0 +1,66 @@
+datasource db {
+  provider = "postgres"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-1.0.x"]
+}
+
+generator appsync {
+  provider = "./dist/generator.js"
+
+  // optional params
+  debug            = true
+  output           = "./generated/prisma-appsync"
+  extendSchema     = "./custom-schema.gql"
+  extendResolvers  = "./custom-resolvers.yaml"
+  defaultDirective = "@auth(model: [{ allow: apiKey }])"
+}
+
+/// @gql(fields: { hiddenField: null }, subscriptions: null)
+/// @auth(model: [{ allow: userPools, groups: ["admins"] }])
+model User {
+  uuid        String    @id @default(uuid()) @db.VarChar(200)
+  username    String    @unique
+  email       String    @unique
+  hiddenField String?
+  role        Role      @default(USER)
+  posts       Post[]
+  comments    Comment[]
+}
+
+/// @gql(model: null)
+model hiddenModel {
+  id Int @id @default(autoincrement())
+}
+
+/// @gql(queries: { list: null, count: "county" })
+/// @auth(model: [{ allow: userPools, groups: ["users", "admin"] }])
+model Post {
+  id          Int       @id @default(autoincrement())
+  title       String
+  author      User?     @relation(fields: [authorUuid], references: [uuid])
+  authorUuid  String?   @db.VarChar(200)
+  published   Boolean   @default(false)
+  comments    Comment[]
+  views       Int       @default(0)
+  lastSavedAt DateTime  @default(now())
+}
+
+/// @gql(model: null)
+model Comment {
+  id          Int      @id @default(autoincrement())
+  author      User?    @relation(fields: [authorUuid], references: [uuid])
+  authorUuid  String?  @db.VarChar(200)
+  post        Post     @relation(fields: [postId], references: [id])
+  postId      Int
+  message     String
+  lastSavedAt DateTime @default(now())
+}
+
+enum Role {
+  USER
+  ADMIN
+}

@@ -1,5 +1,40 @@
 {
+    "$schema": "https://json.schemastore.org/tsconfig",
+    "display": "Default",
     "compilerOptions": {
-        "types": ["jest", "node"]
-    }
+        "target": "ES2018",
+        "module": "commonjs",
+        "lib": ["es2018"],
+        "declaration": false,
+        "strict": true,
+        "noImplicitAny": false,
+        "strictNullChecks": true,
+        "noImplicitThis": true,
+        "alwaysStrict": true,
+        "noUnusedLocals": false,
+        "noUnusedParameters": false,
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": false,
+        "inlineSourceMap": true,
+        "inlineSources": true,
+        "esModuleInterop": true,
+        "experimentalDecorators": true,
+        "strictPropertyInitialization": false,
+        "baseUrl": ".",
+        "paths": {
+            "@client": ["packages/client/src/index"],
+            "@client/*": ["packages/client/src/*"],
+            "prisma-appsync/dist/server": ["dist/server"],
+            "@appsync-server": ["packages/server/src/index"],
+            "@appsync-server/*": ["packages/server/src/*"]
+        },
+        "types": ["node", "lodash"],
+        "plugins": [
+            {
+                "transform": "@zerollup/ts-transform-paths"
+            }
+        ]
+    },
+    "include": ["**/*.ts", "**/*.tsx"],
+    "exclude": ["node_modules"]
 }

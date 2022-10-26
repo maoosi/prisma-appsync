@@ -1,0 +1,5 @@
+packages:
+    - "packages/server"
+    - "packages/client"
+    - "packages/installer"
+    - "packages/generator"

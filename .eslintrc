@@ -1,0 +1,23 @@
+{
+    "root": true,
+    "extends": "@antfu",
+    "rules": {
+        "jsonc/indent": ["error", 4, {}],
+        "@typescript-eslint/indent": [
+            "error",
+            4,
+            {
+                "offsetTernaryExpressions": true,
+                "ignoredNodes": ["TemplateLiteral *", "TSTypeParameterInstantiation"]
+            }
+        ]
+    },
+    "globals": {
+        "$": true,
+        "chalk": true,
+        "cd": true,
+        "argv": true,
+        "fs": true,
+        "nothrow": true
+    }
+}

@@ -1,0 +1,32 @@
+datasource db {
+    provider = "sqlite"
+    url      = env("DATABASE_URL")
+}
+
+generator client {
+    provider      = "prisma-client-js"
+    binaryTargets = ["native", "rhel-openssl-1.0.x"]
+}
+
+generator appsync {
+    provider = "prisma-appsync"
+}
+
+model User {
+    id        Int      @id @default(autoincrement())
+    email     String   @unique
+    fullname  String?
+    posts     Post[]
+    createdAt DateTime @default(now())
+}
+
+model Post {
+    id        Int      @id @default(autoincrement())
+    author    User?    @relation(fields: [authorId], references: [id])
+    authorId  Int?
+    title     String
+    views     Int?     @default(1)
+    published Boolean? @default(false)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}

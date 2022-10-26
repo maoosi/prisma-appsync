@@ -1,3 +1,0 @@
-extend type Mutation {
-    incrementPostsViews(postId: Int!): Post
-}
