@@ -15,8 +15,6 @@ async function getPublishConfig() {
         message: 'Select publish tag',
         choices: [
             { title: 'preview', value: 'preview' },
-            { title: 'beta', value: 'beta' },
-            { title: 'rc', value: 'rc' },
             { title: 'latest', value: 'latest' },
         ],
         initial: 0,
