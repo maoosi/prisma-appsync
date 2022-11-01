@@ -1,556 +1,389 @@
 {% for model in models %}
-    type {{ model.name }} {{ model.directives.model | safe }} {
-        {% for field in model.fields -%}
-            {{ field.name }}: {{ field.scalar }}{% if field.isRequired -%}!{% endif %} {{ field.directives.field | safe }}
-        {% endfor %}
+    type {{ model.name }}
+    {{ model.directives.model | safe }} {
+    {% for field in model.fields -%}
+        {{ field.name }}: {{ field.scalar }}
+        {% if field.isRequired -%}!{% endif %}
+        {{ field.directives.field | safe }}
+    {% endfor %}
     }
 {% endfor %}
-
 type BatchPayload {{ defaultAuthDirective.model | safe }} {
     count: Int
 }
-
 {% for enum in enums %}
     enum {{ enum.name }} {
-        {% for value in enum.values -%}
-            {{ value }}
-        {% endfor %}
+    {% for value in enum.values -%}
+        {{ value }}
+    {% endfor %}
     }
-
-    input {{ enum.name }}EnumFilter {
-        equals: {{ enum.name }}
-        in: [{{ enum.name }}!]
-        not: {{ enum.name }}EnumFilter
-        notIn: [{{ enum.name }}!]
-    }
+                            input {{ enum.name }} EnumFilter { equals: {{ enum.name }} in: [{{ enum.name }} !] not:
+    {{ enum.name }} EnumFilter notIn: [{{ enum.name }}!] }
 {% endfor %}
-
 enum OrderByArg {
     ASC
     DESC
 }
-
 {% for model in models %}
     {% if model.uniqueIndexes | length -%}
         {% for uniqueIndex in model.uniqueIndexes -%}
             input {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput {
-                {% for field in model.fields -%}
-                    {% if field.name in uniqueIndex.fields -%}
-                        {{ field.name }}: {{ field.scalar }}
-                    {% endif -%}
-                {% endfor %}
+            {% for field in model.fields -%}
+                {% if field.name in uniqueIndex.fields -%}
+                    {{ field.name }}: {{ field.scalar }}
+                {% endif -%}
+            {% endfor %}
             }
         {% endfor %}
     {% endif %}
-
-    input {{ model.name }}Filter {
-        some: {{ model.name }}ScalarWhereInput
-        every: {{ model.name }}ScalarWhereInput
-        none: {{ model.name }}ScalarWhereInput
-    }
-
-    input {{ model.name }}RelationFilter {
-        is: {{ model.name }}ScalarWhereInput
-        isNot: {{ model.name }}ScalarWhereInput
-    }
-
-    input {{ model.name }}ScalarWhereInput {
-        {% for field in model.fields -%}
-            {% if not field.relation -%}
-                {% if field.scalar in ["Int", "Float", "AWSDateTime", "AWSJSON", "AWSEmail", "AWSURL", "Boolean", "String"] -%}
-                    {{ field.name }}: {{ field.scalar }}
-                {% endif -%}
-            {% endif -%}
-        {% endfor %}
-    }
-
-    input {{ model.name }}WhereInput {
-        OR: [{{ model.name }}WhereInput]
-        NOT: [{{ model.name }}WhereInput]
-        AND: [{{ model.name }}WhereInput]
-        {% for field in model.fields -%}
-            {% if not field.relation -%}
-                {% if field.isEnum -%}
-                    {{ field.name }}: {{ field.scalar }}EnumFilter
-                {% elseif field.scalar in ["Int", "Float", "AWSDateTime", "AWSJSON", "AWSEmail", "AWSURL", "Boolean"] -%}
-                    {{ field.name }}: {{ field.scalar }}Filter
-                {% else -%}
-                    {{ field.name }}: StringFilter
-                {% endif -%}
+    input {{ model.name }}Filter { some: {{ model.name }} ScalarWhereInput every: {{ model.name }} ScalarWhereInput none:
+    {{ model.name }}ScalarWhereInput } input {{ model.name }} RelationFilter {
+    {% for field in model.fields -%}
+        {% if not field.relation -%}
+            {% if field.isEnum -%}
+                {{ field.name }}: {{ field.scalar }}EnumFilter
+            {% elseif field.scalar in ["Int", "Float", "AWSDateTime", "AWSJSON", "AWSEmail", "AWSURL", "Boolean"] -%}
+                {{ field.name }}: {{ field.scalar }}Filter
             {% else -%}
-                {% if field.relation.kind === "one" -%}
-                    {{ field.name }}: {{ field.relation.type }}RelationFilter
-                {% else  -%}
-                    {{ field.name }}: {{ field.relation.type }}Filter
-                {% endif -%}
+                {{ field.name }}: StringFilter
             {% endif -%}
-        {% endfor %}
+        {% endif -%}
+    {% endfor %}
     }
-
-    input {{ model.name }}WhereUniqueInput {
-        {% for field in model.fields -%}
-            {% if field.isUnique -%}
-                {{ field.name }}: {{ field.scalar }}
-            {% endif -%}
-        {% endfor %}
-        {%- if model.uniqueIndexes | length -%}
-            {% for uniqueIndex in model.uniqueIndexes -%}
-                {{ uniqueIndex.fields | join("_") }}: {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput!
-            {% endfor -%}
-        {% endif %}
-    }
-
-    input {{ model.name }}OrderByInput {
-        {% for field in model.fields -%}
-            {% if not field.relation -%}
-                {{ field.name }}: OrderByArg
+                            input {{ model.name }} ScalarWhereInput {
+    {% for field in model.fields -%}
+        {% if not field.relation -%}
+            {% if field.isEnum -%}
+                {{ field.name }}: {{ field.scalar }}EnumFilter
+            {% elseif field.scalar in ["Int", "Float", "AWSDateTime", "AWSJSON", "AWSEmail", "AWSURL", "Boolean"] -%}
+                {{ field.name }}: {{ field.scalar }}Filter
             {% else -%}
-                {{ field.name }}: {{ field.relation.type }}OrderByInput
+                {{ field.name }}: StringFilter
             {% endif -%}
-        {% endfor %}
+        {% endif -%}
+    {% endfor %}
     }
-
+                            input {{ model.name }} WhereInput { OR: [{{ model.name }} WhereInput] NOT: [{{ model.name }}
+    WhereInput] AND: [{{ model.name }}WhereInput]
+    {% for field in model.fields -%}
+        {% if not field.relation -%}
+            {% if field.isEnum -%}
+                {{ field.name }}: {{ field.scalar }}EnumFilter
+            {% elseif field.scalar in ["Int", "Float", "AWSDateTime", "AWSJSON", "AWSEmail", "AWSURL", "Boolean"] -%}
+                {{ field.name }}: {{ field.scalar }}Filter
+            {% else -%}
+                {{ field.name }}: StringFilter
+            {% endif -%}
+        {% else -%}
+            {% if field.relation.kind === "one" -%}
+                {{ field.name }}: {{ field.relation.type }}RelationFilter
+            {% else -%}
+                {{ field.name }}: {{ field.relation.type }}Filter
+            {% endif -%}
+        {% endif -%}
+    {% endfor %}
+    }
+                            input {{ model.name }} WhereUniqueInput {
+    {% for field in model.fields -%}
+        {% if field.isUnique -%}
+            {{ field.name }}: {{ field.scalar }}
+        {% endif -%}
+    {% endfor %}
+    {%- if model.uniqueIndexes | length -%}
+        {% for uniqueIndex in model.uniqueIndexes -%}
+            {{ uniqueIndex.fields | join("_") }}: {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput
+        {% endfor -%}
+    {% endif %}
+    }
+                            input {{ model.name }} OrderByInput {
+    {% for field in model.fields -%}
+        {% if not field.relation -%}
+            {{ field.name }}: OrderByArg
+        {% else -%}
+            {{ field.name }}: {{ field.relation.type }}OrderByInput
+        {% endif -%}
+    {% endfor %}
+    }
     {% if model.isEditable -%}
         input {{ model.name }}CreateInput {
-            {% for field in model.fields -%}
-                {% if field.isEditable and not field.relation -%}
-                    {{ field.name }}: 
-                        {{ field.scalar }}{% if field.isRequired -%}!{% endif %}
-                {% elseif field.isEditable and field.relation -%}
-                    {{ field.name }}: 
-                        {{ field.relation.name }}CreateRelationInput{% if field.isRequired -%}!{% endif %}
-                {% endif -%}
-            {% endfor %}
+        {% for field in model.fields -%}
+            {% if field.isEditable and not field.relation -%}
+                {{ field.name }}: {{ field.scalar }}
+                {% if field.isRequired -%}!{% endif %}
+            {% elseif field.isEditable and field.relation -%}
+                {{ field.name }}: {{ field.relation.name }}CreateRelationInput{% if field.isRequired -%}!{% endif %}
+            {% endif -%}
+        {% endfor %}
         }
-
-        input {{ model.name }}CreateManyInput {
-            {% for field in model.fields -%}
-                {% if field.isEditable and not field.relation -%}
-                    {{ field.name }}: 
-                        {{ field.scalar }}{% if field.isRequired -%}!{% endif %}
-                {% endif -%}
-            {% endfor %}
+                                                                                                        input
+        {{ model.name }} CreateManyInput {
+        {% for field in model.fields -%}
+            {% if field.isEditable and not field.relation -%}
+                {{ field.name }}: {{ field.scalar }}
+                {% if field.isRequired -%}!{% endif %}
+            {% endif -%}
+        {% endfor %}
         }
-
-        input {{ model.name }}UpdateInput {
-            {% for field in model.fields -%}
-                {% if field.isEditable and not field.relation -%}
-                    {{ field.name }}: {{ field.scalar }}
-                {% elseif field.isEditable and field.relation -%}
-                    {{ field.name }}: {{ field.relation.name }}UpdateRelationsInput
-                {% endif -%}
-            {% endfor %}
+                                                                                                        input
+        {{ model.name }} UpdateInput {
+        {% for field in model.fields -%}
+            {% if field.isEditable and not field.relation -%}
+                {{ field.name }}: {{ field.scalar }}
+            {% elseif field.isEditable and field.relation -%}
+                {{ field.name }}: {{ field.relation.name }}UpdateRelationsInput
+            {% endif -%}
+        {% endfor %}
         }
-
         {% if model.operationFields  | length -%}
-        input {{ model.name }}OperationInput {
+            input {{ model.name }}OperationInput {
             {% for field in model.operationFields -%}
                 {{ field.name }}: {{ field.scalar }}Operation
             {% endfor %}
-        }
+            }
         {% endif %}
-
-        input {{ model.name }}UpdateUniqueInput {
-            data: {{ model.name }}UpdateInput!
-            where: {{ model.name }}WhereUniqueInput!
-        }
-
-        input {{ model.name }}UpdateManyInput {
-            where: {{ model.name }}WhereInput!
-            data: {{ model.name }}UpdateInput!
-        }
-
-        input {{ model.name }}UpsertInput {
-            create: {{ model.name }}CreateInput!
-            update: {{ model.name }}UpdateInput!
-        }
-
-        input {{ model.name }}UpsertUniqueInput {
-            where: {{ model.name }}WhereUniqueInput!
-            create: {{ model.name }}CreateInput!
-            update: {{ model.name }}UpdateInput!
-        }
-
-        input {{ model.name }}ConnectOrCreateInput {
-            where: {{ model.name }}WhereUniqueInput!
-            create: {{ model.name }}CreateInput!
-        }
-
-        input {{ model.name }}DeleteUniqueInput {
-            where: {{ model.name }}WhereUniqueInput!
-        }
-
-        input {{ model.name }}DeleteManyInput {
-            where: {{ model.name }}WhereInput!
-        }
+        input {{ model.name }}UpdateUniqueInput { data: {{ model.name }} UpdateInput! where: {{ model.name }}WhereUniqueInput! }
+        input {{ model.name }}UpdateManyInput { where: {{ model.name }}WhereInput! data: {{ model.name }} UpdateInput! } input
+        {{ model.name }} UpsertInput { create: {{ model.name }}CreateInput! update: {{ model.name }} UpdateInput! } input
+        {{ model.name }} UpsertUniqueInput { where: {{ model.name }}WhereUniqueInput! create: {{ model.name }}CreateInput!
+        update: {{ model.name }} UpdateInput! } input {{ model.name }} ConnectOrCreateInput { where: {{ model.name }}
+        WhereUniqueInput! create:
+        {{ model.name }} CreateInput! } input {{ model.name }} DeleteUniqueInput { where: {{ model.name }} WhereUniqueInput! }
+        input {{ model.name }} DeleteManyInput { where: {{ model.name }} WhereInput! }
     {% endif %}
-
     {% for field in model.fields -%}
         {% if field.relation -%}
             input {{ field.relation.name }}CreateRelationInput {
-                {% if field.relation.kind === "one" -%}
-                create: {{ field.relation.type }}CreateInput
-                connect: {{ field.relation.type }}WhereUniqueInput
-                connectOrCreate: {{ field.relation.type }}ConnectOrCreateInput
-                {% else  -%}
-                create: [{{ field.relation.type }}CreateInput]
-                connect: [{{ field.relation.type }}WhereUniqueInput]
-                connectOrCreate: [{{ field.relation.type }}ConnectOrCreateInput]
-                {% endif -%}
+            {% if field.relation.kind === "one" -%}
+                create: {{ field.relation.type }}CreateInput connect: {{ field.relation.type }} WhereUniqueInput connectOrCreate:
+                {{ field.relation.type }}ConnectOrCreateInput
+            {% else -%}
+                create: [{{ field.relation.type }}CreateInput] connect: [{{ field.relation.type }}
+                WhereUniqueInput] connectOrCreate: [{{ field.relation.type }}ConnectOrCreateInput]
+            {% endif -%}
             }
-
-            input {{ field.relation.name }}UpdateRelationsInput {
-                {% if field.relation.kind === "one" -%}
-                connect: {{ field.relation.type }}WhereUniqueInput
-                create: {{ field.relation.type }}CreateInput
-                connectOrCreate: {{ field.relation.type }}ConnectOrCreateInput
-                update: {{ field.relation.type }}UpdateInput
-                upsert: {{ field.relation.type }}UpsertInput
-                delete: Boolean
-                disconnect: Boolean
-                {% else  -%}
-                connect: [{{ field.relation.type }}WhereUniqueInput]
-                create: [{{ field.relation.type }}CreateInput]
-                connectOrCreate: [{{ field.relation.type }}ConnectOrCreateInput]
-                update: [{{ field.relation.type }}UpdateUniqueInput]
-                upsert: [{{ field.relation.type }}UpsertUniqueInput]
-                delete: [{{ field.relation.type }}DeleteUniqueInput]
-                disconnect: [{{ field.relation.type }}WhereUniqueInput]
-                set: [{{ field.relation.type }}WhereUniqueInput]
-                updateMany: [{{ field.relation.type }}UpdateManyInput]
-                deleteMany: [{{ field.relation.type }}DeleteManyInput]
-                {% endif -%}
+                                                            input {{ field.relation.name }} UpdateRelationsInput {
+            {% if field.relation.kind === "one" -%}
+                connect: {{ field.relation.type }}WhereUniqueInput create: {{ field.relation.type }} CreateInput connectOrCreate:
+                {{ field.relation.type }}ConnectOrCreateInput update: {{ field.relation.type }} UpdateInput upsert:
+                {{ field.relation.type }}UpsertInput delete: Boolean disconnect: Boolean
+            {% else -%}
+                connect: [{{ field.relation.type }}WhereUniqueInput] create: [{{ field.relation.type }}
+                CreateInput] connectOrCreate: [{{ field.relation.type }} ConnectOrCreateInput] update: [{{ field.relation.type }}
+                UpdateUniqueInput] upsert: [{{ field.relation.type }} UpsertUniqueInput] delete: [{{ field.relation.type }}
+                DeleteUniqueInput] disconnect: [{{ field.relation.type }} WhereUniqueInput] set: [{{ field.relation.type }}
+                WhereUniqueInput] updateMany: [{{ field.relation.type }} UpdateManyInput] deleteMany: [{{ field.relation.type }} DeleteManyInput]
+            {% endif -%}
             }
         {% endif -%}
     {% endfor %}
 {% endfor %}
-
-input IntOperation {
-    set: Int
-    increment: Int
-    decrement: Int
-    multiply: Int
-    divide: Int
-}
-
-input FloatOperation {
-    set: Float
-    increment: Float
-    decrement: Float
-    multiply: Float
-    divide: Float
-}
-
-input AWSDateTimeFilter {
-    equals: AWSDateTime
-    gt: AWSDateTime
-    gte: AWSDateTime
-    in: [AWSDateTime!]
-    lt: AWSDateTime
-    lte: AWSDateTime
-    not: AWSDateTimeFilter
-    notIn: [AWSDateTime!]
-}
-
-input FloatFilter {
-    equals: Float
-    gt: Float
-    gte: Float
-    in: [Float!]
-    lt: Float
-    lte: Float
-    not: FloatFilter
-    notIn: [Float!]
-}
-
-input IntFilter {
-    equals: Int
-    gt: Int
-    gte: Int
-    in: [Int!]
-    lt: Int
-    lte: Int
-    not: IntFilter
-    notIn: [Int!]
-}
-
-input AWSJSONFilter {
-    contains: String
-    endsWith: String
-    equals: AWSJSON
-    in: [AWSJSON!]
-    not: AWSJSONFilter
-    notIn: [AWSJSON!]
-    startsWith: String
-}
-
-input AWSEmailFilter {
-    contains: String
-    endsWith: String
-    equals: AWSEmail
-    in: [AWSEmail!]
-    not: AWSEmailFilter
-    notIn: [AWSEmail!]
-    startsWith: String
-}
-
-input AWSURLFilter {
-    contains: String
-    endsWith: String
-    equals: AWSURL
-    in: [AWSURL!]
-    not: AWSURLFilter
-    notIn: [AWSURL!]
-    startsWith: String
-}
-
-input StringFilter {
-    contains: String
-    endsWith: String
-    equals: String
-    in: [String!]
-    not: StringFilter
-    notIn: [String!]
-    startsWith: String
-    mode: String
-}
-
-input BooleanFilter {
-    equals: Boolean
-    not: BooleanFilter
-}
-
+input IntOperation { set: Int increment: Int decrement: Int multiply: Int divide: Int } input FloatOperation { set:
+Float increment: Float decrement: Float multiply: Float divide: Float } input AWSDateTimeFilter { equals: AWSDateTime
+gt: AWSDateTime gte: AWSDateTime in: [AWSDateTime!] lt: AWSDateTime lte: AWSDateTime not: AWSDateTimeFilter notIn:
+[AWSDateTime!] } input FloatFilter { equals: Float gt: Float gte: Float in: [Float!] lt: Float lte: Float not:
+FloatFilter notIn: [Float!] } input IntFilter { equals: Int gt: Int gte: Int in: [Int!] lt: Int lte: Int not: IntFilter
+notIn: [Int!] } input AWSJSONFilter { contains: String endsWith: String equals: AWSJSON in: [AWSJSON!] not:
+AWSJSONFilter notIn: [AWSJSON!] startsWith: String } input AWSEmailFilter { contains: String endsWith: String equals:
+AWSEmail in: [AWSEmail!] not: AWSEmailFilter notIn: [AWSEmail!] startsWith: String } input AWSURLFilter { contains:
+String endsWith: String equals: AWSURL in: [AWSURL!] not: AWSURLFilter notIn: [AWSURL!] startsWith: String } input
+StringFilter { contains: String endsWith: String equals: String in: [String!] not: StringFilter notIn: [String!]
+startsWith: String mode: String } input BooleanFilter { equals: Boolean not: BooleanFilter }
 {% if models | length -%}
-{% if usesMutations -%}
-type Mutation {
-    {% for model in models %}
-        {% if model.isEditable -%}
-            {% if model.gql.create -%}
-            """
-            Create a new single {{ model.name }} record.
-            """
-            {{ model.gql.create }}(
-                data: {{ model.name }}CreateInput!
-            ): {{ model.name }} {{ model.directives.create | safe }}
-            {% endif %}
-            {% if model.gql.createMany -%}
-            """
-            Create multiple new {{ model.name }} records.
-            """
-            {{ model.gql.createMany }}(
-                data: [{{ model.name }}CreateManyInput!],
-                skipDuplicates: Boolean
-            ): BatchPayload {{ model.directives.createMany | safe }}
-            {% endif %}
-            {% if model.gql.update -%}
-            """
-            Update an existing single {{ model.name }} record.
-            """
-            {{ model.gql.update }}(
-                where: {{ model.name }}WhereUniqueInput!,
-                {% if model.operationFields  | length -%}
-                data: {{ model.name }}UpdateInput,
-                operation: {{ model.name }}OperationInput,
-                {% else -%}
-                data: {{ model.name }}UpdateInput,
+    {% if usesMutations -%}
+        type Mutation {
+        {% for model in models %}
+            {% if model.isEditable -%}
+                {% if model.gql.create -%}
+                    """ Create a new
+                                                                                                    single
+                    {{ model.name }} record. """ {{ model.gql.create }}(
+                                                            data: {{ model.name }}
+                    CreateInput! ): {{ model.name }}
+                    {{ model.directives.create | safe }}
                 {% endif %}
-            ): {{ model.name }} {{ model.directives.update | safe }}
-            {% endif %}
-            {% if model.gql.updateMany -%}
-            """
-            Update multiple existing {{ model.name }} records.
-            """
-            {{ model.gql.updateMany }}(
-                where: {{ model.name }}WhereInput!,
-                {% if model.operationFields  | length -%}
-                data: {{ model.name }}UpdateInput,
-                operation: {{ model.name }}OperationInput,
-                {% else -%}
-                data: {{ model.name }}UpdateInput,
+                {% if model.gql.createMany -%}
+                    """ Create multiple
+                                                                                                    new
+                    {{ model.name }} records. """ {{ model.gql.createMany }} ( data: [{{ model.name }} CreateManyInput!], skipDuplicates:
+                    Boolean ): BatchPayload {{ model.directives.createMany | safe }}
                 {% endif %}
-            ): BatchPayload {{ model.directives.updateMany | safe }}
+                {% if model.gql.update -%}
+                    """ Update an existing
+                    single {{ model.name }} record. """ {{ model.gql.update }}( where: {{ model.name }}
+                        WhereUniqueInput!,
+                    {% if model.operationFields  | length -%}
+                        data: {{ model.name }}UpdateInput, operation: {{ model.name }}OperationInput,
+                    {% else -%}
+                        data: {{ model.name }}UpdateInput,
+                    {% endif %}
+                    ): {{ model.name }}
+                    {{ model.directives.update | safe }}
+                {% endif %}
+                {% if model.gql.updateMany -%}
+                    """ Update multiple
+                    existing {{ model.name }} records. """ {{ model.gql.updateMany }}( where: {{ model.name }}
+                        WhereInput!,
+                    {% if model.operationFields  | length -%}
+                        data: {{ model.name }}UpdateInput, operation: {{ model.name }}OperationInput,
+                    {% else -%}
+                        data: {{ model.name }}UpdateInput,
+                    {% endif %}
+                    ): BatchPayload {{ model.directives.updateMany | safe }}
+                {% endif %}
+                {% if model.gql.upsert -%}
+                    """ Update an existing or create a new
+                                        single {{ model.name }} record. """ {{ model.gql.upsert }}(
+                    data: {{ model.name }} UpdateInput!, where: {{ model.name }} WhereUniqueInput! ): {{ model.name }}
+                    {{ model.directives.upsert | safe }}
+                {% endif %}
+                {% if model.gql.delete -%}
+                    """ Delete a
+                                                            single {{ model.name }} record. """ {{ model.gql.delete }}( where:
+                    {{ model.name }} WhereUniqueInput! ): {{ model.name }}
+                    {{ model.directives.delete | safe }}
+                {% endif %}
+                {% if model.gql.deleteMany -%}
+                    """ Delete
+                                                            multiple {{ model.name }} records. """ {{ model.gql.deleteMany }}(
+                    where: {{ model.name }}WhereInput! ):
+                                                            BatchPayload {{ model.directives.deleteMany | safe }}
+                {% endif %}
+            {% endif -%}
+        {% endfor %}
+        }
+    {% endif -%}
+    {% if usesQueries -%}
+        type Query {
+        {% for model in models %}
+            {% if model.gql.get -%}
+                """ Find a
+                                single {{ model.name }} record by unique identifier. """ {{ model.gql.get }}( where:
+                {{ model.name }} WhereUniqueInput! ): {{ model.name }}
+                {{ model.directives.get | safe }}
             {% endif %}
-            {% if model.gql.upsert -%}
-            """
-            Update an existing or create a new single {{ model.name }} record.
-            """
-            {{ model.gql.upsert }}(
-                data: {{ model.name }}UpdateInput!,
-                where: {{ model.name }}WhereUniqueInput!
-            ): {{ model.name }} {{ model.directives.upsert | safe }}
+            {% if model.gql.list -%}
+                """ Find
+                many {{ model.name }} records
+                                                (optional query filters). """
+                {{ model.gql.list }}( where: {{ model.name }} WhereInput, orderBy: [{{ model.name }} OrderByInput], skip: Int, take: Int
+                ): [{{ model.name }}] {{ model.directives.list | safe }}
             {% endif %}
-            {% if model.gql.delete -%}
-            """
-            Delete a single {{ model.name }} record.
-            """
-            {{ model.gql.delete }}(
-                where: {{ model.name }}WhereUniqueInput!
-            ): {{ model.name }} {{ model.directives.delete | safe }}
+            {% if model.gql.count -%}
+                """ Count
+                all {{ model.name }} records
+                                                (optional query filters). """
+                {{ model.gql.count }}( where: {{ model.name }} WhereInput, orderBy: [{{ model.name }} OrderByInput], skip: Int, take:
+                Int ): Int {{ model.directives.count | safe }}
             {% endif %}
-            {% if model.gql.deleteMany -%}
-            """
-            Delete multiple {{ model.name }} records.
-            """
-            {{ model.gql.deleteMany }}(
-                where: {{ model.name }}WhereInput!
-            ): BatchPayload {{ model.directives.deleteMany | safe }}
-            {% endif %}
-        {% endif -%}
-    {% endfor %}
-}
-{% endif -%}
-
-{% if usesQueries -%}
-type Query {
-    {% for model in models %}
-        {% if model.gql.get -%}
-        """
-        Find a single {{ model.name }} record by unique identifier.
-        """
-        {{ model.gql.get }}(
-            where: {{ model.name }}WhereUniqueInput!
-        ): {{ model.name }} {{ model.directives.get | safe }}
-        {% endif %}
-        {% if model.gql.list -%}
-        """
-        Find many {{ model.name }} records (optional query filters).
-        """
-        {{ model.gql.list }}(
-            where: {{ model.name }}WhereInput,
-            orderBy: [{{ model.name }}OrderByInput],
-            skip: Int,
-            take: Int
-        ): [{{ model.name }}] {{ model.directives.list | safe }}
-        {% endif %}
-        {% if model.gql.count -%}
-        """
-        Count all {{ model.name }} records (optional query filters).
-        """
-        {{ model.gql.count }}(
-            where: {{ model.name }}WhereInput,
-            orderBy: [{{ model.name }}OrderByInput],
-            skip: Int,
-            take: Int
-        ): Int {{ model.directives.count | safe }}
-        {% endif %}
-    {% endfor %}
-}
-{% endif -%}
-
-{% if usesSubscriptions -%}
-type Subscription {
-    {% for model in models %}
-        {% if model.isEditable -%}
-            {% if model.gql.onCreated and model.gql.create -%}
-            """
-            Triggered from `{{ model.gql.create }}` mutation (excl. `{{ model.gql.createMany }}` and `{{ model.gql.upsert }}`).
-            """
-            {{ model.gql.onCreated }}(
-                {% if model.uniqueIndexes | length -%}
-                    {% for uniqueIndex in model.uniqueIndexes -%}
-                        {{ uniqueIndex.fields | join("_") }}: {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput!
-                    {% endfor -%}
-                {% endif -%}
-                {% for field in model.subscriptionFields -%}
-                    {{ field.name }}: {{ field.scalar }}
-                {% endfor %}
-            ): {{ model.name }}
-                @aws_subscribe(mutations: ["{{ model.gql.create }}"]) {{ model.directives.onCreated | safe }}
-            {% endif %}
-            {% if model.gql.onUpdated and model.gql.update -%}
-            """
-            Triggered from `{{ model.gql.update }}` mutation (excl. `{{ model.gql.updateMany }}` and `{{ model.gql.upsert }}`).
-            """
-            {{ model.gql.onUpdated }}(
-                {% if model.uniqueIndexes | length -%}
-                    {% for uniqueIndex in model.uniqueIndexes -%}
-                        {{ uniqueIndex.fields | join("_") }}: {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput!
-                    {% endfor -%}
-                {% endif -%}
-                {% for field in model.subscriptionFields -%}
-                    {{ field.name }}: {{ field.scalar }}
-                {% endfor %}
-            ): {{ model.name }}
-                @aws_subscribe(mutations: ["{{ model.gql.update }}"]) {{ model.directives.onUpdated | safe }}
-            {% endif %}
-            {% if model.gql.onUpserted and model.gql.upsert -%}
-            """
-            Triggered from `{{ model.gql.upsert }}` mutation.
-            """
-            {{ model.gql.onUpserted }}(
-                {% if model.uniqueIndexes | length -%}
-                    {% for uniqueIndex in model.uniqueIndexes -%}
-                        {{ uniqueIndex.fields | join("_") }}: {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput!
-                    {% endfor -%}
-                {% endif -%}
-                {% for field in model.subscriptionFields -%}
-                    {{ field.name }}: {{ field.scalar }}
-                {% endfor %}
-            ): {{ model.name }}
-                @aws_subscribe(mutations: ["{{ model.gql.upsert }}"]) {{ model.directives.onUpserted | safe }}
-            {% endif %}
-            {% if model.gql.onDeleted and model.gql.delete -%}
-            """
-            Triggered from `{{ model.gql.delete }}` mutation (excl. `{{ model.gql.deleteMany }}`).
-            """
-            {{ model.gql.onDeleted }}(
-                {% if model.uniqueIndexes | length -%}
-                    {% for uniqueIndex in model.uniqueIndexes -%}
-                        {{ uniqueIndex.fields | join("_") }}: {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput!
-                    {% endfor -%}
-                {% endif -%}
-                {% for field in model.subscriptionFields -%}
-                    {{ field.name }}: {{ field.scalar }}
-                {% endfor %}
-            ): {{ model.name }}
-                @aws_subscribe(mutations: ["{{ model.gql.delete }}"]) {{ model.directives.onDeleted | safe }}
-            {% endif %}
-            {% if model.gql.onMutated and model.gql.create and model.gql.update and model.gql.upsert and model.gql.delete -%}
-            """
-            Triggered from ANY SINGLE record mutation.
-            """
-            {{ model.gql.onMutated }}(
-                {% if model.uniqueIndexes | length -%}
-                    {% for uniqueIndex in model.uniqueIndexes -%}
-                        {{ uniqueIndex.fields | join("_") }}: {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput!
-                    {% endfor -%}
-                {% endif -%}
-                {% for field in model.subscriptionFields -%}
-                    {{ field.name }}: {{ field.scalar }}
-                {% endfor %}
-            ): {{ model.name }}
-                @aws_subscribe(mutations: ["{{ model.gql.create }}", "{{ model.gql.update }}", "{{ model.gql.upsert }}", "{{ model.gql.delete }}"]) {{ model.directives.onMutated | safe }}
-            {% endif %}
-            {% if model.gql.onCreatedMany and model.gql.createMany -%}
-            """
-            Triggered from `{{ model.gql.createMany }}` mutation.
-            """
-            {{ model.gql.onCreatedMany }}: BatchPayload
-                @aws_subscribe(mutations: ["{{ model.gql.createMany }}"]) {{ model.directives.onCreatedMany | safe }}
-            {% endif %}
-            {% if model.gql.onUpdatedMany and model.gql.updateMany -%}
-            """
-            Triggered from `{{ model.gql.updateMany }}` mutation.
-            """
-            {{ model.gql.onUpdatedMany }}: BatchPayload
-                @aws_subscribe(mutations: ["{{ model.gql.updateMany }}"]) {{ model.directives.onUpdatedMany | safe }}
-            {% endif %}
-            {% if model.gql.onMutatedMany and model.gql.createMany and model.gql.updateMany and model.gql.deleteMany -%}
-            """
-            Triggered from ANY MULTIPLE records mutation.
-            """
-            {{ model.gql.onMutatedMany }}: BatchPayload
-                @aws_subscribe(mutations: ["{{ model.gql.createMany }}", "{{ model.gql.updateMany }}", "{{ model.gql.deleteMany }}"]) {{ model.directives.onMutatedMany | safe }}
-            {% endif %}
-            {% if model.gql.onDeletedMany and model.gql.deleteMany -%}
-            """
-            Triggered from `{{ model.gql.deleteMany }}` mutation.
-            """
-            {{ model.gql.onDeletedMany }}: BatchPayload
-                @aws_subscribe(mutations: ["{{ model.gql.deleteMany }}"]) {{ model.directives.onDeletedMany | safe }}
-            {% endif %}
-        {% endif -%}
-    {% endfor %}
-}
-{% endif -%}
+        {% endfor %}
+        }
+    {% endif -%}
+    {% if usesSubscriptions -%}
+        type Subscription {
+        {% for model in models %}
+            {% if model.isEditable -%}
+                {% if model.gql.onCreated and model.gql.create -%}
+                    """ Triggered from
+                                                                                                    `{{ model.gql.create }}` mutation (excl.
+                                        `{{ model.gql.createMany }} ` and `{{ model.gql.upsert }}
+                    `). """
+                    {{ model.gql.onCreated }}(
+                    {% if model.uniqueIndexes | length -%}
+                        {% for uniqueIndex in model.uniqueIndexes -%}
+                            {{ uniqueIndex.fields | join("_") }}: {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput
+                        {% endfor -%}
+                    {% endif -%}
+                    {% for field in model.subscriptionFields -%}
+                        {{ field.name }}: {{ field.scalar }}
+                    {% endfor %}
+                    ): {{ model.name }} @aws_subscribe(mutations: ["{{ model.gql.create }}"]) {{ model.directives.onCreated | safe }}
+                {% endif %}
+                {% if model.gql.onUpdated and model.gql.update -%}
+                    """ Triggered from
+                                                                                                    `{{ model.gql.update }}` mutation (excl.
+                                        `{{ model.gql.updateMany }} ` and `{{ model.gql.upsert }}
+                    `). """
+                    {{ model.gql.onUpdated }}(
+                    {% if model.uniqueIndexes | length -%}
+                        {% for uniqueIndex in model.uniqueIndexes -%}
+                            {{ uniqueIndex.fields | join("_") }}: {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput
+                        {% endfor -%}
+                    {% endif -%}
+                    {% for field in model.subscriptionFields -%}
+                        {{ field.name }}: {{ field.scalar }}
+                    {% endfor %}
+                    ): {{ model.name }} @aws_subscribe(mutations: ["{{ model.gql.update }}"]) {{ model.directives.onUpdated | safe }}
+                {% endif %}
+                {% if model.gql.onUpserted and model.gql.upsert -%}
+                    """ Triggered from
+                                                                                                    `{{ model.gql.upsert }}` mutation. """ {{ model.gql.onUpserted }}(
+                    {% if model.uniqueIndexes | length -%}
+                        {% for uniqueIndex in model.uniqueIndexes -%}
+                            {{ uniqueIndex.fields | join("_") }}: {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput
+                        {% endfor -%}
+                    {% endif -%}
+                    {% for field in model.subscriptionFields -%}
+                        {{ field.name }}: {{ field.scalar }}
+                    {% endfor %}
+                    ): {{ model.name }} @aws_subscribe(mutations: ["{{ model.gql.upsert }}"]) {{ model.directives.onUpserted | safe }}
+                {% endif %}
+                {% if model.gql.onDeleted and model.gql.delete -%}
+                    """ Triggered from
+                                                                                                    `{{ model.gql.delete }}` mutation (excl.
+                                        `{{ model.gql.deleteMany }} `). """
+                    {{ model.gql.onDeleted }}(
+                    {% if model.uniqueIndexes | length -%}
+                        {% for uniqueIndex in model.uniqueIndexes -%}
+                            {{ uniqueIndex.fields | join("_") }}: {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput
+                        {% endfor -%}
+                    {% endif -%}
+                    {% for field in model.subscriptionFields -%}
+                        {{ field.name }}: {{ field.scalar }}
+                    {% endfor %}
+                    ): {{ model.name }} @aws_subscribe(mutations: ["{{ model.gql.delete }}"]) {{ model.directives.onDeleted | safe }}
+                {% endif %}
+                {% if model.gql.onMutated and model.gql.create and model.gql.update and model.gql.upsert and model.gql.delete -%}
+                    """ Triggered from ANY SINGLE record mutation.
+                                                                                """
+                    {{ model.gql.onMutated }}(
+                    {% if model.uniqueIndexes | length -%}
+                        {% for uniqueIndex in model.uniqueIndexes -%}
+                            {{ uniqueIndex.fields | join("_") }}: {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput
+                        {% endfor -%}
+                    {% endif -%}
+                    {% for field in model.subscriptionFields -%}
+                        {{ field.name }}: {{ field.scalar }}
+                    {% endfor %}
+                    ): {{ model.name }}
+                    @aws_subscribe(mutations: ["{{ model.gql.create }}", "{{ model.gql.update }}", "{{ model.gql.upsert }}", "{{ model.gql.delete }}"]) {{ model.directives.onMutated | safe }}
+                {% endif %}
+                {% if model.gql.onCreatedMany and model.gql.createMany -%}
+                    """ Triggered from
+                                                                                                    `{{ model.gql.createMany }}` mutation.
+                                        """ {{ model.gql.onCreatedMany }}
+                    : BatchPayload @aws_subscribe(mutations: ["{{ model.gql.createMany }} "]) {{ model.directives.onCreatedMany | safe }}
+                {% endif %}
+                {% if model.gql.onUpdatedMany and model.gql.updateMany -%}
+                    """ Triggered from
+                                                                                                    `{{ model.gql.updateMany }}` mutation.
+                                        """ {{ model.gql.onUpdatedMany }}
+                    : BatchPayload @aws_subscribe(mutations: ["{{ model.gql.updateMany }} "]) {{ model.directives.onUpdatedMany | safe }}
+                {% endif %}
+                {% if model.gql.onMutatedMany and model.gql.createMany and model.gql.updateMany and model.gql.deleteMany -%}
+                    """ Triggered from ANY MULTIPLE records mutation.
+                                                                                """
+                    {{ model.gql.onMutatedMany }}: BatchPayload
+                                                            @aws_subscribe(mutations: ["{{ model.gql.createMany }}",
+                                        "{{ model.gql.updateMany }}", "{{ model.gql.deleteMany }}"]) {{ model.directives.onMutatedMany | safe }}
+                {% endif %}
+                {% if model.gql.onDeletedMany and model.gql.deleteMany -%}
+                    """ Triggered from
+                                                                                                    `{{ model.gql.deleteMany }}` mutation.
+                                        """ {{ model.gql.onDeletedMany }}
+                    : BatchPayload @aws_subscribe(mutations: ["{{ model.gql.deleteMany }} "]) {{ model.directives.onDeletedMany | safe }}
+                {% endif %}
+            {% endif -%}
+        {% endfor %}
+        }
+    {% endif -%}
 {% endif -%}
