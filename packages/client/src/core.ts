@@ -418,14 +418,13 @@ export class PrismaAppSync {
 
             // Guard: get and run all after hooks functions matching query
             if (resolveParams?.hooks) {
-                const q: AfterHookParams = await runHooks({
+                result = await runHooks({
                     when: 'after',
                     hooks: resolveParams.hooks,
                     prismaClient: this.prismaClient,
                     QueryParams,
                     result,
                 })
-                result = q.result
             }
         }
         catch (error) {
