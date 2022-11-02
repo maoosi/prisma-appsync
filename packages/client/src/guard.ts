@@ -237,7 +237,7 @@ export async function runHooks({
         }
     }
 
-    return result
+    return result || QueryParams
 }
 
 export async function preventDOS({
