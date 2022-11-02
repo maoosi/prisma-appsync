@@ -222,22 +222,25 @@ export async function runHooks({
         return hookWhen === when && isMatchingGlob(currentPath, hookGlob)
     })
 
+    let hookResponse = when === 'after'
+        ? { ...QueryParams, result }
+        : QueryParams
+
     if (matchingHooks.length > 0) {
         for (let index = 0; index < matchingHooks.length; index++) {
             const hookPath = matchingHooks[index]
 
             if (Object.prototype.hasOwnProperty.call(hooks, hookPath)) {
-                const hookResult = await hooks[hookPath]({
+                hookResponse = await hooks[hookPath]({
                     ...QueryParams,
                     ...(typeof result !== 'undefined' && when === 'after' && { result }),
                     prismaClient,
                 })
-                result = hookResult
             }
         }
     }
 
-    return result
+    return hookResponse
 }
 
 export async function preventDOS({

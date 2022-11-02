@@ -323,7 +323,7 @@ export class PrismaAppSync {
             }
 
             // Guard: get and run all before hooks functions matching query
-            if (resolveParams?.hooks) {
+            if (!isEmpty(resolveParams?.hooks)) {
                 QueryParams = await runHooks({
                     when: 'before',
                     hooks: resolveParams.hooks,
@@ -417,7 +417,7 @@ export class PrismaAppSync {
             }
 
             // Guard: get and run all after hooks functions matching query
-            if (resolveParams?.hooks) {
+            if (!isEmpty(resolveParams?.hooks)) {
                 const q: AfterHookParams = await runHooks({
                     when: 'after',
                     hooks: resolveParams.hooks,
