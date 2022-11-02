@@ -50,15 +50,28 @@ enum OrderByArg {
     }
 
     input {{ model.name }}RelationFilter {
-        is: {{ model.name }}ScalarWhereInput
-        isNot: {{ model.name }}ScalarWhereInput
+        {% for field in model.fields -%}
+            {% if not field.relation -%}
+                {% if field.isEnum -%}
+                    {{ field.name }}: {{ field.scalar }}EnumFilter
+                {% elseif field.scalar in ["Int", "Float", "AWSDateTime", "AWSJSON", "AWSEmail", "AWSURL", "Boolean"] -%}
+                    {{ field.name }}: {{ field.scalar }}Filter
+                {% else -%}
+                    {{ field.name }}: StringFilter
+                {% endif -%}
+            {% endif -%}
+        {% endfor %}
     }
 
     input {{ model.name }}ScalarWhereInput {
         {% for field in model.fields -%}
             {% if not field.relation -%}
-                {% if field.scalar in ["Int", "Float", "AWSDateTime", "AWSJSON", "AWSEmail", "AWSURL", "Boolean", "String"] -%}
-                    {{ field.name }}: {{ field.scalar }}
+                {% if field.isEnum -%}
+                    {{ field.name }}: {{ field.scalar }}EnumFilter
+                {% elseif field.scalar in ["Int", "Float", "AWSDateTime", "AWSJSON", "AWSEmail", "AWSURL", "Boolean"] -%}
+                    {{ field.name }}: {{ field.scalar }}Filter
+                {% else -%}
+                    {{ field.name }}: StringFilter
                 {% endif -%}
             {% endif -%}
         {% endfor %}
