@@ -3,7 +3,7 @@ node_modules/
 */**/node_modules/
 
 # Testing
-tests/e2e/prisma/generated/
+tests/prisma/generated/
 playground/
 
 # Dist folder
