@@ -1,5 +1,4 @@
-type User
-    @aws_cognito_user_pools(cognito_groups: ["admins"]) {
+type User @aws_auth(cognito_groups: ["admins"]) {
     uuid: String!
     username: String!
     email: AWSEmail!
@@ -7,10 +6,7 @@ type User
     posts: [Post!]
 }
 
-type Post
-    @aws_cognito_user_pools(
-        cognito_groups: ["users", "admin"]
-    ) {
+type Post @aws_auth(cognito_groups: ["users", "admin"]) {
     id: Int!
     title: String!
     author: User
@@ -18,6 +14,14 @@ type Post
     published: Boolean!
     views: Int!
     lastSavedAt: AWSDateTime!
+}
+
+type HighlightedPost
+    @aws_api_key
+    @aws_cognito_user_pools(cognito_groups: ["admins"]) {
+    id: Int!
+    authorUuid: String!
+    postId: Int!
 }
 
 type BatchPayload @aws_api_key {
@@ -284,6 +288,101 @@ input PostAuthorUpdateRelationsInput {
     disconnect: Boolean
 }
 
+input AuthorUuidPostIdFieldsInput {
+    authorUuid: String
+    postId: Int
+}
+
+input HighlightedPostFilter {
+    some: HighlightedPostScalarWhereInput
+    every: HighlightedPostScalarWhereInput
+    none: HighlightedPostScalarWhereInput
+}
+
+input HighlightedPostRelationFilter {
+    is: HighlightedPostScalarWhereInput
+    isNot: HighlightedPostScalarWhereInput
+}
+
+input HighlightedPostScalarWhereInput {
+    id: Int
+    authorUuid: String
+    postId: Int
+}
+
+input HighlightedPostWhereInput {
+    OR: [HighlightedPostWhereInput]
+    NOT: [HighlightedPostWhereInput]
+    AND: [HighlightedPostWhereInput]
+    id: IntFilter
+    authorUuid: StringFilter
+    postId: IntFilter
+}
+
+input HighlightedPostWhereUniqueInput {
+    id: Int
+    authorUuid_postId: AuthorUuidPostIdFieldsInput
+}
+
+input HighlightedPostOrderByInput {
+    id: OrderByArg
+    authorUuid: OrderByArg
+    postId: OrderByArg
+}
+
+input HighlightedPostCreateInput {
+    authorUuid: String!
+    postId: Int!
+}
+
+input HighlightedPostCreateManyInput {
+    authorUuid: String!
+    postId: Int!
+}
+
+input HighlightedPostUpdateInput {
+    authorUuid: String
+    postId: Int
+}
+
+input HighlightedPostOperationInput {
+    postId: IntOperation
+}
+
+input HighlightedPostUpdateUniqueInput {
+    data: HighlightedPostUpdateInput!
+    where: HighlightedPostWhereUniqueInput!
+}
+
+input HighlightedPostUpdateManyInput {
+    where: HighlightedPostWhereInput!
+    data: HighlightedPostUpdateInput!
+}
+
+input HighlightedPostUpsertInput {
+    create: HighlightedPostCreateInput!
+    update: HighlightedPostUpdateInput!
+}
+
+input HighlightedPostUpsertUniqueInput {
+    where: HighlightedPostWhereUniqueInput!
+    create: HighlightedPostCreateInput!
+    update: HighlightedPostUpdateInput!
+}
+
+input HighlightedPostConnectOrCreateInput {
+    where: HighlightedPostWhereUniqueInput!
+    create: HighlightedPostCreateInput!
+}
+
+input HighlightedPostDeleteUniqueInput {
+    where: HighlightedPostWhereUniqueInput!
+}
+
+input HighlightedPostDeleteManyInput {
+    where: HighlightedPostWhereInput!
+}
+
 input IntOperation {
     set: Int
     increment: Int
@@ -382,68 +481,57 @@ input BooleanFilter {
 type Mutation {
     # Create a new single User record.
     createUser(data: UserCreateInput!): User
-        @aws_cognito_user_pools(cognito_groups: ["admins"])
+        @aws_auth(cognito_groups: ["admins"])
 
     # Create multiple new User records.
     createManyUsers(
         data: [UserCreateManyInput!]
         skipDuplicates: Boolean
-    ): BatchPayload
-        @aws_cognito_user_pools(cognito_groups: ["admins"])
+    ): BatchPayload @aws_auth(cognito_groups: ["admins"])
 
     # Update an existing single User record.
     updateUser(
         where: UserWhereUniqueInput!
         data: UserUpdateInput
-    ): User
-        @aws_cognito_user_pools(cognito_groups: ["admins"])
+    ): User @aws_auth(cognito_groups: ["admins"])
 
     # Update multiple existing User records.
     updateManyUsers(
         where: UserWhereInput!
         data: UserUpdateInput
-    ): BatchPayload
-        @aws_cognito_user_pools(cognito_groups: ["admins"])
+    ): BatchPayload @aws_auth(cognito_groups: ["admins"])
 
     # Update an existing or create a new single User record.
     upsertUser(
         data: UserUpdateInput!
         where: UserWhereUniqueInput!
-    ): User
-        @aws_cognito_user_pools(cognito_groups: ["admins"])
+    ): User @aws_auth(cognito_groups: ["admins"])
 
     # Delete a single User record.
     deleteUser(where: UserWhereUniqueInput!): User
-        @aws_cognito_user_pools(cognito_groups: ["admins"])
+        @aws_auth(cognito_groups: ["admins"])
 
     # Delete multiple User records.
     deleteManyUsers(where: UserWhereInput!): BatchPayload
-        @aws_cognito_user_pools(cognito_groups: ["admins"])
+        @aws_auth(cognito_groups: ["admins"])
 
     # Create a new single Post record.
     createPost(data: PostCreateInput!): Post
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admin"]
-        )
+        @aws_auth(cognito_groups: ["users", "admin"])
 
     # Create multiple new Post records.
     createManyPosts(
         data: [PostCreateManyInput!]
         skipDuplicates: Boolean
     ): BatchPayload
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admin"]
-        )
+        @aws_auth(cognito_groups: ["users", "admin"])
 
     # Update an existing single Post record.
     updatePost(
         where: PostWhereUniqueInput!
         data: PostUpdateInput
         operation: PostOperationInput
-    ): Post
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admin"]
-        )
+    ): Post @aws_auth(cognito_groups: ["users", "admin"])
 
     # Update multiple existing Post records.
     updateManyPosts(
@@ -451,30 +539,76 @@ type Mutation {
         data: PostUpdateInput
         operation: PostOperationInput
     ): BatchPayload
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admin"]
-        )
+        @aws_auth(cognito_groups: ["users", "admin"])
 
     # Update an existing or create a new single Post record.
     upsertPost(
         data: PostUpdateInput!
         where: PostWhereUniqueInput!
-    ): Post
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admin"]
-        )
+    ): Post @aws_auth(cognito_groups: ["users", "admin"])
 
     # Delete a single Post record.
     deletePost(where: PostWhereUniqueInput!): Post
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admin"]
-        )
+        @aws_auth(cognito_groups: ["users", "admin"])
 
     # Delete multiple Post records.
     deleteManyPosts(where: PostWhereInput!): BatchPayload
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admin"]
-        )
+        @aws_auth(cognito_groups: ["users", "admin"])
+
+    # Create a new single HighlightedPost record.
+    createHighlightedPost(
+        data: HighlightedPostCreateInput!
+    ): HighlightedPost
+        @aws_api_key
+        @aws_cognito_user_pools(cognito_groups: ["admins"])
+
+    # Create multiple new HighlightedPost records.
+    createManyHighlightedPosts(
+        data: [HighlightedPostCreateManyInput!]
+        skipDuplicates: Boolean
+    ): BatchPayload
+        @aws_api_key
+        @aws_cognito_user_pools(cognito_groups: ["admins"])
+
+    # Update an existing single HighlightedPost record.
+    updateHighlightedPost(
+        where: HighlightedPostWhereUniqueInput!
+        data: HighlightedPostUpdateInput
+        operation: HighlightedPostOperationInput
+    ): HighlightedPost
+        @aws_api_key
+        @aws_cognito_user_pools(cognito_groups: ["admins"])
+
+    # Update multiple existing HighlightedPost records.
+    updateManyHighlightedPosts(
+        where: HighlightedPostWhereInput!
+        data: HighlightedPostUpdateInput
+        operation: HighlightedPostOperationInput
+    ): BatchPayload
+        @aws_api_key
+        @aws_cognito_user_pools(cognito_groups: ["admins"])
+
+    # Update an existing or create a new single HighlightedPost record.
+    upsertHighlightedPost(
+        data: HighlightedPostUpdateInput!
+        where: HighlightedPostWhereUniqueInput!
+    ): HighlightedPost
+        @aws_api_key
+        @aws_cognito_user_pools(cognito_groups: ["admins"])
+
+    # Delete a single HighlightedPost record.
+    deleteHighlightedPost(
+        where: HighlightedPostWhereUniqueInput!
+    ): HighlightedPost
+        @aws_api_key
+        @aws_cognito_user_pools(cognito_groups: ["admins"])
+
+    # Delete multiple HighlightedPost records.
+    deleteManyHighlightedPosts(
+        where: HighlightedPostWhereInput!
+    ): BatchPayload
+        @aws_api_key
+        @aws_cognito_user_pools(cognito_groups: ["admins"])
 
     # Send a notification.
     notify(message: String!): PublishNotification
@@ -483,7 +617,7 @@ type Mutation {
 type Query {
     # Find a single User record by unique identifier.
     getUser(where: UserWhereUniqueInput!): User
-        @aws_cognito_user_pools(cognito_groups: ["admins"])
+        @aws_auth(cognito_groups: ["admins"])
 
     # Find many User records (optional query filters).
     listUsers(
@@ -491,8 +625,7 @@ type Query {
         orderBy: [UserOrderByInput]
         skip: Int
         take: Int
-    ): [User]
-        @aws_cognito_user_pools(cognito_groups: ["admins"])
+    ): [User] @aws_auth(cognito_groups: ["admins"])
 
     # Count all User records (optional query filters).
     countUsers(
@@ -500,14 +633,11 @@ type Query {
         orderBy: [UserOrderByInput]
         skip: Int
         take: Int
-    ): Int
-        @aws_cognito_user_pools(cognito_groups: ["admins"])
+    ): Int @aws_auth(cognito_groups: ["admins"])
 
     # Find a single Post record by unique identifier.
     getPost(where: PostWhereUniqueInput!): Post
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admin"]
-        )
+        @aws_auth(cognito_groups: ["users", "admin"])
 
     # Count all Post records (optional query filters).
     county(
@@ -515,40 +645,56 @@ type Query {
         orderBy: [PostOrderByInput]
         skip: Int
         take: Int
+    ): Int @aws_auth(cognito_groups: ["users", "admin"])
+
+    # Find a single HighlightedPost record by unique identifier.
+    getHighlightedPost(
+        where: HighlightedPostWhereUniqueInput!
+    ): HighlightedPost
+        @aws_api_key
+        @aws_cognito_user_pools(cognito_groups: ["admins"])
+
+    # Find many HighlightedPost records (optional query filters).
+    listHighlightedPosts(
+        where: HighlightedPostWhereInput
+        orderBy: [HighlightedPostOrderByInput]
+        skip: Int
+        take: Int
+    ): [HighlightedPost]
+        @aws_api_key
+        @aws_cognito_user_pools(cognito_groups: ["admins"])
+
+    # Count all HighlightedPost records (optional query filters).
+    countHighlightedPosts(
+        where: HighlightedPostWhereInput
+        orderBy: [HighlightedPostOrderByInput]
+        skip: Int
+        take: Int
     ): Int
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admin"]
-        )
+        @aws_api_key
+        @aws_cognito_user_pools(cognito_groups: ["admins"])
 }
 
 type Subscription {
     # Triggered from `createPost` mutation (excl. `createManyPosts` and `upsertPost`).
     onCreatedPost(id: Int, authorUuid: String): Post
         @aws_subscribe(mutations: ["createPost"])
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admin"]
-        )
+        @aws_auth(cognito_groups: ["users", "admin"])
 
     # Triggered from `updatePost` mutation (excl. `updateManyPosts` and `upsertPost`).
     onUpdatedPost(id: Int, authorUuid: String): Post
         @aws_subscribe(mutations: ["updatePost"])
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admin"]
-        )
+        @aws_auth(cognito_groups: ["users", "admin"])
 
     # Triggered from `upsertPost` mutation.
     onUpsertedPost(id: Int, authorUuid: String): Post
         @aws_subscribe(mutations: ["upsertPost"])
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admin"]
-        )
+        @aws_auth(cognito_groups: ["users", "admin"])
 
     # Triggered from `deletePost` mutation (excl. `deleteManyPosts`).
     onDeletedPost(id: Int, authorUuid: String): Post
         @aws_subscribe(mutations: ["deletePost"])
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admin"]
-        )
+        @aws_auth(cognito_groups: ["users", "admin"])
 
     # Triggered from ANY SINGLE record mutation.
     onMutatedPost(id: Int, authorUuid: String): Post
@@ -560,23 +706,17 @@ type Subscription {
                 "deletePost"
             ]
         )
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admin"]
-        )
+        @aws_auth(cognito_groups: ["users", "admin"])
 
     # Triggered from `createManyPosts` mutation.
     onCreatedManyPosts: BatchPayload
         @aws_subscribe(mutations: ["createManyPosts"])
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admin"]
-        )
+        @aws_auth(cognito_groups: ["users", "admin"])
 
     # Triggered from `updateManyPosts` mutation.
     onUpdatedManyPosts: BatchPayload
         @aws_subscribe(mutations: ["updateManyPosts"])
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admin"]
-        )
+        @aws_auth(cognito_groups: ["users", "admin"])
 
     # Triggered from ANY MULTIPLE records mutation.
     onMutatedManyPosts: BatchPayload
@@ -587,16 +727,100 @@ type Subscription {
                 "deleteManyPosts"
             ]
         )
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admin"]
-        )
+        @aws_auth(cognito_groups: ["users", "admin"])
 
     # Triggered from `deleteManyPosts` mutation.
     onDeletedManyPosts: BatchPayload
         @aws_subscribe(mutations: ["deleteManyPosts"])
-        @aws_cognito_user_pools(
-            cognito_groups: ["users", "admin"]
+        @aws_auth(cognito_groups: ["users", "admin"])
+
+    # Triggered from `createHighlightedPost` mutation (excl. `createManyHighlightedPosts` and `upsertHighlightedPost`).
+    onCreatedHighlightedPost(
+        authorUuid_postId: AuthorUuidPostIdFieldsInput
+        id: Int
+    ): HighlightedPost
+        @aws_subscribe(mutations: ["createHighlightedPost"])
+        @aws_api_key
+        @aws_cognito_user_pools(cognito_groups: ["admins"])
+
+    # Triggered from `updateHighlightedPost` mutation (excl. `updateManyHighlightedPosts` and `upsertHighlightedPost`).
+    onUpdatedHighlightedPost(
+        authorUuid_postId: AuthorUuidPostIdFieldsInput
+        id: Int
+    ): HighlightedPost
+        @aws_subscribe(mutations: ["updateHighlightedPost"])
+        @aws_api_key
+        @aws_cognito_user_pools(cognito_groups: ["admins"])
+
+    # Triggered from `upsertHighlightedPost` mutation.
+    onUpsertedHighlightedPost(
+        authorUuid_postId: AuthorUuidPostIdFieldsInput
+        id: Int
+    ): HighlightedPost
+        @aws_subscribe(mutations: ["upsertHighlightedPost"])
+        @aws_api_key
+        @aws_cognito_user_pools(cognito_groups: ["admins"])
+
+    # Triggered from `deleteHighlightedPost` mutation (excl. `deleteManyHighlightedPosts`).
+    onDeletedHighlightedPost(
+        authorUuid_postId: AuthorUuidPostIdFieldsInput
+        id: Int
+    ): HighlightedPost
+        @aws_subscribe(mutations: ["deleteHighlightedPost"])
+        @aws_api_key
+        @aws_cognito_user_pools(cognito_groups: ["admins"])
+
+    # Triggered from ANY SINGLE record mutation.
+    onMutatedHighlightedPost(
+        authorUuid_postId: AuthorUuidPostIdFieldsInput
+        id: Int
+    ): HighlightedPost
+        @aws_subscribe(
+            mutations: [
+                "createHighlightedPost"
+                "updateHighlightedPost"
+                "upsertHighlightedPost"
+                "deleteHighlightedPost"
+            ]
         )
+        @aws_api_key
+        @aws_cognito_user_pools(cognito_groups: ["admins"])
+
+    # Triggered from `createManyHighlightedPosts` mutation.
+    onCreatedManyHighlightedPosts: BatchPayload
+        @aws_subscribe(
+            mutations: ["createManyHighlightedPosts"]
+        )
+        @aws_api_key
+        @aws_cognito_user_pools(cognito_groups: ["admins"])
+
+    # Triggered from `updateManyHighlightedPosts` mutation.
+    onUpdatedManyHighlightedPosts: BatchPayload
+        @aws_subscribe(
+            mutations: ["updateManyHighlightedPosts"]
+        )
+        @aws_api_key
+        @aws_cognito_user_pools(cognito_groups: ["admins"])
+
+    # Triggered from ANY MULTIPLE records mutation.
+    onMutatedManyHighlightedPosts: BatchPayload
+        @aws_subscribe(
+            mutations: [
+                "createManyHighlightedPosts"
+                "updateManyHighlightedPosts"
+                "deleteManyHighlightedPosts"
+            ]
+        )
+        @aws_api_key
+        @aws_cognito_user_pools(cognito_groups: ["admins"])
+
+    # Triggered from `deleteManyHighlightedPosts` mutation.
+    onDeletedManyHighlightedPosts: BatchPayload
+        @aws_subscribe(
+            mutations: ["deleteManyHighlightedPosts"]
+        )
+        @aws_api_key
+        @aws_cognito_user_pools(cognito_groups: ["admins"])
 
     # Triggered from `notify` mutation.
     onNotification: PublishNotification

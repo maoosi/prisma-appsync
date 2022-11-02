@@ -4,8 +4,9 @@ datasource db {
 }
 
 generator client {
-  provider      = "prisma-client-js"
-  binaryTargets = ["native", "rhel-openssl-1.0.x"]
+  provider        = "prisma-client-js"
+  binaryTargets   = ["native", "rhel-openssl-1.0.x"]
+  previewFeatures = ["extendedWhereUnique"]
 }
 
 generator appsync {
@@ -58,6 +59,15 @@ model Comment {
   postId      Int
   message     String
   lastSavedAt DateTime @default(now())
+}
+
+/// @auth(model: [{ allow: apiKey }, { allow: userPools, groups: ["admins"] }])
+model HighlightedPost {
+  id         Int    @id @default(autoincrement())
+  authorUuid String @db.VarChar(200)
+  postId     Int
+
+  @@unique([authorUuid, postId])
 }
 
 enum Role {

@@ -55,6 +55,36 @@
 - typeName: Mutation
   fieldName: deleteManyPosts
   dataSource: prisma-appsync
+- typeName: Query
+  fieldName: getHighlightedPost
+  dataSource: prisma-appsync
+- typeName: Query
+  fieldName: listHighlightedPosts
+  dataSource: prisma-appsync
+- typeName: Query
+  fieldName: countHighlightedPosts
+  dataSource: prisma-appsync
+- typeName: Mutation
+  fieldName: createHighlightedPost
+  dataSource: prisma-appsync
+- typeName: Mutation
+  fieldName: updateHighlightedPost
+  dataSource: prisma-appsync
+- typeName: Mutation
+  fieldName: upsertHighlightedPost
+  dataSource: prisma-appsync
+- typeName: Mutation
+  fieldName: deleteHighlightedPost
+  dataSource: prisma-appsync
+- typeName: Mutation
+  fieldName: createManyHighlightedPosts
+  dataSource: prisma-appsync
+- typeName: Mutation
+  fieldName: updateManyHighlightedPosts
+  dataSource: prisma-appsync
+- typeName: Mutation
+  fieldName: deleteManyHighlightedPosts
+  dataSource: prisma-appsync
 - typeName: Mutation
   fieldName: notify
   requestMappingTemplate: >-
