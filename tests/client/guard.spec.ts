@@ -202,11 +202,11 @@ describe('CLIENT #guard', () => {
         })
 
         test('expect "after:modify/post" to run _after_ "updatePost" and modify result', async () => {
-            const result = await runHooks({
+            const hookResponse = await runHooks({
                 when: 'after',
                 hooks: {
-                    'after:modify/post': async ({ result }) => {
-                        return result
+                    'after:modify/post': async (QueryParams) => {
+                        return QueryParams
                     },
                 },
                 prismaClient: new PrismaClient(),
@@ -236,7 +236,7 @@ describe('CLIENT #guard', () => {
                 result: 'after:modify/post',
             })
 
-            expect(result).toEqual('after:modify/post')
+            expect(hookResponse.result).toEqual('after:modify/post')
         })
 
         test('expect "before:notify" to run _before_ "notify"', async () => {
