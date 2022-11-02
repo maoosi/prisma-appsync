@@ -95,7 +95,7 @@ enum OrderByArg {
         {% endfor %}
         {%- if model.uniqueIndexes | length -%}
             {% for uniqueIndex in model.uniqueIndexes -%}
-                {{ uniqueIndex.fields | join("_") }}: {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput!
+                {{ uniqueIndex.fields | join("_") }}: {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput
             {% endfor -%}
         {% endif %}
     }
@@ -448,7 +448,7 @@ type Subscription {
             {{ model.gql.onCreated }}(
                 {% if model.uniqueIndexes | length -%}
                     {% for uniqueIndex in model.uniqueIndexes -%}
-                        {{ uniqueIndex.fields | join("_") }}: {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput!
+                        {{ uniqueIndex.fields | join("_") }}: {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput
                     {% endfor -%}
                 {% endif -%}
                 {% for field in model.subscriptionFields -%}
@@ -464,7 +464,7 @@ type Subscription {
             {{ model.gql.onUpdated }}(
                 {% if model.uniqueIndexes | length -%}
                     {% for uniqueIndex in model.uniqueIndexes -%}
-                        {{ uniqueIndex.fields | join("_") }}: {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput!
+                        {{ uniqueIndex.fields | join("_") }}: {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput
                     {% endfor -%}
                 {% endif -%}
                 {% for field in model.subscriptionFields -%}
@@ -480,7 +480,7 @@ type Subscription {
             {{ model.gql.onUpserted }}(
                 {% if model.uniqueIndexes | length -%}
                     {% for uniqueIndex in model.uniqueIndexes -%}
-                        {{ uniqueIndex.fields | join("_") }}: {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput!
+                        {{ uniqueIndex.fields | join("_") }}: {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput
                     {% endfor -%}
                 {% endif -%}
                 {% for field in model.subscriptionFields -%}
@@ -496,7 +496,7 @@ type Subscription {
             {{ model.gql.onDeleted }}(
                 {% if model.uniqueIndexes | length -%}
                     {% for uniqueIndex in model.uniqueIndexes -%}
-                        {{ uniqueIndex.fields | join("_") }}: {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput!
+                        {{ uniqueIndex.fields | join("_") }}: {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput
                     {% endfor -%}
                 {% endif -%}
                 {% for field in model.subscriptionFields -%}
@@ -512,7 +512,7 @@ type Subscription {
             {{ model.gql.onMutated }}(
                 {% if model.uniqueIndexes | length -%}
                     {% for uniqueIndex in model.uniqueIndexes -%}
-                        {{ uniqueIndex.fields | join("_") }}: {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput!
+                        {{ uniqueIndex.fields | join("_") }}: {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput
                     {% endfor -%}
                 {% endif -%}
                 {% for field in model.subscriptionFields -%}

@@ -60,6 +60,15 @@ model Comment {
   lastSavedAt DateTime @default(now())
 }
 
+/// @auth(model: [{ allow: apiKey }, { allow: userPools, groups: ["admins"] }])
+model HighlightedPost {
+  id         Int    @id @default(autoincrement())
+  authorUuid String @db.VarChar(200)
+  postId     Int
+
+  @@unique([authorUuid, postId])
+}
+
 enum Role {
   USER
   ADMIN
