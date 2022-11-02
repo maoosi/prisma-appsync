@@ -461,8 +461,8 @@ export class PrismaAppSyncCompiler {
                 // You can’t use the @aws_auth directive along with additional authorization modes. @aws_auth works only in the context of AMAZON_COGNITO_USER_POOLS authorization with no additional authorization modes.
                 // https://docs.aws.amazon.com/appsync/latest/devguide/security-authz.html
                 const cognitoDirective = directivesObjects.some(d => d.allow !== 'userPools')
-                ? '@aws_cognito_user_pools'
-                : '@aws_auth'
+                    ? '@aws_cognito_user_pools'
+                    : '@aws_auth'
 
                 if (directive?.groups && Array.isArray(directive.groups)) {
                     outputDirectives.push(
