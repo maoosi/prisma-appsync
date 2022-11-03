@@ -81,7 +81,7 @@ export function log(message: string, obj?: any, level?: logLevel): void {
                     compact: false,
                     depth: 5,
                     breakLength: 80,
-                    maxStringLength: 300,
+                    maxStringLength: 800,
                     ...(!process.env.LAMBDA_TASK_ROOT && {
                         colors: true,
                     }),

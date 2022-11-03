@@ -2,13 +2,15 @@ import type {
     AfterHookParams,
     InjectedConfig,
     Options,
-    Prisma,
     PrismaAppSyncOptionsType,
     ResolveParams,
     Shield,
     ShieldAuthorization,
 } from './defs'
-import { BatchActionsList, DebugTestingKey, PrismaClient } from './defs'
+import {
+    BatchActionsList, DebugTestingKey, Prisma,
+    PrismaClient,
+} from './defs'
 import { CustomError, log, parseError } from './inspector'
 import {
     clarify,
@@ -395,15 +397,48 @@ export class PrismaAppSync {
                     )
                 }
                 catch (err: any) {
-                    const truncate = err?.message?.length > 500
+                    const maxErrorSize = 400
+                    const truncate = err?.message?.length > maxErrorSize
                     const message = truncate
-                        ? `... ${err.message.slice(err.message.length - 500)}`
+                        ? `... ${err.message.slice(err.message.length - maxErrorSize)}`
                         : err.message
 
-                    throw new CustomError(
-                        message.split('\n').pop() || 'Unknown error during query.',
-                        { type: 'INTERNAL_SERVER_ERROR' },
-                    )
+                    if (err instanceof Prisma.PrismaClientKnownRequestError) {
+                        throw new CustomError(
+                            `Prisma Client known request error${err?.code ? ` (code ${err.code})` : ''}. https://www.prisma.io/docs/reference/api-reference/error-reference#prismaclientknownrequesterror`,
+                            { type: 'INTERNAL_SERVER_ERROR', trace: [message] },
+                        )
+                    }
+                    else if (err instanceof Prisma.PrismaClientUnknownRequestError) {
+                        throw new CustomError(
+                            'Prisma Client unknown request error. https://www.prisma.io/docs/reference/api-reference/error-reference#prismaclientunknownrequesterror',
+                            { type: 'INTERNAL_SERVER_ERROR', trace: [message] },
+                        )
+                    }
+                    else if (err instanceof Prisma.PrismaClientRustPanicError) {
+                        throw new CustomError(
+                            'Prisma Client Rust panic error. https://www.prisma.io/docs/reference/api-reference/error-reference#prismaclientrustpanicerror',
+                            { type: 'INTERNAL_SERVER_ERROR', trace: [message] },
+                        )
+                    }
+                    else if (err instanceof Prisma.PrismaClientInitializationError) {
+                        throw new CustomError(
+                            `Prisma Client initialization error${err?.errorCode ? ` (errorCode ${err.errorCode})` : ''}. https://www.prisma.io/docs/reference/api-reference/error-reference#prismaclientinitializationerror`,
+                            { type: 'INTERNAL_SERVER_ERROR', trace: [message] },
+                        )
+                    }
+                    else if (err instanceof Prisma.PrismaClientValidationError) {
+                        throw new CustomError(
+                            'Prisma Client validation error. https://www.prisma.io/docs/reference/api-reference/error-reference#prismaclientvalidationerror',
+                            { type: 'INTERNAL_SERVER_ERROR', trace: [message] },
+                        )
+                    }
+                    else {
+                        throw new CustomError(
+                            message.split('\n').pop() || 'Unknown error during query.',
+                            { type: 'INTERNAL_SERVER_ERROR' },
+                        )
+                    }
                 }
             }
             // Resolver :: query resolver not found
