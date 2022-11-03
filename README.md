@@ -4,9 +4,9 @@
 
 # Prisma-AppSync &middot; [![Generic badge](https://img.shields.io/badge/Generator%20for-◭%20Prisma-9F7AEA.svg)](https://www.prisma.io) [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/maoosi/prisma-appsync/graphs/commit-activity)
 
-**Prisma-AppSync** is a [Prisma](https://www.prisma.io) Generator, that instantly converts your Schema into a full-blown ⚡&#160;GraphQL&#160;API for [AWS AppSync](https://aws.amazon.com/appsync/).
+**Prisma-AppSync** is a [Prisma](https://www.prisma.io) Generator, that instantly converts your Schema into a full-blown GraphQL&#160;API for [AWS AppSync](https://aws.amazon.com/appsync/).
 
-## ✨ Automatically generated
+## ⚡ Automatically generated
 
 - **GraphQL Schema:** Designed to work with AWS AppSync.
 - **TS Client:** Prisma Client on steroids built for AWS Lambda.
@@ -25,11 +25,18 @@
 
 [Read the documentation](https://prisma-appsync.vercel.app) to get started with Prisma-AppSync.
 
-## 🧙‍♂️ Contributors
+## ✨ Contributors
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://sylvainsimao.fr"><img src="https://avatars.githubusercontent.com/u/4679377?v=4?s=100" width="100px;" alt="Sylvain"/><br /><sub><b>Sylvain</b></sub></a><br /><a href="#maintainer-maoosi" title="Maintainer">🧙‍♂️</a> <a href="https://github.com/maoosi/prisma-appsync/commits?author=maoosi" title="Code">💻</a> <a href="#ideas-maoosi" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/maoosi/prisma-appsync/commits?author=maoosi" title="Documentation">📖</a></td>
+    </tr>
+  </tbody>
+</table>
 
 <!-- markdownlint-restore -->
 <!-- prettier-ignore-end -->

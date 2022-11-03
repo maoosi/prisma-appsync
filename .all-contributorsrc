@@ -8,9 +8,8 @@
     "commit": true,
     "types": {
         "maintainer": {
-            "symbol": "💚",
-            "description": "Maintainer",
-            "link": "[<%= symbol %>](<%= url %> \"<%= description %>\"),"
+            "symbol": "🧙‍♂️",
+            "description": "Maintainer"
         }
     },
     "contributors": [
@@ -21,8 +20,8 @@
             "profile": "https://sylvainsimao.fr",
             "contributions": [
                 "maintainer",
-                "ideas",
                 "code",
+                "ideas",
                 "doc"
             ]
         }
