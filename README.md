@@ -27,24 +27,14 @@
 
 ## 🧙‍♂️ Contributors
 
-<table>
-    <tr>
-        <td align="center">
-            <div>
-                <sub><b>Owner/Maintainer</b></sub>
-            </div>
-            <div>
-                <a href="https://github.com/maoosi" target="_blank">
-                    <img src="https://avatars2.githubusercontent.com/u/4679377?v=3?s=120" width="120px;" alt="maoosi"/>
-                    <br /><sub><b>Sylvain (@maoosi)</b></sub>
-                </a>
-            </div>
-            <div>
-                <a href="https://github.com/sponsors/maoosi"><sub>💚 Sponsor</sub></a>
-            </div>
-        </td>
-    </tr>
-</table>
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
 
 ## 🤟 Sponsors
 

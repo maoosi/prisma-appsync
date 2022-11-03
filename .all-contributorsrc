@@ -1,0 +1,30 @@
+{
+    "projectName": "prisma-appsync",
+    "projectOwner": "maoosi",
+    "repoType": "github",
+    "repoHost": "https://github.com",
+    "files": ["README.md"],
+    "imageSize": 100,
+    "commit": true,
+    "types": {
+        "maintainer": {
+            "symbol": "💚",
+            "description": "Maintainer",
+            "link": "[<%= symbol %>](<%= url %> \"<%= description %>\"),"
+        }
+    },
+    "contributors": [
+        {
+            "login": "maoosi",
+            "name": "Sylvain",
+            "avatar_url": "https://avatars.githubusercontent.com/u/4679377?v=4",
+            "profile": "https://sylvainsimao.fr",
+            "contributions": [
+                "maintainer",
+                "ideas",
+                "code",
+                "doc"
+            ]
+        }
+    ]
+}
