@@ -2,7 +2,7 @@
     <img width="250" height="250" src="https://prisma-appsync.vercel.app/logo.png" alt="Prisma-AppSync" />
 </p>
 
-# Prisma-AppSync &middot; [![TypeScript](https://img.shields.io/badge/-TypeScript-2D3748?logo=typescript&colorA=0096ff&logoColor=fff)](/packages/client/src/) [![AWS](https://img.shields.io/badge/-AWS%20AppSync-2D3748?logo=amazon-aws&colorA=EB5F05&logoColor=fff)](https://www.prisma.io) [![Prisma](https://img.shields.io/badge/-Prisma%20Generator-2D3748?logo=prisma&colorA=5B67D8&logoColor=fff)](https://www.prisma.io)
+# Prisma-AppSync &middot; [![TypeScript](https://img.shields.io/badge/-TypeScript-2D3748?logo=typescript&colorA=0096ff&logoColor=fff)](/packages/client/src/) [![AWS AppSync](https://img.shields.io/badge/-AWS%20AppSync-2D3748?logo=amazon-aws&colorA=EB5F05&logoColor=fff)](https://aws.amazon.com/appsync/) [![Prisma](https://img.shields.io/badge/-Prisma%20Generator-2D3748?logo=prisma&colorA=5B67D8&logoColor=fff)](https://www.prisma.io)
 
 **Prisma-AppSync** is a [Prisma](https://www.prisma.io) Generator, that instantly converts your Schema into a full-blown GraphQL&#160;API for [AWS AppSync](https://aws.amazon.com/appsync/).
 
