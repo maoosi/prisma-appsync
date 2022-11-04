@@ -36,6 +36,15 @@
         "code",
         "ideas"
       ]
+    },
+    {
+      "login": "ryparker",
+      "name": "Ryan Parker",
+      "avatar_url": "https://avatars.githubusercontent.com/u/17558268?v=4",
+      "profile": "http://ryanparker.dev",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "commitConvention": "angular",
