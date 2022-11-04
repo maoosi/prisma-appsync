@@ -39,6 +39,7 @@
         "@types/lodash": "^4.14.186",
         "@types/node": "^18.11.4",
         "@zerollup/ts-transform-paths": "^1.7.18",
+        "all-contributors-cli": "^6.24.0",
         "esbuild": "^0.15.12",
         "eslint": "^8.26.0",
         "listr": "^0.14.3",
