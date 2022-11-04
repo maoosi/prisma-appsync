@@ -33,7 +33,8 @@
 <table>
   <tbody>
     <tr>
-      <td align="center" valign="top" width="14.28%"><a href="https://sylvainsimao.fr"><img src="https://avatars.githubusercontent.com/u/4679377?v=4?s=100" width="100px;" alt="Sylvain"/><br /><sub><b>Sylvain</b></sub></a><br /><a href="#maintainer-maoosi" title="Maintainer">🧙‍♂️</a> <a href="https://github.com/maoosi/prisma-appsync/commits?author=maoosi" title="Code">💻</a> <a href="#ideas-maoosi" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/maoosi/prisma-appsync/commits?author=maoosi" title="Documentation">📖</a></td>
+      <td align="center"><a href="https://sylvainsimao.fr"><img src="https://avatars.githubusercontent.com/u/4679377?v=4?s=100" width="100px;" alt="Sylvain"/><br /><sub><b>Sylvain</b></sub></a><br /><a href="#maintainer-maoosi" title="Maintainer">🧙‍♂️</a> <a href="https://github.com/maoosi/prisma-appsync/commits?author=maoosi" title="Code">💻</a> <a href="#ideas-maoosi" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/maoosi/prisma-appsync/commits?author=maoosi" title="Documentation">📖</a></td>
+      <td align="center"><a href="http://www.cipriancaba.com"><img src="https://avatars.githubusercontent.com/u/695515?v=4?s=100" width="100px;" alt="Ciprian Caba"/><br /><sub><b>Ciprian Caba</b></sub></a><br /><a href="https://github.com/maoosi/prisma-appsync/commits?author=cipriancaba" title="Code">💻</a> <a href="#ideas-cipriancaba" title="Ideas, Planning, & Feedback">🤔</a></td>
     </tr>
   </tbody>
 </table>
