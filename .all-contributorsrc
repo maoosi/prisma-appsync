@@ -1,29 +1,52 @@
 {
-    "projectName": "prisma-appsync",
-    "projectOwner": "maoosi",
-    "repoType": "github",
-    "repoHost": "https://github.com",
-    "files": ["README.md"],
-    "imageSize": 100,
-    "commit": true,
-    "types": {
-        "maintainer": {
-            "symbol": "🧙‍♂️",
-            "description": "Maintainer"
-        }
+  "projectName": "prisma-appsync",
+  "projectOwner": "maoosi",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": true,
+  "types": {
+    "maintainer": {
+      "symbol": "🧙‍♂️",
+      "description": "Maintainer"
+    }
+  },
+  "contributors": [
+    {
+      "login": "maoosi",
+      "name": "Sylvain",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4679377?v=4",
+      "profile": "https://sylvainsimao.fr",
+      "contributions": [
+        "maintainer",
+        "code",
+        "ideas",
+        "doc"
+      ]
     },
-    "contributors": [
-        {
-            "login": "maoosi",
-            "name": "Sylvain",
-            "avatar_url": "https://avatars.githubusercontent.com/u/4679377?v=4",
-            "profile": "https://sylvainsimao.fr",
-            "contributions": [
-                "maintainer",
-                "code",
-                "ideas",
-                "doc"
-            ]
-        }
-    ]
+    {
+      "login": "cipriancaba",
+      "name": "Ciprian Caba",
+      "avatar_url": "https://avatars.githubusercontent.com/u/695515?v=4",
+      "profile": "http://www.cipriancaba.com",
+      "contributions": [
+        "code",
+        "ideas"
+      ]
+    },
+    {
+      "login": "ryparker",
+      "name": "Ryan Parker",
+      "avatar_url": "https://avatars.githubusercontent.com/u/17558268?v=4",
+      "profile": "http://ryanparker.dev",
+      "contributions": [
+        "code"
+      ]
+    }
+  ],
+  "commitConvention": "angular",
+  "contributorsPerLine": 7
 }

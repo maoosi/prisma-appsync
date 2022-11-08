@@ -23,8 +23,11 @@ jobs:
           node-version: 16
           cache: "pnpm"
 
-      - name: Install dependencies
-        run: pnpm install
+      - name: Install global dependencies
+        run: "pnpm add -g zx"
+
+      - name: Install project dependencies
+        run: "pnpm install"
 
       - name: Run tests
-        run: pnpm run test
+        run: "pnpm run test"
