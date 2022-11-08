@@ -44,7 +44,7 @@ export class Installer {
         // defaults
         this.gitBranch = ['preview', 'contributor'].includes(String(process.env?.INSTALL_MODE))
             ? 'maoosi/prisma-appsync#dev'
-            : 'maoosi/prisma-appsync#main'
+            : 'maoosi/prisma-appsync#latest'
         this.installPackage = ['preview', 'contributor'].includes(String(process.env?.INSTALL_MODE))
             ? 'prisma-appsync@preview'
             : 'prisma-appsync'
