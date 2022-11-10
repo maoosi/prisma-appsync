@@ -19,7 +19,7 @@ hero:
 features:
   - icon: ◭
     title: Instant Prisma Schema Conversion
-    details: Auto-generates a full-blown GraphQL API simply using a Prisma Schema file.
+    details: Auto-generates a full-blown GraphQL API just using a Prisma Schema file.
   - icon: 👾
     title: AWS AppSync Features
     details: Fully managed, real-time subscriptions, authorizations, high availability, scalability and more.

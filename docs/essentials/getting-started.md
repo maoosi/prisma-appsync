@@ -66,7 +66,7 @@ export const main = async (event: any) => {
 }
 ```
 
-Either copy the AWS CDK boilerplate provided with Prisma-AppSync into your project, OR simply use it as a reference for your own CDK config:
+Either copy the AWS CDK boilerplate provided with Prisma-AppSync into your project, OR just use it as a reference for your own CDK config:
 
 ```bash
 # path to cdk boilerplate
@@ -101,7 +101,7 @@ project/
 
 All the files inside the `prisma/generated` directory will be auto-generated each time you run `npx prisma generate`. These files contain everything required to deploy and run your API.
 
-Updating fields or adding a new model? Simply update your `schema.prisma` file, then run:
+Updating fields or adding a new model? Update your `schema.prisma` file, then run:
 
 ```bash
 npx prisma generate
@@ -109,7 +109,7 @@ npx prisma generate
 
 ### Local server
 
-To run the local server shipped with Prisma-AppSync, simply run the below command:
+To run the local server shipped with Prisma-AppSync, just run the below command:
 
 ```bash
 yarn run dev
@@ -121,7 +121,7 @@ yarn run dev
 
 Make sure to install the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html), the [AWS CDK CLI](https://docs.aws.amazon.com/cdk/v2/guide/getting_started.html#getting_started_install), and [Docker](https://docs.docker.com/get-docker/) on your local machine. Configure your local environment to use your AWS Account: [refer to the guide here](https://docs.aws.amazon.com/cdk/v2/guide/cli.html#cli-environment). 
 
-Then simply run the below CDK CLI command:
+Then just run the below CDK CLI command:
 
 ```bash
 DATABASE_URL=[url] yarn deploy

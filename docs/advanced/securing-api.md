@@ -46,7 +46,7 @@ console.log(post.title) // output: "<img src>"
 
 </td></tr></table>
 
-If you prefer to disable data sanitization, simply set the `sanitize` option to false when instantiating the Client:
+If you prefer to disable data sanitization, set the `sanitize` option to false when instantiating the Client:
 
 ```ts
 const prismaAppSync = new PrismaAppSync({ sanitize: false })
