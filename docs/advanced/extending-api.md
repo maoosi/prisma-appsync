@@ -1,6 +1,6 @@
 # 🔌 Extending the API
 
-In some cases, it might be useful to extend the GraphQL CRUD API that is being generated, using custom Types and Resolvers.
+It can be useful to extend the default GraphQL CRUD API, using custom Types and Resolvers.
 
 ::: tip USE CASE
 To illustrate this, let's assume we have an existing model `Post` with field `views`. We want to add a custom mutation `incrementPostsViews` and build a custom resolver to increment post views on every call.
