@@ -164,12 +164,12 @@ describe('CLIENT #guard', () => {
 
     describe('.runHooks?', () => {
         test('expect "before:updatePost" to run _before_ "updatePost"', async () => {
-            let testValue: any = false
-            await runHooks({
+            const hookResponse = await runHooks({
                 when: 'before',
                 hooks: {
-                    'before:updatePost': async () => {
-                        testValue = 'before:updatePost'
+                    'before:updatePost': async (data) => {
+                        data.test = 'before:updatePost'
+                        return data
                     },
                 },
                 prismaClient: new PrismaClient(),
@@ -198,15 +198,15 @@ describe('CLIENT #guard', () => {
                 },
             })
 
-            expect(testValue).toEqual('before:updatePost')
+            expect(hookResponse.test).toEqual('before:updatePost')
         })
 
-        test('expect "after:modify/post" to run _after_ "updatePost" and modify result', async () => {
+        test('expect "after:updatePost" to run _after_ "updatePost" and modify result', async () => {
             const hookResponse = await runHooks({
                 when: 'after',
                 hooks: {
-                    'after:modify/post': async (QueryParams) => {
-                        return QueryParams
+                    'after:updatePost': async (params) => {
+                        return { ...params, result: 'after:updatePost' }
                     },
                 },
                 prismaClient: new PrismaClient(),
@@ -233,10 +233,10 @@ describe('CLIENT #guard', () => {
                     },
                     type: 'Mutation',
                 },
-                result: 'after:modify/post',
+                result: 'hello',
             })
 
-            expect(hookResponse.result).toEqual('after:modify/post')
+            expect(hookResponse.result).toEqual('after:updatePost')
         })
 
         test('expect "before:notify" to run _before_ "notify"', async () => {

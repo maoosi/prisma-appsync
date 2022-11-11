@@ -4,27 +4,49 @@ Hooks let you “hook into” Prisma-AppSync lifecycle to either trigger custom 
 
 ## 👉 Example code
 
+Basic example:
+
+```ts
+return await prismaAppSync.resolve({
+    event,
+    hooks: {
+        // Mutate Post title before creation on database
+        'before:createPost': async (params: BeforeHookParams) => {
+            params.prismaArgs.data.title = 'New post title'
+            return params
+        },
+        // Override query result using always the same Post title
+        'after:listPosts': async (params: AfterHookParams) => {
+            params.result.map(r => r.title = 'Always the same title')
+            return params
+        },
+    },
+})
+```
+
+Advanced example:
+
 ```ts
 return await prismaAppSync.resolve<'likePost'>({
     event,
     hooks: {
         // execute before any query
-        'before:**': async (data: BeforeHookParams) => data,
+        'before:**': async (params: BeforeHookParams) => params,
 
         // execute after any query
-        'after:**': async (data: AfterHookParams) => data,
+        'after:**': async (params: AfterHookParams) => params,
 
         // execute after custom resolver query `likePost`
         // (e.g. `query { likePost(postId: 3) }`)
-        'after:likePost': async (data: AfterHookParams) => {
-            await data.prismaClient.notification.create({
+        'after:likePost': async (params: AfterHookParams) => {
+            await params.prismaClient.notification.create({
                 data: {
                     event: 'POST_LIKED',
-                    targetId: data.args.postId,
-                    userId: data.authIdentity.sub,
+                    targetId: params.args.postId,
+                    userId: params.authIdentity.sub,
                 },
             })
-            return data
+            return params
         },
     },
 })
