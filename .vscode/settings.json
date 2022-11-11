@@ -104,6 +104,11 @@
             "language": "markdown",
             "scheme": "file",
             "pattern": "README.md"
+        },
+        {
+            "language": "markdown",
+            "scheme": "file",
+            "pattern": "docs/advanced/hooks.md"
         }
     ]
 }
