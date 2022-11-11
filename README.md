@@ -24,7 +24,7 @@
 Run the following command and follow the prompts 🙂
 
 ```shell
-npx create-prisma-appsync-app
+npx create-prisma-appsync-app@latest
 ```
 
 ## 📓 Documentation

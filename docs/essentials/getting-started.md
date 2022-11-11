@@ -9,7 +9,7 @@ Please make sure to read [Prisma-AppSync core concepts](/essentials/concept) fir
 Run the following command and follow the prompts 🙂
 
 ```bash
-npx create-prisma-appsync-app
+npx create-prisma-appsync-app@latest
 ```
 
 🚀🚀🚀 Done! 

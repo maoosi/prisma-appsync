@@ -48,7 +48,7 @@ Think of it as [Prisma Client](https://www.prisma.io/client) on steroids 💪. F
 
 ### ◭ Prisma-AppSync [ Installer ]
 
-Interactive scaffolding CLI to quickly start new Prisma-AppSync projects, accessible from a single `npx create-prisma-appsync-app` command. It can also plug into existing projects already using Prisma.
+Interactive scaffolding CLI to quickly start new Prisma-AppSync projects, accessible from a single `npx create-prisma-appsync-app@latest` command. It can also plug into existing projects already using Prisma.
 
 </td>
 </tr>
