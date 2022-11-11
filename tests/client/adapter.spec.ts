@@ -238,7 +238,6 @@ describe('CLIENT #adapter', () => {
                 defaultPagination: false,
             })
             expect(result).toStrictEqual({
-                select: {},
                 where: { title: { startsWith: 'Hello' } },
             })
         })
@@ -252,7 +251,6 @@ describe('CLIENT #adapter', () => {
                 defaultPagination: false,
             })
             expect(result).toStrictEqual({
-                select: {},
                 data: { title: 'Hello', content: 'World' },
             })
         })
@@ -266,7 +264,6 @@ describe('CLIENT #adapter', () => {
                 defaultPagination: false,
             })
             expect(result).toStrictEqual({
-                select: {},
                 orderBy: [{ title: 'asc' }, { postedAt: 'desc' }],
             })
         })
@@ -289,7 +286,7 @@ describe('CLIENT #adapter', () => {
                 _selectionSetList: [],
                 defaultPagination: false,
             })
-            expect(result).toStrictEqual({ select: {}, skip: 5 })
+            expect(result).toStrictEqual({ skip: 5 })
         })
         test('expect "take" to be converted to prisma syntax', () => {
             const result = getPrismaArgs({
@@ -298,7 +295,7 @@ describe('CLIENT #adapter', () => {
                 _selectionSetList: [],
                 defaultPagination: false,
             })
-            expect(result).toStrictEqual({ select: {}, take: 3 })
+            expect(result).toStrictEqual({ take: 3 })
         })
         test('expect "skipDuplicates" to be converted to prisma syntax', () => {
             const result = getPrismaArgs({
@@ -307,7 +304,7 @@ describe('CLIENT #adapter', () => {
                 _selectionSetList: [],
                 defaultPagination: false,
             })
-            expect(result).toStrictEqual({ select: {}, skipDuplicates: true })
+            expect(result).toStrictEqual({ skipDuplicates: true })
         })
         test('expect default pagination to do nothing when "take" is specified', () => {
             const result = getPrismaArgs({
@@ -316,7 +313,7 @@ describe('CLIENT #adapter', () => {
                 _arguments: { take: '3' },
                 _selectionSetList: [],
             })
-            expect(result).toStrictEqual({ select: {}, skip: 0, take: 3 })
+            expect(result).toStrictEqual({ skip: 0, take: 3 })
         })
         test('expect default pagination to apply default take value', () => {
             const result = getPrismaArgs({
@@ -325,7 +322,7 @@ describe('CLIENT #adapter', () => {
                 _arguments: {},
                 _selectionSetList: [],
             })
-            expect(result).toStrictEqual({ select: {}, skip: 0, take: 50 })
+            expect(result).toStrictEqual({ skip: 0, take: 50 })
         })
     })
 
