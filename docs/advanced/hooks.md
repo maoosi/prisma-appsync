@@ -17,7 +17,7 @@ return await prismaAppSync.resolve({
         },
         // Override query result using always the same Post title
         'after:listPosts': async (params: AfterHookParams) => {
-            params.result.map(r => r.title = 'Always the same title')
+            params.result = params.result.map(r => r.title = 'Always the same title')
             return params
         },
     },
