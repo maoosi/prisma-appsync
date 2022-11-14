@@ -58,9 +58,6 @@ generatorHandler({
                 // Generate resolvers
                 await compiler.makeResolvers(options.generator.config.extendResolvers)
                 console.log('[Prisma-AppSync] Generating models mapping.')
-
-                // Generate docs
-                // await compiler.makeDocs()
             }
             catch (e) {
                 console.error('Error: unable to compile files for Prisma AppSync Generator')

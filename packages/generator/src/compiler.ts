@@ -684,6 +684,7 @@ export class PrismaAppSyncCompiler {
         const defaultValue: any = searchField?.default || null
         return (
             defaultValue?.name === 'autoincrement'
+            || defaultValue?.name === 'uuid'
             || searchField.isUpdatedAt
             || ['updatedAt', 'createdAt'].includes(searchField.name)
         )

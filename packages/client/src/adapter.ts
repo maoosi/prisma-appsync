@@ -33,7 +33,7 @@ import {
 export function parseEvent(appsyncEvent: AppSyncEvent, options: Options, customResolvers?: any | null): QueryParams {
     if (
         isEmpty(appsyncEvent?.info?.fieldName)
-        || isEmpty(appsyncEvent?.info?.selectionSetList)
+        || isUndefined(appsyncEvent?.info?.selectionSetList)
         || isEmpty(appsyncEvent?.info?.parentTypeName)
         || isUndefined(appsyncEvent?.arguments)
     )
@@ -399,6 +399,9 @@ export function getPrismaArgs({
     if (typeof _selectionSetList !== 'undefined')
         prismaArgs.select = parseSelectionList(_selectionSetList)
 
+    if (isEmpty(prismaArgs.select))
+        delete prismaArgs.select
+
     if (typeof _arguments.skip !== 'undefined')
         prismaArgs.skip = parseInt(_arguments.skip)
     else if (defaultPagination !== false && action === Actions.list)
@@ -494,7 +497,8 @@ function parseSelectionList(selectionSetList: any): any {
         if (!parts.includes('__typename')) {
             if (parts.length > 1)
                 prismaArgs = merge(prismaArgs, getInclude(parts))
-            else prismaArgs = merge(prismaArgs, getSelect(parts))
+            else
+                prismaArgs = merge(prismaArgs, getSelect(parts))
         }
     }
 

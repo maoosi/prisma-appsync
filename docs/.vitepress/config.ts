@@ -75,7 +75,8 @@ export default defineConfig({
             {
                 text: 'Changelog',
                 items: [
-                    { text: '(latest) 1.0.0-rc.2', link: '/changelog/1.0.0-rc.2' },
+                    { text: '(latest) 1.0.0-rc.3', link: '/changelog/1.0.0-rc.3' },
+                    { text: '1.0.0-rc.2', link: '/changelog/1.0.0-rc.2' },
                     { text: '1.0.0-rc.1', link: '/changelog/1.0.0-rc.1' },
                     { text: 'Contributing', link: '/contributing' },
                 ],

@@ -1,10 +1,10 @@
 #!/usr/bin/env zx
 /* eslint-disable @typescript-eslint/no-unused-vars */
+
 import Listr from 'listr'
 import prompts from 'prompts'
 
 await $`zx scripts/env.mjs`
-await $`zx scripts/test.mjs`
 
 $.verbose = false
 
@@ -63,26 +63,14 @@ async function getPublishConfig() {
     }
 }
 
-async function publishCore({ publishVersion, tag }) {
-    console.log('# Core')
+async function publishCore({ tag }) {
+    console.log('Publishing Core...')
 
     await new Listr([
         {
             title: 'Cleansing package.json',
             task: async () => {
                 await $`node scripts/publish/_pkg.core.cleanse`
-            },
-        },
-        {
-            title: `Setting publish version to ${publishVersion}`,
-            task: async () => {
-                const pkg = await fs.readJson('./package.json')
-                pkg.version = publishVersion
-                await fs.writeJson('./package.json', pkg)
-
-                const pkgAfter = await fs.readJson('./package-afterPublish.json')
-                pkgAfter.version = publishVersion
-                await fs.writeJson('./package-afterPublish.json', pkgAfter)
             },
         },
         {
@@ -98,21 +86,13 @@ async function publishCore({ publishVersion, tag }) {
     })
 }
 
-async function publishInstaller({ publishVersion, tag }) {
-    console.log('# Installer')
+async function publishInstaller({ tag }) {
+    console.log('Publishing Installer...')
 
     await new Listr([
         {
             title: 'Copy + Cleanse package.json',
             task: async () => await $`node scripts/publish/_pkg.installer.cleanse`,
-        },
-        {
-            title: `Setting publish version to ${publishVersion}`,
-            task: async () => {
-                const pkg = await fs.readJson('./dist/installer/package.json')
-                pkg.version = publishVersion
-                await fs.writeJson('./dist/installer/package.json', pkg)
-            },
         },
         {
             title: 'Publishing on NPM',
@@ -126,19 +106,24 @@ async function publishInstaller({ publishVersion, tag }) {
 const publishConfig = await getPublishConfig()
 
 if (publishConfig.versionOk) {
-    const { publishList } = await prompts({
-        type: 'multiselect',
-        name: 'publishList',
-        message: 'Select packages to publish',
-        choices: [
-            { title: 'Core', value: 'core', selected: true },
-            { title: 'Installer', value: 'installer', selected: true },
-        ],
-    })
+    const corePkgFile = './package.json'
+    const installerPkgFile = './packages/installer/package.json'
 
-    if (publishList.includes('core'))
-        await publishCore(publishConfig)
+    // change package.json versions
+    console.log(`\nSetting publish version to ${publishConfig.publishVersion}...`)
+    const corePkg = await fs.readJson(corePkgFile)
+    const installerPkg = await fs.readJson(installerPkgFile)
+    corePkg.version = publishConfig.publishVersion
+    installerPkg.version = publishConfig.publishVersion
+    await fs.writeJson(corePkgFile, corePkg, { spaces: 4 })
+    await fs.writeJson(installerPkgFile, installerPkg, { spaces: 4 })
 
-    if (publishList.includes('installer'))
-        await publishInstaller(publishConfig)
+    // build + test
+    console.log('Building + Testing...')
+    await $`zx scripts/test.mjs`
+
+    // publish packages
+    await publishCore(publishConfig)
+    await publishInstaller(publishConfig)
+    console.log('Done!')
 }
