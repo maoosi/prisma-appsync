@@ -1,7 +1,7 @@
 {
     "name": "create-prisma-appsync-app",
     "private": true,
-    "version": "1.0.0-rc.0.59",
+    "version": "1.0.0-rc.3",
     "author": "maoosi <hello@sylvainsimao.fr>",
     "license": "BSD-2-Clause",
     "bin": "./bin/index.js",
