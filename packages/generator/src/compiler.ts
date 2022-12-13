@@ -533,7 +533,7 @@ export class PrismaAppSyncCompiler {
                             scalar: this.getFieldScalar(field),
                             isRequired: this.isFieldRequired(field),
                             isEnum: this.isFieldEnum(field),
-                            isEditable: !this.isFieldGeneratedRelation(field, model) && !this.isFieldImmutable(field),
+                            isEditable: !this.isFieldGeneratedRelation(field, model),
                             isUnique: this.isFieldUnique(field, model),
                             ...(field.relationName && {
                                 relation: {
@@ -671,7 +671,7 @@ export class PrismaAppSyncCompiler {
 
     // Return true if field is required
     private isFieldRequired(searchField: DMMF.Field): boolean {
-        return searchField.isRequired && !(searchField.relationName && searchField.isList)
+        return searchField.isRequired && !(searchField.relationName && searchField.isList) && !this.isFieldAutoPopulated(searchField)
     }
 
     // Return true if field is an enum type
@@ -679,8 +679,8 @@ export class PrismaAppSyncCompiler {
         return searchField.kind === 'enum'
     }
 
-    // Return true if field shouldn't be mutated manually (e.g. `updatedAt`)
-    private isFieldImmutable(searchField: DMMF.Field): boolean {
+    // Return true if field doesn't need to be mutated manually (e.g. `updatedAt`)
+    private isFieldAutoPopulated(searchField: DMMF.Field): boolean {
         const defaultValue: any = searchField?.default || null
         return (
             defaultValue?.name === 'autoincrement'
