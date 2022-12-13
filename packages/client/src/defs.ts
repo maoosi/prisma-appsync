@@ -66,13 +66,13 @@ export type { AppSyncResolverHandler, AppSyncResolverEvent, AppSyncIdentity }
  * }
  * ```
  */
-export interface QueryParams {
+export interface QueryParams<T = any> {
     type: GraphQLType
     operation: string
     context: Context
     fields: string[]
     paths: string[]
-    args: any
+    args: T
     prismaArgs: PrismaArgs
     authorization: Authorization
     identity: Identity
@@ -109,7 +109,7 @@ export interface QueryBuilder {
     prismaDeleteMany: (...prismaArgs: PrismaArgs[]) => PrismaDeleteMany
 }
 
-export type QueryParamsCustom = QueryParams & {
+export type QueryParamsCustom<T = any> = QueryParams<T> & {
     prismaClient: PrismaClient
 }
 
