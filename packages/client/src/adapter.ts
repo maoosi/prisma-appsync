@@ -488,7 +488,7 @@ function getSelect(parts: any): any {
  * @returns any
  */
 function parseSelectionList(selectionSetList: any): any {
-    let prismaArgs: any = {}
+    let prismaArgs: any = { select: {} }
 
     for (let i = 0; i < selectionSetList.length; i++) {
         const path = selectionSetList[i]
