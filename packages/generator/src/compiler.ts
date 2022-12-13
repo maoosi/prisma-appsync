@@ -685,6 +685,7 @@ export class PrismaAppSyncCompiler {
         return (
             defaultValue?.name === 'autoincrement'
             || defaultValue?.name === 'uuid'
+            || defaultValue?.name === 'cuid'
             || searchField.isUpdatedAt
             || ['updatedAt', 'createdAt'].includes(searchField.name)
         )
@@ -722,27 +723,27 @@ export class PrismaAppSyncCompiler {
         let parserOpt: prettier.RequiredOptions['parser'] | boolean
 
         switch (extname(outputFilename)) {
-        case '.ts':
-            parserOpt = 'typescript'
-            break
-        case '.json':
-            parserOpt = 'json'
-            break
-        case '.gql':
-            parserOpt = 'graphql'
-            break
-        case '.md':
-            parserOpt = 'markdown'
-            break
-        case '.yaml':
-            parserOpt = 'yaml'
-            break
-        case '.js':
-            parserOpt = 'babel'
-            break
-        default:
-            parserOpt = false
-            break
+            case '.ts':
+                parserOpt = 'typescript'
+                break
+            case '.json':
+                parserOpt = 'json'
+                break
+            case '.gql':
+                parserOpt = 'graphql'
+                break
+            case '.md':
+                parserOpt = 'markdown'
+                break
+            case '.yaml':
+                parserOpt = 'yaml'
+                break
+            case '.js':
+                parserOpt = 'babel'
+                break
+            default:
+                parserOpt = false
+                break
         }
 
         // pretiffy output
@@ -777,20 +778,20 @@ export class PrismaAppSyncCompiler {
     // Return field sample for demo/docs
     private getFieldSample(field: DMMF.Field): any {
         switch (field.type) {
-        case 'Int':
-            return '2'
-        case 'String':
-            return '"Foo"'
-        case 'Json':
-            return { foo: 'bar' }
-        case 'Float':
-            return '2.5'
-        case 'Boolean':
-            return 'false'
-        case 'DateTime':
-            return '"dd/mm/YYYY"'
-        default:
-            return field.type
+            case 'Int':
+                return '2'
+            case 'String':
+                return '"Foo"'
+            case 'Json':
+                return { foo: 'bar' }
+            case 'Float':
+                return '2.5'
+            case 'Boolean':
+                return 'false'
+            case 'DateTime':
+                return '"dd/mm/YYYY"'
+            default:
+                return field.type
         }
     }
 
@@ -823,34 +824,34 @@ export class PrismaAppSyncCompiler {
 
         if (field.kind === 'scalar' && typeof field.type === 'string') {
             switch (field.type.toLocaleLowerCase()) {
-            case 'int':
-                type = 'Int'
-                break
-            case 'datetime':
-                type = 'AWSDateTime'
-                break
-            case 'json':
-                type = 'AWSJSON'
-                break
-            case 'float':
-                type = 'Float'
-                break
-            case 'boolean':
-                type = 'Boolean'
-                break
-            case 'string':
-                type = 'String'
-                break
+                case 'int':
+                    type = 'Int'
+                    break
+                case 'datetime':
+                    type = 'AWSDateTime'
+                    break
+                case 'json':
+                    type = 'AWSJSON'
+                    break
+                case 'float':
+                    type = 'Float'
+                    break
+                case 'boolean':
+                    type = 'Boolean'
+                    break
+                case 'string':
+                    type = 'String'
+                    break
             }
 
             if (type === 'String') {
                 switch (field.name.toLocaleLowerCase()) {
-                case 'email':
-                    type = 'AWSEmail'
-                    break
-                case 'url':
-                    type = 'AWSURL'
-                    break
+                    case 'email':
+                        type = 'AWSEmail'
+                        break
+                    case 'url':
+                        type = 'AWSURL'
+                        break
                 }
             }
         }
