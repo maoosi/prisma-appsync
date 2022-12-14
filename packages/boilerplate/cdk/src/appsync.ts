@@ -24,7 +24,7 @@ export interface AppSyncStackProps {
         code: string
         memorySize: number
         warmUp: boolean
-        policies?: any[]
+        policies?: iam.PolicyStatementProps[]
         bundling?: lambdaNodejs.BundlingOptions
         environment?: {}
     }
@@ -99,7 +99,9 @@ export class AppSyncStack extends Stack {
                 && this.props.function.policies.length > 0 && {
                 inlinePolicies: {
                     customApiFunctionPolicy: new iam.PolicyDocument({
-                        statements: this.props.function.policies,
+                        statements: this.props.function.policies.map((statement) => {
+                            return new iam.PolicyStatement(statement)
+                        }),
                     }),
                 },
             }),
