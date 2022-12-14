@@ -23,7 +23,7 @@ export interface AppSyncStackProps {
     function: {
         code: string
         memorySize: number
-        warmUp: boolean
+        useWarmUp: number
         policies?: iam.PolicyStatementProps[]
         bundling?: lambdaNodejs.BundlingOptions
         environment?: {}
@@ -131,8 +131,8 @@ export class AppSyncStack extends Stack {
         this.directResolverFn = new lambda.Alias(this, `${this.resourcesPrefixCamel}_FnAliasLive`, {
             aliasName: 'live',
             version: lambdaFunction.currentVersion,
-            ...(this.props.function.warmUp === true && {
-                provisionedConcurrentExecutions: 1,
+            ...(this.props.function.useWarmUp > 0 && {
+                provisionedConcurrentExecutions: this.props.function.useWarmUp,
             }),
         })
 

@@ -14,7 +14,7 @@ new AppSyncStack(app, kebabCase('{{ projectName }}'), {
     function: {
         code: join(process.cwd(), '{{ relativeHandlerPath }}'),
         memorySize: 1536,
-        warmUp: false, // warmUp=true will incur extra costs
+        useWarmUp: 0, // useWarmUp > 0 will incur extra costs
         environment: {
             NODE_ENV: 'production',
             DATABASE_URL: process.env.DATABASE_URL,
