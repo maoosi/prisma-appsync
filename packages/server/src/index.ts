@@ -2,9 +2,10 @@
 import { join } from 'path'
 import { readFileSync } from 'fs'
 import { exec as nodeExec } from 'child_process'
-import { buildSchema } from 'graphql'
+import { createServer as createHttpServer } from 'node:http'
 import type { Plugin } from '@envelop/types'
-import { createServer as graphqlServer } from '@graphql-yoga/node'
+import { createSchema, createYoga } from 'graphql-yoga'
+import type { YogaServerOptions } from 'graphql-yoga'
 import { cli as cleye } from 'cleye'
 import chokidar from 'chokidar'
 import prettier from 'prettier'
@@ -49,7 +50,7 @@ export const argv = cleye({
     },
 })
 
-export async function createServer({ defaultQuery, lambdaHandler, port, schema, watchers, headers }: ServerOptions) {
+export async function createServer({ defaultQuery, lambdaHandler, port, schema, watchers, headers, yogaServerOptions }: ServerOptions) {
     process.on('SIGTERM', () => process.exit(0))
 
     if (!process?.env?.DATABASE_URL)
@@ -62,14 +63,12 @@ export async function createServer({ defaultQuery, lambdaHandler, port, schema, 
         return {
             async onExecute({ args }) {
                 const context: any = args.contextValue
-
+                const variables: any = args?.variableValues || {}
+                const operationName: string = args?.operationName || String()
+                const query: string = context?.params?.query || {}
+                const request: any = context?.req || {}
                 return {
                     async onExecuteDone({ setResult }) {
-                        const request: any = context?.req || {}
-                        const query: string = context?.query || String()
-                        const operationName: string = context?.operationName || String()
-                        const variables: any = context?.variables || {}
-
                         if (query && operationName !== 'IntrospectionQuery') {
                             const identity = useLambdaIdentity(Authorizations.AWS_IAM || null, {
                                 sourceIp: request?.headers['x-forwarded-for'] || request?.socket?.remoteAddress,
@@ -122,15 +121,14 @@ export async function createServer({ defaultQuery, lambdaHandler, port, schema, 
         }
     }
 
-    const server = graphqlServer({
-        port,
-        schema: {
-            typeDefs: buildSchema([
+    const yoga = createYoga({
+        schema: createSchema({
+            typeDefs: [
                 readFileSync(join(__dirname, 'gql/appsync-scalars.gql'), { encoding: 'utf-8' }),
                 readFileSync(join(__dirname, 'gql/appsync-directives.gql'), { encoding: 'utf-8' }),
                 schema,
-            ].join('\n')),
-        },
+            ],
+        }),
         graphiql: {
             title: 'Prisma-AppSync',
             defaultQuery: defaultQuery ? prettier.format(defaultQuery, { parser: 'graphql' }) : undefined,
@@ -139,9 +137,14 @@ export async function createServer({ defaultQuery, lambdaHandler, port, schema, 
         plugins: [
             useLambdaFunction(),
         ],
+        ...(yogaServerOptions || {}),
     })
 
-    server.start()
+    const server = createHttpServer(yoga)
+
+    server.listen(port, () => {
+        console.info(`🧘 Yoga -  Running GraphQL Server at http://localhost:${port}/graphql`)
+    })
 
     if (watchers?.length) {
         const shell = (command: string): Promise<{ err: any; strdout: any; stderr: any }> =>
@@ -184,4 +187,5 @@ interface ServerOptions {
     defaultQuery?: string
     headers?: any
     watchers?: { watch: string | string[]; exec: string }[]
+    yogaServerOptions?: YogaServerOptions<{}, {}>
 }

@@ -1,3 +1,5 @@
+import type { YogaServerOptions } from 'graphql-yoga'
+
 export const argv: any
 
 export function createServer({
@@ -13,6 +15,7 @@ export function createServer({
     defaultQuery?: string
     headers?: any
     watchers?: { watch: string | string[]; exec: string }[]
+    yogaServerOptions?: YogaServerOptions<{}, {}>
 }): void
 
 

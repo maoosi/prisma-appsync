@@ -6,12 +6,12 @@
     "license": "BSD-2-Clause",
     "devDependencies": {
         "@envelop/types": "^3.0.0",
-        "@graphql-yoga/node": "^2.13.13",
         "@types/lodash": "^4.14.186",
         "@types/prettier": "^2.7.1",
         "chokidar": "^3.5.3",
         "cleye": "^1.2.1",
         "graphql": "^16.6.0",
+        "graphql-yoga": "^3.1.1",
         "json-to-graphql-query": "^2.2.4",
         "lodash": "^4.17.21",
         "prettier": "^2.7.1"
