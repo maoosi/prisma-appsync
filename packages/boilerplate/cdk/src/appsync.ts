@@ -110,7 +110,7 @@ export class AppSyncStack extends Stack {
             functionName: `${this.resourcesPrefix}_fn`,
             role: lambdaExecutionRole,
             environment: this.props.function.environment || {},
-            runtime: lambda.Runtime.NODEJS_14_X,
+            runtime: lambda.Runtime.NODEJS_16_X,
             timeout: Duration.seconds(10),
             handler: 'main',
             entry: this.props.function.code,
