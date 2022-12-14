@@ -53,7 +53,7 @@ enum OrderByArg {
         {% for field in model.fields -%}
             {% if not field.relation -%}
                 {% if field.isEnum -%}
-                    {{ field.name }}: {{ field.scalar }}EnumFilter
+                    {{ field.name }}: {{ field.type }}EnumFilter
                 {% elseif field.scalar in ["Int", "Float", "AWSDateTime", "AWSJSON", "AWSEmail", "AWSURL", "Boolean"] -%}
                     {{ field.name }}: {{ field.scalar }}Filter
                 {% else -%}
@@ -67,7 +67,7 @@ enum OrderByArg {
         {% for field in model.fields -%}
             {% if not field.relation -%}
                 {% if field.isEnum -%}
-                    {{ field.name }}: {{ field.scalar }}EnumFilter
+                    {{ field.name }}: {{ field.type }}EnumFilter
                 {% elseif field.scalar in ["Int", "Float", "AWSDateTime", "AWSJSON", "AWSEmail", "AWSURL", "Boolean"] -%}
                     {{ field.name }}: {{ field.scalar }}Filter
                 {% else -%}
@@ -84,7 +84,7 @@ enum OrderByArg {
         {% for field in model.fields -%}
             {% if not field.relation -%}
                 {% if field.isEnum -%}
-                    {{ field.name }}: {{ field.scalar }}EnumFilter
+                    {{ field.name }}: {{ field.type }}EnumFilter
                 {% elseif field.scalar in ["Int", "Float", "AWSDateTime", "AWSJSON", "AWSEmail", "AWSURL", "Boolean"] -%}
                     {{ field.name }}: {{ field.scalar }}Filter
                 {% else -%}
