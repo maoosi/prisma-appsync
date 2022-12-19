@@ -161,7 +161,7 @@ return await prismaAppSync.resolve({
 
 Combining fine-grained access control with [AppSync Authorization modes](#👉-appsync-authorization-modes) allows to implement powerful controls around data.
 
-To illustrate this with a more advanced example, let's assume we want to restrict API access to users logged in via `AMAZON_COGNITO_USER_POOLS` and only allow the owner of a given Post to update it:
+To illustrate this with a more advanced example, let's assume we want to restrict API access to users logged in via `AMAZON_COGNITO_USER_POOLS` and only allow the owner of a given Post to modify it:
 
 ```ts
 return await prismaAppSync.resolve({
