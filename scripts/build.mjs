@@ -19,7 +19,7 @@ try {
     if (!argv?.ignoreClient) {
         // build Prisma-AppSync Client
         console.log(chalk.blue('\nBuild :: Client\n'))
-        await $`esbuild packages/client/src/index.ts --bundle --define:process.env.NODE_ENV="production" --format=cjs --minify --keep-names --platform=node --target=node14 --external:fsevents --external:@prisma/client --outfile=dist/client/index.js --legal-comments=inline`
+        await $`esbuild packages/client/src/index.ts --bundle '--define:process.env.NODE_ENV="production"' --format=cjs --minify --keep-names --platform=node --target=node14 --external:fsevents --external:@prisma/client --outfile=dist/client/index.js --legal-comments=inline`
 
         // build Prisma-AppSync Client TS Declarations
         console.log(chalk.blue('\nBuild :: Client TS Declarations\n'))
@@ -29,7 +29,7 @@ try {
     if (!argv?.ignoreInstaller) {
         // build installer
         console.log(chalk.blue('\nBuild :: Create app\n'))
-        await $`esbuild packages/installer/src/index.ts --bundle --define:process.env.NODE_ENV="production" --format=cjs --minify --keep-names --platform=node --target=node14 --external:fsevents --external:_http_common --outfile=dist/installer/bin/index.js`
+        await $`esbuild packages/installer/src/index.ts --bundle '--define:process.env.NODE_ENV="production"' --format=cjs --minify --keep-names --platform=node --target=node14 --external:fsevents --external:_http_common --outfile=dist/installer/bin/index.js`
     }
 
     if (!argv?.ignoreServer) {

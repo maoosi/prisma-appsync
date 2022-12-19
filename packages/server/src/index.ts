@@ -9,6 +9,7 @@ import type { YogaServerOptions } from 'graphql-yoga'
 import { cli as cleye } from 'cleye'
 import chokidar from 'chokidar'
 import prettier from 'prettier'
+import { GraphQLError } from 'graphql'
 import { Authorizations } from '../../client/src'
 import useLambdaIdentity from './utils/useLambdaIdentity'
 import useLambdaEvent from './utils/useLambdaEvent'
@@ -92,26 +93,44 @@ export async function createServer({ defaultQuery, lambdaHandler, port, schema, 
                                 identity,
                             })
 
-                            const lambdaResult: any = await lambdaHandler.main(
-                                event,
-                                {
-                                    functionName: 'prisma-appsync--handler',
-                                    functionVersion: '1',
-                                    invokedFunctionArn: 'xxx',
-                                    memoryLimitInMB: '1536',
-                                    awsRequestId: 'xxx',
-                                    logGroupName: 'xxx',
-                                    logStreamName: 'xxx',
-                                    identity: undefined,
-                                    clientContext: undefined,
-                                    getRemainingTimeInMillis: () => 10,
-                                    done: () => {},
-                                    fail: () => {},
-                                    succeed: () => {},
-                                    callbackWaitsForEmptyEventLoop: false,
-                                },
-                                () => {},
-                            )
+                            let lambdaResult: any
+
+                            try {
+                                lambdaResult = await lambdaHandler.main(
+                                    event,
+                                    {
+                                        functionName: 'prisma-appsync--handler',
+                                        functionVersion: '1',
+                                        invokedFunctionArn: 'xxx',
+                                        memoryLimitInMB: '1536',
+                                        awsRequestId: 'xxx',
+                                        logGroupName: 'xxx',
+                                        logStreamName: 'xxx',
+                                        identity: undefined,
+                                        clientContext: undefined,
+                                        getRemainingTimeInMillis: () => 10,
+                                        done: () => {},
+                                        fail: () => {},
+                                        succeed: () => {},
+                                        callbackWaitsForEmptyEventLoop: false,
+                                    },
+                                    () => {},
+                                )
+                            }
+                            catch (error: any) {
+                                throw new GraphQLError(String(error?.error || error?.message || error), {
+                                    ...(error?.type && {
+                                        extensions: {
+                                            code: error.type,
+                                            ...(error?.code && {
+                                                http: {
+                                                    status: error.code,
+                                                },
+                                            }),
+                                        },
+                                    }),
+                                })
+                            }
 
                             setResult({ data: { [event.info.fieldName]: lambdaResult } })
                         }
