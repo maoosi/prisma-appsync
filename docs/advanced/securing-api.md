@@ -112,8 +112,8 @@ Prisma-AppSync enables authz directives directly inside the `schema.prisma` file
 
 ```json
 generator appsync {
-    provider = "prisma-appsync"
-    defaultDirective = "@auth(model: [{ allow: iam }, { allow: apiKey }])"
+  provider = "prisma-appsync"
+  defaultDirective = "@auth(model: [{ allow: iam }, { allow: apiKey }])"
 }
 ```
 
