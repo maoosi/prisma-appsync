@@ -100,7 +100,7 @@ export function getShieldAuthorization({
             modelPlural = modelPluralMatch
     }
 
-    const shieldPaths = paths.map((path: string) => {
+    const reqPaths = paths.map((path: string) => {
         if (context.model) {
             BatchActionsList.forEach((batchAction: string) => {
                 path = path.replace(
@@ -115,8 +115,8 @@ export function getShieldAuthorization({
         return path
     })
 
-    for (let i = shieldPaths.length - 1; i >= 0; i--) {
-        const shieldPath: string = shieldPaths[i]
+    for (let i = paths.length - 1; i >= 0; i--) {
+        const reqPath: string = reqPaths[i]
 
         for (const matcher in shield) {
             let globPattern = matcher
@@ -124,7 +124,7 @@ export function getShieldAuthorization({
             if (!globPattern.startsWith('/') && globPattern !== '**')
                 globPattern = `/${globPattern}`
 
-            if (isMatchingGlob(shieldPath, globPattern)) {
+            if (isMatchingGlob(reqPath, globPattern)) {
                 const shieldRule = shield[matcher]
 
                 if (typeof shieldRule === 'boolean') {

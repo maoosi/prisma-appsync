@@ -142,15 +142,15 @@ Prisma-AppSync allows to implementation of fine-grained access control. For exam
 ```ts
 return await prismaAppSync.resolve({
     event,
-    shield: ({ prismaClient }) => {
-    // Prisma filtering syntax
-    // https://www.prisma.io/docs/concepts/components/prisma-client/filtering-and-sorting
+    shield: () => {
+        // Prisma filtering syntax
+        // https://www.prisma.io/docs/concepts/components/prisma-client/filtering-and-sorting
         const isPublished = { status: { equals: 'PUBLISHED' } }
 
         return {
             // Micromatch syntax
             // https://github.com/micromatch/micromatch
-            'access/post{,/**}': {
+            'getPost{,/**}': {
                 rule: isPublished,
                 reason: () => 'Unpublished Posts cannot be accessed.',
             },
@@ -175,7 +175,7 @@ return await prismaAppSync.resolve({
                 rule: isCognitoAuth,
                 reason: ({ model }) => `${model} access is restricted to logged-in users.`,
             },
-            'modify/post{,/**}': {
+            '{update,upsert,delete}Post{,/**}': {
                 rule: isOwner,
                 reason: ({ model }) => `${model} can only be modified by their owner.`,
             },
