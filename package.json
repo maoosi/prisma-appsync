@@ -52,6 +52,5 @@
         "vite-tsconfig-paths": "^3.5.2",
         "vitepress": "1.0.0-alpha.22",
         "vitest": "^0.24.3"
-    },
-    "packageManager": "yarn@1.22.19"
+    }
 }
