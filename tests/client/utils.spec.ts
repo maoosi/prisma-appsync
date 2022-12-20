@@ -131,6 +131,10 @@ describe('CLIENT #utils', () => {
             const result = dotate({ data: { title: 'glut' } })
             expect(result).toEqual({ 'data.title': 'glut' })
         })
+        test('expect dotate to preserve arrays', () => {
+            const result = dotate({ data: { tags: ['foo', 'bar'] } })
+            expect(result).toEqual({ 'data.tags': ['foo', 'bar'] })
+        })
     })
     describe('.isMatchingGlob?', () => {
         test('expect isMatchingGlob to return true if specified path matches any of the glob patterns', () => {

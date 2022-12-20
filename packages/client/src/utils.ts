@@ -1,4 +1,4 @@
-import { dot } from 'dot-object'
+import { flatten } from 'wild-wild-utils'
 import { isMatch } from 'micromatch'
 import deepmerge from 'deepmerge'
 import { decode as decodeHtml, encode as encodeHtml } from 'html-entities'
@@ -63,7 +63,7 @@ export function encode(str: string): string {
  * @returns any
  */
 export function dotate(source: any): any {
-    return dot(source)
+    return flatten(source, { shallowArrays: true })
 }
 
 /**

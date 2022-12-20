@@ -9,10 +9,17 @@ import type { YogaServerOptions } from 'graphql-yoga'
 import { cli as cleye } from 'cleye'
 import chokidar from 'chokidar'
 import prettier from 'prettier'
+import gql from 'graphql-tag'
 import { GraphQLError } from 'graphql'
 import { Authorizations } from '../../client/src'
+import { queryObject } from './utils/useGraphqlFilter'
 import useLambdaIdentity from './utils/useLambdaIdentity'
 import useLambdaEvent from './utils/useLambdaEvent'
+
+declare global {
+    // eslint-disable-next-line no-var, vars-on-top
+    var __server: any
+}
 
 // npx ts-node-dev ./server.ts --transpile-only
 //      --handler handler.ts
@@ -132,7 +139,13 @@ export async function createServer({ defaultQuery, lambdaHandler, port, schema, 
                                 })
                             }
 
-                            setResult({ data: { [event.info.fieldName]: lambdaResult } })
+                            const filteredResult = queryObject(
+                                gql`${event.info.selectionSetGraphQL}`,
+                                { [event.info.fieldName]: lambdaResult },
+                                { includeMissingData: true },
+                            )
+
+                            setResult({ data: filteredResult })
                         }
                     },
                 }
@@ -156,10 +169,16 @@ export async function createServer({ defaultQuery, lambdaHandler, port, schema, 
         plugins: [
             useLambdaFunction(),
         ],
+        maskedErrors: false,
         ...(yogaServerOptions || {}),
     })
 
+    if (globalThis.__server)
+        await globalThis.__server.close()
+
     const server = createHttpServer(yoga)
+
+    globalThis.__server = server
 
     server.listen(port, () => {
         console.info(`🧘 Yoga -  Running GraphQL Server at http://localhost:${port}/graphql`)

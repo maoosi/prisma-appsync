@@ -6,11 +6,13 @@
     "license": "BSD-2-Clause",
     "devDependencies": {
         "@types/aws-lambda": "^8.10.108",
+        "@types/micromatch": "^4.0.2",
         "deepmerge": "^4.2.2",
-        "dot-object": "^2.1.4",
         "html-entities": "^2.3.3",
         "lambda-rate-limiter": "^3.0.1",
         "micromatch": "^4.0.5",
+        "wild-wild-path": "^3.6.0",
+        "wild-wild-utils": "^4.9.0",
         "xss": "^1.0.14"
     }
 }
