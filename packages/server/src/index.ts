@@ -21,12 +21,12 @@ declare global {
     var __server: any
 }
 
-// npx ts-node-dev ./server.ts --transpile-only
+// npx vite-node ./server.ts --watch --
 //      --handler handler.ts
 //      --schema prisma/generated/prisma-appsync/schema.gql
 //      --port 4000
-//      --watch ../packages/(client|generator)/**
-//      --exec pnpm run build
+//      --watchers '[{"watch":["**/*.prisma","*.prisma"],"exec":"npx prisma generate && touch ./server.ts"}]'
+//      --headers '{"x-fingerprint":"123456"}'
 export const argv = cleye({
     name: 'prisma-appsync-server',
     flags: {
