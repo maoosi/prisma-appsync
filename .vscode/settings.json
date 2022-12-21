@@ -109,6 +109,11 @@
             "language": "markdown",
             "scheme": "file",
             "pattern": "docs/advanced/hooks.md"
+        },
+        {
+            "language": "markdown",
+            "scheme": "file",
+            "pattern": "docs/changelog/1.0.0-rc.4.md"
         }
     ]
 }

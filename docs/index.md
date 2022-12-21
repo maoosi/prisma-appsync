@@ -5,6 +5,9 @@ hero:
   name: Prisma-AppSync
   text: GraphQL API Generator for AWS and ◭ Prisma
   tagline: Prisma-AppSync is a Prisma Generator, that instantly converts your Schema into a full-blown GraphQL API for AWS AppSync.
+  image:
+    src: /logo.svg
+    alt: Prisma-AppSync
   actions:
     - theme: brand
       text: Getting Started
