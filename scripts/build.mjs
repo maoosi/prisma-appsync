@@ -23,7 +23,7 @@ try {
 
         // build Prisma-AppSync Client TS Declarations
         console.log(chalk.blue('\nBuild :: Client TS Declarations\n'))
-        await $`tsc packages/client/src/*.ts --outDir dist/client/ --declaration --emitDeclarationOnly --esModuleInterop`
+        await $`tsc packages/client/src/*.ts --outDir dist/client/ --declaration --emitDeclarationOnly --esModuleInterop`.nothrow()
     }
 
     if (!argv?.ignoreInstaller) {
@@ -35,7 +35,7 @@ try {
     if (!argv?.ignoreServer) {
         // build server
         console.log(chalk.blue('\nBuild :: Server\n'))
-        await $`esbuild packages/server/src/index.ts --bundle --format=cjs --minify --keep-names --platform=node --target=node14 --external:fsevents --external:_http_common --outfile=dist/server/index.js`
+        await $`esbuild packages/server/src/index.ts --bundle --format=cjs --minify --keep-names --platform=node --target=node14 --external:fsevents --external:@prisma/client --external:_http_common --outfile=dist/server/index.js`
 
         // build server TS Declarations
         console.log(chalk.blue('\nBuild :: Server TS Declarations\n'))

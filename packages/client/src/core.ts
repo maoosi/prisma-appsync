@@ -8,8 +8,10 @@ import type {
     ShieldAuthorization,
 } from './defs'
 import {
-    BatchActionsList, DebugTestingKey, Prisma,
+    BatchActionsList, 
+    DebugTestingKey,
     PrismaClient,
+    Prisma
 } from './defs'
 import { CustomError, log, parseError } from './inspector'
 import {
@@ -49,7 +51,7 @@ const injectedConfig: InjectedConfig = {} //! inject:config
  */
 export class PrismaAppSync {
     public options: Options
-    public prismaClient: PrismaClient
+    public prismaClient: PrismaClient<Prisma.PrismaClientOptions, 'query' | 'info' | 'warn' | 'error'>
 
     /**
    * ### Client Constructor
@@ -175,13 +177,9 @@ export class PrismaAppSync {
 
         // Prisma logs
         if (!(process?.env?.PRISMA_APPSYNC_TESTING === 'true')) {
-            // @ts-expect-error: 'query' event isn't being recognised
             this.prismaClient.$on('query', (e: any) => log('Prisma Client query:', e, 'INFO'))
-            // @ts-expect-error: 'info' event isn't being recognised
             this.prismaClient.$on('info', (e: any) => log('Prisma Client info:', e, 'INFO'))
-            // @ts-expect-error: 'warn' event isn't being recognised
             this.prismaClient.$on('warn', (e: any) => log('Prisma Client warn:', e, 'WARN'))
-            // @ts-expect-error: 'error' event isn't being recognised
             this.prismaClient.$on('error', (e: any) => log('Prisma Client error:', e, 'ERROR'))
         }
     }

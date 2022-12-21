@@ -12,6 +12,3 @@ await $`npx prisma generate --schema tests/prisma/schema.prisma`
 console.log(chalk.blue('\nTest :: Client\n'))
 await $`vitest run tests/client/*.spec.ts`
 
-// e2e tests
-// console.log(chalk.blue('Test :: e2e\n'))
-// await $`print hello`

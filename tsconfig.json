@@ -28,7 +28,7 @@
             "@appsync-server": ["packages/server/src/index"],
             "@appsync-server/*": ["packages/server/src/*"]
         },
-        "types": ["node", "lodash"],
+        "types": ["node"],
         "plugins": [
             {
                 "transform": "@zerollup/ts-transform-paths"
