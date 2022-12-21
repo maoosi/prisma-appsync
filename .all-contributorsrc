@@ -54,6 +54,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "Tenrys",
+      "name": "Bell",
+      "avatar_url": "https://avatars.githubusercontent.com/u/3979239?v=4",
+      "profile": "http://bell.moe",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "commitConvention": "angular",
