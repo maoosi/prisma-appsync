@@ -95,7 +95,7 @@ function getArgumentObject(argumentFields: Argument[]) {
         }
         else if (arg.value.kind === 'ListValue') {
             argObj[arg.name.value] = flatMap(arg.value.values, (element: any) => {
-                if (element.value) {
+                if (typeof element.value !== 'undefined') {
                     return element.value
                 }
                 else if (element.fields) {
@@ -143,7 +143,7 @@ function getArguments(args: any) {
         }
         else if (arg.value.kind === 'ListValue') {
             argsObj[arg.name.value] = flatMap(arg.value.values, (element: any) => {
-                if (element.value) {
+                if (typeof element.value !== 'undefined') {
                     return element.value
                 }
                 else if (element.fields) {
