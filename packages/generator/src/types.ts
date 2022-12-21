@@ -40,6 +40,7 @@ export interface DMMFPAS_Comments {
 export interface DMMFPAS_Field {
     name: string
     scalar: string
+    isList: boolean
     isRequired: boolean
     isEditable: boolean
     isEnum: boolean

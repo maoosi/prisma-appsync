@@ -78,7 +78,7 @@ importers:
       pluralize: ^8.0.0
       prettier: ^2.7.1
     devDependencies:
-      '@prisma/generator-helper': 4.7.1
+      '@prisma/generator-helper': 4.8.0
       '@types/pluralize': 0.0.29
       '@types/prettier': 2.7.1
       appsync-schema-converter: 2.0.0_graphql@16.6.0
@@ -693,8 +693,8 @@ packages:
       prisma: 4.8.0
     dev: true
 
-  /@prisma/debug/4.7.1:
-    resolution: {integrity: sha512-oppjBRcTakJuAn0rANxWT9caxLKypSBT4Ajh7t+uPcO06CJOoN2Gt4VpFdw2i79U+klGAjTe/1yh8SCsTmxAhA==}
+  /@prisma/debug/4.8.0:
+    resolution: {integrity: sha512-/VT+P6npte5nN8RgLUYm7cNFpHnl7WxbPRZDUIbMF6FG1oI2i3I3NOSOM05urdd1X/rjlZWUgxoh7rL2sdaLSQ==}
     dependencies:
       '@types/debug': 4.1.7
       debug: 4.3.4
@@ -712,10 +712,10 @@ packages:
     requiresBuild: true
     dev: true
 
-  /@prisma/generator-helper/4.7.1:
-    resolution: {integrity: sha512-q9mjYOyLxkLWhqjvPB5sx5J1VRegWA2eC9mwrGgA0CSMo6SzZ7xwIe4rMJKnh4a7QMUO03+HQFdv/Nz7BOWCcg==}
+  /@prisma/generator-helper/4.8.0:
+    resolution: {integrity: sha512-qUSX/6aLkIXUAnIw5IyJdizkqFYYc4EfP4VFLAFYQb281affP6XNQm8nf+El7H6J4MM0eWPRqTH1gtAWFqAYkg==}
     dependencies:
-      '@prisma/debug': 4.7.1
+      '@prisma/debug': 4.8.0
       '@types/cross-spawn': 6.0.2
       chalk: 4.1.2
       cross-spawn: 7.0.3

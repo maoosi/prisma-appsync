@@ -1,7 +1,7 @@
 {% for model in models %}
     type {{ model.name }} {{ model.directives.model | safe }} {
         {% for field in model.fields -%}
-            {{ field.name }}: {{ field.scalar }}{% if field.isRequired -%}!{% endif %} {{ field.directives.field | safe }}
+            {{ field.name }}: {% if field.isList -%}[{{ field.scalar }}]{% else %}{{ field.scalar }}{% endif %}{% if field.isRequired -%}!{% endif %} {{ field.directives.field | safe }}
         {% endfor %}
     }
 {% endfor %}
@@ -23,6 +23,14 @@ type BatchPayload {{ defaultAuthDirective.model | safe }} {
         not: {{ enum.name }}EnumFilter
         notIn: [{{ enum.name }}!]
     }
+
+    input {{ enum.name }}EnumListFilter {
+        equals: [{{ enum.name }}!]
+        has: {{ enum.name }}
+        hasEvery: [{{ enum.name }}!]
+        hasSome: [{{ enum.name }}!]
+        isEmpty: Boolean
+    }
 {% endfor %}
 
 enum OrderByArg {
@@ -36,7 +44,7 @@ enum OrderByArg {
             input {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput {
                 {% for field in model.fields -%}
                     {% if field.name in uniqueIndex.fields -%}
-                        {{ field.name }}: {{ field.scalar }}
+                        {{ field.name }}: {% if field.isList -%}[{{ field.scalar }}]{% else %}{{ field.scalar }}{% endif %}
                     {% endif -%}
                 {% endfor %}
             }
@@ -52,12 +60,22 @@ enum OrderByArg {
     input {{ model.name }}RelationFilter {
         {% for field in model.fields -%}
             {% if not field.relation -%}
-                {% if field.isEnum -%}
-                    {{ field.name }}: {{ field.scalar }}EnumFilter
-                {% elseif field.scalar in ["Int", "Float", "AWSDateTime", "AWSJSON", "AWSEmail", "AWSURL", "Boolean"] -%}
-                    {{ field.name }}: {{ field.scalar }}Filter
+                {% if field.isList -%}
+                    {% if field.isEnum -%}
+                        {{ field.name }}: {{ field.scalar }}EnumListFilter
+                    {% elseif field.scalar in ["Int", "Float", "AWSDateTime", "AWSJSON", "AWSEmail", "AWSURL", "Boolean"] -%}
+                        {{ field.name }}: {{ field.scalar }}ListFilter
+                    {% else -%}
+                        {{ field.name }}: StringListFilter
+                    {% endif -%}
                 {% else -%}
-                    {{ field.name }}: StringFilter
+                    {% if field.isEnum -%}
+                        {{ field.name }}: {{ field.scalar }}EnumFilter
+                    {% elseif field.scalar in ["Int", "Float", "AWSDateTime", "AWSJSON", "AWSEmail", "AWSURL", "Boolean"] -%}
+                        {{ field.name }}: {{ field.scalar }}Filter
+                    {% else -%}
+                        {{ field.name }}: StringFilter
+                    {% endif -%}
                 {% endif -%}
             {% endif -%}
         {% endfor %}
@@ -66,12 +84,22 @@ enum OrderByArg {
     input {{ model.name }}ScalarWhereInput {
         {% for field in model.fields -%}
             {% if not field.relation -%}
-                {% if field.isEnum -%}
-                    {{ field.name }}: {{ field.scalar }}EnumFilter
-                {% elseif field.scalar in ["Int", "Float", "AWSDateTime", "AWSJSON", "AWSEmail", "AWSURL", "Boolean"] -%}
-                    {{ field.name }}: {{ field.scalar }}Filter
+                {% if field.isList -%}
+                    {% if field.isEnum -%}
+                        {{ field.name }}: {{ field.scalar }}EnumListFilter
+                    {% elseif field.scalar in ["Int", "Float", "AWSDateTime", "AWSJSON", "AWSEmail", "AWSURL", "Boolean"] -%}
+                        {{ field.name }}: {{ field.scalar }}ListFilter
+                    {% else -%}
+                        {{ field.name }}: StringListFilter
+                    {% endif -%}
                 {% else -%}
-                    {{ field.name }}: StringFilter
+                    {% if field.isEnum -%}
+                        {{ field.name }}: {{ field.scalar }}EnumFilter
+                    {% elseif field.scalar in ["Int", "Float", "AWSDateTime", "AWSJSON", "AWSEmail", "AWSURL", "Boolean"] -%}
+                        {{ field.name }}: {{ field.scalar }}Filter
+                    {% else -%}
+                        {{ field.name }}: StringFilter
+                    {% endif -%}
                 {% endif -%}
             {% endif -%}
         {% endfor %}
@@ -83,12 +111,22 @@ enum OrderByArg {
         AND: [{{ model.name }}WhereInput]
         {% for field in model.fields -%}
             {% if not field.relation -%}
-                {% if field.isEnum -%}
-                    {{ field.name }}: {{ field.scalar }}EnumFilter
-                {% elseif field.scalar in ["Int", "Float", "AWSDateTime", "AWSJSON", "AWSEmail", "AWSURL", "Boolean"] -%}
-                    {{ field.name }}: {{ field.scalar }}Filter
+                {% if field.isList -%}
+                    {% if field.isEnum -%}
+                        {{ field.name }}: {{ field.scalar }}EnumListFilter
+                    {% elseif field.scalar in ["Int", "Float", "AWSDateTime", "AWSJSON", "AWSEmail", "AWSURL", "Boolean"] -%}
+                        {{ field.name }}: {{ field.scalar }}ListFilter
+                    {% else -%}
+                        {{ field.name }}: StringListFilter
+                    {% endif -%}
                 {% else -%}
-                    {{ field.name }}: StringFilter
+                    {% if field.isEnum -%}
+                        {{ field.name }}: {{ field.scalar }}EnumFilter
+                    {% elseif field.scalar in ["Int", "Float", "AWSDateTime", "AWSJSON", "AWSEmail", "AWSURL", "Boolean"] -%}
+                        {{ field.name }}: {{ field.scalar }}Filter
+                    {% else -%}
+                        {{ field.name }}: StringFilter
+                    {% endif -%}
                 {% endif -%}
             {% else -%}
                 {% if field.relation.kind === "one" -%}
@@ -103,7 +141,7 @@ enum OrderByArg {
     input {{ model.name }}WhereUniqueInput {
         {% for field in model.fields -%}
             {% if field.isUnique -%}
-                {{ field.name }}: {{ field.scalar }}
+                {{ field.name }}: {% if field.isList -%}[{{ field.scalar }}]{% else %}{{ field.scalar }}{% endif %}
             {% endif -%}
         {% endfor %}
         {%- if model.uniqueIndexes | length -%}
@@ -128,7 +166,7 @@ enum OrderByArg {
             {% for field in model.fields -%}
                 {% if field.isEditable and not field.relation -%}
                     {{ field.name }}: 
-                        {{ field.scalar }}{% if field.isRequired -%}!{% endif %}
+                        {% if field.isList -%}[{{ field.scalar }}]{% else %}{{ field.scalar }}{% endif %}{% if field.isRequired -%}!{% endif %}
                 {% elseif field.isEditable and field.relation -%}
                     {{ field.name }}: 
                         {{ field.relation.name }}CreateRelationInput{% if field.isRequired -%}!{% endif %}
@@ -140,7 +178,7 @@ enum OrderByArg {
             {% for field in model.fields -%}
                 {% if field.isEditable and not field.relation -%}
                     {{ field.name }}: 
-                        {{ field.scalar }}{% if field.isRequired -%}!{% endif %}
+                        {% if field.isList -%}[{{ field.scalar }}]{% else %}{{ field.scalar }}{% endif %}{% if field.isRequired -%}!{% endif %}
                 {% endif -%}
             {% endfor %}
         }
@@ -148,7 +186,7 @@ enum OrderByArg {
         input {{ model.name }}UpdateInput {
             {% for field in model.fields -%}
                 {% if field.isEditable and not field.relation -%}
-                    {{ field.name }}: {{ field.scalar }}
+                    {{ field.name }}: {% if field.isList -%}[{{ field.scalar }}]{% else %}{{ field.scalar }}{% endif %}
                 {% elseif field.isEditable and field.relation -%}
                     {{ field.name }}: {{ field.relation.name }}UpdateRelationsInput
                 {% endif -%}
@@ -265,6 +303,14 @@ input AWSDateTimeFilter {
     notIn: [AWSDateTime!]
 }
 
+input AWSDateTimeListFilter {
+    equals: [AWSDateTime!]
+    has: AWSDateTime
+    hasEvery: [AWSDateTime!]
+    hasSome: [AWSDateTime!]
+    isEmpty: Boolean
+}
+
 input FloatFilter {
     equals: Float
     gt: Float
@@ -274,6 +320,14 @@ input FloatFilter {
     lte: Float
     not: FloatFilter
     notIn: [Float!]
+}
+
+input FloatListFilter {
+    equals: [Float!]
+    has: Float
+    hasEvery: [Float!]
+    hasSome: [Float!]
+    isEmpty: Boolean
 }
 
 input IntFilter {
@@ -287,6 +341,14 @@ input IntFilter {
     notIn: [Int!]
 }
 
+input IntListFilter {
+    equals: [Int!]
+    has: Int
+    hasEvery: [Int!]
+    hasSome: [Int!]
+    isEmpty: Boolean
+}
+
 input AWSJSONFilter {
     contains: String
     endsWith: String
@@ -295,6 +357,14 @@ input AWSJSONFilter {
     not: AWSJSONFilter
     notIn: [AWSJSON!]
     startsWith: String
+}
+
+input AWSJSONListFilter {
+    equals: [AWSJSON!]
+    has: AWSJSON
+    hasEvery: [AWSJSON!]
+    hasSome: [AWSJSON!]
+    isEmpty: Boolean
 }
 
 input AWSEmailFilter {
@@ -307,6 +377,14 @@ input AWSEmailFilter {
     startsWith: String
 }
 
+input AWSEmailListFilter {
+    equals: [AWSEmail!]
+    has: AWSEmail
+    hasEvery: [AWSEmail!]
+    hasSome: [AWSEmail!]
+    isEmpty: Boolean
+}
+
 input AWSURLFilter {
     contains: String
     endsWith: String
@@ -315,6 +393,14 @@ input AWSURLFilter {
     not: AWSURLFilter
     notIn: [AWSURL!]
     startsWith: String
+}
+
+input AWSURLListFilter {
+    equals: [AWSURL!]
+    has: AWSURL
+    hasEvery: [AWSURL!]
+    hasSome: [AWSURL!]
+    isEmpty: Boolean
 }
 
 input StringFilter {
@@ -328,9 +414,24 @@ input StringFilter {
     mode: String
 }
 
+input StringListFilter {
+    equals: [String!]
+    has: String
+    hasEvery: [String!]
+    hasSome: [String!]
+    isEmpty: Boolean
+}
+
 input BooleanFilter {
     equals: Boolean
     not: BooleanFilter
+}
+
+input BooleanListFilter {
+    equals: [Boolean!]
+    has: Boolean
+    hasEvery: [Boolean!]
+    hasSome: [Boolean!]
 }
 
 {% if models | length -%}

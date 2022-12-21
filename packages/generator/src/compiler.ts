@@ -532,6 +532,7 @@ export class PrismaAppSyncCompiler {
                             name: field.name,
                             scalar: this.getFieldScalar(field),
                             isRequired: this.isFieldRequired(field),
+                            isList: this.isFieldList(field),
                             isEnum: this.isFieldEnum(field),
                             isEditable: !this.isFieldGeneratedRelation(field, model),
                             isUnique: this.isFieldUnique(field, model),
@@ -539,7 +540,7 @@ export class PrismaAppSyncCompiler {
                                 relation: {
                                     name: this.getFieldRelationName(field, model),
                                     kind: this.getFieldRelationKind(field),
-                                    type: this.getFieldType(field),
+                                    type: this.getFieldScalar(field),
                                 },
                             }),
                             directives,
@@ -652,6 +653,7 @@ export class PrismaAppSyncCompiler {
                         name: i.name || i.fields.join('_'),
                         scalar: `${i.fields.join('_')}FieldsInput`,
                         isEnum: false,
+                        isList: false,
                         isRequired: true,
                         isEditable: false,
                         isUnique: true,
@@ -671,7 +673,7 @@ export class PrismaAppSyncCompiler {
 
     // Return true if field is required
     private isFieldRequired(searchField: DMMF.Field): boolean {
-        return searchField.isRequired && !(searchField.relationName && searchField.isList) && !this.isFieldAutoPopulated(searchField)
+        return searchField.isRequired && !searchField.isList && !this.isFieldAutoPopulated(searchField)
     }
 
     // Return true if field is an enum type
@@ -698,6 +700,11 @@ export class PrismaAppSyncCompiler {
                 return field.relationFromFields && field.relationFromFields.includes(searchField.name)
             }) > -1
         )
+    }
+
+    // Return true if field is a List (array)
+    private isFieldList(searchField: DMMF.Field): boolean {
+        return searchField.isList
     }
 
     // Compile and output file
@@ -807,20 +814,6 @@ export class PrismaAppSyncCompiler {
 
     // Get AppSync scalar from Prisma type
     private getFieldScalar(field: DMMF.Field): string {
-        let scalar: string = this.getFieldType(field)
-
-        if (field.isList) {
-            if (field.isRequired)
-                scalar = `${scalar}!`
-
-            scalar = `[${scalar}]`
-        }
-
-        return scalar
-    }
-
-    // Get AppSync type from Prisma type
-    private getFieldType(field: DMMF.Field): string {
         let type = 'String'
 
         if (field.kind === 'scalar' && typeof field.type === 'string') {
