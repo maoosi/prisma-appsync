@@ -39,6 +39,7 @@ export interface DMMFPAS_Comments {
 
 export interface DMMFPAS_Field {
     name: string
+    type?: string
     scalar: string
     isList: boolean
     isRequired: boolean

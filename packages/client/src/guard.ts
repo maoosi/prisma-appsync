@@ -12,7 +12,7 @@ import {
     BatchActionsList,
     DebugTestingKey,
 } from './defs'
-import { decode, encode, filterXSS, isMatchingGlob, merge, traverse, upperFirst } from './utils'
+import { decode, encode, filterXSS, isEmpty, isMatchingGlob, merge, traverse, upperFirst } from './utils'
 import { CustomError } from './inspector'
 
 // https:// github.com/blackflux/lambda-rate-limiter
@@ -172,13 +172,30 @@ export function getShieldAuthorization({
  * @param {any} options
  * @param {string[]} options.paths
  * @param {Context} options.context
+ * @param {any} options.fieldsMapping
  * @returns number
  */
-export function getDepth({ paths, context }: { paths: string[]; context: Context }): number {
+export function getDepth(
+    { paths, context, fieldsMapping }:
+    { paths: string[]; context: Context; fieldsMapping: any },
+): number {
     let depth = 0
 
+    const stopPaths: string[] = []
+
+    if (!isEmpty(fieldsMapping)) {
+        for (const fieldMap in fieldsMapping) {
+            if (fieldsMapping[fieldMap].toLowerCase() === 'json')
+                stopPaths.push(String(fieldMap))
+        }
+    }
+
     paths.forEach((path: string) => {
-        const pathDepth = path.split('/').length - 3
+        const stopPath = stopPaths.find((p: string) => path.includes(p))
+        const stopLength = stopPath ? stopPath.split('/').length - 1 : undefined
+        const parts = path.split('/').filter(Boolean).slice(2, stopLength ? stopLength + 2 : undefined)
+        const pathDepth = parts.length
+
         if (pathDepth > depth)
             depth = pathDepth
     })

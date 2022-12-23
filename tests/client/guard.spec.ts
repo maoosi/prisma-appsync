@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { getShieldAuthorization, runHooks } from '@client/guard'
+import { getDepth, getShieldAuthorization, runHooks } from '@client/guard'
 import type { Options } from '@client/defs'
 import { Actions, ActionsAliases, Authorizations } from '@client/defs'
 import { Prisma, PrismaClient } from '@prisma/client'
@@ -16,6 +16,7 @@ const options: Options = {
     defaultPagination: false,
     maxDepth: 3,
     modelsMapping: { Post: 'post', Posts: 'post' },
+    fieldsMapping: {},
     maxReqPerUserMinute: 200,
 }
 
@@ -310,6 +311,48 @@ describe('CLIENT #guard', () => {
             })
 
             expect(testValue).toEqual('before:**')
+        })
+    })
+
+    describe('.getDepth?', () => {
+        test('expect getDepth to return depth', () => {
+            const depth = getDepth({
+                paths: [
+                    '/list/post/id',
+                    '/list/post/title',
+                    '/list/post/json',
+                    '/list/post/author/name',
+                ],
+                context: {
+                    action: Actions.update,
+                    alias: ActionsAliases.modify,
+                    model: Models.Post,
+                },
+                fieldsMapping: {},
+            })
+            expect(depth).toEqual(2)
+        })
+        test('expect getDepth to return depth, excluding Json fields', () => {
+            const depth = getDepth({
+                paths: [
+                    '/create/post/title',
+                    '/create/post/json/menu/id',
+                    '/create/post/json/menu/value',
+                    '/create/post/json/menu/popup/menuitem',
+                    '/get/post/title',
+                    '/get/post/json',
+                ],
+                context: {
+                    action: Actions.update,
+                    alias: ActionsAliases.modify,
+                    model: Models.Post,
+                },
+                fieldsMapping: {
+                    'post/json': 'Json',
+                    'posts/json': 'Json',
+                },
+            })
+            expect(depth).toEqual(1)
         })
     })
 })

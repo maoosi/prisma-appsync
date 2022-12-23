@@ -130,6 +130,7 @@ describe('CLIENT #adapter', () => {
                     defaultPagination: false,
                     maxDepth: 3,
                     modelsMapping: {},
+                    fieldsMapping: {},
                     maxReqPerUserMinute: 200,
                 },
                 operation: 'notify',

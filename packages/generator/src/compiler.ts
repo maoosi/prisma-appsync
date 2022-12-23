@@ -245,6 +245,7 @@ export class PrismaAppSyncCompiler {
     public getInjectedConfig(): Required<InjectedConfig> {
         const injectedConfig: Required<InjectedConfig> = {
             modelsMapping: {},
+            fieldsMapping: {},
             operations: String(),
         }
 
@@ -258,13 +259,28 @@ export class PrismaAppSyncCompiler {
 
             injectedConfig.modelsMapping[model.name] = model.prismaRef
 
-            for (let i = 0; i < Object.keys(model.gql).length; i++) {
-                const key = Object.keys(model.gql)[i]
+            for (let j = 0; j < Object.keys(model.gql).length; j++) {
+                const key = Object.keys(model.gql)[j]
                 const operation = model.gql[key]
 
                 if (typeof operation === 'string') {
                     if (!operationsList.includes(operation))
                         operationsList.push(operation)
+                }
+
+                for (let k = 0; k < model.fields.length; k++) {
+                    const field = model.fields[k]
+
+                    if (
+                        field.type && ![
+                            '_model', '_fields', '_usesQueries', '_usesMutations', '_usesSubscriptions',
+                        ].includes(key)
+                    ) {
+                        const singleRelationPath = `${model.name.toLowerCase()}/${field.name}`
+                        const multiRelationPath = `${model.pluralizedName.toLowerCase()}/${field.name}`
+                        injectedConfig.fieldsMapping[singleRelationPath] = field.type
+                        injectedConfig.fieldsMapping[multiRelationPath] = field.type
+                    }
                 }
             }
         }
@@ -530,6 +546,7 @@ export class PrismaAppSyncCompiler {
                     if (!field.isGenerated && !isFieldIgnored) {
                         fields.push({
                             name: field.name,
+                            type: field.type,
                             scalar: this.getFieldScalar(field),
                             isRequired: this.isFieldRequired(field),
                             isList: this.isFieldList(field),
@@ -651,6 +668,7 @@ export class PrismaAppSyncCompiler {
                 uniqueIndexes.forEach(i =>
                     subFields.push({
                         name: i.name || i.fields.join('_'),
+                        type: undefined,
                         scalar: `${i.fields.join('_')}FieldsInput`,
                         isEnum: false,
                         isList: false,

@@ -97,7 +97,7 @@ describe('CLIENT #core', () => {
         //     const maliciousXss = result?.__prismaAppsync?.QueryParams?.prismaArgs?.data?.pins
         //     expect(maliciousXss).toEqual([
         //         { title: '&lt;img src&gt;', order: 1 },
-        //         { title: '&lt;img src&gt;', order: 3 }
+        //         { title: '&lt;img src&gt;', order: 3 },
         //     ])
         // })
         test('expect Sanitizer to _not_ sanitize inputs', async () => {

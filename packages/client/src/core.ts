@@ -8,10 +8,10 @@ import type {
     ShieldAuthorization,
 } from './defs'
 import {
-    BatchActionsList, 
+    BatchActionsList,
     DebugTestingKey,
+    Prisma,
     PrismaClient,
-    Prisma
 } from './defs'
 import { CustomError, log, parseError } from './inspector'
 import {
@@ -93,6 +93,7 @@ export class PrismaAppSync {
         // Set client options using constructor options
         this.options = {
             modelsMapping: {},
+            fieldsMapping: {},
             connectionString: String(process.env.DATABASE_URL),
             sanitize:
                 typeof options?.sanitize !== 'undefined'
@@ -127,6 +128,17 @@ export class PrismaAppSync {
                 this.options.modelsMapping = JSON.parse(
                     process.env.PRISMA_APPSYNC_INJECTED_CONFIG,
                 ).modelsMapping
+            }
+            catch {}
+        }
+        if (injectedConfig?.fieldsMapping) {
+            this.options.fieldsMapping = injectedConfig.fieldsMapping
+        }
+        else if (process?.env?.PRISMA_APPSYNC_INJECTED_CONFIG) {
+            try {
+                this.options.fieldsMapping = JSON.parse(
+                    process.env.PRISMA_APPSYNC_INJECTED_CONFIG,
+                ).fieldsMapping
             }
             catch {}
         }
@@ -264,6 +276,7 @@ export class PrismaAppSync {
             const depth = getDepth({
                 paths: QueryParams.paths,
                 context: QueryParams.context,
+                fieldsMapping: this.options.fieldsMapping,
             })
             if (depth > this.options.maxDepth) {
                 throw new CustomError(

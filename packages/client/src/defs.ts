@@ -24,10 +24,12 @@ export interface PrismaAppSyncOptionsType {
 
 export type Options = Required<PrismaAppSyncOptionsType> & {
     modelsMapping: any
+    fieldsMapping: any
 }
 
 export interface InjectedConfig {
     modelsMapping?: { [modelVariant: string]: string }
+    fieldsMapping?: { [fieldPath: string]: string }
     operations?: string
 }
 
