@@ -18,7 +18,7 @@ import useLambdaEvent from './utils/useLambdaEvent'
 
 declare global {
     // eslint-disable-next-line no-var, vars-on-top
-    var __server: any
+    var __prismaAppSyncServer: any
 }
 
 // npx vite-node ./server.ts --watch --
@@ -173,18 +173,22 @@ export async function createServer({ defaultQuery, lambdaHandler, port, schema, 
         ...(yogaServerOptions || {}),
     })
 
-    if (globalThis.__server)
-        await globalThis.__server.close()
+    // if (globalThis?.__prismaAppSyncServer?.chokidarInstances) {
+    //     for (let i = 0; i < globalThis.__prismaAppSyncServer.chokidarInstances?.length; i++) {
+    //         const chok = globalThis.__prismaAppSyncServer.chokidarInstances[i]
+    //         await chok?.close()
+    //     }
+    // }
+
+    if (globalThis?.__prismaAppSyncServer?.serverInstance)
+        await globalThis?.__prismaAppSyncServer?.serverInstance?.close()
 
     const server = createHttpServer(yoga)
 
-    globalThis.__server = server
+    const serverInstance = server
+    const chokidarInstances: any[] = []
 
-    server.listen(port, () => {
-        console.info(`🧘 Yoga -  Running GraphQL Server at http://localhost:${port}/graphql`)
-    })
-
-    if (watchers?.length) {
+    if (watchers?.length && !globalThis?.__prismaAppSyncServer?.chokidarInstances) {
         const shell = (command: string): Promise<{ err: any; strdout: any; stderr: any }> =>
             new Promise((resolve) => {
                 nodeExec(
@@ -201,21 +205,30 @@ export async function createServer({ defaultQuery, lambdaHandler, port, schema, 
             })
 
         watchers.forEach(({ watch, exec }) => {
-            chokidar.watch(watch, {
+            const chok = chokidar.watch(watch, {
                 ignored: '**/node_modules/**',
                 ignoreInitial: true,
                 awaitWriteFinish: true,
             })
-                .on('change', async (path) => {
-                    console.log(`Change detected on ${path}`)
 
-                    if (exec) {
-                        console.log(`Executing ${exec}`)
-                        await shell(exec)
-                    }
-                })
+            chok.on('change', async (path) => {
+                console.log(`Change detected on ${path}`)
+
+                if (exec) {
+                    console.log(`Executing ${exec}`)
+                    await shell(exec)
+                }
+            })
+
+            chokidarInstances.push(chok)
         })
     }
+
+    server.listen(port, () => {
+        console.info(`🧘 Yoga -  Running GraphQL Server at http://localhost:${port}/graphql`)
+    })
+
+    globalThis.__prismaAppSyncServer = { serverInstance, chokidarInstances }
 }
 
 interface ServerOptions {
