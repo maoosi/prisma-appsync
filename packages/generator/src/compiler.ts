@@ -552,7 +552,7 @@ export class PrismaAppSyncCompiler {
                             isList: this.isFieldList(field),
                             isEnum: this.isFieldEnum(field),
                             isEditable: !this.isFieldGeneratedRelation(field, model),
-                            isUnique: this.isFieldUnique(field, model),
+                            isUnique: this.isFieldUnique(field),
                             ...(field.relationName && {
                                 relation: {
                                     name: this.getFieldRelationName(field, model),
@@ -685,8 +685,8 @@ export class PrismaAppSyncCompiler {
     }
 
     // Return true if field is unique (meaning it can be used for WhereUniqueInputs)
-    private isFieldUnique(searchField: DMMF.Field, model: DMMF.Model): boolean {
-        return searchField.isId || searchField.isUnique || this.isFieldGeneratedRelation(searchField, model)
+    private isFieldUnique(searchField: DMMF.Field): boolean {
+        return searchField.isId || searchField.isUnique
     }
 
     // Return true if field is required
@@ -827,7 +827,7 @@ export class PrismaAppSyncCompiler {
 
     // Return relation kind (`one` or `many`) from Prisma type
     private getFieldRelationKind(field: DMMF.Field): 'one' | 'many' {
-        return field.relationFromFields && field.relationFromFields.length === 1 ? 'one' : 'many'
+        return !field.isList ? 'one' : 'many'
     }
 
     // Get AppSync scalar from Prisma type

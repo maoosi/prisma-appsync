@@ -52,11 +52,11 @@ enum OrderByArg {
     {% endif %}
 
     input {{ model.name }}Filter {
-        some: {{ model.name }}ScalarWhereInput
-        every: {{ model.name }}ScalarWhereInput
-        none: {{ model.name }}ScalarWhereInput
+        some: {{ model.name }}WhereInput
+        every: {{ model.name }}WhereInput
+        none: {{ model.name }}WhereInput
     }
-
+{# 
     input {{ model.name }}RelationFilter {
         {% for field in model.fields -%}
             {% if not field.relation -%}
@@ -77,11 +77,17 @@ enum OrderByArg {
                         {{ field.name }}: StringFilter
                     {% endif -%}
                 {% endif -%}
+            {% else -%}
+                {% if field.relation.kind === "one" -%}
+                    {{ field.name }}: {{ field.relation.type }}WhereInput
+                {% else  -%}
+                    {{ field.name }}: {{ field.relation.type }}Filter
+                {% endif -%}
             {% endif -%}
         {% endfor %}
-    }
+    } #}
 
-    input {{ model.name }}ScalarWhereInput {
+    {# input {{ model.name }}ScalarWhereInput {
         {% for field in model.fields -%}
             {% if not field.relation -%}
                 {% if field.isList -%}
@@ -103,7 +109,7 @@ enum OrderByArg {
                 {% endif -%}
             {% endif -%}
         {% endfor %}
-    }
+    } #}
 
     input {{ model.name }}WhereInput {
         OR: [{{ model.name }}WhereInput]
@@ -130,7 +136,7 @@ enum OrderByArg {
                 {% endif -%}
             {% else -%}
                 {% if field.relation.kind === "one" -%}
-                    {{ field.name }}: {{ field.relation.type }}RelationFilter
+                    {{ field.name }}: {{ field.relation.type }}WhereInput
                 {% else  -%}
                     {{ field.name }}: {{ field.relation.type }}Filter
                 {% endif -%}
