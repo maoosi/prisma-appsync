@@ -13,26 +13,47 @@ generator appsync {
 }
 
 model User {
-    id        Int      @id @default(autoincrement())
-    createdAt DateTime @default(now())
-    email     String   @unique
+    id        Int       @id @default(autoincrement())
+    createdAt DateTime  @default(now())
+    email     String    @unique
     name      String?
-    role      Role     @default(USER)
+    role      Role?     @default(USER)
     posts     Post[]
-}
-
-model Post {
-    id        Int      @id @default(autoincrement())
-    author    User?    @relation(fields: [authorId], references: [id])
-    authorId  Int?
-    title     String   @db.VarChar(255)
-    views     Int?     @default(1)
-    published Boolean? @default(false)
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    comments  Comment[]
 }
 
 enum Role {
     USER
     ADMIN
+}
+
+model Post {
+    id         Int        @id @default(autoincrement())
+    author     User       @relation(fields: [authorId], references: [id])
+    authorId   Int
+    title      String     @db.VarChar(255)
+    views      Int?       @default(1)
+    categories Category[]
+    comments   Comment[]
+    tags       String[]
+    published  Boolean?   @default(false)
+    createdAt  DateTime   @default(now())
+    updatedAt  DateTime   @updatedAt
+}
+
+enum Category {
+    A
+    B
+    C
+}
+
+model Comment {
+    id        Int      @id @default(autoincrement())
+    text      String
+    author    User     @relation(fields: [authorId], references: [id])
+    authorId  Int
+    post      Post     @relation(fields: [postId], references: [id])
+    postId    Int
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }
