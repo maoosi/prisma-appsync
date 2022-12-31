@@ -69,7 +69,7 @@ export function clarify(data: any): any {
  * @param {Context} options.context
  * @returns ShieldAuthorization
  */
-export function getShieldAuthorization({
+export async function getShieldAuthorization({
     shield,
     paths,
     context,
@@ -79,7 +79,7 @@ export function getShieldAuthorization({
     paths: string[]
     context: Context
     options: Options
-}): ShieldAuthorization {
+}): Promise<ShieldAuthorization> {
     const authorization: ShieldAuthorization = {
         canAccess: true,
         reason: String(),
@@ -136,6 +136,15 @@ export function getShieldAuthorization({
 
                     if (typeof shieldRule.rule === 'boolean') {
                         authorization.canAccess = shieldRule.rule
+                    }
+                    else if (typeof shieldRule.rule === 'function') {
+                        const ruleResult = shieldRule.rule(context)
+                        if (
+                            ruleResult instanceof Promise
+                        ) authorization.canAccess = await ruleResult
+                        else if (typeof ruleResult === 'boolean')
+                            authorization.canAccess = ruleResult
+                        else throw new CustomError('Shield rule must return a boolean.', { type: 'INTERNAL_SERVER_ERROR' })
                     }
                     else {
                         authorization.canAccess = true
