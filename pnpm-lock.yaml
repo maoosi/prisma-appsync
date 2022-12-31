@@ -120,7 +120,6 @@ importers:
       graphql: ^16.6.0
       graphql-tag: ^2.12.6
       graphql-yoga: ^3.1.1
-      json-to-graphql-query: ^2.2.4
       lodash: ^4.17.21
       prettier: ^2.7.1
     devDependencies:
@@ -132,7 +131,6 @@ importers:
       graphql: 16.6.0
       graphql-tag: 2.12.6_graphql@16.6.0
       graphql-yoga: 3.1.1_graphql@16.6.0
-      json-to-graphql-query: 2.2.4
       lodash: 4.17.21
       prettier: 2.8.1
 
@@ -3119,10 +3117,6 @@ packages:
 
   /json-stable-stringify-without-jsonify/1.0.1:
     resolution: {integrity: sha512-Bdboy+l7tA3OGW6FjyFHWkP5LuByj1Tk33Ljyq0axyzdk9//JSi2u3fP1QSmd1KNwq6VOKYGlAu87CisVir6Pw==}
-    dev: true
-
-  /json-to-graphql-query/2.2.4:
-    resolution: {integrity: sha512-vNvsOKDSlEqYCzejI1xHS9Hm738dSnG4Upy09LUGqyybZXSIIb7NydDphB/6WxW2EEVpPU4JeU/Yo63Nw9dEJg==}
     dev: true
 
   /json5/1.0.1:

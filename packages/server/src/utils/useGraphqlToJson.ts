@@ -1,7 +1,5 @@
 // adapted from: https://github.com/trayio/graphql-query-to-json
-
 import { parse } from 'graphql'
-import { EnumType } from 'json-to-graphql-query'
 import mapValues from 'lodash/mapValues'
 
 interface variablesObject {
@@ -73,6 +71,11 @@ interface ActualDefinitionNode {
 const undefinedVariableConst = 'undefined_variable'
 const isVariableDropinConst = '_____isVariableDropinConst'
 
+declare class EnumType {
+    value: string
+    constructor(value: string)
+}
+
 export const isArray = Array.isArray
 
 export function flatMap(arg: any, callback: any) {
@@ -87,80 +90,34 @@ export function isObject(arg: any): boolean {
     return arg instanceof Object
 }
 
-function getArgumentObject(argumentFields: Argument[]) {
-    const argObj: any = {}
-    argumentFields.forEach((arg) => {
-        if (arg.value.kind === 'ObjectValue' && arg?.value?.fields) {
-            argObj[arg.name.value] = getArgumentObject(arg.value.fields)
-        }
-        else if (arg.value.kind === 'ListValue') {
-            argObj[arg.name.value] = flatMap(arg.value.values, (element: any) => {
-                if (typeof element.value !== 'undefined') {
-                    return element.value
-                }
-                else if (element.fields) {
-                    const args = getArguments(element.fields)
-                    const value: any = {}
+function getArgument(arg: any) {
+    if (arg.value.kind === 'ObjectValue')
+        return getArguments(arg.value.fields)
 
-                    Object.keys(args).forEach((key) => {
-                        value[key] = args[key].value
-                    })
+    else if (arg.value.kind === 'Variable')
+        return `${arg.value.name.value}${isVariableDropinConst}`
 
-                    return value
-                }
-            })
-        }
-        else if (arg.value.kind === 'IntValue') {
-            argObj[arg.name.value] = parseInt(arg.value.value)
-        }
-        else if (arg.value.kind === 'Variable') {
-            argObj[arg.name.value] = `${arg?.value?.name?.value}${isVariableDropinConst}`
-        }
-        else {
-            argObj[arg.name.value] = arg.value.value
-        }
-    })
-    return argObj
+    else if (arg.selectionSet)
+        return getSelections(arg.selectionSet.selections)
+
+    else if (arg.value.kind === 'EnumValue')
+        return new EnumType(arg.value.value).value
+
+    else if (arg.value.kind === 'IntValue')
+        return parseInt(arg.value.value)
+
+    else if (arg.value.kind === 'ListValue')
+        return flatMap(arg.value.values, (argValue: any) => getArgument({ value: argValue }))
+
+    else
+        return arg.value.value
 }
 
-function getArguments(args: any) {
+function getArguments(args: any[]) {
     const argsObj: any = {}
+
     args.forEach((arg: any) => {
-        if (arg.value.kind === 'ObjectValue') {
-            argsObj[arg.name.value] = getArgumentObject(arg.value.fields)
-        }
-        else if (arg.value.kind === 'Variable') {
-            argsObj[arg.name.value] = `${arg.value.name.value}${isVariableDropinConst}`
-        }
-        else if (arg.selectionSet) {
-            argsObj[arg.name.value] = getSelections(arg.selectionSet.selections)
-        }
-        else if (arg.value.kind === 'EnumValue') {
-            argsObj[arg.name.value] = new EnumType(arg.value.value)
-        }
-        else if (arg.value.kind === 'IntValue') {
-            argsObj[arg.name.value] = parseInt(arg.value.value)
-        }
-        else if (arg.value.kind === 'ListValue') {
-            argsObj[arg.name.value] = flatMap(arg.value.values, (element: any) => {
-                if (typeof element.value !== 'undefined') {
-                    return element.value
-                }
-                else if (element.fields) {
-                    const args = getArguments(element.fields)
-                    const value: any = {}
-
-                    Object.keys(args).forEach((key) => {
-                        value[key] = args[key].value
-                    })
-
-                    return value
-                }
-            })
-        }
-        else {
-            argsObj[arg.name.value] = arg.value.value
-        }
+        argsObj[arg.name.value] = getArgument(arg)
     })
 
     return argsObj
@@ -172,11 +129,14 @@ function getSelections(selections: Selection[]) {
     selections.forEach((selection) => {
         const selectionHasAlias = selection.alias
         const selectionName = selectionHasAlias ? selection.alias.value : selection.name.value
+
         if (selection.selectionSet) {
             selObj[selectionName] = getSelections(selection.selectionSet.selections)
+
             if (selectionHasAlias)
                 selObj[selection.alias.value].__aliasFor = selection.name.value
         }
+
         if (selection.arguments && selection.arguments.length > 0)
             selObj[selectionName].__args = getArguments(selection.arguments)
 
@@ -201,6 +161,7 @@ function checkEachVariableInQueryIsDefined(defintion: ActualDefinitionNode, vari
         const idx = varsList?.findIndex((element) => {
             return element.key === variableKey
         })
+
         if (idx !== -1 && varsList && typeof idx !== 'undefined' && typeof varsList[idx] !== 'undefined')
             varsList[idx].value = variableValue
     })
@@ -222,6 +183,7 @@ function replaceVariables(obj: any, variables: any): any {
     return mapValues(obj, (value) => {
         if (isString(value) && new RegExp(`${isVariableDropinConst}$`).test(value)) {
             const variableName = value.replace(isVariableDropinConst, '')
+
             return variables[variableName]
         }
         else if (isObject(value) && !isArray(value)) {
@@ -244,6 +206,7 @@ export function graphQlQueryToJson(
     },
 ) {
     const jsonObject: any = {}
+
     if (!query)
         return jsonObject
 
@@ -263,5 +226,6 @@ export function graphQlQueryToJson(
     jsonObject[operation] = selections
 
     const varsReplacedWithValues = replaceVariables(jsonObject, options.variables)
+
     return varsReplacedWithValues
 }
