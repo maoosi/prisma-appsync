@@ -152,7 +152,7 @@ export interface Shield {
     [matcher: string]:
     | boolean
     | {
-        rule: boolean | any
+        rule: boolean | ((context: Context) => boolean | Promise<boolean>) | any
         reason?: Reason
     }
 }
