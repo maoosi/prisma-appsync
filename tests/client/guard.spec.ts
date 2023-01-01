@@ -22,8 +22,8 @@ const options: Options = {
 
 describe('CLIENT #guard', () => {
     describe('.getShieldAuthorization?', () => {
-        test('expect query to be _denied_ by default', () => {
-            const authorization = getShieldAuthorization({
+        test('expect query to be _denied_ by default', async () => {
+            const authorization = await getShieldAuthorization({
                 shield: { '**': false },
                 paths: ['/update/post/title'],
                 context: {
@@ -43,8 +43,8 @@ describe('CLIENT #guard', () => {
             })
         })
 
-        test('expect query to be _denied_ when ** is false', () => {
-            const authorization = getShieldAuthorization({
+        test('expect query to be _denied_ when ** is false', async () => {
+            const authorization = await getShieldAuthorization({
                 shield: { '**': false },
                 paths: ['/update/post/title'],
                 context: {
@@ -64,8 +64,8 @@ describe('CLIENT #guard', () => {
             })
         })
 
-        test('expect query to be _allowed_ when ** is true', () => {
-            const authorization = getShieldAuthorization({
+        test('expect query to be _allowed_ when ** is true', async () => {
+            const authorization = await getShieldAuthorization({
                 shield: { '**': true },
                 paths: ['/update/post/title'],
                 context: {
@@ -85,8 +85,8 @@ describe('CLIENT #guard', () => {
             })
         })
 
-        test('expect query to be _denied_ when custom rule overrides **', () => {
-            const authorization = getShieldAuthorization({
+        test('expect query to be _denied_ when custom rule overrides **', async () => {
+            const authorization = await getShieldAuthorization({
                 shield: {
                     '**': true,
                     '/update{Post,Comment,User}{,/**}': {
@@ -112,8 +112,8 @@ describe('CLIENT #guard', () => {
             })
         })
 
-        test('expect query to be _allowed_ when custom rule overrides **', () => {
-            const authorization = getShieldAuthorization({
+        test('expect query to be _allowed_ when custom rule overrides **', async () => {
+            const authorization = await getShieldAuthorization({
                 shield: {
                     '**': false,
                     '/updateMany{Posts,Comments,Users}{,/**}': { rule: true },
@@ -136,10 +136,10 @@ describe('CLIENT #guard', () => {
             })
         })
 
-        test('expect query to be a _prismaFilter_ when rule is an object', () => {
+        test('expect query to be a _prismaFilter_ when rule is an object', async () => {
             const isOwner = { owner: { cognitoSub: 'xxx' } }
 
-            const authorization = getShieldAuthorization({
+            const authorization = await getShieldAuthorization({
                 shield: {
                     '**': false,
                     '/update{Post,Comment,User}{,/**}': { rule: isOwner },

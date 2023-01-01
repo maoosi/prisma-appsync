@@ -296,7 +296,7 @@ export class PrismaAppSync {
                 : {}
 
             // Guard :: get shield authorization config
-            const shieldAuth: ShieldAuthorization = getShieldAuthorization({
+            const shieldAuth: ShieldAuthorization = await getShieldAuthorization({
                 shield,
                 paths: QueryParams.paths,
                 options: this.options,
