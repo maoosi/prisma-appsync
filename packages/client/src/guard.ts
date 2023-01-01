@@ -139,12 +139,13 @@ export async function getShieldAuthorization({
                     }
                     else if (typeof shieldRule.rule === 'function') {
                         const ruleResult = shieldRule.rule(context)
-                        if (
-                            ruleResult instanceof Promise
-                        ) authorization.canAccess = await ruleResult
+
+                        if (ruleResult instanceof Promise)
+                            authorization.canAccess = await ruleResult
                         else if (typeof ruleResult === 'boolean')
                             authorization.canAccess = ruleResult
-                        else throw new CustomError('Shield rule must return a boolean.', { type: 'INTERNAL_SERVER_ERROR' })
+                        else
+                            throw new CustomError('Shield rule must return a boolean.', { type: 'INTERNAL_SERVER_ERROR' })
                     }
                     else {
                         authorization.canAccess = true
