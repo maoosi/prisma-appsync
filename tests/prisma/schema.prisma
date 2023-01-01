@@ -26,7 +26,7 @@ model User {
   username    String    @unique
   email       String    @unique
   hiddenField String?
-  role        Role      @default(USER)
+  role        Role?     @default(USER)
   posts       Post[]
   comments    Comment[]
 }
@@ -43,25 +43,24 @@ model Post {
   title       String
   author      User?     @relation(fields: [authorUuid], references: [uuid])
   authorUuid  String?   @db.VarChar(200)
-  published   Boolean   @default(false)
+  published   Boolean?  @default(false)
   comments    Comment[]
-  views       Int       @default(0)
-  lastSavedAt DateTime  @default(now())
+  views       Int?      @default(0)
+  lastSavedAt DateTime? @default(now())
 }
 
-/// @gql(model: null)
 model Comment {
-  id          Int      @id @default(autoincrement())
-  author      User?    @relation(fields: [authorUuid], references: [uuid])
-  authorUuid  String?  @db.VarChar(200)
-  post        Post     @relation(fields: [postId], references: [id])
+  id          Int       @id @default(autoincrement())
+  author      User?     @relation(fields: [authorUuid], references: [uuid])
+  authorUuid  String?   @db.VarChar(200)
+  post        Post      @relation(fields: [postId], references: [id])
   postId      Int
   message     String
-  lastSavedAt DateTime @default(now())
+  lastSavedAt DateTime? @default(now())
 }
 
 /// @auth(model: [{ allow: apiKey }, { allow: userPools, groups: ["admins"] }])
-model HighlightedPost {
+model Like {
   id         Int    @id @default(autoincrement())
   authorUuid String @db.VarChar(200)
   postId     Int
