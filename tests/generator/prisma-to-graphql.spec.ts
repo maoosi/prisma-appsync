@@ -118,7 +118,7 @@ describe('GENERATOR #gql', () => {
             `
             tester.test(true, query)
         })
-        test('expect "relation to one filter" query to be valid', async () => {
+        test('expect "relation to-one filter" query to be valid', async () => {
             const query = `
                 query {
                     listComments(
@@ -136,7 +136,7 @@ describe('GENERATOR #gql', () => {
             `
             tester.test(true, query)
         })
-        test('expect "relation to many filter" query to be valid', async () => {
+        test('expect "relation to-many filter" query to be valid', async () => {
             const query = `
                 query {
                     listUsers(
@@ -145,6 +145,92 @@ describe('GENERATOR #gql', () => {
                                 every: {
                                     published: {
                                         equals: true
+                                    }
+                                }
+                            }
+                        }
+                    ) {
+                        username
+                        email
+                        role
+                    }
+                }
+            `
+            tester.test(true, query)
+        })
+        test('expect "deeply nested relation to-one-to-many filter" query to be valid', async () => {
+            const query = `
+                query {
+                    listComments(
+                        where: {
+                            author: {
+                                posts: {
+                                    every: {
+                                        published: { equals: true }
+                                    }
+                                }
+                            }
+                        }
+                    ) {
+                        message
+                    }
+                }
+            `
+            tester.test(true, query)
+        })
+        test('expect "deeply nested relation to-many-to-many filter" query to be valid', async () => {
+            const query = `
+                query {
+                    listUsers(
+                        where: {
+                            posts: {
+                                every: {
+                                    comments: {
+                                        every: {
+                                            message: { startsWith: "hello" }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    ) {
+                        username
+                        email
+                        role
+                    }
+                }
+            `
+            tester.test(true, query)
+        })
+        test('expect "deeply nested relation to-one-to-one filter" query to be valid', async () => {
+            const query = `
+                query {
+                    listComments(
+                        where: {
+                            author: {
+                                profile: {
+                                    bio: { contains: "hello" }
+                                }
+                            }
+                        }
+                    ) {
+                        message
+                    }
+                }
+            `
+            tester.test(true, query)
+        })
+        test('expect "deeply nested relation to-many-to-one filter" query to be valid', async () => {
+            const query = `
+                query {
+                    listUsers(
+                        where: {
+                            posts: {
+                                every: {
+                                    author: {
+                                        username: {
+                                            equals: "username"
+                                        }
                                     }
                                 }
                             }

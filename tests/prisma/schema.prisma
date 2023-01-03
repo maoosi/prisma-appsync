@@ -28,7 +28,15 @@ model User {
   hiddenField String?
   role        Role?     @default(USER)
   posts       Post[]
+  profile     Profile?
   comments    Comment[]
+}
+
+model Profile {
+  uuid      String  @id @default(uuid()) @db.VarChar(200)
+  owner     User?   @relation(fields: [ownerUuid], references: [uuid])
+  ownerUuid String? @unique @db.VarChar(200)
+  bio       String?
 }
 
 /// @gql(model: null)
