@@ -827,7 +827,6 @@ export class PrismaAppSyncCompiler {
 
     // Return relation kind (`one` or `many`) from Prisma type
     private getFieldRelationKind(field: DMMF.Field): 'one' | 'many' {
-        // return field.relationFromFields && field.relationFromFields.length === 1 ? 'one' : 'many'
         return !field.isList ? 'one' : 'many'
     }
 
