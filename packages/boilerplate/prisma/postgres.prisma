@@ -16,7 +16,7 @@ model User {
     id        Int       @id @default(autoincrement())
     createdAt DateTime  @default(now())
     email     String    @unique
-    name      String?
+    username  String?
     role      Role?     @default(USER)
     posts     Post[]
     comments  Comment[]
@@ -49,7 +49,7 @@ enum Category {
 
 model Comment {
     id        Int      @id @default(autoincrement())
-    text      String
+    message   String
     author    User     @relation(fields: [authorId], references: [id])
     authorId  Int
     post      Post     @relation(fields: [postId], references: [id])
