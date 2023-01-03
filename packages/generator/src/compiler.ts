@@ -552,7 +552,7 @@ export class PrismaAppSyncCompiler {
                             isList: this.isFieldList(field),
                             isEnum: this.isFieldEnum(field),
                             isEditable: !this.isFieldGeneratedRelation(field, model),
-                            isUnique: this.isFieldUnique(field, model),
+                            isUnique: this.isFieldUnique(field),
                             ...(field.relationName && {
                                 relation: {
                                     name: this.getFieldRelationName(field, model),
@@ -685,8 +685,8 @@ export class PrismaAppSyncCompiler {
     }
 
     // Return true if field is unique (meaning it can be used for WhereUniqueInputs)
-    private isFieldUnique(searchField: DMMF.Field, model: DMMF.Model): boolean {
-        return searchField.isId || searchField.isUnique || this.isFieldGeneratedRelation(searchField, model)
+    private isFieldUnique(searchField: DMMF.Field): boolean {
+        return searchField.isId || searchField.isUnique
     }
 
     // Return true if field is required
@@ -748,27 +748,27 @@ export class PrismaAppSyncCompiler {
         let parserOpt: prettier.RequiredOptions['parser'] | boolean
 
         switch (extname(outputFilename)) {
-        case '.ts':
-            parserOpt = 'typescript'
-            break
-        case '.json':
-            parserOpt = 'json'
-            break
-        case '.gql':
-            parserOpt = 'graphql'
-            break
-        case '.md':
-            parserOpt = 'markdown'
-            break
-        case '.yaml':
-            parserOpt = 'yaml'
-            break
-        case '.js':
-            parserOpt = 'babel'
-            break
-        default:
-            parserOpt = false
-            break
+            case '.ts':
+                parserOpt = 'typescript'
+                break
+            case '.json':
+                parserOpt = 'json'
+                break
+            case '.gql':
+                parserOpt = 'graphql'
+                break
+            case '.md':
+                parserOpt = 'markdown'
+                break
+            case '.yaml':
+                parserOpt = 'yaml'
+                break
+            case '.js':
+                parserOpt = 'babel'
+                break
+            default:
+                parserOpt = false
+                break
         }
 
         // pretiffy output
@@ -803,20 +803,20 @@ export class PrismaAppSyncCompiler {
     // Return field sample for demo/docs
     private getFieldSample(field: DMMF.Field): any {
         switch (field.type) {
-        case 'Int':
-            return '2'
-        case 'String':
-            return '"Foo"'
-        case 'Json':
-            return { foo: 'bar' }
-        case 'Float':
-            return '2.5'
-        case 'Boolean':
-            return 'false'
-        case 'DateTime':
-            return '"dd/mm/YYYY"'
-        default:
-            return field.type
+            case 'Int':
+                return '2'
+            case 'String':
+                return '"Foo"'
+            case 'Json':
+                return { foo: 'bar' }
+            case 'Float':
+                return '2.5'
+            case 'Boolean':
+                return 'false'
+            case 'DateTime':
+                return '"dd/mm/YYYY"'
+            default:
+                return field.type
         }
     }
 
@@ -827,7 +827,7 @@ export class PrismaAppSyncCompiler {
 
     // Return relation kind (`one` or `many`) from Prisma type
     private getFieldRelationKind(field: DMMF.Field): 'one' | 'many' {
-        return field.relationFromFields && field.relationFromFields.length === 1 ? 'one' : 'many'
+        return !field.isList ? 'one' : 'many'
     }
 
     // Get AppSync scalar from Prisma type
@@ -836,34 +836,34 @@ export class PrismaAppSyncCompiler {
 
         if (field.kind === 'scalar' && typeof field.type === 'string') {
             switch (field.type.toLocaleLowerCase()) {
-            case 'int':
-                type = 'Int'
-                break
-            case 'datetime':
-                type = 'AWSDateTime'
-                break
-            case 'json':
-                type = 'AWSJSON'
-                break
-            case 'float':
-                type = 'Float'
-                break
-            case 'boolean':
-                type = 'Boolean'
-                break
-            case 'string':
-                type = 'String'
-                break
+                case 'int':
+                    type = 'Int'
+                    break
+                case 'datetime':
+                    type = 'AWSDateTime'
+                    break
+                case 'json':
+                    type = 'AWSJSON'
+                    break
+                case 'float':
+                    type = 'Float'
+                    break
+                case 'boolean':
+                    type = 'Boolean'
+                    break
+                case 'string':
+                    type = 'String'
+                    break
             }
 
             if (type === 'String') {
                 switch (field.name.toLocaleLowerCase()) {
-                case 'email':
-                    type = 'AWSEmail'
-                    break
-                case 'url':
-                    type = 'AWSURL'
-                    break
+                    case 'email':
+                        type = 'AWSEmail'
+                        break
+                    case 'url':
+                        type = 'AWSURL'
+                        break
                 }
             }
         }
