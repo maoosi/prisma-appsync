@@ -48,6 +48,96 @@ describe('GENERATOR #gql', () => {
             `
             tester.test(true, query)
         })
+        test('expect "create<Model>" query to be valid', async () => {
+            const query = `
+                mutation {
+                    createPost(
+                        data: { title: "Hello world" }
+                    ) {
+                        title
+                    }
+                }
+            `
+            tester.test(true, query)
+        })
+        test('expect "update<Model>" query to be valid', async () => {
+            const query = `
+                mutation {
+                    updatePost(
+                        where: { id: 1 }
+                        data: { title: "Hello world" }
+                    ) {
+                        title
+                    }
+                }
+            `
+            tester.test(true, query)
+        })
+        test('expect "upsert<Model>" query to be valid', async () => {
+            const query = `
+                mutation {
+                    upsertPost(
+                        where: { id: 1 }
+                        data: { title: "Hello world" }
+                    ) {
+                        title
+                    }
+                }
+            `
+            tester.test(true, query)
+        })
+        test('expect "delete<Model>" query to be valid', async () => {
+            const query = `
+                mutation {
+                    deletePost(
+                        where: { id: 1 }
+                    ) {
+                        title
+                    }
+                }
+            `
+            tester.test(true, query)
+        })
+        test('expect "createMany<Model>" query to be valid', async () => {
+            const query = `
+                mutation {
+                    createManyPosts(
+                        data: [
+                            { title: "Hello world 1" },
+                            { title: "Hello world 2" }
+                        ]
+                    ) {
+                        count
+                    }
+                }
+            `
+            tester.test(true, query)
+        })
+        test('expect "updateMany<Model>" query to be valid', async () => {
+            const query = `
+                mutation {
+                    updateManyPosts(
+                        where: { title: { equals: "Hello" } }
+                        data: { title: "Hello world" }
+                    ) {
+                        count
+                    }
+                }
+            `
+            tester.test(true, query)
+        })
+        test('expect "deleteMany<Model>" query to be valid', async () => {
+            const query = `
+                mutation {
+                    deleteManyPosts(
+                        where: { title: { equals: "Hello world" } }
+                    ) {
+                        count
+                    }
+                }
+            `
+            tester.test(true, query)
+        })
     })
     describe('.advancedOperations?', () => {
         test('expect "deeply nested read" query to be valid', async () => {
