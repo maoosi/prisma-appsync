@@ -2,6 +2,7 @@ export interface CompilerOptions {
     schemaPath?: string
     outputDir?: string
     defaultDirective?: string
+    previewFeatures?: string[]
     debug?: boolean
 }
 
@@ -85,4 +86,5 @@ export interface DMMFPAS {
     usesQueries: boolean
     usesMutations: boolean
     usesSubscriptions: boolean
+    previewFeatures: string[]
 }

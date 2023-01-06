@@ -10,8 +10,6 @@ import flow from 'lodash/flow'
 import camelCase from 'lodash/camelCase'
 import upperFirst from 'lodash/upperFirst'
 import merge from 'lodash/merge'
-import omit from 'lodash/omit'
-// import { inspect } from 'util'
 import { isObject, isUndefined, replaceAll } from '@client/utils'
 import type { InjectedConfig } from '@client/defs'
 import type {
@@ -159,7 +157,9 @@ export class PrismaAppSyncCompiler {
                 },
             },
         }
+
         this.dmmf = dmmf
+
         this.data = {
             models: [],
             enums: [],
@@ -168,27 +168,13 @@ export class PrismaAppSyncCompiler {
             usesQueries: false,
             usesMutations: false,
             usesSubscriptions: false,
+            previewFeatures: options?.previewFeatures || [],
         }
 
         if (!(process?.env?.PRISMA_APPSYNC === 'false'))
             this.parseDMMF()
 
         return this
-    }
-
-    // Return config
-    public getConfig() {
-        return {
-            models: this.data.models.map((m: DMMFPAS_Model) => {
-                return omit(m, ['fields'])
-            }),
-            enums: this.data.enums,
-            customResolvers: this.data.customResolvers,
-            defaultAuthDirective: this.data.defaultAuthDirective,
-            usesQueries: this.data.usesQueries,
-            usesMutations: this.data.usesMutations,
-            usesSubscriptions: this.data.usesSubscriptions,
-        }
     }
 
     // Generate and output AppSync schema
@@ -623,8 +609,6 @@ export class PrismaAppSyncCompiler {
             if (this.data.usesSubscriptions === false && model.gql._usesSubscriptions === true)
                 this.data.usesSubscriptions = true
         })
-
-        // console.log(inspect(this.data, false, null, true))
 
         return this
     }

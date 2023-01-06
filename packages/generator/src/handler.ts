@@ -18,32 +18,38 @@ generatorHandler({
         }
     },
     async onGenerate(options: any) {
-        if (options.generator.output) {
+        if (options?.generator?.output) {
             try {
-                // Is debug mode enabled?
-                const debug: boolean = typeof options.generator.debug === 'boolean' ? options.generator.debug : false
+                // Default client generator
+                const clientGenerator = options?.otherGenerators?.find(g => g?.provider?.value === 'prisma-client-js')
 
-                if (debug)
-                    console.log('[Prisma-AppSync] Generator config: ', options.generator.config)
+                // Is debug mode enabled?
+                const debug: boolean = typeof options?.generator?.config?.debug !== undefined
+                    ? Boolean(options.generator.config.debug)
+                    : false
 
                 // Read output dir (ensures previous version of prisma are still supported)
-                const outputDir
-                    = typeof options.generator.output === 'string' ? (options.generator.output! as string) : undefined
+                const outputDir: string = options?.generator?.output?.value || String()
+
+                // Read preview features
+                const previewFeatures: string[] = clientGenerator?.previewFeatures || []
+
+                if (debug) {
+                    console.log('[Prisma-AppSync] Generator config: ', {
+                        ...options.generator.config,
+                        output: outputDir,
+                        previewFeatures,
+                    })
+                }
 
                 // Init compiler with user options
                 const compiler = new PrismaAppSyncCompiler(options.dmmf, {
                     schemaPath: options.schemaPath,
                     outputDir,
                     defaultDirective: options?.generator?.config?.defaultDirective || String(),
+                    previewFeatures,
                     debug,
                 })
-
-                if (debug) {
-                    console.log(
-                        '[Prisma-AppSync] Parsed schema config: ',
-                        JSON.stringify(compiler.getConfig(), null, 2),
-                    )
-                }
 
                 console.log('[Prisma-AppSync] Generating client.')
 

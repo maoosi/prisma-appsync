@@ -155,7 +155,11 @@ enum OrderByArg {
 
         input {{ model.name }}UpdateUniqueInput {
             data: {{ model.name }}UpdateInput!
-            where: {{ model.name }}WhereUniqueInput!
+            {% if "extendedWhereUnique" in previewFeatures -%}
+                where: {{ model.name }}WhereInput!
+            {% else  -%}
+                where: {{ model.name }}WhereUniqueInput!
+            {% endif -%}
         }
 
         input {{ model.name }}UpdateManyInput {
@@ -169,7 +173,11 @@ enum OrderByArg {
         }
 
         input {{ model.name }}UpsertUniqueInput {
-            where: {{ model.name }}WhereUniqueInput!
+            {% if "extendedWhereUnique" in previewFeatures -%}
+                where: {{ model.name }}WhereInput!
+            {% else  -%}
+                where: {{ model.name }}WhereUniqueInput!
+            {% endif -%}
             create: {{ model.name }}CreateInput!
             update: {{ model.name }}UpdateInput!
         }
@@ -180,7 +188,11 @@ enum OrderByArg {
         }
 
         input {{ model.name }}DeleteUniqueInput {
-            where: {{ model.name }}WhereUniqueInput!
+            {% if "extendedWhereUnique" in previewFeatures -%}
+                where: {{ model.name }}WhereInput!
+            {% else  -%}
+                where: {{ model.name }}WhereUniqueInput!
+            {% endif -%}
         }
 
         input {{ model.name }}DeleteManyInput {
@@ -218,7 +230,11 @@ enum OrderByArg {
                 update: [{{ field.relation.type }}UpdateUniqueInput]
                 upsert: [{{ field.relation.type }}UpsertUniqueInput]
                 delete: [{{ field.relation.type }}DeleteUniqueInput]
+                {% if "extendedWhereUnique" in previewFeatures -%}
+                disconnect: [{{ field.relation.type }}WhereInput]
+                {% else  -%}
                 disconnect: [{{ field.relation.type }}WhereUniqueInput]
+                {% endif -%}
                 set: [{{ field.relation.type }}WhereUniqueInput]
                 updateMany: [{{ field.relation.type }}UpdateManyInput]
                 deleteMany: [{{ field.relation.type }}DeleteManyInput]
@@ -413,7 +429,11 @@ type Mutation {
             Update an existing single {{ model.name }} record.
             """
             {{ model.gql.update }}(
-                where: {{ model.name }}WhereUniqueInput!,
+                {% if "extendedWhereUnique" in previewFeatures -%}
+                where: {{ model.name }}WhereInput!
+                {% else  -%}
+                where: {{ model.name }}WhereUniqueInput!
+                {% endif -%}
                 {% if model.operationFields  | length -%}
                 data: {{ model.name }}UpdateInput,
                 operation: {{ model.name }}OperationInput,
@@ -442,7 +462,11 @@ type Mutation {
             """
             {{ model.gql.upsert }}(
                 data: {{ model.name }}UpdateInput!,
+                {% if "extendedWhereUnique" in previewFeatures -%}
+                where: {{ model.name }}WhereInput!
+                {% else  -%}
                 where: {{ model.name }}WhereUniqueInput!
+                {% endif -%}
             ): {{ model.name }} {{ model.directives.upsert | safe }}
             {% endif %}
             {% if model.gql.delete -%}
@@ -450,7 +474,11 @@ type Mutation {
             Delete a single {{ model.name }} record.
             """
             {{ model.gql.delete }}(
+                {% if "extendedWhereUnique" in previewFeatures -%}
+                where: {{ model.name }}WhereInput!
+                {% else  -%}
                 where: {{ model.name }}WhereUniqueInput!
+                {% endif -%}
             ): {{ model.name }} {{ model.directives.delete | safe }}
             {% endif %}
             {% if model.gql.deleteMany -%}
@@ -474,7 +502,11 @@ type Query {
         Find a single {{ model.name }} record by unique identifier.
         """
         {{ model.gql.get }}(
+            {% if "extendedWhereUnique" in previewFeatures -%}
+            where: {{ model.name }}WhereInput!
+            {% else  -%}
             where: {{ model.name }}WhereUniqueInput!
+            {% endif -%}
         ): {{ model.name }} {{ model.directives.get | safe }}
         {% endif %}
         {% if model.gql.list -%}
