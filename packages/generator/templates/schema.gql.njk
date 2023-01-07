@@ -102,6 +102,48 @@ enum OrderByArg {
             {% endfor -%}
         {% endif %}
     }
+    
+    input {{ model.name }}ExtendedWhereUniqueInput {
+        OR: [{{ model.name }}WhereInput]
+        NOT: [{{ model.name }}WhereInput]
+        AND: [{{ model.name }}WhereInput]
+        {% for field in model.fields -%}
+            {% if field.isUnique -%}
+                {{ field.name }}: {% if field.isList -%}[{{ field.scalar }}]{% else %}{{ field.scalar }}{% endif %}
+            {% else -%}
+                {% if not field.relation -%}
+                    {% if field.isList -%}
+                        {% if field.isEnum -%}
+                            {{ field.name }}: {{ field.scalar }}EnumListFilter
+                        {% elseif field.scalar in ["Int", "Float", "AWSDateTime", "AWSJSON", "AWSEmail", "AWSURL", "Boolean"] -%}
+                            {{ field.name }}: {{ field.scalar }}ListFilter
+                        {% else -%}
+                            {{ field.name }}: StringListFilter
+                        {% endif -%}
+                    {% else -%}
+                        {% if field.isEnum -%}
+                            {{ field.name }}: {{ field.scalar }}EnumFilter
+                        {% elseif field.scalar in ["Int", "Float", "AWSDateTime", "AWSJSON", "AWSEmail", "AWSURL", "Boolean"] -%}
+                            {{ field.name }}: {{ field.scalar }}Filter
+                        {% else -%}
+                            {{ field.name }}: StringFilter
+                        {% endif -%}
+                    {% endif -%}
+                {% else -%}
+                    {% if field.relation.kind === "one" -%}
+                        {{ field.name }}: {{ field.relation.type }}WhereInput
+                    {% else  -%}
+                        {{ field.name }}: {{ field.relation.type }}Filter
+                    {% endif -%}
+                {% endif -%}
+            {% endif -%}
+        {% endfor %}
+        {%- if model.uniqueIndexes | length -%}
+            {% for uniqueIndex in model.uniqueIndexes -%}
+                {{ uniqueIndex.fields | join("_") }}: {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput
+            {% endfor -%}
+        {% endif %}
+    }
 
     input {{ model.name }}OrderByInput {
         {% for field in model.fields -%}
@@ -156,7 +198,7 @@ enum OrderByArg {
         input {{ model.name }}UpdateUniqueInput {
             data: {{ model.name }}UpdateInput!
             {% if "extendedWhereUnique" in previewFeatures -%}
-                where: {{ model.name }}WhereInput!
+                where: {{ model.name }}ExtendedWhereUniqueInput!
             {% else  -%}
                 where: {{ model.name }}WhereUniqueInput!
             {% endif -%}
@@ -174,7 +216,7 @@ enum OrderByArg {
 
         input {{ model.name }}UpsertUniqueInput {
             {% if "extendedWhereUnique" in previewFeatures -%}
-                where: {{ model.name }}WhereInput!
+                where: {{ model.name }}ExtendedWhereUniqueInput!
             {% else  -%}
                 where: {{ model.name }}WhereUniqueInput!
             {% endif -%}
@@ -189,7 +231,7 @@ enum OrderByArg {
 
         input {{ model.name }}DeleteUniqueInput {
             {% if "extendedWhereUnique" in previewFeatures -%}
-                where: {{ model.name }}WhereInput!
+                where: {{ model.name }}ExtendedWhereUniqueInput!
             {% else  -%}
                 where: {{ model.name }}WhereUniqueInput!
             {% endif -%}
@@ -231,7 +273,7 @@ enum OrderByArg {
                 upsert: [{{ field.relation.type }}UpsertUniqueInput]
                 delete: [{{ field.relation.type }}DeleteUniqueInput]
                 {% if "extendedWhereUnique" in previewFeatures -%}
-                disconnect: [{{ field.relation.type }}WhereInput]
+                disconnect: [{{ field.relation.type }}ExtendedWhereUniqueInput]
                 {% else  -%}
                 disconnect: [{{ field.relation.type }}WhereUniqueInput]
                 {% endif -%}
@@ -430,7 +472,7 @@ type Mutation {
             """
             {{ model.gql.update }}(
                 {% if "extendedWhereUnique" in previewFeatures -%}
-                where: {{ model.name }}WhereInput!
+                where: {{ model.name }}ExtendedWhereUniqueInput!
                 {% else  -%}
                 where: {{ model.name }}WhereUniqueInput!
                 {% endif -%}
@@ -463,7 +505,7 @@ type Mutation {
             {{ model.gql.upsert }}(
                 data: {{ model.name }}UpdateInput!,
                 {% if "extendedWhereUnique" in previewFeatures -%}
-                where: {{ model.name }}WhereInput!
+                where: {{ model.name }}ExtendedWhereUniqueInput!
                 {% else  -%}
                 where: {{ model.name }}WhereUniqueInput!
                 {% endif -%}
@@ -475,7 +517,7 @@ type Mutation {
             """
             {{ model.gql.delete }}(
                 {% if "extendedWhereUnique" in previewFeatures -%}
-                where: {{ model.name }}WhereInput!
+                where: {{ model.name }}ExtendedWhereUniqueInput!
                 {% else  -%}
                 where: {{ model.name }}WhereUniqueInput!
                 {% endif -%}
@@ -503,7 +545,7 @@ type Query {
         """
         {{ model.gql.get }}(
             {% if "extendedWhereUnique" in previewFeatures -%}
-            where: {{ model.name }}WhereInput!
+            where: {{ model.name }}ExtendedWhereUniqueInput!
             {% else  -%}
             where: {{ model.name }}WhereUniqueInput!
             {% endif -%}
