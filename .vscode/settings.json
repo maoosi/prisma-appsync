@@ -41,7 +41,7 @@
     "prettier.enable": false,
 
     // Editor
-    "editor.formatOnSave": true,
+    "editor.formatOnSave": false,
     "editor.accessibilitySupport": "off",
     "editor.cursorSmoothCaretAnimation": true,
     "editor.find.addExtraSpaceOnTop": false,

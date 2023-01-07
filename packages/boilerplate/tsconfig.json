@@ -1,0 +1,26 @@
+{
+    "$schema": "https://json.schemastore.org/tsconfig",
+    "display": "Default",
+    "compilerOptions": {
+        "target": "ES2018",
+        "module": "commonjs",
+        "lib": ["es2018"],
+        "declaration": false,
+        "strict": true,
+        "noImplicitAny": false,
+        "strictNullChecks": true,
+        "noImplicitThis": true,
+        "alwaysStrict": true,
+        "noUnusedLocals": false,
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": false,
+        "inlineSourceMap": true,
+        "inlineSources": true,
+        "esModuleInterop": true,
+        "experimentalDecorators": true,
+        "strictPropertyInitialization": false,
+        "baseUrl": "."
+    },
+    "include": ["**/*.ts", "**/*.tsx"],
+    "exclude": ["node_modules"]
+}

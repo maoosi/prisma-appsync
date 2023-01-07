@@ -94,7 +94,7 @@ export class Installer {
                 const detectedVersion = (await fs.readJson(path.join(__dirname, '../package.json')))?.version
                 version = `v${detectedVersion}`
             }
-            catch {}
+            catch { }
         }
         else {
             version = '> Contributor Mode'
@@ -248,6 +248,10 @@ export class Installer {
             this.installConfig.clones.push({
                 from: path.join(this.detected.rootPath, '../', 'packages/boilerplate/handler.ts'),
                 to: path.join(this.detected.rootPath, 'handler.ts'),
+            })
+            this.installConfig.clones.push({
+                from: path.join(this.detected.rootPath, '../', 'packages/boilerplate/tsconfig.json'),
+                to: path.join(this.detected.rootPath, 'tsconfig.json'),
             })
         }
 
