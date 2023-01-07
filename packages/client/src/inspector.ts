@@ -11,22 +11,21 @@ const errorCodes = {
 
 export interface ErrorExtensions {
     type: keyof typeof errorCodes
-    trace?: string[]
-    [key: string]: any
+    cause?: any
 }
 
 export interface ErrorDetails {
     error: string
     type: ErrorExtensions['type']
     code: number
-    trace: ErrorExtensions['trace']
+    cause?: ErrorExtensions['cause']
 }
 
 export class CustomError extends Error {
     public error: ErrorDetails['error']
     public type: ErrorDetails['type']
     public code: ErrorDetails['code']
-    public trace: ErrorDetails['trace']
+    public cause: ErrorDetails['cause']
     public details: ErrorDetails
 
     constructor(message: string, extensions: ErrorExtensions) {
@@ -34,12 +33,8 @@ export class CustomError extends Error {
 
         this.error = message
         this.type = extensions.type
-        this.trace = extensions?.trace || []
-        this.code
-            = typeof errorCodes[this.type] !== 'undefined' ? errorCodes[this.type] : errorCodes.INTERNAL_SERVER_ERROR
-
-        if (this.stack && this.stack.length > 0)
-            this.trace.unshift(this.stack)
+        this.cause = extensions?.cause?.meta?.cause || extensions?.cause
+        this.code = typeof errorCodes[this.type] !== 'undefined' ? errorCodes[this.type] : errorCodes.INTERNAL_SERVER_ERROR
 
         this.message = JSON.stringify({
             error: this.error,
@@ -47,11 +42,16 @@ export class CustomError extends Error {
             code: this.code,
         })
 
+        const maxCauseMessageLength = 500
+
+        if (this.cause?.message?.length > maxCauseMessageLength)
+            this.cause.message = `... ${this.cause.message.slice(this.cause.message.length - maxCauseMessageLength)}`
+
         this.details = {
             error: this.error,
             type: this.type,
             code: this.code,
-            trace: this.trace,
+            ...(this.cause && { cause: this.cause }),
         }
 
         if (!(process?.env?.PRISMA_APPSYNC_TESTING === 'true'))
@@ -66,7 +66,7 @@ export function parseError(error: Error): CustomError {
     else {
         return new CustomError(error.message, {
             type: 'INTERNAL_SERVER_ERROR',
-            trace: error?.stack ? [error.stack] : [],
+            cause: error,
         })
     }
 }
