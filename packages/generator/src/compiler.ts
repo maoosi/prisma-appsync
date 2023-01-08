@@ -177,6 +177,112 @@ export class PrismaAppSyncCompiler {
         return this
     }
 
+    // Parse data from Prisma DMMF
+    private parseDMMF(): this {
+        const defaultDirective: DMMFPAS_Comments = this.parseComments(this.options.defaultDirective)
+        this.data.defaultAuthDirective = this.getDirectives(defaultDirective.auth)
+
+        // models
+        this.dmmf.datamodel.models.forEach((model: DMMF.Model) => {
+            const fields: DMMFPAS_Field[] = []
+            const comments: DMMFPAS_Comments = this.parseComments(model.documentation)
+            const name = pascalCase(model.name)
+            const pluralizedName = pascalCase(plural(model.name))
+            const directives: any = this.getDirectives({ ...defaultDirective.auth, ...comments.auth })
+            const gqlConfig: any = this.getGqlModeling(comments.gql, {
+                name,
+                pluralizedName,
+            })
+            const isModelIgnored = !isUndefined(gqlConfig?._model) && gqlConfig._model === false
+
+            if (!isModelIgnored) {
+                model.fields.forEach((field: DMMF.Field) => {
+                    const isFieldIgnored = gqlConfig?._fields?.[field.name] === null
+
+                    if (!field.isGenerated && !isFieldIgnored) {
+                        fields.push({
+                            name: field.name,
+                            type: field.type,
+                            scalar: this.getFieldScalar(field),
+                            isRequired: this.isFieldRequired(field),
+                            isAutopopulated: this.isFieldAutoPopulated(field),
+                            isList: this.isFieldList(field),
+                            isEnum: this.isFieldEnum(field),
+                            isEditable: !this.isFieldGeneratedRelation(field, model),
+                            isUnique: this.isFieldUnique(field),
+                            ...(field.relationName && {
+                                relation: {
+                                    name: this.getFieldRelationName(field, model),
+                                    kind: this.getFieldRelationKind(field),
+                                    type: this.getFieldScalar(field),
+                                },
+                            }),
+                            directives,
+                        })
+                    }
+                })
+
+                this.data.models.push({
+                    name,
+                    pluralizedName,
+                    prismaRef: model.name.charAt(0).toLowerCase() + model.name.slice(1),
+                    directives,
+                    uniqueIndexes: model.uniqueIndexes,
+                    uniqueFields: model.uniqueFields,
+                    fields,
+                    operationFields: fields.filter(
+                        f => f.isEditable && !f.relation && ['Int', 'Float'].includes(f.scalar),
+                    ),
+                    gql: gqlConfig,
+                    isEditable: fields.filter(f => f.isEditable).length > 0,
+                    subscriptionFields: this.filterSubscriptionFields(fields, model.uniqueIndexes),
+                })
+            }
+        })
+
+        // enums
+        this.dmmf.datamodel.enums.forEach((enumerated: DMMF.DatamodelEnum) => {
+            const enumValues: string[] = enumerated.values.map(v => v.name)
+
+            this.data.enums.push({
+                name: enumerated.name,
+                values: enumValues,
+            })
+        })
+
+        // remove fields with broken relations (e.g. related model does not exist)
+        this.data.models = this.data.models.map((model: DMMFPAS_Model) => {
+            model.fields = model.fields.filter((field: DMMFPAS_Field) => {
+                if (field?.relation) {
+                    const modelExists = this.data.models.find((searchModel: DMMFPAS_Model) => {
+                        return searchModel.name === field?.relation?.type
+                    })
+
+                    if (!modelExists)
+                        return false
+                }
+
+                return true
+            })
+
+            return model
+        })
+
+        // usesQueries / usesMutations / usesSubscriptions
+        this.data.models.forEach((model: DMMFPAS_Model) => {
+            if (this.data.usesQueries === false && model.gql._usesQueries === true)
+                this.data.usesQueries = true
+
+            if (this.data.usesMutations === false && model.gql._usesMutations === true)
+                this.data.usesMutations = true
+
+            if (this.data.usesSubscriptions === false && model.gql._usesSubscriptions === true)
+                this.data.usesSubscriptions = true
+        })
+
+        return this
+    }
+
     // Generate and output AppSync schema
     public async makeSchema(customSchemaPath?: string): Promise<this> {
         // generate schema
@@ -316,24 +422,6 @@ export class PrismaAppSyncCompiler {
             /((?: )*(\'|\")\/\/\!\s+inject:type:operations(\'|\"))/g,
             injectedConfig.operations,
         )
-
-        return this
-    }
-
-    // Generate and output API documentation
-    public async makeDocs(): Promise<this> {
-        // generate main readme file
-        await this.makeFile(join(__dirname, './templates/docs/README.md.njk'), { outputDir: 'docs' })
-
-        // generate doc for each model
-        for (let i = 0; i < this.data.models.length; i++) {
-            const model = this.data.models[i]
-            await this.makeFile(join(__dirname, './templates/docs/model.md.njk'), {
-                data: { model },
-                outputFilename: `${model.name}.md`,
-                outputDir: 'docs',
-            })
-        }
 
         return this
     }
@@ -507,113 +595,6 @@ export class PrismaAppSyncCompiler {
         return directivesOutput
     }
 
-    // Parse data from Prisma DMMF
-    private parseDMMF(): this {
-        const defaultDirective: DMMFPAS_Comments = this.parseComments(this.options.defaultDirective)
-        this.data.defaultAuthDirective = this.getDirectives(defaultDirective.auth)
-
-        // models
-        this.dmmf.datamodel.models.forEach((model: DMMF.Model) => {
-            const fields: DMMFPAS_Field[] = []
-            const comments: DMMFPAS_Comments = this.parseComments(model.documentation)
-            const name = pascalCase(model.name)
-            const pluralizedName = pascalCase(plural(model.name))
-            const directives: any = this.getDirectives({ ...defaultDirective.auth, ...comments.auth })
-            const gqlConfig: any = this.getGqlModeling(comments.gql, {
-                name,
-                pluralizedName,
-            })
-            const isModelIgnored = !isUndefined(gqlConfig?._model) && gqlConfig._model === false
-
-            if (!isModelIgnored) {
-                model.fields.forEach((field: DMMF.Field) => {
-                    const isFieldIgnored = gqlConfig?._fields?.[field.name] === null
-
-                    if (!field.isGenerated && !isFieldIgnored) {
-                        fields.push({
-                            name: field.name,
-                            type: field.type,
-                            scalar: this.getFieldScalar(field),
-                            isRequired: this.isFieldRequired(field),
-                            isAutopopulated: this.isFieldAutoPopulated(field),
-                            isList: this.isFieldList(field),
-                            isEnum: this.isFieldEnum(field),
-                            isEditable: !this.isFieldGeneratedRelation(field, model),
-                            isUnique: this.isFieldUnique(field),
-                            ...(field.relationName && {
-                                relation: {
-                                    name: this.getFieldRelationName(field, model),
-                                    kind: this.getFieldRelationKind(field),
-                                    type: this.getFieldScalar(field),
-                                },
-                            }),
-                            directives,
-                            sample: this.getFieldSample(field),
-                        })
-                    }
-                })
-
-                this.data.models.push({
-                    name,
-                    pluralizedName,
-                    prismaRef: model.name.charAt(0).toLowerCase() + model.name.slice(1),
-                    directives,
-                    uniqueIndexes: model.uniqueIndexes,
-                    uniqueFields: model.uniqueFields,
-                    fields,
-                    operationFields: fields.filter(
-                        f => f.isEditable && !f.relation && ['Int', 'Float'].includes(f.scalar),
-                    ),
-                    gql: gqlConfig,
-                    isEditable: fields.filter(f => f.isEditable).length > 0,
-                    subscriptionFields: this.filterSubscriptionFields(fields, model.uniqueIndexes),
-                })
-            }
-        })
-
-        // enums
-        this.dmmf.datamodel.enums.forEach((enumerated: DMMF.DatamodelEnum) => {
-            const enumValues: string[] = enumerated.values.map(v => v.name)
-
-            this.data.enums.push({
-                name: enumerated.name,
-                values: enumValues,
-            })
-        })
-
-        // remove fields with broken relations (e.g. related model does not exist)
-        this.data.models = this.data.models.map((model: DMMFPAS_Model) => {
-            model.fields = model.fields.filter((field: DMMFPAS_Field) => {
-                if (field?.relation) {
-                    const modelExists = this.data.models.find((searchModel: DMMFPAS_Model) => {
-                        return searchModel.name === field?.relation?.type
-                    })
-
-                    if (!modelExists)
-                        return false
-                }
-
-                return true
-            })
-
-            return model
-        })
-
-        // usesQueries / usesMutations / usesSubscriptions
-        this.data.models.forEach((model: DMMFPAS_Model) => {
-            if (this.data.usesQueries === false && model.gql._usesQueries === true)
-                this.data.usesQueries = true
-
-            if (this.data.usesMutations === false && model.gql._usesMutations === true)
-                this.data.usesMutations = true
-
-            if (this.data.usesSubscriptions === false && model.gql._usesSubscriptions === true)
-                this.data.usesSubscriptions = true
-        })
-
-        return this
-    }
-
     // Return fields for subscription
     private filterSubscriptionFields(
         fields: DMMFPAS_Field[],
@@ -661,7 +642,6 @@ export class PrismaAppSyncCompiler {
                         isEditable: false,
                         isUnique: true,
                         isAutopopulated: true,
-                        sample: '2',
                     }),
                 )
             }
@@ -784,26 +764,6 @@ export class PrismaAppSyncCompiler {
         await outputFile(outputFilePath, outputContent)
 
         return outputFilePath
-    }
-
-    // Return field sample for demo/docs
-    private getFieldSample(field: DMMF.Field): any {
-        switch (field.type) {
-            case 'Int':
-                return '2'
-            case 'String':
-                return '"Foo"'
-            case 'Json':
-                return { foo: 'bar' }
-            case 'Float':
-                return '2.5'
-            case 'Boolean':
-                return 'false'
-            case 'DateTime':
-                return '"dd/mm/YYYY"'
-            default:
-                return field.type
-        }
     }
 
     // Return relation name from Prisma type

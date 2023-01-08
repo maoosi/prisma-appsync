@@ -44,7 +44,6 @@ export interface DMMFPAS_Field {
     scalar: string
     directives?: any
     relation?: DMMFPAS_Relation
-    sample: any
     isList: boolean
     isRequired: boolean
     isEditable: boolean
