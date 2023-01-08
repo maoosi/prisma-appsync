@@ -535,6 +535,7 @@ export class PrismaAppSyncCompiler {
                             type: field.type,
                             scalar: this.getFieldScalar(field),
                             isRequired: this.isFieldRequired(field),
+                            isAutopopulated: this.isFieldAutoPopulated(field),
                             isList: this.isFieldList(field),
                             isEnum: this.isFieldEnum(field),
                             isEditable: !this.isFieldGeneratedRelation(field, model),
@@ -659,6 +660,7 @@ export class PrismaAppSyncCompiler {
                         isRequired: true,
                         isEditable: false,
                         isUnique: true,
+                        isAutopopulated: true,
                         sample: '2',
                     }),
                 )
@@ -675,7 +677,7 @@ export class PrismaAppSyncCompiler {
 
     // Return true if field is required
     private isFieldRequired(searchField: DMMF.Field): boolean {
-        return searchField.isRequired && !searchField.isList && !this.isFieldAutoPopulated(searchField)
+        return searchField.isRequired && !searchField.isList
     }
 
     // Return true if field is an enum type

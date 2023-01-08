@@ -42,14 +42,15 @@ export interface DMMFPAS_Field {
     name: string
     type?: string
     scalar: string
+    directives?: any
+    relation?: DMMFPAS_Relation
+    sample: any
     isList: boolean
     isRequired: boolean
     isEditable: boolean
     isEnum: boolean
     isUnique: boolean
-    directives?: any
-    relation?: DMMFPAS_Relation
-    sample: any
+    isAutopopulated: boolean
 }
 
 export type DMMFPAS_UniqueFields = string[]
