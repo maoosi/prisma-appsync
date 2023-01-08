@@ -19,31 +19,31 @@ export interface CompilerOptionsPrivate extends CompilerOptions {
     }
 }
 
-export interface DMMFPAS_Model {
+export interface Document_Model {
     name: string
     pluralizedName: string
     prismaRef: string
-    fields: DMMFPAS_Field[]
+    fields: Document_Field[]
     directives: any
     isEditable: boolean
     gql: any
-    uniqueFields: DMMFPAS_UniqueFields[]
-    uniqueIndexes: DMMFPAS_UniqueIndexes[]
-    operationFields: DMMFPAS_Field[]
-    subscriptionFields: DMMFPAS_Field[]
+    uniqueFields: Document_UniqueFields[]
+    uniqueIndexes: Document_UniqueIndexes[]
+    operationFields: Document_Field[]
+    subscriptionFields: Document_Field[]
 }
 
-export interface DMMFPAS_Comments {
+export interface Document_Comments {
     auth: any
     gql: any
 }
 
-export interface DMMFPAS_Field {
+export interface Document_Field {
     name: string
     type?: string
     scalar: string
     directives?: any
-    relation?: DMMFPAS_Relation
+    relation?: Document_Relation
     isList: boolean
     isRequired: boolean
     isEditable: boolean
@@ -52,25 +52,25 @@ export interface DMMFPAS_Field {
     isAutopopulated: boolean
 }
 
-export type DMMFPAS_UniqueFields = string[]
+export type Document_UniqueFields = string[]
 
-export interface DMMFPAS_UniqueIndexes {
+export interface Document_UniqueIndexes {
     name: string
     fields: string[]
 }
 
-export interface DMMFPAS_Enum {
+export interface Document_Enum {
     name: string
     values: string[]
 }
 
-export interface DMMFPAS_Relation {
+export interface Document_Relation {
     name: string
     kind: 'one' | 'many'
     type: string
 }
 
-export interface DMMFPAS_CustomResolver {
+export interface Document_CustomResolver {
     typeName: string
     fieldName: string
     dataSource: string
@@ -78,10 +78,10 @@ export interface DMMFPAS_CustomResolver {
     responseMappingTemplate?: string
 }
 
-export interface DMMFPAS {
-    models: DMMFPAS_Model[]
-    enums: DMMFPAS_Enum[]
-    customResolvers: DMMFPAS_CustomResolver[]
+export interface Document {
+    models: Document_Model[]
+    enums: Document_Enum[]
+    customResolvers: Document_CustomResolver[]
     defaultAuthDirective: string
     usesQueries: boolean
     usesMutations: boolean

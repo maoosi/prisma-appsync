@@ -15,12 +15,12 @@ import type { InjectedConfig } from '@client/defs'
 import type {
     CompilerOptions,
     CompilerOptionsPrivate,
-    DMMFPAS,
-    DMMFPAS_Comments,
-    DMMFPAS_CustomResolver,
-    DMMFPAS_Field,
-    DMMFPAS_Model,
-    DMMFPAS_UniqueIndexes,
+    Document,
+    Document_Comments,
+    Document_CustomResolver,
+    Document_Field,
+    Document_Model,
+    Document_UniqueIndexes,
 } from './types'
 
 // AppSync schema helper
@@ -32,7 +32,7 @@ const pascalCase = flow(camelCase, upperFirst)
 
 export class PrismaAppSyncCompiler {
     private dmmf: DMMF.Document
-    private data: DMMFPAS
+    private document: Document
     private options: CompilerOptionsPrivate
 
     // Class constructor (entry point)
@@ -160,7 +160,7 @@ export class PrismaAppSyncCompiler {
 
         this.dmmf = dmmf
 
-        this.data = {
+        this.document = {
             models: [],
             enums: [],
             customResolvers: [],
@@ -179,13 +179,13 @@ export class PrismaAppSyncCompiler {
 
     // Parse data from Prisma DMMF
     private parseDMMF(): this {
-        const defaultDirective: DMMFPAS_Comments = this.parseComments(this.options.defaultDirective)
-        this.data.defaultAuthDirective = this.getDirectives(defaultDirective.auth)
+        const defaultDirective: Document_Comments = this.parseComments(this.options.defaultDirective)
+        this.document.defaultAuthDirective = this.getDirectives(defaultDirective.auth)
 
         // models
         this.dmmf.datamodel.models.forEach((model: DMMF.Model) => {
-            const fields: DMMFPAS_Field[] = []
-            const comments: DMMFPAS_Comments = this.parseComments(model.documentation)
+            const fields: Document_Field[] = []
+            const comments: Document_Comments = this.parseComments(model.documentation)
             const name = pascalCase(model.name)
             const pluralizedName = pascalCase(plural(model.name))
             const directives: any = this.getDirectives({ ...defaultDirective.auth, ...comments.auth })
@@ -222,7 +222,7 @@ export class PrismaAppSyncCompiler {
                     }
                 })
 
-                this.data.models.push({
+                this.document.models.push({
                     name,
                     pluralizedName,
                     prismaRef: model.name.charAt(0).toLowerCase() + model.name.slice(1),
@@ -244,17 +244,17 @@ export class PrismaAppSyncCompiler {
         this.dmmf.datamodel.enums.forEach((enumerated: DMMF.DatamodelEnum) => {
             const enumValues: string[] = enumerated.values.map(v => v.name)
 
-            this.data.enums.push({
+            this.document.enums.push({
                 name: enumerated.name,
                 values: enumValues,
             })
         })
 
         // remove fields with broken relations (e.g. related model does not exist)
-        this.data.models = this.data.models.map((model: DMMFPAS_Model) => {
-            model.fields = model.fields.filter((field: DMMFPAS_Field) => {
+        this.document.models = this.document.models.map((model: Document_Model) => {
+            model.fields = model.fields.filter((field: Document_Field) => {
                 if (field?.relation) {
-                    const modelExists = this.data.models.find((searchModel: DMMFPAS_Model) => {
+                    const modelExists = this.document.models.find((searchModel: Document_Model) => {
                         return searchModel.name === field?.relation?.type
                     })
 
@@ -269,15 +269,15 @@ export class PrismaAppSyncCompiler {
         })
 
         // usesQueries / usesMutations / usesSubscriptions
-        this.data.models.forEach((model: DMMFPAS_Model) => {
-            if (this.data.usesQueries === false && model.gql._usesQueries === true)
-                this.data.usesQueries = true
+        this.document.models.forEach((model: Document_Model) => {
+            if (this.document.usesQueries === false && model.gql._usesQueries === true)
+                this.document.usesQueries = true
 
-            if (this.data.usesMutations === false && model.gql._usesMutations === true)
-                this.data.usesMutations = true
+            if (this.document.usesMutations === false && model.gql._usesMutations === true)
+                this.document.usesMutations = true
 
-            if (this.data.usesSubscriptions === false && model.gql._usesSubscriptions === true)
-                this.data.usesSubscriptions = true
+            if (this.document.usesSubscriptions === false && model.gql._usesSubscriptions === true)
+                this.document.usesSubscriptions = true
         })
 
         return this
@@ -343,8 +343,8 @@ export class PrismaAppSyncCompiler {
 
         const operationsList: string[] = []
 
-        for (let i = 0; i < this.data.models.length; i++) {
-            const model = this.data.models[i]
+        for (let i = 0; i < this.document.models.length; i++) {
+            const model = this.document.models[i]
 
             if (model.name !== model.pluralizedName)
                 injectedConfig.modelsMapping[model.pluralizedName] = model.prismaRef
@@ -396,9 +396,9 @@ export class PrismaAppSyncCompiler {
             }
 
             // Read user-defined custom resolvers
-            this.data.customResolvers = loadYaml(
+            this.document.customResolvers = loadYaml(
                 readFileSync(join(dirname(this.options.schemaPath), customResolversPath), { encoding: 'utf8' }),
-            ) as DMMFPAS_CustomResolver[]
+            ) as Document_CustomResolver[]
         }
 
         // generate resolvers
@@ -427,7 +427,7 @@ export class PrismaAppSyncCompiler {
     }
 
     // Read directives from comments
-    private parseComments(directives?: string): DMMFPAS_Comments {
+    private parseComments(directives?: string): Document_Comments {
         let gql = {}
         let auth = {}
 
@@ -597,10 +597,10 @@ export class PrismaAppSyncCompiler {
 
     // Return fields for subscription
     private filterSubscriptionFields(
-        fields: DMMFPAS_Field[],
-        uniqueIndexes?: DMMFPAS_UniqueIndexes[],
-    ): DMMFPAS_Field[] {
-        const subFields: DMMFPAS_Field[] = []
+        fields: Document_Field[],
+        uniqueIndexes?: Document_UniqueIndexes[],
+    ): Document_Field[] {
+        const subFields: Document_Field[] = []
         const maxFields = 5
 
         let shouldContinue = true
@@ -609,7 +609,7 @@ export class PrismaAppSyncCompiler {
         while (shouldContinue) {
             shouldContinue = false
 
-            const field: DMMFPAS_Field = fields[currentIndex]
+            const field: Document_Field = fields[currentIndex]
 
             if (typeof field !== 'undefined' && !field.relation && field.isUnique)
                 subFields.push(field)
@@ -703,7 +703,7 @@ export class PrismaAppSyncCompiler {
 
         let outputContent: string = nunjucks.renderString(
             inputContent.trim(),
-            outputFileOptions && outputFileOptions.data ? outputFileOptions.data : this.data,
+            outputFileOptions && outputFileOptions.data ? outputFileOptions.data : this.document,
         )
 
         const outputFilename: string
