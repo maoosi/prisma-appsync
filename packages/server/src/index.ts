@@ -97,8 +97,8 @@ export async function createServer({ defaultQuery, lambdaHandler, port, schema, 
                             })
 
                             request.headers = {
-                                ...(request?.headers || {}),
                                 ...headers,
+                                ...(request?.headers || {}),
                             }
 
                             const event = useLambdaEvent({
