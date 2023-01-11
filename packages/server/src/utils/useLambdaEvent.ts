@@ -24,7 +24,9 @@ export default function useLambdaIdentity({
     if (Object.keys(args).length > 0)
         delete selectionSet.__args
 
-    const selectionSetList = Object.keys(_.dotate(selectionSet)).map(selection => selection.replace(/\./g, '/'))
+    const selectionSetList = Object.keys(_.dotate(selectionSet))
+        .filter(selection => selection !== '.')
+        .map(selection => selection.replace(/\./g, '/'))
 
     selectionSetList.unshift('__typename')
 
