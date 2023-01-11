@@ -53,7 +53,7 @@ const reduceObject = <T extends JSONObject>(
             const fieldName = name.value
             const value = object[fieldName]
 
-            if (typeof value !== 'undefined') {
+            if (typeof value !== 'undefined' && value !== null && value !== '') {
                 if (selection.selectionSet) {
                     reducedObject[fieldName] = reduceOutput(
                         selection.selectionSet,
