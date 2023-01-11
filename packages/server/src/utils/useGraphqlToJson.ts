@@ -153,6 +153,7 @@ function checkEachVariableInQueryIsDefined(defintion: ActualDefinitionNode, vari
             {
                 key: curr.variable.name.value,
                 value: undefinedVariableConst,
+                required: curr.type.kind === 'NonNullType',
             },
         ]
     }, [])
@@ -167,7 +168,7 @@ function checkEachVariableInQueryIsDefined(defintion: ActualDefinitionNode, vari
     })
 
     const undefinedVariable = varsList?.find((varInQuery) => {
-        return varInQuery.value === undefinedVariableConst
+        return varInQuery.value === undefinedVariableConst && varInQuery.required
     })
 
     if (undefinedVariable) {
