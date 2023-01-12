@@ -124,7 +124,6 @@ const reduceOutput = <T extends JSONObject | Array<JSONObject>>(
     return reduceObject(selectionSet, fragments, object, options) as T
 }
 
-// TODO option to fill missing data with "null"
 export const queryObject = <T extends {}>(
     query: string | DocumentNode,
     data: T,

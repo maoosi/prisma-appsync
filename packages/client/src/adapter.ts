@@ -18,7 +18,6 @@ import {
     ActionsAliasesList,
     Authorizations,
     BatchActionsList,
-    DebugTestingKey,
     ReservedPrismaKeys,
 } from './defs'
 
@@ -90,22 +89,19 @@ export function parseEvent(appsyncEvent: AppSyncEvent, options: Options, customR
 }
 
 /**
- * #### Convert undefined's to NULL's.
+ * #### Convert `is: <enum>NULL` and `isNot: <enum>NULL` to `is: null` and `isNot: null`
  *
  * @param {any} data
  * @returns any
  */
 export function addNullables(data: any): any {
-    return data
-
     return traverse(data, (value, key) => {
         let excludeChilds = false
 
-        if (typeof key === 'string' && key === DebugTestingKey)
+        if (typeof key === 'string' && (key === 'is' || key === 'isNot')) {
             excludeChilds = true
-
-        if (value === undefined)
             value = null
+        }
 
         return { value, excludeChilds }
     })

@@ -71,11 +71,6 @@ interface ActualDefinitionNode {
 const undefinedVariableConst = 'undefined_variable'
 const isVariableDropinConst = '_____isVariableDropinConst'
 
-declare class EnumType {
-    value: string
-    constructor(value: string)
-}
-
 export const isArray = Array.isArray
 
 export function flatMap(arg: any, callback: any) {
@@ -101,7 +96,7 @@ function getArgument(arg: any) {
         return getSelections(arg.selectionSet.selections)
 
     else if (arg.value.kind === 'EnumValue')
-        return new EnumType(arg.value.value).value
+        return arg.value.value
 
     else if (arg.value.kind === 'IntValue')
         return parseInt(arg.value.value)
@@ -109,8 +104,7 @@ function getArgument(arg: any) {
     else if (arg.value.kind === 'ListValue')
         return flatMap(arg.value.values, (argValue: any) => getArgument({ value: argValue }))
 
-    else
-        return arg.value.value
+    else return arg.value.value
 }
 
 function getArguments(args: any[]) {

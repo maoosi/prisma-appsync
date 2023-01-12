@@ -10,6 +10,15 @@ type BatchPayload {{ defaultAuthDirective.model | safe }} {
     count: Int
 }
 
+enum OrderByArg {
+    ASC
+    DESC
+}
+
+enum NullArg {
+    NULL
+}
+
 {% for enum in enums %}
     enum {{ enum.name }} {
         {% for value in enum.values -%}
@@ -33,11 +42,6 @@ type BatchPayload {{ defaultAuthDirective.model | safe }} {
     }
 {% endfor %}
 
-enum OrderByArg {
-    ASC
-    DESC
-}
-
 {% for model in models %}
     {% if model.uniqueIndexes | length -%}
         {% for uniqueIndex in model.uniqueIndexes -%}
@@ -58,6 +62,8 @@ enum OrderByArg {
     }
 
     input {{ model.name }}WhereInput {
+        is: NullArg
+        isNot: NullArg
         OR: [{{ model.name }}WhereInput]
         NOT: [{{ model.name }}WhereInput]
         AND: [{{ model.name }}WhereInput]
@@ -303,6 +309,8 @@ input FloatOperation {
 }
 
 input AWSDateTimeFilter {
+    is: NullArg
+    isNot: NullArg
     equals: AWSDateTime
     gt: AWSDateTime
     gte: AWSDateTime
@@ -322,6 +330,8 @@ input AWSDateTimeListFilter {
 }
 
 input FloatFilter {
+    is: NullArg
+    isNot: NullArg
     equals: Float
     gt: Float
     gte: Float
@@ -341,6 +351,8 @@ input FloatListFilter {
 }
 
 input IntFilter {
+    is: NullArg
+    isNot: NullArg
     equals: Int
     gt: Int
     gte: Int
@@ -360,6 +372,8 @@ input IntListFilter {
 }
 
 input AWSJSONFilter {
+    is: NullArg
+    isNot: NullArg
     contains: String
     endsWith: String
     equals: AWSJSON
@@ -378,6 +392,8 @@ input AWSJSONListFilter {
 }
 
 input AWSEmailFilter {
+    is: NullArg
+    isNot: NullArg
     contains: String
     endsWith: String
     equals: AWSEmail
@@ -396,6 +412,8 @@ input AWSEmailListFilter {
 }
 
 input AWSURLFilter {
+    is: NullArg
+    isNot: NullArg
     contains: String
     endsWith: String
     equals: AWSURL
@@ -414,6 +432,8 @@ input AWSURLListFilter {
 }
 
 input StringFilter {
+    is: NullArg
+    isNot: NullArg
     contains: String
     endsWith: String
     equals: String
@@ -433,6 +453,8 @@ input StringListFilter {
 }
 
 input BooleanFilter {
+    is: NullArg
+    isNot: NullArg
     equals: Boolean
     not: BooleanFilter
 }
