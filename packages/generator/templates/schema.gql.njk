@@ -234,18 +234,6 @@ enum NullArg {
             where: {{ model.name }}WhereUniqueInput!
             create: {{ model.name }}CreateInput!
         }
-
-        input {{ model.name }}DeleteUniqueInput {
-            {% if "extendedWhereUnique" in previewFeatures -%}
-                where: {{ model.name }}ExtendedWhereUniqueInput!
-            {% else  -%}
-                where: {{ model.name }}WhereUniqueInput!
-            {% endif -%}
-        }
-
-        input {{ model.name }}DeleteManyInput {
-            where: {{ model.name }}WhereInput!
-        }
     {% endif %}
 
     {% for field in model.fields -%}
@@ -277,15 +265,17 @@ enum NullArg {
                 connectOrCreate: [{{ field.relation.type }}ConnectOrCreateInput]
                 update: [{{ field.relation.type }}UpdateUniqueInput]
                 upsert: [{{ field.relation.type }}UpsertUniqueInput]
-                delete: [{{ field.relation.type }}DeleteUniqueInput]
                 {% if "extendedWhereUnique" in previewFeatures -%}
+                delete: [{{ field.relation.type }}ExtendedWhereUniqueInput]
                 disconnect: [{{ field.relation.type }}ExtendedWhereUniqueInput]
+                deleteMany: [{{ field.relation.type }}ExtendedWhereUniqueInput]
                 {% else  -%}
+                delete: [{{ field.relation.type }}WhereUniqueInput]
                 disconnect: [{{ field.relation.type }}WhereUniqueInput]
+                deleteMany: [{{ field.relation.type }}WhereUniqueInput]
                 {% endif -%}
                 set: [{{ field.relation.type }}WhereUniqueInput]
                 updateMany: [{{ field.relation.type }}UpdateManyInput]
-                deleteMany: [{{ field.relation.type }}DeleteManyInput]
                 {% endif -%}
             }
         {% endif -%}
