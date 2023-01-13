@@ -81,9 +81,9 @@ enum NullArg {
                     {% if field.isEnum -%}
                         {{ field.name }}: {{ field.scalar }}EnumFilter
                     {% elseif field.scalar in ["Int", "Float", "AWSDateTime", "AWSJSON", "AWSEmail", "AWSURL", "Boolean"] -%}
-                        {{ field.name }}: {{ field.scalar }}Filter
+                        {{ field.name }}: {{ field.scalar }}{% if not field.isRequired -%}Nullable{% endif -%}Filter
                     {% else -%}
-                        {{ field.name }}: StringFilter
+                        {{ field.name }}: String{% if not field.isRequired -%}Nullable{% endif -%}Filter
                     {% endif -%}
                 {% endif -%}
             {% else -%}
@@ -130,9 +130,9 @@ enum NullArg {
                         {% if field.isEnum -%}
                             {{ field.name }}: {{ field.scalar }}EnumFilter
                         {% elseif field.scalar in ["Int", "Float", "AWSDateTime", "AWSJSON", "AWSEmail", "AWSURL", "Boolean"] -%}
-                            {{ field.name }}: {{ field.scalar }}Filter
+                            {{ field.name }}: {{ field.scalar }}{% if not field.isRequired -%}Nullable{% endif -%}Filter
                         {% else -%}
-                            {{ field.name }}: StringFilter
+                            {{ field.name }}: String{% if not field.isRequired -%}Nullable{% endif -%}Filter
                         {% endif -%}
                     {% endif -%}
                 {% else -%}
@@ -309,8 +309,6 @@ input FloatOperation {
 }
 
 input AWSDateTimeFilter {
-    is: NullArg
-    isNot: NullArg
     equals: AWSDateTime
     gt: AWSDateTime
     gte: AWSDateTime
@@ -319,6 +317,18 @@ input AWSDateTimeFilter {
     lte: AWSDateTime
     not: AWSDateTimeFilter
     notIn: [AWSDateTime!]
+}
+
+input AWSDateTimeNullableFilter {
+    equals: AWSDateTime
+    gt: AWSDateTime
+    gte: AWSDateTime
+    in: [AWSDateTime!]
+    lt: AWSDateTime
+    lte: AWSDateTime
+    not: AWSDateTimeFilter
+    notIn: [AWSDateTime!]
+    isNull: Boolean
 }
 
 input AWSDateTimeListFilter {
@@ -330,8 +340,6 @@ input AWSDateTimeListFilter {
 }
 
 input FloatFilter {
-    is: NullArg
-    isNot: NullArg
     equals: Float
     gt: Float
     gte: Float
@@ -340,6 +348,19 @@ input FloatFilter {
     lte: Float
     not: FloatFilter
     notIn: [Float!]
+    isNull: Boolean
+}
+
+input FloatNullableFilter {
+    equals: Float
+    gt: Float
+    gte: Float
+    in: [Float!]
+    lt: Float
+    lte: Float
+    not: FloatFilter
+    notIn: [Float!]
+    isNull: Boolean
 }
 
 input FloatListFilter {
@@ -351,8 +372,6 @@ input FloatListFilter {
 }
 
 input IntFilter {
-    is: NullArg
-    isNot: NullArg
     equals: Int
     gt: Int
     gte: Int
@@ -361,6 +380,18 @@ input IntFilter {
     lte: Int
     not: IntFilter
     notIn: [Int!]
+}
+
+input IntNullableFilter {
+    equals: Int
+    gt: Int
+    gte: Int
+    in: [Int!]
+    lt: Int
+    lte: Int
+    not: IntFilter
+    notIn: [Int!]
+    isNull: Boolean
 }
 
 input IntListFilter {
@@ -372,8 +403,6 @@ input IntListFilter {
 }
 
 input AWSJSONFilter {
-    is: NullArg
-    isNot: NullArg
     contains: String
     endsWith: String
     equals: AWSJSON
@@ -381,6 +410,17 @@ input AWSJSONFilter {
     not: AWSJSONFilter
     notIn: [AWSJSON!]
     startsWith: String
+}
+
+input AWSJSONNullableFilter {
+    contains: String
+    endsWith: String
+    equals: AWSJSON
+    in: [AWSJSON!]
+    not: AWSJSONFilter
+    notIn: [AWSJSON!]
+    startsWith: String
+    isNull: Boolean
 }
 
 input AWSJSONListFilter {
@@ -392,8 +432,6 @@ input AWSJSONListFilter {
 }
 
 input AWSEmailFilter {
-    is: NullArg
-    isNot: NullArg
     contains: String
     endsWith: String
     equals: AWSEmail
@@ -401,6 +439,17 @@ input AWSEmailFilter {
     not: AWSEmailFilter
     notIn: [AWSEmail!]
     startsWith: String
+}
+
+input AWSEmailNullableFilter {
+    contains: String
+    endsWith: String
+    equals: AWSEmail
+    in: [AWSEmail!]
+    not: AWSEmailFilter
+    notIn: [AWSEmail!]
+    startsWith: String
+    isNull: Boolean
 }
 
 input AWSEmailListFilter {
@@ -412,8 +461,6 @@ input AWSEmailListFilter {
 }
 
 input AWSURLFilter {
-    is: NullArg
-    isNot: NullArg
     contains: String
     endsWith: String
     equals: AWSURL
@@ -421,6 +468,17 @@ input AWSURLFilter {
     not: AWSURLFilter
     notIn: [AWSURL!]
     startsWith: String
+}
+
+input AWSURLNullableFilter {
+    contains: String
+    endsWith: String
+    equals: AWSURL
+    in: [AWSURL!]
+    not: AWSURLFilter
+    notIn: [AWSURL!]
+    startsWith: String
+    isNull: Boolean
 }
 
 input AWSURLListFilter {
@@ -432,8 +490,6 @@ input AWSURLListFilter {
 }
 
 input StringFilter {
-    is: NullArg
-    isNot: NullArg
     contains: String
     endsWith: String
     equals: String
@@ -442,6 +498,18 @@ input StringFilter {
     notIn: [String!]
     startsWith: String
     mode: String
+}
+
+input StringNullableFilter {
+    contains: String
+    endsWith: String
+    equals: String
+    in: [String!]
+    not: StringFilter
+    notIn: [String!]
+    startsWith: String
+    mode: String
+    isNull: Boolean
 }
 
 input StringListFilter {
@@ -453,10 +521,14 @@ input StringListFilter {
 }
 
 input BooleanFilter {
-    is: NullArg
-    isNot: NullArg
     equals: Boolean
     not: BooleanFilter
+}
+
+input BooleanNullableFilter {
+    equals: Boolean
+    not: BooleanFilter
+    isNull: Boolean
 }
 
 input BooleanListFilter {

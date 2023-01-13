@@ -1,6 +1,6 @@
 import { CustomError } from './inspector'
 import { sanitize } from './guard'
-import { clone, dotate, isEmpty, isObject, isUndefined, lowerFirst, merge, traverse } from './utils'
+import { clone, dotate, isEmpty, isObject, isUndefined, lowerFirst, merge, replaceObjectPath, traverse } from './utils'
 import type {
     Action,
     ActionsAlias,
@@ -95,16 +95,32 @@ export function parseEvent(appsyncEvent: AppSyncEvent, options: Options, customR
  * @returns any
  */
 export function addNullables(data: any): any {
-    return traverse(data, (value, key) => {
+    const replaceList: { target: string[]; value: any }[] = []
+
+    traverse(data, ({ value, key, path }) => {
         let excludeChilds = false
 
         if (typeof key === 'string' && (key === 'is' || key === 'isNot')) {
+            replaceList.push({ target: path, value: value === 'NULL' ? null : undefined })
             excludeChilds = true
-            value = null
+        }
+
+        else if (typeof key === 'string' && key === 'isNull') {
+            replaceList.push({
+                target: path.splice(0, path.length - 1),
+                value: value === true ? { equals: null } : { not: null },
+            })
+            excludeChilds = true
         }
 
         return { value, excludeChilds }
     })
+
+    replaceList.forEach((replaceAction) => {
+        replaceObjectPath(data, replaceAction.target, replaceAction.value)
+    })
+
+    return data
 }
 
 /**

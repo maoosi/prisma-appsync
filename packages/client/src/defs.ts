@@ -29,7 +29,7 @@ export type Options = Required<PrismaAppSyncOptionsType> & {
 
 export interface InjectedConfig {
     modelsMapping?: { [modelVariant: string]: string }
-    fieldsMapping?: { [fieldPath: string]: string }
+    fieldsMapping?: { [fieldPath: string]: { type: string; isRelation: boolean } }
     operations?: string
 }
 

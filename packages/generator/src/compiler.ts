@@ -370,8 +370,8 @@ export class PrismaAppSyncCompiler {
                     ) {
                         const singleRelationPath = `${model.name.toLowerCase()}/${field.name}`
                         const multiRelationPath = `${model.pluralizedName.toLowerCase()}/${field.name}`
-                        injectedConfig.fieldsMapping[singleRelationPath] = field.type
-                        injectedConfig.fieldsMapping[multiRelationPath] = field.type
+                        injectedConfig.fieldsMapping[singleRelationPath] = { type: field.type, isRelation: !!field?.relation }
+                        injectedConfig.fieldsMapping[multiRelationPath] = { type: field.type, isRelation: !!field?.relation }
                     }
                 }
             }

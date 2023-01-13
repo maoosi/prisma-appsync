@@ -11,6 +11,7 @@ import {
     lowerFirst,
     merge,
     replaceAll,
+    replaceObjectPath,
     traverse,
     traverseAsync,
 } from './utils'
@@ -52,6 +53,7 @@ const _ = {
     traverse,
     traverseAsync,
     replaceAll,
+    replaceObjectPath,
 }
 
 export { _ }
