@@ -95,6 +95,33 @@ enum NullArg {
             {% endif -%}
         {% endfor %}
     }
+    
+    input {{ model.name }}ScalarWhereInput {
+        OR: [{{ model.name }}ScalarWhereInput]
+        NOT: [{{ model.name }}ScalarWhereInput]
+        AND: [{{ model.name }}ScalarWhereInput]
+        {% for field in model.fields -%}
+            {% if not field.relation -%}
+                {% if field.isList -%}
+                    {% if field.isEnum -%}
+                        {{ field.name }}: {{ field.scalar }}EnumListFilter
+                    {% elseif field.scalar in ["Int", "Float", "AWSDateTime", "AWSJSON", "AWSEmail", "AWSURL", "Boolean"] -%}
+                        {{ field.name }}: {{ field.scalar }}ListFilter
+                    {% else -%}
+                        {{ field.name }}: StringListFilter
+                    {% endif -%}
+                {% else -%}
+                    {% if field.isEnum -%}
+                        {{ field.name }}: {{ field.scalar }}EnumFilter
+                    {% elseif field.scalar in ["Int", "Float", "AWSDateTime", "AWSJSON", "AWSEmail", "AWSURL", "Boolean"] -%}
+                        {{ field.name }}: {{ field.scalar }}{% if not field.isRequired -%}Nullable{% endif -%}Filter
+                    {% else -%}
+                        {{ field.name }}: String{% if not field.isRequired -%}Nullable{% endif -%}Filter
+                    {% endif -%}
+                {% endif -%}
+            {% endif -%}
+        {% endfor %}
+    }
 
     input {{ model.name }}WhereUniqueInput {
         {% for field in model.fields -%}
@@ -211,7 +238,7 @@ enum NullArg {
         }
 
         input {{ model.name }}UpdateManyInput {
-            where: {{ model.name }}WhereInput!
+            where: {{ model.name }}ScalarWhereInput!
             data: {{ model.name }}UpdateInput!
         }
 
@@ -268,12 +295,11 @@ enum NullArg {
                 {% if "extendedWhereUnique" in previewFeatures -%}
                 delete: [{{ field.relation.type }}ExtendedWhereUniqueInput]
                 disconnect: [{{ field.relation.type }}ExtendedWhereUniqueInput]
-                deleteMany: [{{ field.relation.type }}ExtendedWhereUniqueInput]
                 {% else  -%}
                 delete: [{{ field.relation.type }}WhereUniqueInput]
                 disconnect: [{{ field.relation.type }}WhereUniqueInput]
-                deleteMany: [{{ field.relation.type }}WhereUniqueInput]
                 {% endif -%}
+                deleteMany: [{{ field.relation.type }}ScalarWhereInput]
                 set: [{{ field.relation.type }}WhereUniqueInput]
                 updateMany: [{{ field.relation.type }}UpdateManyInput]
                 {% endif -%}
