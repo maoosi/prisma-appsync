@@ -203,7 +203,7 @@ export class PrismaAppSyncCompiler {
                         fields.push({
                             name: field.name,
                             type: field.type,
-                            scalar: this.getFieldScalar(field),
+                            scalar: gqlConfig?._scalars?.[field.name] || this.getFieldScalar(field),
                             isRequired: this.isFieldRequired(field),
                             isAutopopulated: this.isFieldAutoPopulated(field),
                             isList: this.isFieldList(field),
@@ -467,6 +467,7 @@ export class PrismaAppSyncCompiler {
         const gqlOutput: {
             _model: boolean
             _fields: any
+            _scalars: any
             _usesQueries: boolean
             _usesMutations: boolean
             _usesSubscriptions: boolean
@@ -474,6 +475,7 @@ export class PrismaAppSyncCompiler {
         } = {
             _model: gqlObject?.model !== null,
             _fields: gqlObject?.fields || {},
+            _scalars: gqlObject?.scalars || {},
             _usesQueries: false,
             _usesMutations: false,
             _usesSubscriptions: false,
