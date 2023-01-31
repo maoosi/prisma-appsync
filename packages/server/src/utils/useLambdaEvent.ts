@@ -2,7 +2,7 @@ import type { AppSyncEvent, AppSyncIdentity, Identity } from '../../../client/sr
 import { _ } from '../../../client/src'
 import { graphQlQueryToJson } from './useGraphqlToJson'
 
-export default function useLambdaIdentity({
+export default function useLambdaEvent({
     request,
     graphQLParams,
     identity,
