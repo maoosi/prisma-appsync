@@ -43,7 +43,7 @@
     // Editor
     "editor.formatOnSave": false,
     "editor.accessibilitySupport": "off",
-    "editor.cursorSmoothCaretAnimation": true,
+    "editor.cursorSmoothCaretAnimation": "on",
     "editor.find.addExtraSpaceOnTop": false,
     "editor.guides.bracketPairs": "active",
     "editor.inlineSuggest.enabled": true,
