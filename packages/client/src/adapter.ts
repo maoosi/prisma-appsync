@@ -1,6 +1,6 @@
 import { CustomError } from './inspector'
 import { sanitize } from './guard'
-import { clone, dotate, isEmpty, isObject, isUndefined, lowerFirst, merge, traverse } from './utils'
+import { clone, dotate, isEmpty, isObject, isUndefined, lowerFirst, merge, replaceObjectPath, traverse } from './utils'
 import type {
     Action,
     ActionsAlias,
@@ -18,7 +18,6 @@ import {
     ActionsAliasesList,
     Authorizations,
     BatchActionsList,
-    DebugTestingKey,
     ReservedPrismaKeys,
 } from './defs'
 
@@ -90,25 +89,38 @@ export function parseEvent(appsyncEvent: AppSyncEvent, options: Options, customR
 }
 
 /**
- * #### Convert undefined's to NULL's.
+ * #### Convert `is: <enum>NULL` and `isNot: <enum>NULL` to `is: null` and `isNot: null`
  *
  * @param {any} data
  * @returns any
  */
 export function addNullables(data: any): any {
-    return data
+    const replaceList: { target: string[]; value: any }[] = []
 
-    return traverse(data, (value, key) => {
+    traverse(data, ({ value, key, path }) => {
         let excludeChilds = false
 
-        if (typeof key === 'string' && key === DebugTestingKey)
+        if (typeof key === 'string' && (key === 'is' || key === 'isNot')) {
+            replaceList.push({ target: path, value: value === 'NULL' ? null : undefined })
             excludeChilds = true
+        }
 
-        if (value === undefined)
-            value = null
+        else if (typeof key === 'string' && key === 'isNull') {
+            replaceList.push({
+                target: path.splice(0, path.length - 1),
+                value: value === true ? { equals: null } : { not: null },
+            })
+            excludeChilds = true
+        }
 
         return { value, excludeChilds }
     })
+
+    replaceList.forEach((replaceAction) => {
+        replaceObjectPath(data, replaceAction.target, replaceAction.value)
+    })
+
+    return data
 }
 
 /**

@@ -19,12 +19,13 @@ generator appsync {
   defaultDirective = "@auth(model: [{ allow: apiKey }])"
 }
 
-/// @gql(fields: { hiddenField: null }, subscriptions: null)
+/// @gql(fields: { hiddenField: null }, subscriptions: null, scalars: { website: "AWSURL" })
 /// @auth(model: [{ allow: userPools, groups: ["admins"] }])
 model User {
   uuid        String    @id @default(uuid()) @db.VarChar(200)
   username    String    @unique
   email       String    @unique
+  website     String?
   hiddenField String?
   role        Role?     @default(USER)
   posts       Post[]

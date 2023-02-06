@@ -79,16 +79,27 @@ export async function createServer({ defaultQuery, lambdaHandler, port, schema, 
                 return {
                     async onExecuteDone({ setResult }) {
                         if (query && operationName !== 'IntrospectionQuery') {
-                            const identity = useLambdaIdentity(Authorizations.AWS_IAM || null, {
-                                sourceIp: request?.headers['x-forwarded-for'] || request?.socket?.remoteAddress,
-                                username: 'johndoe',
-                                sub: 'xxxxxx',
-                                resolverContext: {},
+                            let prismaAppSyncHeader: any
+
+                            try { prismaAppSyncHeader = JSON.parse(request?.headers?.['x-prisma-appsync']) }
+                            catch { prismaAppSyncHeader = {} }
+
+                            const authorization = prismaAppSyncHeader?.authorization || Authorizations.AWS_IAM || null
+                            const signature = prismaAppSyncHeader?.signature || {}
+
+                            const identity = useLambdaIdentity(authorization, {
+                                ...{
+                                    sourceIp: request?.headers['x-forwarded-for'] || request?.socket?.remoteAddress,
+                                    username: 'johndoe',
+                                    sub: 'xxxxxx',
+                                    resolverContext: {},
+                                },
+                                ...signature,
                             })
 
                             request.headers = {
-                                ...(request?.headers || {}),
                                 ...headers,
+                                ...(request?.headers || {}),
                             }
 
                             const events = useLambdaEvents({

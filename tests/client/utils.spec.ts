@@ -12,6 +12,7 @@ import {
     lowerFirst,
     merge,
     omit,
+    replaceObjectPath,
     traverse,
     upperFirst,
 } from '@client/utils'
@@ -221,7 +222,7 @@ describe('CLIENT #utils', () => {
                         ],
                     },
                 },
-                (value) => {
+                ({ value }) => {
                     if (typeof value === 'boolean')
                         value = !value
                     return { value }
@@ -250,7 +251,7 @@ describe('CLIENT #utils', () => {
                         ],
                     },
                 },
-                (value, key) => {
+                ({ value, key }) => {
                     let excludeChilds = false
                     if (typeof key === 'string' && key === 'authors')
                         excludeChilds = true
@@ -271,7 +272,7 @@ describe('CLIENT #utils', () => {
             })
         })
         test('expect traverse to allow traverse an modify an Array', () => {
-            const result = traverse([{ authors: { username: true } }, { comments: { username: true } }], (value) => {
+            const result = traverse([{ authors: { username: true } }, { comments: { username: true } }], ({ value }) => {
                 if (typeof value === 'boolean')
                     value = !value
                 return { value }
@@ -281,7 +282,7 @@ describe('CLIENT #utils', () => {
         test('expect traverse to allow excluding elements in Array', () => {
             const result = traverse(
                 [{ authors: { username: true } }, { comments: { username: true } }],
-                (value, key) => {
+                ({ value, key }) => {
                     const excludeChilds = !!(typeof key === 'string' && key === 'comments')
                     if (typeof value === 'boolean')
                         value = !value
@@ -289,6 +290,11 @@ describe('CLIENT #utils', () => {
                 },
             )
             expect(result).toEqual([{ authors: { username: false } }, { comments: { username: true } }])
+        })
+        test('expect replaceObjectPath to allow replace and mutate based on path and replacer', () => {
+            const obj = { where: { author: { is: 'NULL' } } }
+            replaceObjectPath(obj, ['where', 'author', 'is'], null)
+            expect(obj).toEqual({ where: { author: { is: null } } })
         })
     })
 })

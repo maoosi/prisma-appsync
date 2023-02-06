@@ -348,8 +348,8 @@ describe('CLIENT #guard', () => {
                     model: Models.Post,
                 },
                 fieldsMapping: {
-                    'post/json': 'Json',
-                    'posts/json': 'Json',
+                    'post/json': { type: 'Json' },
+                    'posts/json': { type: 'Json' },
                 },
             })
             expect(depth).toEqual(1)

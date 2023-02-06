@@ -10,6 +10,15 @@ type BatchPayload {{ defaultAuthDirective.model | safe }} {
     count: Int
 }
 
+enum OrderByArg {
+    ASC
+    DESC
+}
+
+enum NullArg {
+    NULL
+}
+
 {% for enum in enums %}
     enum {{ enum.name }} {
         {% for value in enum.values -%}
@@ -33,11 +42,6 @@ type BatchPayload {{ defaultAuthDirective.model | safe }} {
     }
 {% endfor %}
 
-enum OrderByArg {
-    ASC
-    DESC
-}
-
 {% for model in models %}
     {% if model.uniqueIndexes | length -%}
         {% for uniqueIndex in model.uniqueIndexes -%}
@@ -58,6 +62,8 @@ enum OrderByArg {
     }
 
     input {{ model.name }}WhereInput {
+        is: NullArg
+        isNot: NullArg
         OR: [{{ model.name }}WhereInput]
         NOT: [{{ model.name }}WhereInput]
         AND: [{{ model.name }}WhereInput]
@@ -75,9 +81,9 @@ enum OrderByArg {
                     {% if field.isEnum -%}
                         {{ field.name }}: {{ field.scalar }}EnumFilter
                     {% elseif field.scalar in ["Int", "Float", "AWSDateTime", "AWSJSON", "AWSEmail", "AWSURL", "Boolean"] -%}
-                        {{ field.name }}: {{ field.scalar }}Filter
+                        {{ field.name }}: {{ field.scalar }}{% if not field.isRequired -%}Nullable{% endif -%}Filter
                     {% else -%}
-                        {{ field.name }}: StringFilter
+                        {{ field.name }}: String{% if not field.isRequired -%}Nullable{% endif -%}Filter
                     {% endif -%}
                 {% endif -%}
             {% else -%}
@@ -85,6 +91,33 @@ enum OrderByArg {
                     {{ field.name }}: {{ field.relation.type }}WhereInput
                 {% else  -%}
                     {{ field.name }}: {{ field.relation.type }}Filter
+                {% endif -%}
+            {% endif -%}
+        {% endfor %}
+    }
+    
+    input {{ model.name }}ScalarWhereInput {
+        OR: [{{ model.name }}ScalarWhereInput]
+        NOT: [{{ model.name }}ScalarWhereInput]
+        AND: [{{ model.name }}ScalarWhereInput]
+        {% for field in model.fields -%}
+            {% if not field.relation -%}
+                {% if field.isList -%}
+                    {% if field.isEnum -%}
+                        {{ field.name }}: {{ field.scalar }}EnumListFilter
+                    {% elseif field.scalar in ["Int", "Float", "AWSDateTime", "AWSJSON", "AWSEmail", "AWSURL", "Boolean"] -%}
+                        {{ field.name }}: {{ field.scalar }}ListFilter
+                    {% else -%}
+                        {{ field.name }}: StringListFilter
+                    {% endif -%}
+                {% else -%}
+                    {% if field.isEnum -%}
+                        {{ field.name }}: {{ field.scalar }}EnumFilter
+                    {% elseif field.scalar in ["Int", "Float", "AWSDateTime", "AWSJSON", "AWSEmail", "AWSURL", "Boolean"] -%}
+                        {{ field.name }}: {{ field.scalar }}{% if not field.isRequired -%}Nullable{% endif -%}Filter
+                    {% else -%}
+                        {{ field.name }}: String{% if not field.isRequired -%}Nullable{% endif -%}Filter
+                    {% endif -%}
                 {% endif -%}
             {% endif -%}
         {% endfor %}
@@ -124,9 +157,9 @@ enum OrderByArg {
                         {% if field.isEnum -%}
                             {{ field.name }}: {{ field.scalar }}EnumFilter
                         {% elseif field.scalar in ["Int", "Float", "AWSDateTime", "AWSJSON", "AWSEmail", "AWSURL", "Boolean"] -%}
-                            {{ field.name }}: {{ field.scalar }}Filter
+                            {{ field.name }}: {{ field.scalar }}{% if not field.isRequired -%}Nullable{% endif -%}Filter
                         {% else -%}
-                            {{ field.name }}: StringFilter
+                            {{ field.name }}: String{% if not field.isRequired -%}Nullable{% endif -%}Filter
                         {% endif -%}
                     {% endif -%}
                 {% else -%}
@@ -205,7 +238,7 @@ enum OrderByArg {
         }
 
         input {{ model.name }}UpdateManyInput {
-            where: {{ model.name }}WhereInput!
+            where: {{ model.name }}ScalarWhereInput!
             data: {{ model.name }}UpdateInput!
         }
 
@@ -227,18 +260,6 @@ enum OrderByArg {
         input {{ model.name }}ConnectOrCreateInput {
             where: {{ model.name }}WhereUniqueInput!
             create: {{ model.name }}CreateInput!
-        }
-
-        input {{ model.name }}DeleteUniqueInput {
-            {% if "extendedWhereUnique" in previewFeatures -%}
-                where: {{ model.name }}ExtendedWhereUniqueInput!
-            {% else  -%}
-                where: {{ model.name }}WhereUniqueInput!
-            {% endif -%}
-        }
-
-        input {{ model.name }}DeleteManyInput {
-            where: {{ model.name }}WhereInput!
         }
     {% endif %}
 
@@ -271,15 +292,16 @@ enum OrderByArg {
                 connectOrCreate: [{{ field.relation.type }}ConnectOrCreateInput]
                 update: [{{ field.relation.type }}UpdateUniqueInput]
                 upsert: [{{ field.relation.type }}UpsertUniqueInput]
-                delete: [{{ field.relation.type }}DeleteUniqueInput]
                 {% if "extendedWhereUnique" in previewFeatures -%}
+                delete: [{{ field.relation.type }}ExtendedWhereUniqueInput]
                 disconnect: [{{ field.relation.type }}ExtendedWhereUniqueInput]
                 {% else  -%}
+                delete: [{{ field.relation.type }}WhereUniqueInput]
                 disconnect: [{{ field.relation.type }}WhereUniqueInput]
                 {% endif -%}
+                deleteMany: [{{ field.relation.type }}ScalarWhereInput]
                 set: [{{ field.relation.type }}WhereUniqueInput]
                 updateMany: [{{ field.relation.type }}UpdateManyInput]
-                deleteMany: [{{ field.relation.type }}DeleteManyInput]
                 {% endif -%}
             }
         {% endif -%}
@@ -313,6 +335,18 @@ input AWSDateTimeFilter {
     notIn: [AWSDateTime!]
 }
 
+input AWSDateTimeNullableFilter {
+    equals: AWSDateTime
+    gt: AWSDateTime
+    gte: AWSDateTime
+    in: [AWSDateTime!]
+    lt: AWSDateTime
+    lte: AWSDateTime
+    not: AWSDateTimeFilter
+    notIn: [AWSDateTime!]
+    isNull: Boolean
+}
+
 input AWSDateTimeListFilter {
     equals: [AWSDateTime!]
     has: AWSDateTime
@@ -330,6 +364,19 @@ input FloatFilter {
     lte: Float
     not: FloatFilter
     notIn: [Float!]
+    isNull: Boolean
+}
+
+input FloatNullableFilter {
+    equals: Float
+    gt: Float
+    gte: Float
+    in: [Float!]
+    lt: Float
+    lte: Float
+    not: FloatFilter
+    notIn: [Float!]
+    isNull: Boolean
 }
 
 input FloatListFilter {
@@ -351,6 +398,18 @@ input IntFilter {
     notIn: [Int!]
 }
 
+input IntNullableFilter {
+    equals: Int
+    gt: Int
+    gte: Int
+    in: [Int!]
+    lt: Int
+    lte: Int
+    not: IntFilter
+    notIn: [Int!]
+    isNull: Boolean
+}
+
 input IntListFilter {
     equals: [Int!]
     has: Int
@@ -367,6 +426,17 @@ input AWSJSONFilter {
     not: AWSJSONFilter
     notIn: [AWSJSON!]
     startsWith: String
+}
+
+input AWSJSONNullableFilter {
+    contains: String
+    endsWith: String
+    equals: AWSJSON
+    in: [AWSJSON!]
+    not: AWSJSONFilter
+    notIn: [AWSJSON!]
+    startsWith: String
+    isNull: Boolean
 }
 
 input AWSJSONListFilter {
@@ -387,6 +457,17 @@ input AWSEmailFilter {
     startsWith: String
 }
 
+input AWSEmailNullableFilter {
+    contains: String
+    endsWith: String
+    equals: AWSEmail
+    in: [AWSEmail!]
+    not: AWSEmailFilter
+    notIn: [AWSEmail!]
+    startsWith: String
+    isNull: Boolean
+}
+
 input AWSEmailListFilter {
     equals: [AWSEmail!]
     has: AWSEmail
@@ -403,6 +484,17 @@ input AWSURLFilter {
     not: AWSURLFilter
     notIn: [AWSURL!]
     startsWith: String
+}
+
+input AWSURLNullableFilter {
+    contains: String
+    endsWith: String
+    equals: AWSURL
+    in: [AWSURL!]
+    not: AWSURLFilter
+    notIn: [AWSURL!]
+    startsWith: String
+    isNull: Boolean
 }
 
 input AWSURLListFilter {
@@ -424,6 +516,18 @@ input StringFilter {
     mode: String
 }
 
+input StringNullableFilter {
+    contains: String
+    endsWith: String
+    equals: String
+    in: [String!]
+    not: StringFilter
+    notIn: [String!]
+    startsWith: String
+    mode: String
+    isNull: Boolean
+}
+
 input StringListFilter {
     equals: [String!]
     has: String
@@ -435,6 +539,12 @@ input StringListFilter {
 input BooleanFilter {
     equals: Boolean
     not: BooleanFilter
+}
+
+input BooleanNullableFilter {
+    equals: Boolean
+    not: BooleanFilter
+    isNull: Boolean
 }
 
 input BooleanListFilter {

@@ -53,7 +53,7 @@ const reduceObject = <T extends JSONObject>(
             const fieldName = name.value
             const value = object[fieldName]
 
-            if (value || value === 0) {
+            if (typeof value !== 'undefined' && value !== null && value !== '') {
                 if (selection.selectionSet) {
                     reducedObject[fieldName] = reduceOutput(
                         selection.selectionSet,
@@ -124,7 +124,6 @@ const reduceOutput = <T extends JSONObject | Array<JSONObject>>(
     return reduceObject(selectionSet, fragments, object, options) as T
 }
 
-// TODO option to fill missing data with "null"
 export const queryObject = <T extends {}>(
     query: string | DocumentNode,
     data: T,

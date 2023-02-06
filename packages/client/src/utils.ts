@@ -1,3 +1,4 @@
+import { set } from 'wild-wild-path'
 import { flatten } from 'wild-wild-utils'
 import { isMatch } from 'micromatch'
 import deepmerge from 'deepmerge'
@@ -199,8 +200,13 @@ export function isObject(element): boolean {
  */
 export function traverse(
     element: any,
-    iteratee: (value: any, key?: string) => { value: any; excludeChilds?: boolean },
+    iteratee: (
+        { value, key, path }: { value: any; key?: string; path: any[] }
+    ) => { value: any; excludeChilds?: boolean },
+    parentPath?: any[],
 ): any {
+    const path: any = parentPath || []
+
     let outputData
 
     // object
@@ -209,21 +215,22 @@ export function traverse(
 
         for (const key in outputData) {
             if (Object.prototype.hasOwnProperty.call(outputData, key)) {
-                const { excludeChilds, value } = iteratee(outputData[key], key)
+                path.push(key)
+                const { excludeChilds, value } = iteratee({ value: outputData[key], key, path })
 
                 // object
                 if (isObject(value)) {
                     if (excludeChilds)
                         outputData[key] = clone(value)
                     else
-                        outputData[key] = traverse(value, iteratee)
+                        outputData[key] = traverse(value, iteratee, path)
                 }
                 // array
                 else if (Array.isArray(value)) {
                     if (excludeChilds)
                         outputData[key] = [...value]
                     else
-                        outputData[key] = traverse(value, iteratee)
+                        outputData[key] = traverse(value, iteratee, path)
                 }
                 // anything else
                 else {
@@ -234,13 +241,15 @@ export function traverse(
     }
     // array
     else if (Array.isArray(element)) {
-        const { value } = iteratee(element)
+        path.push(element)
+        const { value } = iteratee({ value: element, path })
         outputData = [...value]
-        outputData = [...outputData.map((e: any) => traverse(e, iteratee))]
+        outputData = [...outputData.map((e: any) => traverse(e, iteratee, path))]
     }
     // anything else
     else {
-        const { value } = iteratee(element)
+        path.push(element)
+        const { value } = iteratee({ value: element, path })
         outputData = value
     }
 
@@ -258,8 +267,11 @@ export function traverse(
  */
 export async function traverseAsync(
     element: any,
-    iteratee: (value: any, key?: string) => Promise<{ value: any; excludeChilds?: boolean }>,
+    iteratee: ({ value, key, path }: { value: any; key?: string; path: any[] }) => Promise<{ value: any; excludeChilds?: boolean }>,
+    parentPath?: any[],
 ): Promise<any> {
+    const path: any = parentPath || []
+
     let outputData
 
     // object
@@ -268,21 +280,22 @@ export async function traverseAsync(
 
         for (const key in outputData) {
             if (Object.prototype.hasOwnProperty.call(outputData, key)) {
-                const { excludeChilds, value } = await iteratee(outputData[key], key)
+                path.push(key)
+                const { excludeChilds, value } = await iteratee({ value: outputData[key], key, path })
 
                 // object
                 if (isObject(value)) {
                     if (excludeChilds)
                         outputData[key] = clone(value)
                     else
-                        outputData[key] = await traverseAsync(value, iteratee)
+                        outputData[key] = await traverseAsync(value, iteratee, path)
                 }
                 // array
                 else if (Array.isArray(value)) {
                     if (excludeChilds)
                         outputData[key] = [...value]
                     else
-                        outputData[key] = await traverseAsync(value, iteratee)
+                        outputData[key] = await traverseAsync(value, iteratee, path)
                 }
                 // anything else
                 else {
@@ -293,14 +306,16 @@ export async function traverseAsync(
     }
     // array
     else if (Array.isArray(element)) {
-        const { value } = await iteratee(element)
+        path.push(element)
+        const { value } = await iteratee({ value: element, path })
         outputData = [...value]
         for (let index = 0; index < outputData.length; index++)
-            outputData[index] = await traverseAsync(outputData[index], iteratee)
+            outputData[index] = await traverseAsync(outputData[index], iteratee, path)
     }
     // anything else
     else {
-        const { value } = await iteratee(element)
+        path.push(element)
+        const { value } = await iteratee({ value: element, path })
         outputData = value
     }
 
@@ -333,4 +348,18 @@ export function replaceAll(str: string, findArray: string[], replaceArray: strin
     })
 
     return str
+}
+
+/**
+ * #### Replace object path content (mutate original object)
+ *
+ * @example replaceObjectPath({ where: { author: { is: 'NULL' } } }, ['where', 'author', 'is'], null)
+ *
+ * @param {any} obj
+ * @param {string[]} path
+ * @param {any} replacer
+ * @returns any
+ */
+export function replaceObjectPath(obj, path: string[], replacer: any): any {
+    return set(obj, path, replacer, { mutate: true })
 }

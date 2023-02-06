@@ -27,7 +27,7 @@ const limiter = lambdaRateLimiter({
  * @returns any
  */
 export function sanitize(data: any): any {
-    return traverse(data, (value, key) => {
+    return traverse(data, ({ value, key }) => {
         let excludeChilds = false
 
         if (typeof key === 'string' && key === DebugTestingKey)
@@ -47,7 +47,7 @@ export function sanitize(data: any): any {
  * @returns any
  */
 export function clarify(data: any): any {
-    return traverse(data, (value, key) => {
+    return traverse(data, ({ value, key }) => {
         let excludeChilds = false
 
         if (typeof key === 'string' && key === DebugTestingKey)
@@ -195,7 +195,7 @@ export function getDepth(
 
     if (!isEmpty(fieldsMapping)) {
         for (const fieldMap in fieldsMapping) {
-            if (fieldsMapping[fieldMap].toLowerCase() === 'json')
+            if (fieldsMapping[fieldMap].type.toLowerCase() === 'json')
                 stopPaths.push(String(fieldMap))
         }
     }
