@@ -139,7 +139,9 @@ function getSelections(selections: Selection[]) {
                     __args: getArguments(selection.arguments),
                 }
             }
-            else { selObj[selectionName] = true }
+            else if (!selection.arguments || !selection.arguments.length) {
+                selObj[selectionName] = true
+            }
         }
     })
     return selObj
