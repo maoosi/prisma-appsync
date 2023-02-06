@@ -229,7 +229,7 @@ enum NullArg {
                         {% if field.isList -%}[{{ field.scalar }}]{% else %}{{ field.scalar }}{% endif %}{% if field.isRequired and not field.isAutopopulated -%}!{% endif %}
                 {% elseif field.isEditable and field.relation -%}
                     {{ field.name }}: 
-                        {{ field.relation.name }}CreateRelationInput{% if field.isRequired and not field.isAutopopulated -%}!{% endif %}
+                        {{ field.relation.name }}CreateNestedInput{% if field.isRequired and not field.isAutopopulated -%}!{% endif %}
                 {% endif -%}
             {% endfor %}
         }
@@ -248,7 +248,7 @@ enum NullArg {
                 {% if field.isEditable and not field.relation -%}
                     {{ field.name }}: {% if field.isList -%}[{{ field.scalar }}]{% else %}{{ field.scalar }}{% endif %}
                 {% elseif field.isEditable and field.relation -%}
-                    {{ field.name }}: {{ field.relation.name }}UpdateRelationsInput
+                    {{ field.name }}: {{ field.relation.name }}UpdateNestedInput
                 {% endif -%}
             {% endfor %}
         }
@@ -298,7 +298,7 @@ enum NullArg {
 
     {% for field in model.fields -%}
         {% if field.relation -%}
-            input {{ field.relation.name }}CreateRelationInput {
+            input {{ field.relation.name }}CreateNestedInput {
                 {% if field.relation.kind === "one" -%}
                 create: {{ field.relation.type }}CreateInput
                 connect: {{ field.relation.type }}WhereUniqueInput
@@ -310,7 +310,7 @@ enum NullArg {
                 {% endif -%}
             }
 
-            input {{ field.relation.name }}UpdateRelationsInput {
+            input {{ field.relation.name }}UpdateNestedInput {
                 {% if field.relation.kind === "one" -%}
                 connect: {{ field.relation.type }}WhereUniqueInput
                 create: {{ field.relation.type }}CreateInput
