@@ -129,13 +129,20 @@ function getSelections(selections: Selection[]) {
 
             if (selectionHasAlias)
                 selObj[selection.alias.value].__aliasFor = selection.name.value
+
+            if (selection.arguments && selection.arguments.length > 0)
+                selObj[selectionName].__args = getArguments(selection.arguments)
         }
-
-        if (selection.arguments && selection.arguments.length > 0)
-            selObj[selectionName].__args = getArguments(selection.arguments)
-
-        if (!selection.selectionSet && (!selection.arguments || !selection.arguments.length))
-            selObj[selectionName] = true
+        else {
+            if (selection.arguments && selection.arguments.length > 0) {
+                selObj[selectionName] = {
+                    __args: getArguments(selection.arguments),
+                }
+            }
+            else if (!selection.arguments || !selection.arguments.length) {
+                selObj[selectionName] = true
+            }
+        }
     })
     return selObj
 }
