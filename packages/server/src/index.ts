@@ -14,7 +14,7 @@ import { GraphQLError } from 'graphql'
 import { Authorizations } from '../../client/src'
 import { queryObject } from './utils/useGraphqlFilter'
 import useLambdaIdentity from './utils/useLambdaIdentity'
-import useLambdaEvent from './utils/useLambdaEvent'
+import useLambdaEvents from './utils/useLambdaEvents'
 
 declare global {
     // eslint-disable-next-line no-var, vars-on-top
@@ -75,6 +75,7 @@ export async function createServer({ defaultQuery, lambdaHandler, port, schema, 
                 const operationName: string = args?.operationName || String()
                 const query: string = context?.params?.query || {}
                 const request: any = context?.req || {}
+
                 return {
                     async onExecuteDone({ setResult }) {
                         if (query && operationName !== 'IntrospectionQuery') {
@@ -90,7 +91,7 @@ export async function createServer({ defaultQuery, lambdaHandler, port, schema, 
                                 ...headers,
                             }
 
-                            const event = useLambdaEvent({
+                            const events = useLambdaEvents({
                                 request,
                                 graphQLParams: {
                                     query,
@@ -100,10 +101,12 @@ export async function createServer({ defaultQuery, lambdaHandler, port, schema, 
                                 identity,
                             })
 
-                            let lambdaResult: any
+                            const handlers: Promise<any>[] = []
 
-                            try {
-                                lambdaResult = await lambdaHandler.main(
+                            for (let eventIndex = 0; eventIndex < events.length; eventIndex++) {
+                                const event = events[eventIndex]
+
+                                handlers.push(lambdaHandler.main(
                                     event,
                                     {
                                         functionName: 'prisma-appsync--handler',
@@ -116,36 +119,51 @@ export async function createServer({ defaultQuery, lambdaHandler, port, schema, 
                                         identity: undefined,
                                         clientContext: undefined,
                                         getRemainingTimeInMillis: () => 10,
-                                        done: () => {},
-                                        fail: () => {},
-                                        succeed: () => {},
+                                        done: () => { },
+                                        fail: () => { },
+                                        succeed: () => { },
                                         callbackWaitsForEmptyEventLoop: false,
                                     },
-                                    () => {},
-                                )
-                            }
-                            catch (error: any) {
-                                throw new GraphQLError(String(error?.error || error?.message || error), {
-                                    ...(error?.type && {
-                                        extensions: {
-                                            code: error.type,
-                                            ...(error?.code && {
-                                                http: {
-                                                    status: error.code,
-                                                },
-                                            }),
-                                        },
-                                    }),
-                                })
+                                    () => { },
+                                ))
                             }
 
-                            const filteredResult = queryObject(
-                                gql`${event.info.selectionSetGraphQL}`,
-                                { [event.info.fieldName]: lambdaResult },
+                            const handlerResults = await Promise.allSettled(handlers)
+
+                            let lambdaResults: any = {}
+
+                            handlerResults.forEach((handlerResult, eventIndex) => {
+                                if (handlerResult.status === 'rejected') {
+                                    const error = handlerResult.reason
+
+                                    throw new GraphQLError(String(error?.error || error?.message || error), {
+                                        ...(error?.type && {
+                                            extensions: {
+                                                code: error.type,
+                                                ...(error?.code && {
+                                                    http: {
+                                                        status: error.code,
+                                                    },
+                                                }),
+                                            },
+                                        }),
+                                    })
+                                }
+                                else {
+                                    lambdaResults = {
+                                        ...lambdaResults,
+                                        [events[eventIndex].info.fieldName]: handlerResult.value,
+                                    }
+                                }
+                            })
+
+                            const filteredResults = queryObject(
+                                gql`${events[0].info.selectionSetGraphQL}`,
+                                lambdaResults,
                                 { includeMissingData: true },
                             )
 
-                            setResult({ data: filteredResult })
+                            setResult({ data: filteredResults })
                         }
                     },
                 }
