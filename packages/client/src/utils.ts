@@ -241,10 +241,9 @@ export function traverse(
     }
     // array
     else if (Array.isArray(element)) {
-        path.push(element)
         const { value } = iteratee({ value: element, path })
         outputData = [...value]
-        outputData = [...outputData.map((e: any) => traverse(e, iteratee, path))]
+        outputData = [...outputData.map((e: any, i: number) => traverse(e, iteratee, [...path, i]))]
     }
     // anything else
     else {
@@ -306,11 +305,10 @@ export async function traverseAsync(
     }
     // array
     else if (Array.isArray(element)) {
-        path.push(element)
         const { value } = await iteratee({ value: element, path })
         outputData = [...value]
         for (let index = 0; index < outputData.length; index++)
-            outputData[index] = await traverseAsync(outputData[index], iteratee, path)
+            outputData[index] = await traverseAsync(outputData[index], iteratee, [...path, index])
     }
     // anything else
     else {
