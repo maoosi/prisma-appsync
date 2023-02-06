@@ -670,8 +670,7 @@ export class PrismaAppSyncCompiler {
     // Return true if field doesn't need to be mutated manually (e.g. `updatedAt`)
     private isFieldAutoPopulated(searchField: DMMF.Field): boolean {
         return Boolean(
-            (searchField?.default !== undefined && searchField?.default !== null)
-            || searchField?.isUpdatedAt,
+            typeof searchField?.default !== 'undefined' || searchField?.isUpdatedAt,
         )
     }
 
