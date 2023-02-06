@@ -2,7 +2,7 @@
 import { describe, expect, test } from 'vitest'
 import { PrismaAppSync } from '@client'
 import useLambdaIdentity from '@appsync-server/utils/useLambdaIdentity'
-import useLambdaEvent from '@appsync-server/utils/useLambdaEvent'
+import useLambdaEvents from '@appsync-server/utils/useLambdaEvents'
 import { Actions, ActionsAliases, Authorizations } from '@client/defs'
 
 process.env.PRISMA_APPSYNC_TESTING = 'true'
@@ -11,7 +11,7 @@ process.env.PRISMA_APPSYNC_INJECTED_CONFIG = JSON.stringify({
 })
 
 function mockAppSyncEvent(operationName: string, query: string) {
-    return useLambdaEvent({
+    return useLambdaEvents({
         request: {
             headers: {
                 'x-fingerprint': 'fingerprint:abcdef',
@@ -22,7 +22,7 @@ function mockAppSyncEvent(operationName: string, query: string) {
             operationName,
             query,
         },
-    })
+    })?.[0] || {}
 }
 
 describe('CLIENT #core', () => {

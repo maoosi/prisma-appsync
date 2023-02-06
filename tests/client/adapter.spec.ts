@@ -14,7 +14,7 @@ import type { Action, Authorization } from '@client/defs'
 import { Actions, ActionsAliases, Authorizations } from '@client/defs'
 import { Prisma } from '@prisma/client'
 import useLambdaIdentity from '@appsync-server/utils/useLambdaIdentity'
-import useLambdaEvent from '@appsync-server/utils/useLambdaEvent'
+import useLambdaEvents from '@appsync-server/utils/useLambdaEvents'
 import { testEach } from './_helpers'
 
 process.env.PRISMA_APPSYNC_TESTING = 'true'
@@ -22,7 +22,7 @@ process.env.PRISMA_APPSYNC_TESTING = 'true'
 const Models = Prisma.ModelName
 
 function mockAppSyncEvent(identity: NonNullable<Authorization>) {
-    return useLambdaEvent({
+    return useLambdaEvents({
         request: {},
         graphQLParams: {
             query: 'query getPost { getPost { title } }',
@@ -36,7 +36,7 @@ function mockAppSyncEvent(identity: NonNullable<Authorization>) {
             sub: 'xxxxxx',
             resolverContext: {},
         }),
-    })
+    })?.[0] || {}
 }
 
 describe('CLIENT #adapter', () => {
