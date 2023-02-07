@@ -148,11 +148,13 @@ export type AfterHookParams = QueryParams & {
 
 export type Reason = string | ((context: Context) => string)
 
+export type ShieldRule = boolean | ((context: Context) => boolean | Promise<boolean>) | any
+
 export interface Shield {
     [matcher: string]:
     | boolean
     | {
-        rule: boolean | ((context: Context) => boolean | Promise<boolean>) | any
+        rule: ShieldRule
         reason?: Reason
     }
 }

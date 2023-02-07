@@ -184,4 +184,22 @@ return await prismaAppSync.resolve({
 })
 ```
 
- > The above example implies using Cognito User Pools Authorization. Plus having set up an `Owner` relation on the `Post` model, and a `cognitoSub` field on the `User` model (containing all users `sub`).
+> The above example implies using Cognito User Pools Authorization. Plus having set up an `Owner` relation on the `Post` model, and a `cognitoSub` field on the `User` model (containing all users `sub`).
+
+### 🚨 Order matters!
+
+The latest matching rule ALWAYS overrides previous ones.
+
+```ts
+// Bad - Second rule overrides first one
+return {
+    'listUsers/password': false,
+    'listUsers{,/**}': true,
+}
+
+// Good - Always write the more specific rules last
+return {
+    'listUsers{,/**}': true,
+    'listUsers/password': false
+}
+```

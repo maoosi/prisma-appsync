@@ -6,6 +6,7 @@ import type {
     QueryParams,
     Shield,
     ShieldAuthorization,
+    ShieldRule,
 } from './defs'
 import {
     ActionsList,
@@ -61,6 +62,81 @@ export function clarify(data: any): any {
 }
 
 /**
+ * #### Returns an Shield authorization object for a given field.
+ *
+ * @param {any} options
+ * @param {Shield} options.shield
+ * @param {ShieldRule} options.shieldRule
+ * @param {string} options.globPattern
+ * @param {string} options.matcher
+ * @param {Context} options.context
+ * @returns Promise<ShieldAuthorization>
+ */
+async function getFieldAuthorization(
+    { shield, shieldRule, globPattern, matcher, context }:
+    {
+        shield: Shield
+        shieldRule: ShieldRule
+        globPattern: string
+        matcher: string
+        context: Context
+    },
+): Promise<ShieldAuthorization> {
+    const authorization: ShieldAuthorization = {
+        canAccess: true,
+        reason: String(),
+        prismaFilter: {},
+        matcher: String(),
+        globPattern: String(),
+    }
+
+    if (typeof shieldRule === 'boolean') {
+        authorization.canAccess = shield[matcher] as boolean
+    }
+    else {
+        if (typeof shieldRule.rule === 'undefined')
+            throw new Error('Badly formed shield rule.')
+
+        if (typeof shieldRule.rule === 'boolean') {
+            authorization.canAccess = shieldRule.rule
+        }
+        else if (typeof shieldRule.rule === 'function') {
+            const ruleResult = shieldRule.rule(context)
+
+            if (ruleResult instanceof Promise)
+                authorization.canAccess = await ruleResult
+            else if (typeof ruleResult === 'boolean')
+                authorization.canAccess = ruleResult
+            else
+                throw new Error('Shield rule must return a boolean.')
+        }
+        else {
+            authorization.canAccess = true
+            if (!authorization.prismaFilter)
+                authorization.prismaFilter = {}
+
+            authorization.prismaFilter = merge(authorization.prismaFilter, shieldRule.rule)
+        }
+    }
+
+    authorization.matcher = matcher
+    authorization.globPattern = globPattern
+
+    const isReasonDefined = typeof shieldRule !== 'boolean' && typeof shieldRule.reason !== 'undefined'
+    let reason = `Matcher: ${authorization.matcher}`
+
+    if (isReasonDefined && typeof shieldRule.reason === 'function')
+        reason = shieldRule.reason(context)
+
+    else if (isReasonDefined && typeof shieldRule.reason === 'string')
+        reason = shieldRule.reason
+
+    authorization.reason = reason
+
+    return authorization
+}
+
+/**
  * #### Returns an authorization object from a Shield configuration passed as input.
  *
  * @param {any} options
@@ -80,15 +156,8 @@ export async function getShieldAuthorization({
     context: Context
     options: Options
 }): Promise<ShieldAuthorization> {
-    const authorization: ShieldAuthorization = {
-        canAccess: true,
-        reason: String(),
-        prismaFilter: {},
-        matcher: String(),
-        globPattern: String(),
-    }
-
     const modelSingular = context.model ? upperFirst(context.model!) : String()
+
     let modelPlural = modelSingular
 
     if (options?.modelsMapping && modelSingular) {
@@ -115,60 +184,47 @@ export async function getShieldAuthorization({
         return path
     })
 
-    for (let i = paths.length - 1; i >= 0; i--) {
-        const reqPath: string = reqPaths[i]
+    let authorization: ShieldAuthorization = {
+        canAccess: true,
+        reason: String(),
+        prismaFilter: {},
+        matcher: String(),
+        globPattern: String(),
+    }
 
-        for (const matcher in shield) {
-            let globPattern = matcher
+    for (const matcher in shield) {
+        const concurrentFieldsAuthCheck: Promise<any>[] = []
 
-            if (!globPattern.startsWith('/') && globPattern !== '**')
-                globPattern = `/${globPattern}`
+        let globPattern = matcher
+
+        if (!globPattern.startsWith('/') && globPattern !== '**')
+            globPattern = `/${globPattern}`
+
+        for (let i = paths.length - 1; i >= 0; i--) {
+            const reqPath: string = reqPaths[i]
 
             if (isMatchingGlob(reqPath, globPattern)) {
                 const shieldRule = shield[matcher]
 
-                if (typeof shieldRule === 'boolean') {
-                    authorization.canAccess = shield[matcher] as boolean
-                }
-                else {
-                    if (typeof shieldRule.rule === 'undefined')
-                        throw new CustomError('Badly formed shield rule.', { type: 'INTERNAL_SERVER_ERROR' })
+                concurrentFieldsAuthCheck.push(
+                    getFieldAuthorization({ shield, shieldRule, globPattern, matcher, context }),
+                )
+            }
+        }
 
-                    if (typeof shieldRule.rule === 'boolean') {
-                        authorization.canAccess = shieldRule.rule
-                    }
-                    else if (typeof shieldRule.rule === 'function') {
-                        const ruleResult = shieldRule.rule(context)
+        const fieldsAuthCheckResults = await Promise.allSettled(concurrentFieldsAuthCheck)
 
-                        if (ruleResult instanceof Promise)
-                            authorization.canAccess = await ruleResult
-                        else if (typeof ruleResult === 'boolean')
-                            authorization.canAccess = ruleResult
-                        else
-                            throw new CustomError('Shield rule must return a boolean.', { type: 'INTERNAL_SERVER_ERROR' })
-                    }
-                    else {
-                        authorization.canAccess = true
-                        if (!authorization.prismaFilter)
-                            authorization.prismaFilter = {}
+        for (let fieldIndex = 0; fieldIndex < fieldsAuthCheckResults.length; fieldIndex++) {
+            const fieldAuthCheckResult = fieldsAuthCheckResults[fieldIndex]
 
-                        authorization.prismaFilter = merge(authorization.prismaFilter, shieldRule.rule)
-                    }
-                }
+            if (fieldAuthCheckResult.status === 'rejected') {
+                throw new CustomError(fieldAuthCheckResult.reason, { type: 'INTERNAL_SERVER_ERROR' })
+            }
+            else {
+                authorization = fieldAuthCheckResult.value
 
-                authorization.matcher = matcher
-                authorization.globPattern = globPattern
-
-                const isReasonDefined = typeof shieldRule !== 'boolean' && typeof shieldRule.reason !== 'undefined'
-                let reason = `Matcher: ${authorization.matcher}`
-
-                if (isReasonDefined && typeof shieldRule.reason === 'function')
-                    reason = shieldRule.reason(context)
-
-                else if (isReasonDefined && typeof shieldRule.reason === 'string')
-                    reason = shieldRule.reason
-
-                authorization.reason = reason
+                if (!fieldAuthCheckResult.value.canAccess)
+                    break
             }
         }
     }
