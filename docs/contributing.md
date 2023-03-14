@@ -1,6 +1,6 @@
-# 🧬 Contributing
+# Contributions guide
 
-Thanks for your interest in contributing! Please make sure to take a moment and read through [Prisma-AppSync concept](/essentials/concept.html), as well as the following guide:
+Thanks for your interest in contributing! Please make sure to take a moment and read through [Prisma-AppSync concept](quick-start/getting-started), as well as the following guide:
 
 ## 👉 Repository setup
 

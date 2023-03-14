@@ -30,8 +30,8 @@ export default defineConfig({
         },
 
         nav: [
-            { text: 'Documentation', link: '/essentials/getting-started' },
-            { text: 'Changelog', link: '/changelog/' },
+            { text: 'Documentation', link: '/quick-start/getting-started' },
+            { text: 'Changelog', link: '/changelog/1.0.0-rc.5' },
             {
                 text: 'Links',
                 items: [
@@ -47,33 +47,54 @@ export default defineConfig({
                         text: 'Roadmap',
                         link: 'https://github.com/users/maoosi/projects/1',
                     },
-                    {
-                        text: 'Contributing',
-                        link: '/contributing',
-                    },
                 ],
             },
         ],
 
         sidebar: [
             {
-                text: 'Essentials',
+                text: 'Quick start',
                 items: [
-                    { text: '🦄 Why Prisma-AppSync?', link: '/essentials/concept' },
-                    { text: '⚡️ Getting started', link: '/essentials/getting-started' },
+                    { text: 'Getting started', link: '/quick-start/getting-started' },
+                    { text: 'Installation', link: '/quick-start/installation' },
+                    { text: 'Usage', link: '/quick-start/usage' },
+                    { text: 'Deploy', link: '/quick-start/deploy' },
                 ],
             },
             {
-                text: 'Advanced',
+                text: 'Features',
+                collapsible: true,
+                collapsed: true,
                 items: [
-                    { text: '🔌 Extending the API', link: '/advanced/extending-api' },
-                    { text: '🚨 Securing the API', link: '/advanced/securing-api' },
-                    { text: '🪴 Tweaking GQL Schema', link: '/advanced/tweaking-schema' },
-                    { text: '🪝 Adding Hooks', link: '/advanced/hooks' },
+                    { text: 'Adding Hooks', link: '/features/hooks' },
+                    { text: 'Custom resolvers', link: '/features/resolvers' },
+                    { text: 'Tweaking GQL schema', link: '/features/gql-schema' },
+                ],
+            },
+            {
+                text: 'Security',
+                collapsible: true,
+                collapsed: true,
+                items: [
+                    { text: 'AppSync Authz', link: '/security/appsync-authz' },
+                    { text: 'Shield (ACL rules)', link: '/security/shield-acl' },
+                    { text: 'XSS sanitizer', link: '/security/xss-sanitizer' },
+                    { text: 'Query depth', link: '/security/query-depth' },
+                    { text: 'Rate limiter (DOS)', link: '/security/rate-limiter' },
+                ],
+            },
+            {
+                text: 'Contributing',
+                collapsible: true,
+                collapsed: true,
+                items: [
+                    { text: 'Contributions guide', link: '/contributing' },
                 ],
             },
             {
                 text: 'Changelog',
+                collapsible: true,
+                collapsed: true,
                 items: [
                     { text: '(latest) 1.0.0-rc.5', link: '/changelog/1.0.0-rc.5' },
                     { text: '1.0.0-rc.4', link: '/changelog/1.0.0-rc.4' },

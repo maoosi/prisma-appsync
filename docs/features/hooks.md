@@ -1,4 +1,4 @@
-# 🪝 Adding Hooks
+# Adding Hooks
 
 Hooks let you “hook into” Prisma-AppSync lifecycle to either trigger custom business logic or manipulate data at runtime.
 
