@@ -2,6 +2,18 @@ import type { AppSyncEvent, AppSyncIdentity, Identity } from '../../../client/sr
 import { _ } from '../../../client/src'
 import { graphQlQueryToJson } from './useGraphqlToJson'
 
+function removeArgs(selectionSet: any) {
+    for (const [key, value] of Object.entries(selectionSet)) {
+        if (key === '__args') {
+            delete selectionSet[key]
+            continue
+        }
+
+        if (value != null && typeof value == 'object' && !Array.isArray(value))
+            removeArgs(selectionSet[key])
+    }
+}
+
 export default function useLambdaEvents({
     request,
     graphQLParams,
@@ -18,14 +30,14 @@ export default function useLambdaEvents({
     const queries = graphQlQueryToJson(selectionSetGraphQL, { variables, operationName })
     const parentType: string = Object.keys(queries)[0]
 
-    for (let queryIndex = 0; queryIndex < Object.keys(queries[parentType]).length; queryIndex++) {
-        const fieldName: string = Object.keys(queries[parentType])[queryIndex]
+    for (const fieldName of Object.keys(queries[parentType])) {
         const parentTypeName = parentType.charAt(0).toUpperCase() + parentType.slice(1)
         const selectionSet = queries[parentType][fieldName]
         const args = typeof selectionSet.__args !== 'undefined' ? selectionSet.__args : {}
 
-        if (Object.keys(args).length > 0)
-            delete selectionSet.__args
+        removeArgs(selectionSet)
+        // if (Object.keys(args).length > 0)
+        //     delete selectionSet.__args
 
         const selectionSetList = Object.keys(_.dotate(selectionSet))
             .filter(selection => selection !== '.')

@@ -201,7 +201,7 @@ export function graphQlQueryToJson(
     query: string,
     options: {
         variables: variablesObject
-        operationName: string
+        operationName?: string
     } = {
         variables: {},
         operationName: String(),

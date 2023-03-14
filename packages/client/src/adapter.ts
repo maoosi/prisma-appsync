@@ -1,8 +1,11 @@
+// import { parse } from 'graphql'
+import { graphQlQueryToJson } from './graphqlToJson'
 import { CustomError } from './inspector'
 import { sanitize } from './guard'
 import {
     clone,
     isEmpty,
+    isObject,
     isUndefined,
     lowerFirst,
     merge,
@@ -65,11 +68,15 @@ export async function parseEvent(appsyncEvent: AppSyncEvent, options: Options, c
 
     const args = clone(sanitizedArgs)
 
-    const prismaArgs = getPrismaArgs({
+    // console.log({ _selectionSetGraphQL: appsyncEvent.info.selectionSetGraphQL })
+    const prismaArgs = await getPrismaArgs({
         action: context.action,
         defaultPagination: options.defaultPagination,
+        _selectionSetGraphQL: appsyncEvent.info.selectionSetGraphQL,
+        _fieldName: appsyncEvent.info.fieldName,
+        _variables: appsyncEvent.info.variables,
         _arguments: clone(sanitizedArgs),
-        _selectionSetList: appsyncEvent.info.selectionSetList,
+        _sanitize: options.sanitize,
     })
 
     const type = getType({
@@ -376,21 +383,28 @@ export function getType({ _parentTypeName }: { _parentTypeName: string }): Graph
  * @param {any} options
  * @param {Action} options.action
  * @param {Options['defaultPagination']} options.defaultPagination
- * @param {any} options._arguments
- * @param {any} options._selectionSetList
+ * @param {any} options.arguments
+ * @param {AppSyncEvent} options.event
+ * @param {boolean} options.sanitize
  * @returns PrismaArgs
  */
-export function getPrismaArgs({
+export async function getPrismaArgs({
     action,
     defaultPagination,
+    _selectionSetGraphQL,
+    _variables,
+    _fieldName,
     _arguments,
-    _selectionSetList,
+    _sanitize,
 }: {
     action: Action
     defaultPagination: Options['defaultPagination']
+    _selectionSetGraphQL: string
+    _variables: any
+    _fieldName: string
     _arguments: any
-    _selectionSetList: any
-}): PrismaArgs {
+    _sanitize: boolean
+}): Promise<PrismaArgs> {
     const prismaArgs: PrismaArgs = {}
 
     if (typeof _arguments.data !== 'undefined' && typeof _arguments.operation !== 'undefined') {
@@ -415,8 +429,8 @@ export function getPrismaArgs({
     if (typeof _arguments.skipDuplicates !== 'undefined')
         prismaArgs.skipDuplicates = _arguments.skipDuplicates
 
-    if (typeof _selectionSetList !== 'undefined')
-        prismaArgs.select = parseSelectionList(_selectionSetList)
+    if (_selectionSetGraphQL)
+        prismaArgs.select = await parseSelectionGraphQL(_selectionSetGraphQL, _fieldName, _variables, _sanitize)
 
     if (isEmpty(prismaArgs.select))
         delete prismaArgs.select
@@ -432,6 +446,80 @@ export function getPrismaArgs({
         prismaArgs.take = defaultPagination
 
     return prismaArgs
+}
+
+async function jsonToPrismaArgs({ select, include = {} }: ({ select: any; include?: any }), _sanitize: boolean) {
+    select = { ...select }
+
+    for (const [key, value] of Object.entries(select) as [string, any][]) {
+        if (key === '__typename')
+            delete select[key]
+
+        if (typeof value === 'object') {
+            const { __args, ...valueWithoutArgs } = value
+
+            const sanitizedArgs
+                = isObject(__args)
+                    ? (_sanitize ? await sanitize(await addNullables(__args)) : await addNullables(__args))
+                    : {}
+
+            if (sanitizedArgs.orderBy)
+                sanitizedArgs.orderBy = parseOrderBy(sanitizedArgs.orderBy)
+
+            const prismaArgs = await jsonToPrismaArgs({ select: valueWithoutArgs }, _sanitize)
+            if (!isEmpty(prismaArgs.select) || !isEmpty(prismaArgs.include)) {
+                select[key] = {
+                    ...prismaArgs,
+                    ...sanitizedArgs,
+                }
+            }
+            else {
+                delete select[key]
+                if (!isEmpty(sanitizedArgs))
+                    include[key] = { ...sanitizedArgs }
+                else
+                    include[key] = true
+            }
+        }
+    }
+    if (isEmpty(include))
+        include = undefined
+
+    return { select, include }
+}
+
+/**
+ * #### Return Prisma `select` from parsed `event.arguments.info.selectionSetGraphQL`.
+ *
+ * @param {string} _selectionSetGraphQL
+ * @param {string} _fieldName
+ * @param {any} _variables
+ * @param {boolean} _sanitize
+ * @returns any
+ */
+async function parseSelectionGraphQL(_selectionSetGraphQL: string, _fieldName: string, _variables: any, _sanitize: boolean): Promise<any> {
+    const json = graphQlQueryToJson(_selectionSetGraphQL, {
+        variables: _variables,
+    })
+    const operationJson = Object.values(json)[0] as any
+    // dev server will give the whole query, but appsync will just give the fields as a subquery
+    // is there a better way to do this?
+    const fieldJson = operationJson[_fieldName] || operationJson
+    delete fieldJson.__args
+
+    const prismaArgs = await jsonToPrismaArgs({ select: fieldJson }, _sanitize)
+
+    if (prismaArgs.include) {
+        for (const include in prismaArgs.include) {
+            if (prismaArgs.select[include])
+                delete prismaArgs.select[include]
+        }
+
+        prismaArgs.select = merge(prismaArgs.select, prismaArgs.include)
+        delete prismaArgs.include
+    }
+
+    return prismaArgs.select !== 'undefined' ? prismaArgs.select : {}
 }
 
 /**
@@ -472,16 +560,16 @@ function parseOrderBy(orderByInputs: any): any[] {
  * @param {any} parts
  * @returns any
  */
-function getInclude(parts: any): any {
-    const field = parts[0]
-    const value = parts.length > 1 ? getSelect(parts.splice(1)) : true
+// function getInclude(parts: any): any {
+//     const field = parts[0]
+//     const value = parts.length > 1 ? getSelect(parts.splice(1)) : true
 
-    return {
-        include: {
-            [field]: value,
-        },
-    }
-}
+//     return {
+//         include: {
+//             [field]: value,
+//         },
+//     }
+// }
 
 /**
  * #### Returns individual `select` field formatted for Prisma.
@@ -489,16 +577,16 @@ function getInclude(parts: any): any {
  * @param {any} parts
  * @returns any
  */
-function getSelect(parts: any): any {
-    const field = parts[0]
-    const value = parts.length > 1 ? getSelect(parts.splice(1)) : true
+// function getSelect(parts: any): any {
+//     const field = parts[0]
+//     const value = parts.length > 1 ? getSelect(parts.splice(1)) : true
 
-    return {
-        select: {
-            [field]: value,
-        },
-    }
-}
+//     return {
+//         select: {
+//             [field]: value,
+//         },
+//     }
+// }
 
 /**
  * #### Return Prisma `select` from parsed `event.arguments.info.selectionSetList`.
@@ -506,33 +594,33 @@ function getSelect(parts: any): any {
  * @param {any} selectionSetList
  * @returns any
  */
-function parseSelectionList(selectionSetList: any): any {
-    let prismaArgs: any = { select: {} }
+// function parseSelectionList(selectionSetList: any): any {
+//     let prismaArgs: any = { select: {} }
 
-    for (let i = 0; i < selectionSetList.length; i++) {
-        const path = selectionSetList[i]
-        const parts = path.split('/')
+//     for (let i = 0; i < selectionSetList.length; i++) {
+//         const path = selectionSetList[i]
+//         const parts = path.split('/')
 
-        if (!parts.includes('__typename')) {
-            if (parts.length > 1)
-                prismaArgs = merge(prismaArgs, getInclude(parts))
-            else
-                prismaArgs = merge(prismaArgs, getSelect(parts))
-        }
-    }
+//         if (!parts.includes('__typename')) {
+//             if (parts.length > 1)
+//                 prismaArgs = merge(prismaArgs, getInclude(parts))
+//             else
+//                 prismaArgs = merge(prismaArgs, getSelect(parts))
+//         }
+//     }
 
-    if (prismaArgs.include) {
-        for (const include in prismaArgs.include) {
-            if (typeof prismaArgs.select[include] !== 'undefined')
-                delete prismaArgs.select[include]
-        }
+//     if (prismaArgs.include) {
+//         for (const include in prismaArgs.include) {
+//             if (typeof prismaArgs.select[include] !== 'undefined')
+//                 delete prismaArgs.select[include]
+//         }
 
-        prismaArgs.select = merge(prismaArgs.select, prismaArgs.include)
-        delete prismaArgs.include
-    }
+//         prismaArgs.select = merge(prismaArgs.select, prismaArgs.include)
+//         delete prismaArgs.include
+//     }
 
-    return typeof prismaArgs.select !== 'undefined' ? prismaArgs.select : {}
-}
+//     return typeof prismaArgs.select !== 'undefined' ? prismaArgs.select : {}
+// }
 
 /**
  * #### Returns req and res paths (`updatePost/title`, `getPost/date`, ..).
