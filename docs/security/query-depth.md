@@ -2,9 +2,9 @@
 
 ## 👉 Usage
 
-By default, Prisma-AppSync will prevent clients from abusing query depth, by limiting the query complexity.
+Prisma-AppSync automatically prevents from abusing query depth, by limiting query complexity.
 
-**For example, it will prevent clients from doing this:**
+**For example, it will prevent from doing this:**
 
 ```graphql
 query IAmEvil {

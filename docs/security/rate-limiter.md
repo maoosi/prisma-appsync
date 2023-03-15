@@ -6,7 +6,7 @@ Limits are kept in memory and are not shared between function instantiations. Th
 
 ## 👉 Usage
 
-By default, Prisma-AppSync will use in-memory rate-limiting to try protect your Database from most common DOS attacks.
+Prisma-AppSync uses in-memory rate-limiting to try protect your Database from most common DOS attacks.
 
 To change the default value (default to 200 requests per user, per minute), you can adjust the `maxReqPerUserMinute` option when instantiating the Client:
 

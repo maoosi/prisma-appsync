@@ -30,6 +30,11 @@ return await prismaAppSync.resolve({
 })
 ```
 
+Useful links to create shield rules:
+
+- [Micromatch syntax](https://github.com/micromatch/micromatch)
+- [Micromatch tester](https://globster.xyz/?q=getPost%7B%2C%2F**%7D&f=getPost%2Ftitle%2CgetPost%2Fstatus)
+
 ## 👉 Usage with AppSync Authorization modes
 
 Combining fine-grained access control with [AppSync Authorization modes](/security/appsync-authz) allows to implement powerful controls around data.

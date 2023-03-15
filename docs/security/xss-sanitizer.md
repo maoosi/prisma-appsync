@@ -2,7 +2,7 @@
 
 ## 👉 Usage
 
-By default, Prisma-AppSync automatically perform XSS sanitization and encode all data coming through the GraphQL API.
+Prisma-AppSync automatically perform XSS sanitization and encode all data coming through the GraphQL API.
 
 **Take a look at this example:**
 
