@@ -94,10 +94,7 @@ export type PrismaCreateMany = Pick<Required<PrismaArgs>, 'data'> & Pick<PrismaA
 export type PrismaUpdate = Pick<Required<PrismaArgs>, 'data' | 'where'> & Pick<PrismaArgs, 'select'>
 export type PrismaUpdateMany = Pick<Required<PrismaArgs>, 'data' | 'where'>
 export type PrismaUpsert = Pick<Required<PrismaArgs>, 'where'> &
-Pick<PrismaArgs, 'select'> & {
-    update: any
-    create: any
-}
+Pick<PrismaArgs, 'select'> & Pick<PrismaArgs, 'update'> & Pick<PrismaArgs, 'create'>
 export type PrismaDelete = Pick<Required<PrismaArgs>, 'where'> & Pick<PrismaArgs, 'select'>
 export type PrismaDeleteMany = Pick<Required<PrismaArgs>, 'where'>
 
@@ -222,6 +219,8 @@ export { PrismaClient, Prisma }
 
 export interface PrismaArgs {
     where?: any
+    create?: any
+    update?: any
     data?: any
     select?: any
     orderBy?: any

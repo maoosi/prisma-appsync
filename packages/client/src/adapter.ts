@@ -414,6 +414,10 @@ export function getPrismaArgs({
     else if (typeof _arguments.operation !== 'undefined')
         prismaArgs.data = _arguments.operation
 
+    if (typeof _arguments.create !== 'undefined')
+        prismaArgs.create = _arguments.create
+    if (typeof _arguments.update !== 'undefined')
+        prismaArgs.update = _arguments.update
     if (typeof _arguments.where !== 'undefined')
         prismaArgs.where = _arguments.where
     if (typeof _arguments.orderBy !== 'undefined')

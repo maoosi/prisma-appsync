@@ -74,14 +74,7 @@ export const queryBuilder: QueryBuilder = {
         return prismaQueryJoin<PrismaUpdateMany>(prismaQueries, ['data', 'where'])
     },
     prismaUpsert: (...prismaQueries: PrismaArgs[]) => {
-        const prismaArgs = prismaQueryJoin<PrismaUpdate>(prismaQueries, ['data', 'where', 'select'])
-
-        return {
-            update: prismaArgs.data,
-            create: prismaArgs.data,
-            where: prismaArgs.where,
-            ...(prismaArgs.select && { select: prismaArgs.select }),
-        } as PrismaUpsert
+        return prismaQueryJoin<PrismaUpsert>(prismaQueries, ['where', 'create', 'update', 'select'])
     },
     prismaDelete: (...prismaQueries: PrismaArgs[]) => {
         return prismaQueryJoin<PrismaDelete>(prismaQueries, ['where', 'select'])

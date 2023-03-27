@@ -126,8 +126,8 @@ describe('CLIENT #queries', () => {
             name: 'upsertQuery',
             prismaQuery: 'upsert',
             expectedResult: {
-                update: query.prismaArgs.data,
-                create: query.prismaArgs.data,
+                create: query.prismaArgs.create,
+                update: query.prismaArgs.update,
                 where: query.prismaArgs.where,
                 select: query.prismaArgs.select,
             },

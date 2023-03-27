@@ -646,7 +646,8 @@ type Mutation {
             Update an existing or create a new single {{ model.name }} record.
             """
             {{ model.gql.upsert }}(
-                data: {{ model.name }}UpdateInput!,
+                create: {{ model.name }}CreateInput!,
+                update: {{ model.name }}UpdateInput!,
                 {% if "extendedWhereUnique" in previewFeatures -%}
                 where: {{ model.name }}ExtendedWhereUniqueInput!
                 {% else  -%}

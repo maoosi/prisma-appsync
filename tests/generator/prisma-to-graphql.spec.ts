@@ -78,7 +78,8 @@ describe('GENERATOR #gql', () => {
                 mutation {
                     upsertPost(
                         where: { id: 1 }
-                        data: { title: "Hello world" }
+                        create: { title: "Hello world" }
+                        update: { title: "Hello world" }
                     ) {
                         title
                     }
