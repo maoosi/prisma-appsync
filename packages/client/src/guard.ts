@@ -1,19 +1,14 @@
 import lambdaRateLimiter from 'lambda-rate-limiter'
 import type {
     Context,
-    Options,
     PrismaClient,
     QueryParams,
     Shield,
     ShieldAuthorization,
     ShieldRule,
 } from './defs'
-import {
-    ActionsList,
-    BatchActionsList,
-    DebugTestingKey,
-} from './defs'
-import { decode, encode, filterXSS, isEmpty, isMatchingGlob, merge, traverse, upperFirst } from './utils'
+import { DebugTestingKey } from './defs'
+import { decode, encode, filterXSS, isEmpty, isMatchingGlob, merge, traverse } from './utils'
 import { CustomError } from './inspector'
 
 // https:// github.com/blackflux/lambda-rate-limiter
@@ -126,7 +121,7 @@ async function getFieldAuthorization(
     let reason = `Matcher: ${authorization.matcher}`
 
     if (isReasonDefined && typeof shieldRule.reason === 'function')
-        reason = shieldRule.reason(context)
+        reason = shieldRule.reason({ action: context.action, model: context.model?.singular || context.action })
 
     else if (isReasonDefined && typeof shieldRule.reason === 'string')
         reason = shieldRule.reason
@@ -139,7 +134,6 @@ async function getFieldAuthorization(
 /**
  * #### Returns an authorization object from a Shield configuration passed as input.
  *
- * @param {any} options
  * @param {Shield} options.shield
  * @param {string[]} options.paths
  * @param {Context} options.context
@@ -149,41 +143,11 @@ export async function getShieldAuthorization({
     shield,
     paths,
     context,
-    options,
 }: {
     shield: Shield
     paths: string[]
     context: Context
-    options: Options
 }): Promise<ShieldAuthorization> {
-    const modelSingular = context.model ? upperFirst(context.model!) : String()
-
-    let modelPlural = modelSingular
-
-    if (options?.modelsMapping && modelSingular) {
-        const models: any[] = Object.keys(options.modelsMapping)
-        const modelPluralMatch = models.find((key: string) => {
-            return options.modelsMapping[key] === modelSingular.toLowerCase() && key !== upperFirst(modelSingular)
-        })
-        if (modelPluralMatch)
-            modelPlural = modelPluralMatch
-    }
-
-    const reqPaths = paths.map((path: string) => {
-        if (context.model) {
-            BatchActionsList.forEach((batchAction: string) => {
-                path = path.replace(
-                    `${batchAction}/${modelSingular.toLowerCase()}`,
-                    `${batchAction}${upperFirst(modelPlural)}`,
-                )
-            })
-            ActionsList.forEach((action: string) => {
-                path = path.replace(`${action}/${modelSingular.toLowerCase()}`, `${action}${upperFirst(modelSingular)}`)
-            })
-        }
-        return path
-    })
-
     let authorization: ShieldAuthorization = {
         canAccess: true,
         reason: String(),
@@ -195,13 +159,10 @@ export async function getShieldAuthorization({
     for (const matcher in shield) {
         const concurrentFieldsAuthCheck: Promise<any>[] = []
 
-        let globPattern = matcher
-
-        if (!globPattern.startsWith('/') && globPattern !== '**')
-            globPattern = `/${globPattern}`
+        const globPattern = matcher
 
         for (let i = paths.length - 1; i >= 0; i--) {
-            const reqPath: string = reqPaths[i]
+            const reqPath: string = paths[i]
 
             if (isMatchingGlob(reqPath, globPattern)) {
                 const shieldRule = shield[matcher]
@@ -258,8 +219,8 @@ export function getDepth(
 
     paths.forEach((path: string) => {
         const stopPath = stopPaths.find((p: string) => path.includes(p))
-        const stopLength = stopPath ? stopPath.split('/').length - 1 : undefined
-        const parts = path.split('/').filter(Boolean).slice(2, stopLength ? stopLength + 2 : undefined)
+        const stopIndex = stopPath ? stopPath.split('/').length - 1 : undefined
+        const parts = path.split('/').filter(Boolean).slice(1, stopIndex ? stopIndex + 1 : undefined)
         const pathDepth = parts.length
 
         if (pathDepth > depth)

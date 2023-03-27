@@ -10,16 +10,66 @@ import {
     getPrismaArgs,
     getType,
 } from '@client/adapter'
-import type { Action, Authorization } from '@client/defs'
+import type { Action, Authorization, Options } from '@client/defs'
 import { Actions, ActionsAliases, Authorizations } from '@client/defs'
 import { Prisma } from '@prisma/client'
 import useLambdaIdentity from '@appsync-server/utils/useLambdaIdentity'
 import useLambdaEvents from '@appsync-server/utils/useLambdaEvents'
+import { plural } from 'pluralize'
+import flow from 'lodash/flow'
+import camelCase from 'lodash/camelCase'
+import upperFirst from 'lodash/upperFirst'
 import { testEach } from './_helpers'
 
-process.env.PRISMA_APPSYNC_TESTING = 'true'
+const pascalCase = flow(camelCase, upperFirst)
+const models: {
+    [key: string]: {
+        prismaRef: string
+        singular: string
+        plural: string
+    }
+} = {
+    People: {
+        prismaRef: 'people',
+        singular: 'People',
+        plural: 'Peoples',
+    },
+}
 
-const Models = Prisma.ModelName
+Prisma.dmmf.datamodel.models.forEach((m) => {
+    models[plural(pascalCase(m.name))] = {
+        prismaRef: m.name,
+        singular: pascalCase(m.name),
+        plural: pascalCase(plural(m.name)),
+    }
+    models[pascalCase(m.name)] = {
+        prismaRef: m.name,
+        singular: pascalCase(m.name),
+        plural: pascalCase(plural(m.name)),
+    }
+})
+
+process.env.PRISMA_APPSYNC_TESTING = 'true'
+process.env.PRISMA_APPSYNC_INJECTED_CONFIG = JSON.stringify({
+    modelsMapping: models,
+})
+
+const TESTING: {
+    models: typeof models
+    options: Options
+} = {
+    models,
+    options: {
+        connectionString: 'xxx',
+        sanitize: true,
+        logLevel: 'INFO' as const,
+        defaultPagination: false,
+        maxDepth: 3,
+        maxReqPerUserMinute: 200,
+        fieldsMapping: {},
+        modelsMapping: models,
+    },
+}
 
 function mockAppSyncEvent(identity: NonNullable<Authorization>) {
     return useLambdaEvents({
@@ -107,10 +157,10 @@ describe('CLIENT #adapter', () => {
 
     describe('.getModel?', () => {
         const cases = Object.values(Actions).map((action: Action) => {
-            return [action, 'People']
+            return [action, models.People]
         })
         testEach(cases)('when operation is "{0}People", expect model to equal "{1}"', (action: Action, expected) => {
-            const result = getModel({ operation: `${action}People`, action })
+            const result = getModel({ operation: `${action}People`, action, options: TESTING.options })
             expect(result).toEqual(expected)
         })
     })
@@ -123,16 +173,7 @@ describe('CLIENT #adapter', () => {
                         return { message: 'Hello world' }
                     },
                 },
-                options: {
-                    connectionString: 'xxx',
-                    sanitize: true,
-                    logLevel: 'INFO',
-                    defaultPagination: false,
-                    maxDepth: 3,
-                    modelsMapping: {},
-                    fieldsMapping: {},
-                    maxReqPerUserMinute: 200,
-                },
+                options: TESTING.options,
                 operation: 'notify',
             })
             expect(context).toEqual({
@@ -330,12 +371,12 @@ describe('CLIENT #adapter', () => {
     describe('.getPaths?', () => {
         test('expect nested get to return matching paths', () => {
             const result = getPaths({
+                operation: 'getPost',
                 context: {
                     action: Actions.get,
                     alias: ActionsAliases.access,
-                    model: Models.Post,
+                    model: TESTING.models.Post,
                 },
-                args: {},
                 prismaArgs: getPrismaArgs({
                     action: Actions.get,
                     _selectionSetList: [
@@ -356,12 +397,17 @@ describe('CLIENT #adapter', () => {
                 }),
             })
             expect(result).toEqual([
-                '/get/post/title',
-                '/get/post/comment/content',
-                '/get/post/comment/author/email',
-                '/get/post/comment/author/username',
-                '/get/post/comment/author/badges/label',
-                '/get/post/comment/author/badges/owners/email',
+                'getPost',
+                'getPost/title',
+                'getPost/comment',
+                'getPost/comment/content',
+                'getPost/comment/author',
+                'getPost/comment/author/email',
+                'getPost/comment/author/username',
+                'getPost/comment/author/badges',
+                'getPost/comment/author/badges/label',
+                'getPost/comment/author/badges/owners',
+                'getPost/comment/author/badges/owners/email',
             ])
         })
 
@@ -377,12 +423,12 @@ describe('CLIENT #adapter', () => {
                 },
             }
             const result = getPaths({
+                operation: 'updatePost',
                 context: {
                     action: Actions.update,
                     alias: ActionsAliases.modify,
-                    model: Models.Post,
+                    model: TESTING.models.Post,
                 },
-                args,
                 prismaArgs: getPrismaArgs({
                     action: Actions.update,
                     _selectionSetList: [
@@ -403,14 +449,22 @@ describe('CLIENT #adapter', () => {
                 }),
             })
             expect(result).toEqual([
-                '/update/post/title',
-                '/update/post/author/username',
-                '/get/post/title',
-                '/get/post/comment/content',
-                '/get/post/comment/author/email',
-                '/get/post/comment/author/username',
-                '/get/post/comment/author/badges/label',
-                '/get/post/comment/author/badges/owners/email',
+                'updatePost',
+                'updatePost/title',
+                'updatePost/author',
+                'updatePost/author/connect',
+                'updatePost/author/connect/username',
+                'getPost',
+                'getPost/title',
+                'getPost/comment',
+                'getPost/comment/content',
+                'getPost/comment/author',
+                'getPost/comment/author/email',
+                'getPost/comment/author/username',
+                'getPost/comment/author/badges',
+                'getPost/comment/author/badges/label',
+                'getPost/comment/author/badges/owners',
+                'getPost/comment/author/badges/owners/email',
             ])
         })
 
@@ -418,7 +472,7 @@ describe('CLIENT #adapter', () => {
             const args = {
                 data: [
                     {
-                        title: 'New title',
+                        title: 'First title of many',
                         author: {
                             connect: {
                                 username: 'johndoe',
@@ -428,12 +482,12 @@ describe('CLIENT #adapter', () => {
                 ],
             }
             const result = getPaths({
+                operation: 'createManyPosts',
                 context: {
                     action: Actions.createMany,
                     alias: ActionsAliases.batchCreate,
-                    model: Models.Post,
+                    model: TESTING.models.Post,
                 },
-                args,
                 prismaArgs: getPrismaArgs({
                     action: Actions.createMany,
                     _arguments: args,
@@ -454,27 +508,33 @@ describe('CLIENT #adapter', () => {
                 }),
             })
             expect(result).toEqual([
-                '/createMany/post/title',
-                '/createMany/post/author/username',
-                '/list/post/title',
-                '/list/post/comment/content',
-                '/list/post/comment/author/email',
-                '/list/post/comment/author/username',
-                '/list/post/comment/author/badges/label',
-                '/list/post/comment/author/badges/owners/email',
+                'createManyPosts',
+                'createManyPosts/title',
+                'createManyPosts/author',
+                'createManyPosts/author/connect',
+                'createManyPosts/author/connect/username',
+                'listPosts',
+                'listPosts/title',
+                'listPosts/comment',
+                'listPosts/comment/content',
+                'listPosts/comment/author',
+                'listPosts/comment/author/email',
+                'listPosts/comment/author/username',
+                'listPosts/comment/author/badges',
+                'listPosts/comment/author/badges/label',
+                'listPosts/comment/author/badges/owners',
+                'listPosts/comment/author/badges/owners/email',
             ])
         })
 
         test('expect custom resolver notify to return matching paths', () => {
             const resolver = 'notify'
             const result = getPaths({
+                operation: resolver,
                 context: {
                     action: resolver,
                     alias: 'custom',
                     model: null,
-                },
-                args: {
-                    message: 'Hello World',
                 },
                 prismaArgs: getPrismaArgs({
                     action: resolver,
@@ -485,7 +545,7 @@ describe('CLIENT #adapter', () => {
                     defaultPagination: false,
                 }),
             })
-            expect(result).toEqual(['/notify/message'])
+            expect(result).toEqual(['notify', 'notify/message'])
         })
     })
 })

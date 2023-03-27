@@ -7,8 +7,27 @@ import { Actions, ActionsAliases, Authorizations } from '@client/defs'
 
 process.env.PRISMA_APPSYNC_TESTING = 'true'
 process.env.PRISMA_APPSYNC_INJECTED_CONFIG = JSON.stringify({
-    modelsMapping: { Post: 'post', Posts: 'post' },
+    modelsMapping: {
+        Posts: {
+            prismaRef: 'post',
+            singular: 'Post',
+            plural: 'Posts',
+        },
+        Post: {
+            prismaRef: 'post',
+            singular: 'Post',
+            plural: 'Posts',
+        },
+    },
 })
+
+const TESTING = {
+    PostModel: {
+        prismaRef: 'post',
+        singular: 'Post',
+        plural: 'Posts',
+    },
+}
 
 function mockAppSyncEvent(operationName: string, query: string) {
     return useLambdaEvents({
@@ -217,12 +236,12 @@ describe('CLIENT #core', () => {
                 context: {
                     action: Actions.get,
                     alias: ActionsAliases.access,
-                    model: 'post',
+                    model: TESTING.PostModel,
                 },
                 fields: ['title', 'author/username'],
                 identity: {},
                 operation: 'getPost',
-                paths: ['/get/post/title', '/get/post/author/username'],
+                paths: ['getPost', 'getPost/title', 'getPost/author', 'getPost/author/username'],
                 prismaArgs: {
                     where: {
                         title: { not: { equals: 'Foo' } },

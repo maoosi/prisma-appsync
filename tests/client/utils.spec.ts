@@ -11,9 +11,11 @@ import {
     isUndefined,
     lowerFirst,
     merge,
+    objectToPaths,
     omit,
     replaceObjectPath,
     traverse,
+    unique,
     upperFirst,
 } from '@client/utils'
 
@@ -135,6 +137,35 @@ describe('CLIENT #utils', () => {
         test('expect dotate to preserve arrays', () => {
             const result = dotate({ data: { tags: ['foo', 'bar'] } })
             expect(result).toEqual({ 'data.tags': ['foo', 'bar'] })
+        })
+    })
+    describe('.objectToPaths?', () => {
+        test('expect objectToPaths to transform an object to to an array of paths.', () => {
+            const result = objectToPaths({ data: { title: 'foo', comment: { user: { id: 2 } } } })
+            expect(result).toEqual([
+                'data',
+                'data/title',
+                'data/comment',
+                'data/comment/user',
+                'data/comment/user/id',
+            ])
+        })
+        test('expect objectToPaths to transform an object to to an array of paths (incl. sub-arrays).', () => {
+            const result = objectToPaths({
+                data: [{
+                    title: 'foo from array',
+                    comment: {
+                        user: { id: 2 },
+                    },
+                }],
+            })
+            expect(result).toEqual([
+                'data',
+                'data/title',
+                'data/comment',
+                'data/comment/user',
+                'data/comment/user/id',
+            ])
         })
     })
     describe('.isMatchingGlob?', () => {
@@ -295,6 +326,11 @@ describe('CLIENT #utils', () => {
             const obj = { where: { author: { is: 'NULL' } } }
             replaceObjectPath(obj, ['where', 'author', 'is'], null)
             expect(obj).toEqual({ where: { author: { is: null } } })
+        })
+    })
+    describe('.unique?', () => {
+        test('expect unique to return a unique array', () => {
+            expect(unique(['a', 'b', 'a'])).toEqual(['a', 'b'])
         })
     })
 })

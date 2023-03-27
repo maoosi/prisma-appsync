@@ -345,11 +345,16 @@ export class PrismaAppSyncCompiler {
 
         for (let i = 0; i < this.document.models.length; i++) {
             const model = this.document.models[i]
+            const modelDefition = {
+                prismaRef: model.prismaRef,
+                singular: model.name,
+                plural: model.pluralizedName,
+            }
 
             if (model.name !== model.pluralizedName)
-                injectedConfig.modelsMapping[model.pluralizedName] = model.prismaRef
+                injectedConfig.modelsMapping[model.pluralizedName] = modelDefition
 
-            injectedConfig.modelsMapping[model.name] = model.prismaRef
+            injectedConfig.modelsMapping[model.name] = modelDefition
 
             for (let j = 0; j < Object.keys(model.gql).length; j++) {
                 const key = Object.keys(model.gql)[j]
@@ -368,10 +373,9 @@ export class PrismaAppSyncCompiler {
                             '_model', '_fields', '_usesQueries', '_usesMutations', '_usesSubscriptions',
                         ].includes(key)
                     ) {
-                        const singleRelationPath = `${model.name.toLowerCase()}/${field.name}`
-                        const multiRelationPath = `${model.pluralizedName.toLowerCase()}/${field.name}`
-                        injectedConfig.fieldsMapping[singleRelationPath] = { type: field.type, isRelation: !!field?.relation }
-                        injectedConfig.fieldsMapping[multiRelationPath] = { type: field.type, isRelation: !!field?.relation }
+                        injectedConfig.fieldsMapping[`${operation}/${field.name}`] = {
+                            type: field.type, isRelation: !!field?.relation,
+                        }
                     }
                 }
             }

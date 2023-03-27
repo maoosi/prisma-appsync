@@ -299,7 +299,6 @@ export class PrismaAppSync {
             const shieldAuth: ShieldAuthorization = await getShieldAuthorization({
                 shield,
                 paths: QueryParams.paths,
-                options: this.options,
                 context: QueryParams.context,
             })
             if (Object.keys(shield).length === 0)
@@ -311,7 +310,10 @@ export class PrismaAppSync {
             if (!shieldAuth.canAccess) {
                 const reason = typeof shieldAuth.reason === 'string'
                     ? shieldAuth.reason
-                    : shieldAuth.reason(QueryParams.context)
+                    : shieldAuth.reason({
+                        action: QueryParams.context.action,
+                        model: QueryParams.context.model?.singular || QueryParams.context.action,
+                    })
                 throw new CustomError(reason, { type: 'FORBIDDEN' })
             }
 

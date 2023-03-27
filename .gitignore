@@ -5,6 +5,7 @@ node_modules/
 # Testing
 tests/prisma/generated/
 playground/
+debug/
 
 # Dist folder
 dist/

@@ -1,11 +1,19 @@
 import { describe, expect } from 'vitest'
 import * as queries from '@client/resolver'
-import type { QueryParams } from '@client/defs'
+import type { Model, QueryParams } from '@client/defs'
 import { Actions, ActionsAliases, Authorizations } from '@client/defs'
 import useLambdaIdentity from '@appsync-server/utils/useLambdaIdentity'
 import { testEach } from './_helpers'
 
 process.env.PRISMA_APPSYNC_TESTING = 'true'
+
+const TESTING = {
+    PostModel: {
+        prismaRef: 'post',
+        singular: 'Post',
+        plural: 'Posts',
+    },
+}
 
 const identity = useLambdaIdentity(Authorizations.AMAZON_COGNITO_USER_POOLS, {
     sourceIp: 'xxx.xxx.xxx.x',
@@ -21,7 +29,7 @@ describe('CLIENT #queries', () => {
         context: {
             action: Actions.get,
             alias: ActionsAliases.access,
-            model: 'post',
+            model: TESTING.PostModel,
         },
         prismaArgs: {
             data: { title: 'Hello World' },
@@ -40,9 +48,9 @@ describe('CLIENT #queries', () => {
         paths: [],
     }
 
-    const createPrismaClient: any = (model: string, prismaQuery: string) => {
+    const createPrismaClient: any = (model: Model, prismaQuery: string) => {
         return {
-            [model]: {
+            [model!.prismaRef]: {
                 [prismaQuery]: (queryObject: any) => {
                     return queryObject
                 },
@@ -145,8 +153,8 @@ describe('CLIENT #queries', () => {
         return [test.name, test.prismaQuery, test.expectedResult]
     })
 
-    testEach(cases)('expect "{0}" to call "{1}" Prisma Query', async (name, prismaQuery, expectedResult) => {
-        const result = await queries[name](createPrismaClient(query.context.model, prismaQuery), query)
+    testEach(cases)('expect "{0}" to call "{1}" Prisma Query', async (queryName, prismaQuery, expectedResult) => {
+        const result = await queries[queryName](createPrismaClient(query.context.model, prismaQuery), query)
         expect(result).toEqual(expectedResult)
     })
 })

@@ -8,6 +8,7 @@ import type {
     AppSyncResolverEvent,
     AppSyncResolverHandler,
 } from 'aws-lambda'
+import { unique } from './utils'
 
 // Prisma-AppSync Client Types
 
@@ -28,7 +29,7 @@ export type Options = Required<PrismaAppSyncOptionsType> & {
 }
 
 export interface InjectedConfig {
-    modelsMapping?: { [modelVariant: string]: string }
+    modelsMapping?: { [modelVariant: string]: { prismaRef: string; singular: string; plural: string } }
     fieldsMapping?: { [fieldPath: string]: { type: string; isRelation: boolean } }
     operations?: string
 }
@@ -42,8 +43,10 @@ export type ActionsAliasStr = keyof typeof ActionsAliases
 export interface Context {
     action: Action
     alias: ActionsAlias
-    model: string | null
+    model: Model
 }
+
+export type Model = { prismaRef: string; singular: string; plural: string } | null
 
 export type { AppSyncResolverHandler, AppSyncResolverEvent, AppSyncIdentity }
 
@@ -146,9 +149,14 @@ export type AfterHookParams = QueryParams & {
     result: any | any[]
 }
 
-export type Reason = string | ((context: Context) => string)
+export interface ShieldContext {
+    action: Action
+    model: string
+}
 
-export type ShieldRule = boolean | ((context: Context) => boolean | Promise<boolean>) | any
+export type Reason = string | ((context: ShieldContext) => string)
+
+export type ShieldRule = boolean | ((context: ShieldContext) => boolean | Promise<boolean>) | any
 
 export interface Shield {
     [matcher: string]:
@@ -246,49 +254,67 @@ export type Identity = API_KEY | AWS_LAMBDA | AWS_IAM | AMAZON_COGNITO_USER_POOL
 
 // Prisma-related Constants
 
-export const ReservedPrismaKeys = [
-    'data',
-    'where',
-    'orderBy',
-    'create',
-    'connect',
-    'connectOrCreate',
-    'update',
-    'upsert',
-    'delete',
-    'disconnect',
-    'set',
-    'updateMany',
-    'deleteMany',
-    'select',
-    'include',
-    'equals',
-    'has',
-    'hasEvery',
-    'in',
-    'not',
-    'notIn',
-    'count',
-    'some',
-    'hasSome',
-    'every',
-    'isEmpty',
-    'none',
-    'is',
-    'isNot',
-    'OR',
-    'NOT',
-    'AND',
-    'gt',
-    'gte',
-    'lt',
-    'lte',
-    'operations',
-    'contains',
-    'endsWith',
-    'startsWith',
-    'mode',
+export const Prisma_QueryOptions = [
+    'where', 'data', 'select', 'orderBy', 'include', 'distinct',
 ]
+
+export const Prisma_NestedQueries = [
+    'create', 'createMany', 'set', 'connect', 'connectOrCreate', 'disconnect', 'update', 'upsert', 'delete', 'updateMany', 'deleteMany',
+]
+
+export const Prisma_FilterConditionsAndOperatos = [
+    'equals', 'not', 'in', 'notIn', 'lt', 'lte', 'gt', 'gte', 'contains', 'search', 'mode', 'startsWith', 'endsWith', 'AND', 'OR', 'NOT',
+]
+
+export const Prisma_FilterRelationFilters = [
+    'some', 'every', 'none', 'is', 'isNot',
+]
+
+export const Prisma_ScalarListMethods = [
+    'set', 'push', 'unset',
+]
+
+export const Prisma_ScalarListFilters = [
+    'has', 'hasEvery', 'hasSome', 'isEmpty', 'isSet', 'equals',
+]
+
+export const Prisma_CompositeTypeMethods = [
+    'set', 'unset', 'update', 'upsert', 'push',
+]
+
+export const Prisma_CompositeTypeFilters = [
+    'equals', 'is', 'isNot', 'isEmpty', 'every', 'some', 'none',
+]
+
+export const Prisma_AtomicNumberOperations = [
+    'increment', 'decrement', 'multiply', 'divide', 'set',
+]
+
+export const Prisma_JSONFilters = [
+    'path', 'string_contains', 'string_starts_with', 'string_ends_with', 'array_contains', 'array_starts_with', 'array_ends_with',
+]
+
+export const Prisma_ReservedKeysForPaths = unique([
+    ...Prisma_QueryOptions,
+    ...Prisma_FilterConditionsAndOperatos,
+    ...Prisma_FilterRelationFilters,
+    ...Prisma_ScalarListFilters,
+    ...Prisma_CompositeTypeFilters,
+    ...Prisma_JSONFilters,
+])
+
+export const Prisma_ReservedKeys = unique([
+    ...Prisma_QueryOptions,
+    ...Prisma_NestedQueries,
+    ...Prisma_FilterConditionsAndOperatos,
+    ...Prisma_FilterRelationFilters,
+    ...Prisma_ScalarListMethods,
+    ...Prisma_ScalarListFilters,
+    ...Prisma_CompositeTypeMethods,
+    ...Prisma_CompositeTypeFilters,
+    ...Prisma_AtomicNumberOperations,
+    ...Prisma_JSONFilters,
+])
 
 // Prisma-AppSync Client Constants
 

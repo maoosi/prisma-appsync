@@ -68,6 +68,45 @@ export function dotate(source: any): any {
 }
 
 /**
+ * #### Transform an object to an array of paths.
+ *
+ * @example objectToPaths({ data: { title: "glut" } })
+ * // returns [ 'data', 'data/title']
+ *
+ * @param {any} source
+ * @returns any
+ */
+export function objectToPaths(source: any): string[] {
+    const dotObject = flatten(source)
+    const dotPaths = Object.keys(dotObject).map((k: string) => {
+        return k
+            .split('.')
+            .filter((part) => {
+                const isDigit = Boolean(/\b(\d+)\b/gi.exec(part))
+                return !isDigit
+            })
+            .join('/')
+    })
+    const paths: string[] = []
+    const seen: Set<string> = new Set()
+
+    for (const dotPath of dotPaths) {
+        const parts = dotPath.split('/')
+        let current = ''
+
+        for (const part of parts) {
+            current += current === '' ? part : `/${part}`
+            if (!seen.has(current)) {
+                paths.push(current)
+                seen.add(current)
+            }
+        }
+    }
+
+    return paths
+}
+
+/**
  * #### Return an object ommitting one to multiple keys.
  *
  * @example omit({ foo: 'foo', bar: 'bar' }, 'foo')
@@ -360,4 +399,16 @@ export function replaceAll(str: string, findArray: string[], replaceArray: strin
  */
 export function replaceObjectPath(obj, path: string[], replacer: any): any {
     return set(obj, path, replacer, { mutate: true })
+}
+
+/**
+ * #### Return unique array
+ *
+ * @example unique(['a', 'b', 'a'])
+ *
+ * @param {any[]} array
+ * @returns any[]
+ */
+export function unique(array): any {
+    return [...new Set(array)]
 }

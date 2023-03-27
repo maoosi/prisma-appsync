@@ -1,23 +1,17 @@
 import { describe, expect, test } from 'vitest'
 import { getDepth, getShieldAuthorization, runHooks } from '@client/guard'
-import type { Options } from '@client/defs'
 import { Actions, ActionsAliases, Authorizations } from '@client/defs'
-import { Prisma, PrismaClient } from '@prisma/client'
-
-const Models = Prisma.ModelName
+import { PrismaClient } from '@prisma/client'
 
 process.env.DATABASE_URL = 'postgresql://USER:PASSWORD@HOST:PORT/DATABASE'
 process.env.PRISMA_APPSYNC_TESTING = 'true'
 
-const options: Options = {
-    connectionString: 'xxx',
-    sanitize: true,
-    logLevel: 'INFO',
-    defaultPagination: false,
-    maxDepth: 3,
-    modelsMapping: { Post: 'post', Posts: 'post' },
-    fieldsMapping: {},
-    maxReqPerUserMinute: 200,
+const TESTING = {
+    PostModel: {
+        prismaRef: 'post',
+        singular: 'Post',
+        plural: 'Posts',
+    },
 }
 
 describe('CLIENT #guard', () => {
@@ -25,13 +19,12 @@ describe('CLIENT #guard', () => {
         test('expect query to be _denied_ by default', async () => {
             const authorization = await getShieldAuthorization({
                 shield: { '**': false },
-                paths: ['/update/post/title'],
+                paths: ['updatePost', 'updatePost/title'],
                 context: {
                     action: Actions.update,
                     alias: ActionsAliases.modify,
-                    model: Models.Post,
+                    model: TESTING.PostModel,
                 },
-                options,
             })
 
             expect(authorization).toEqual({
@@ -46,13 +39,12 @@ describe('CLIENT #guard', () => {
         test('expect query to be _denied_ when ** is false', async () => {
             const authorization = await getShieldAuthorization({
                 shield: { '**': false },
-                paths: ['/update/post/title'],
+                paths: ['updatePost', 'updatePost/title'],
                 context: {
                     action: Actions.update,
                     alias: ActionsAliases.modify,
-                    model: Models.Post,
+                    model: TESTING.PostModel,
                 },
-                options,
             })
 
             expect(authorization).toEqual({
@@ -67,13 +59,12 @@ describe('CLIENT #guard', () => {
         test('expect query to be _allowed_ when ** is true', async () => {
             const authorization = await getShieldAuthorization({
                 shield: { '**': true },
-                paths: ['/update/post/title'],
+                paths: ['updatePost', 'updatePost/title'],
                 context: {
                     action: Actions.update,
                     alias: ActionsAliases.modify,
-                    model: Models.Post,
+                    model: TESTING.PostModel,
                 },
-                options,
             })
 
             expect(authorization).toEqual({
@@ -89,25 +80,24 @@ describe('CLIENT #guard', () => {
             const authorization = await getShieldAuthorization({
                 shield: {
                     '**': true,
-                    '/update{Post,Comment,User}{,/**}': {
+                    'update{Post,Comment,User}{,/**}': {
                         rule: false,
                         reason: ({ model }) => `${model} can only be modified by its owner.`,
                     },
                 },
-                paths: ['/update/post/title'],
+                paths: ['updatePost/title'],
                 context: {
                     action: Actions.update,
                     alias: ActionsAliases.modify,
-                    model: Models.Post,
+                    model: TESTING.PostModel,
                 },
-                options,
             })
 
             expect(authorization).toEqual({
                 canAccess: false,
                 reason: 'Post can only be modified by its owner.',
-                matcher: '/update{Post,Comment,User}{,/**}',
-                globPattern: '/update{Post,Comment,User}{,/**}',
+                matcher: 'update{Post,Comment,User}{,/**}',
+                globPattern: 'update{Post,Comment,User}{,/**}',
                 prismaFilter: {},
             })
         })
@@ -116,22 +106,21 @@ describe('CLIENT #guard', () => {
             const authorization = await getShieldAuthorization({
                 shield: {
                     '**': false,
-                    '/updateMany{Posts,Comments,Users}{,/**}': { rule: true },
+                    'updateMany{Posts,Comments,Users}{,/**}': { rule: true },
                 },
-                paths: ['/updateMany/post/title'],
+                paths: ['updateManyPosts', 'updateManyPosts/title'],
                 context: {
                     action: Actions.update,
                     alias: ActionsAliases.modify,
-                    model: Models.Post,
+                    model: TESTING.PostModel,
                 },
-                options,
             })
 
             expect(authorization).toEqual({
                 canAccess: true,
-                reason: 'Matcher: /updateMany{Posts,Comments,Users}{,/**}',
-                matcher: '/updateMany{Posts,Comments,Users}{,/**}',
-                globPattern: '/updateMany{Posts,Comments,Users}{,/**}',
+                reason: 'Matcher: updateMany{Posts,Comments,Users}{,/**}',
+                matcher: 'updateMany{Posts,Comments,Users}{,/**}',
+                globPattern: 'updateMany{Posts,Comments,Users}{,/**}',
                 prismaFilter: {},
             })
         })
@@ -142,22 +131,21 @@ describe('CLIENT #guard', () => {
             const authorization = await getShieldAuthorization({
                 shield: {
                     '**': false,
-                    '/update{Post,Comment,User}{,/**}': { rule: isOwner },
+                    'update{Post,Comment,User}{,/**}': { rule: isOwner },
                 },
-                paths: ['/update/post/title'],
+                paths: ['updatePost', 'updatePost/title'],
                 context: {
                     action: Actions.update,
                     alias: ActionsAliases.modify,
-                    model: Models.Post,
+                    model: TESTING.PostModel,
                 },
-                options,
             })
 
             expect(authorization).toEqual({
                 canAccess: true,
-                reason: 'Matcher: /update{Post,Comment,User}{,/**}',
-                matcher: '/update{Post,Comment,User}{,/**}',
-                globPattern: '/update{Post,Comment,User}{,/**}',
+                reason: 'Matcher: update{Post,Comment,User}{,/**}',
+                matcher: 'update{Post,Comment,User}{,/**}',
+                globPattern: 'update{Post,Comment,User}{,/**}',
                 prismaFilter: isOwner,
             })
         })
@@ -184,12 +172,12 @@ describe('CLIENT #guard', () => {
                     context: {
                         action: Actions.update,
                         alias: ActionsAliases.modify,
-                        model: Models.Post.toLowerCase(),
+                        model: TESTING.PostModel,
                     },
                     fields: ['title'],
                     identity: {},
                     operation: 'updatePost',
-                    paths: ['/update/post/title', '/get/post/title'],
+                    paths: ['updatePost', 'updatePost/title', 'getPost', 'getPost/title'],
                     prismaArgs: {
                         where: { id: 1 },
                         data: { title: 'New title' },
@@ -221,12 +209,12 @@ describe('CLIENT #guard', () => {
                     context: {
                         action: Actions.update,
                         alias: ActionsAliases.modify,
-                        model: Models.Post.toLowerCase(),
+                        model: TESTING.PostModel,
                     },
                     fields: ['title'],
                     identity: {},
                     operation: 'updatePost',
-                    paths: ['/update/post/title', '/get/post/title'],
+                    paths: ['updatePost', 'updatePost/title', 'getPost', 'getPost/title'],
                     prismaArgs: {
                         where: { id: 1 },
                         data: { title: 'New title' },
@@ -264,7 +252,7 @@ describe('CLIENT #guard', () => {
                     fields: ['message'],
                     identity: {},
                     operation: 'notify',
-                    paths: ['/notify/message'],
+                    paths: ['notify', 'notify/message'],
                     prismaArgs: {
                         select: { message: true },
                     },
@@ -295,12 +283,12 @@ describe('CLIENT #guard', () => {
                     context: {
                         action: Actions.update,
                         alias: ActionsAliases.modify,
-                        model: Models.Post.toLowerCase(),
+                        model: TESTING.PostModel,
                     },
                     fields: ['title'],
                     identity: {},
                     operation: 'updatePost',
-                    paths: ['/update/post/title', '/get/post/title'],
+                    paths: ['updatePost', 'updatePost/title', 'getPost', 'getPost/title'],
                     prismaArgs: {
                         where: { id: 1 },
                         data: { title: 'New title' },
@@ -318,15 +306,17 @@ describe('CLIENT #guard', () => {
         test('expect getDepth to return depth', () => {
             const depth = getDepth({
                 paths: [
-                    '/list/post/id',
-                    '/list/post/title',
-                    '/list/post/json',
-                    '/list/post/author/name',
+                    'listPost',
+                    'listPost/id',
+                    'listPost/title',
+                    'listPost/json',
+                    'listPost/author',
+                    'listPost/author/name',
                 ],
                 context: {
                     action: Actions.update,
                     alias: ActionsAliases.modify,
-                    model: Models.Post,
+                    model: TESTING.PostModel,
                 },
                 fieldsMapping: {},
             })
@@ -335,21 +325,27 @@ describe('CLIENT #guard', () => {
         test('expect getDepth to return depth, excluding Json fields', () => {
             const depth = getDepth({
                 paths: [
-                    '/create/post/title',
-                    '/create/post/json/menu/id',
-                    '/create/post/json/menu/value',
-                    '/create/post/json/menu/popup/menuitem',
-                    '/get/post/title',
-                    '/get/post/json',
+                    'createPost',
+                    'createPost/title',
+                    'createPost/json',
+                    'createPost/json/menu',
+                    'createPost/json/menu/id',
+                    'createPost/json/menu/value',
+                    'createPost/json/menu/popup',
+                    'createPost/json/menu/popup/menuitem',
+                    'getPost',
+                    'getPost/title',
+                    'getPost/json',
                 ],
                 context: {
                     action: Actions.update,
                     alias: ActionsAliases.modify,
-                    model: Models.Post,
+                    model: TESTING.PostModel,
                 },
                 fieldsMapping: {
-                    'post/json': { type: 'Json' },
-                    'posts/json': { type: 'Json' },
+                    'createPost/json': { type: 'Json' },
+                    'createPosts/json': { type: 'Json' },
+                    'getPost/json': { type: 'Json' },
                 },
             })
             expect(depth).toEqual(1)

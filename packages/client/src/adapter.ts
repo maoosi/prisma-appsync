@@ -1,6 +1,16 @@
 import { CustomError } from './inspector'
 import { sanitize } from './guard'
-import { clone, dotate, isEmpty, isObject, isUndefined, lowerFirst, merge, replaceObjectPath, traverse } from './utils'
+import {
+    clone,
+    isEmpty,
+    isUndefined,
+    lowerFirst,
+    merge,
+    objectToPaths,
+    replaceObjectPath,
+    traverse,
+    unique,
+} from './utils'
 import type {
     Action,
     ActionsAlias,
@@ -9,6 +19,7 @@ import type {
     Context,
     GraphQLType,
     Identity,
+    Model,
     Options,
     PrismaArgs,
     QueryParams,
@@ -18,7 +29,7 @@ import {
     ActionsAliasesList,
     Authorizations,
     BatchActionsList,
-    ReservedPrismaKeys,
+    Prisma_ReservedKeysForPaths,
 } from './defs'
 
 /**
@@ -67,8 +78,8 @@ export function parseEvent(appsyncEvent: AppSyncEvent, options: Options, customR
     })
 
     const paths = getPaths({
+        operation,
         context,
-        args,
         prismaArgs,
     })
 
@@ -233,17 +244,7 @@ export function getContext({
     }
     else {
         context.action = getAction({ operation })
-        context.model = getModel({ operation, action: context.action })
-
-        if (typeof options?.modelsMapping?.[context.model] !== 'undefined') {
-            context.model = options.modelsMapping[context.model]
-        }
-        else {
-            throw new CustomError('Issue parsing auto-injected models mapping config.', {
-                type: 'INTERNAL_SERVER_ERROR',
-            })
-        }
-
+        context.model = getModel({ operation, action: context.action, options })
         context.alias = getActionAlias({ action: context.action })
     }
 
@@ -321,13 +322,25 @@ export function getActionAlias({ action }: { action: Action }): ActionsAlias {
  * @param  {any} options
  * @param  {string} options.operation
  * @param  {Action} options.action
+ * @param  {Options} options.options
  * @returns Model
  */
-export function getModel({ operation, action }: { operation: string; action: Action }): string {
-    const model = operation.replace(String(action), '')
+export function getModel(
+    { operation, action, options }:
+    { operation: string; action: Action; options: Options },
+): Model {
+    const actionModel = operation.replace(String(action), '')
 
-    if (!(model.length > 0))
+    if (!(actionModel.length > 0))
         throw new CustomError('Error parsing \'model\' from input event.', { type: 'INTERNAL_SERVER_ERROR' })
+
+    const model = options?.modelsMapping?.[actionModel]
+
+    if (!model) {
+        throw new CustomError('Issue parsing auto-injected models mapping config.', {
+            type: 'INTERNAL_SERVER_ERROR',
+        })
+    }
 
     return model
 }
@@ -528,81 +541,55 @@ function parseSelectionList(selectionSetList: any): any {
 }
 
 /**
- * #### Returns req and res paths (`/update/post/title`, `/get/post/date`, ..).
+ * #### Returns req and res paths (`updatePost/title`, `getPost/date`, ..).
  *
  * @param {any} options
+ * @param {string} options.operation
  * @param {Context} options.context
- * @param {any} options.args
  * @param {PrismaArgs} options.prismaArgs
  * @returns string[]
  */
 export function getPaths({
+    operation,
     context,
-    args,
     prismaArgs,
 }: {
+    operation: string
     context: Context
-    args: any
     prismaArgs: PrismaArgs
 }): string[] {
-    const paths: string[] = []
+    const paths: string[] = objectToPaths({
+        ...(prismaArgs?.data && {
+            data: prismaArgs.data,
+        }),
+        ...(prismaArgs?.select && {
+            select: prismaArgs.select,
+        }),
+    })
 
-    if (context.model === null) {
-        for (const key in args) {
-            if (Object.prototype.hasOwnProperty.call(args, key)) {
-                const value = args[key]
-                const objectPaths = isObject(value) ? dotate(value) : { [key]: value }
+    paths.forEach((path: string, index: number) => {
+        if (path.startsWith('data')) {
+            paths[index] = path.replace('data', operation)
+        }
 
-                for (const key in objectPaths) {
-                    const item = key.split('.').join('/')
-                    const path = `/${lowerFirst(context.action)}/${lowerFirst(item)}`
-                    if (!paths.includes(path))
-                        paths.push(path)
-                }
+        else if (path.startsWith('select')) {
+            const action = BatchActionsList.includes(context.action) ? Actions.list : Actions.get
+            if (context.model !== null) {
+                const model = action === Actions.list ? context.model.plural : context.model.singular
+                paths[index] = path.replace('select', `${lowerFirst(action)}${model}`)
+            }
+            else {
+                paths[index] = path.replace('select', operation)
             }
         }
-    }
+    })
 
-    for (const key in prismaArgs) {
-        if (Object.prototype.hasOwnProperty.call(prismaArgs, key)) {
-            const value = prismaArgs[key]
-
-            if (key === 'data' && context.model !== null) {
-                const inputs: any[] = Array.isArray(value) ? value : [value]
-
-                inputs.forEach((input: any) => {
-                    const objectPaths = isObject(input) ? dotate(input) : { [key]: input }
-
-                    for (const key in objectPaths) {
-                        const item = key
-                            .split('.')
-                            .filter(k => !ReservedPrismaKeys.includes(k))
-                            .join('/')
-                        const path = `/${lowerFirst(context.action)}/${lowerFirst(context.model!)}/${lowerFirst(item)}`
-                        if (!paths.includes(path))
-                            paths.push(path)
-                    }
-                })
-            }
-            else if (key === 'select') {
-                const objectPaths = isObject(value) ? dotate(value) : { [key]: value }
-
-                for (const key in objectPaths) {
-                    const item = key
-                        .split('.')
-                        .filter(k => !ReservedPrismaKeys.includes(k))
-                        .join('/')
-                    const selectAction = BatchActionsList.includes(context.action) ? Actions.list : Actions.get
-                    const path
-                        = context.model !== null
-                            ? `/${lowerFirst(selectAction)}/${lowerFirst(context.model)}/${lowerFirst(item)}`
-                            : `/${lowerFirst(context.action)}/${lowerFirst(item)}`
-                    if (!paths.includes(path))
-                        paths.push(path)
-                }
-            }
-        }
-    }
-
-    return paths
+    return unique(
+        paths.map(
+            (path: string) => path
+                .split('/')
+                .filter(k => !Prisma_ReservedKeysForPaths.includes(k))
+                .join('/'),
+        ),
+    )
 }
