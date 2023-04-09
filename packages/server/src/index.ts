@@ -15,6 +15,7 @@ import { Authorizations } from '../../client/src'
 import { queryObject } from './utils/useGraphqlFilter'
 import useLambdaIdentity from './utils/useLambdaIdentity'
 import useLambdaEvents from './utils/useLambdaEvents'
+import { addTypename } from './utils/useGraphqlTypename'
 
 declare global {
     // eslint-disable-next-line no-var, vars-on-top
@@ -66,6 +67,14 @@ export async function createServer({ defaultQuery, lambdaHandler, port, schema, 
 
     if (!lambdaHandler?.main)
         throw new Error('Handler has no exported function "main".')
+
+    const yogaSchema = createSchema({
+        typeDefs: [
+            readFileSync(join(__dirname, 'gql/appsync-scalars.gql'), { encoding: 'utf-8' }),
+            readFileSync(join(__dirname, 'gql/appsync-directives.gql'), { encoding: 'utf-8' }),
+            schema,
+        ],
+    })
 
     const useLambdaFunction = (): Plugin => {
         return {
@@ -168,13 +177,20 @@ export async function createServer({ defaultQuery, lambdaHandler, port, schema, 
                                 }
                             })
 
+                            const queryDocument = gql`${events[0].info.selectionSetGraphQL}`
+
                             const filteredResults = queryObject(
-                                gql`${events[0].info.selectionSetGraphQL}`,
+                                queryDocument,
                                 lambdaResults,
                                 { includeMissingData: true },
                             )
 
-                            setResult({ data: filteredResults })
+                            const typedResults = await addTypename(
+                                yogaSchema,
+                                filteredResults,
+                            )
+
+                            setResult({ data: typedResults })
                         }
                     },
                 }
@@ -183,13 +199,7 @@ export async function createServer({ defaultQuery, lambdaHandler, port, schema, 
     }
 
     const yoga = createYoga({
-        schema: createSchema({
-            typeDefs: [
-                readFileSync(join(__dirname, 'gql/appsync-scalars.gql'), { encoding: 'utf-8' }),
-                readFileSync(join(__dirname, 'gql/appsync-directives.gql'), { encoding: 'utf-8' }),
-                schema,
-            ],
-        }),
+        schema: yogaSchema,
         graphiql: {
             title: 'Prisma-AppSync',
             defaultQuery: defaultQuery ? prettier.format(defaultQuery, { parser: 'graphql' }) : undefined,
