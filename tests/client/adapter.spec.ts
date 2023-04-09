@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import {
+    addNullables,
     getAction,
     getAuthIdentity,
     getContext,
@@ -546,6 +547,23 @@ describe('CLIENT #adapter', () => {
                 }),
             })
             expect(result).toEqual(['notify', 'notify/message'])
+        })
+    })
+
+    describe('.addNullables?', () => {
+        test('expect addNullables to convert is, isNot and isNull inputs', async () => {
+            const result = await addNullables({
+                post: { is: 'NULL' },
+                user: { isNot: 'NULL' },
+                comment: { isNull: true },
+                blog: { isNull: false },
+            })
+            expect(result).toEqual({
+                post: { is: null },
+                user: { isNot: null },
+                comment: { equals: null },
+                blog: { not: null },
+            })
         })
     })
 })

@@ -14,7 +14,7 @@ import {
     objectToPaths,
     omit,
     replaceObjectPath,
-    traverse,
+    traverseNodes,
     unique,
     upperFirst,
 } from '@client/utils'
@@ -241,8 +241,8 @@ describe('CLIENT #utils', () => {
         })
     })
     describe('.traverse?', () => {
-        test('expect traverse to allow traverse an modify an Object', () => {
-            const result = traverse(
+        test('expect traverse to allow traverse an modify an Object', async () => {
+            const result = await traverseNodes(
                 {
                     select: {
                         title: true,
@@ -253,10 +253,9 @@ describe('CLIENT #utils', () => {
                         ],
                     },
                 },
-                ({ value }) => {
-                    if (typeof value === 'boolean')
-                        value = !value
-                    return { value }
+                async (node) => {
+                    if (typeof node?.value === 'boolean')
+                        node.set(!node.value)
                 },
             )
             expect(result).toEqual({
@@ -270,8 +269,8 @@ describe('CLIENT #utils', () => {
                 },
             })
         })
-        test('expect traverse to allow exclude keys in Object', () => {
-            const result = traverse(
+        test('expect traverse to allow exclude keys in Object', async () => {
+            const result = await traverseNodes(
                 {
                     select: {
                         title: true,
@@ -282,13 +281,11 @@ describe('CLIENT #utils', () => {
                         ],
                     },
                 },
-                ({ value, key }) => {
-                    let excludeChilds = false
-                    if (typeof key === 'string' && key === 'authors')
-                        excludeChilds = true
-                    if (typeof value === 'boolean')
-                        value = !value
-                    return { value, excludeChilds }
+                async (node) => {
+                    if (typeof node?.key === 'string' && node?.key === 'authors')
+                        node.break()
+                    if (typeof node?.value === 'boolean')
+                        node.set(!node.value)
                 },
             )
             expect(result).toEqual({
@@ -302,22 +299,22 @@ describe('CLIENT #utils', () => {
                 },
             })
         })
-        test('expect traverse to allow traverse an modify an Array', () => {
-            const result = traverse([{ authors: { username: true } }, { comments: { username: true } }], ({ value }) => {
-                if (typeof value === 'boolean')
-                    value = !value
-                return { value }
+        test('expect traverse to allow traverse an modify an Array', async () => {
+            const result = await traverseNodes([{ authors: { username: true } }, { comments: { username: true } }], async (node) => {
+                if (typeof node?.value === 'boolean')
+                    node.set(!node.value)
             })
             expect(result).toEqual([{ authors: { username: false } }, { comments: { username: false } }])
         })
-        test('expect traverse to allow excluding elements in Array', () => {
-            const result = traverse(
+        test('expect traverse to allow excluding elements in Array', async () => {
+            const result = await traverseNodes(
                 [{ authors: { username: true } }, { comments: { username: true } }],
-                ({ value, key }) => {
-                    const excludeChilds = !!(typeof key === 'string' && key === 'comments')
-                    if (typeof value === 'boolean')
-                        value = !value
-                    return { value, excludeChilds }
+                async (node) => {
+                    if (typeof node?.value === 'boolean')
+                        node.set(!node.value)
+
+                    if (typeof node?.key === 'string' && node?.key === 'comments')
+                        node.break()
                 },
             )
             expect(result).toEqual([{ authors: { username: false } }, { comments: { username: true } }])

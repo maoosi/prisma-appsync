@@ -7,8 +7,7 @@ import {
     lowerFirst,
     merge,
     objectToPaths,
-    replaceObjectPath,
-    traverse,
+    traverseNodes,
     unique,
 } from './utils'
 import type {
@@ -40,7 +39,7 @@ import {
  * @param  {any|null} customResolvers? - Custom Resolvers.
  * @returns `{ type, operation, context, fields, paths, args, prismaArgs, authorization, identity }` - QueryParams
  */
-export function parseEvent(appsyncEvent: AppSyncEvent, options: Options, customResolvers?: any | null): QueryParams {
+export async function parseEvent(appsyncEvent: AppSyncEvent, options: Options, customResolvers?: any | null): Promise<QueryParams> {
     if (
         isEmpty(appsyncEvent?.info?.fieldName)
         || isUndefined(appsyncEvent?.info?.selectionSetList)
@@ -61,8 +60,8 @@ export function parseEvent(appsyncEvent: AppSyncEvent, options: Options, customR
         _selectionSetList: appsyncEvent.info.selectionSetList,
     })
     const sanitizedArgs = options.sanitize
-        ? sanitize(addNullables(appsyncEvent.arguments))
-        : addNullables(appsyncEvent.arguments)
+        ? await sanitize(await addNullables(appsyncEvent.arguments))
+        : await addNullables(appsyncEvent.arguments)
 
     const args = clone(sanitizedArgs)
 
@@ -105,33 +104,24 @@ export function parseEvent(appsyncEvent: AppSyncEvent, options: Options, customR
  * @param {any} data
  * @returns any
  */
-export function addNullables(data: any): any {
-    const replaceList: { target: string[]; value: any }[] = []
-
-    traverse(data, ({ value, key, path }) => {
-        let excludeChilds = false
-
-        if (typeof key === 'string' && (key === 'is' || key === 'isNot')) {
-            replaceList.push({ target: path, value: value === 'NULL' ? null : undefined })
-            excludeChilds = true
+export async function addNullables(data: any): Promise<any> {
+    return await traverseNodes(data, async (node) => {
+        if (typeof node?.key === 'string' && (node?.key === 'is' || node?.key === 'isNot')) {
+            node.set(node?.value === 'NULL' ? null : undefined)
+            node.break()
         }
 
-        else if (typeof key === 'string' && key === 'isNull') {
-            replaceList.push({
-                target: path.splice(0, path.length - 1),
-                value: value === true ? { equals: null } : { not: null },
-            })
-            excludeChilds = true
+        else if (typeof node?.key === 'string' && node?.childKeys?.includes('isNull')) {
+            const { isNull, ...value } = node.value
+
+            if (isNull === true)
+                node.set({ ...value, equals: null })
+            else
+                node.set({ ...value, not: null })
+
+            node.break()
         }
-
-        return { value, excludeChilds }
     })
-
-    replaceList.forEach((replaceAction) => {
-        replaceObjectPath(data, replaceAction.target, replaceAction.value)
-    })
-
-    return data
 }
 
 /**

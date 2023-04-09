@@ -240,7 +240,7 @@ export class PrismaAppSync {
             })
 
             // Adapter :: parse appsync event
-            let QueryParams = parseEvent(
+            let QueryParams = await parseEvent(
                 resolveParams.event,
                 this.options,
                 resolveParams.resolvers,
@@ -476,7 +476,7 @@ export class PrismaAppSync {
         }
 
         // Guard :: clarify result (decode html)
-        const resultClarified = this.options.sanitize ? clarify(result) : result
+        const resultClarified = this.options.sanitize ? await clarify(result) : result
         log('Returning response to API request w/ result:', resultClarified)
 
         return resultClarified
