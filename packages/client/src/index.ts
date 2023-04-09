@@ -11,7 +11,6 @@ import {
     lowerFirst,
     merge,
     replaceAll,
-    replaceObjectPath,
     traverseNodes,
 } from './utils'
 
@@ -51,7 +50,6 @@ const _ = {
     isObject,
     traverseNodes,
     replaceAll,
-    replaceObjectPath,
 }
 
 export { _ }
