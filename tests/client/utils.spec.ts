@@ -13,7 +13,6 @@ import {
     merge,
     objectToPaths,
     omit,
-    replaceObjectPath,
     traverseNodes,
     unique,
     upperFirst,
@@ -318,11 +317,6 @@ describe('CLIENT #utils', () => {
                 },
             )
             expect(result).toEqual([{ authors: { username: false } }, { comments: { username: true } }])
-        })
-        test('expect replaceObjectPath to allow replace and mutate based on path and replacer', () => {
-            const obj = { where: { author: { is: 'NULL' } } }
-            replaceObjectPath(obj, ['where', 'author', 'is'], null)
-            expect(obj).toEqual({ where: { author: { is: null } } })
         })
     })
     describe('.unique?', () => {
