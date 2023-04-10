@@ -154,7 +154,9 @@ export class PrismaAppSync {
         process.env.PRISMA_APPSYNC_LOG_LEVEL = this.options.logLevel
 
         // Debug logs
-        log('New Prisma-AppSync instance created:', this.options)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { fieldsMapping, ...newInstanceLogs } = this.options
+        log('New Prisma-AppSync instance created:', newInstanceLogs)
 
         // Prisma client options
         const prismaLogDef: Prisma.LogDefinition[] = [

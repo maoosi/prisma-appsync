@@ -23,27 +23,29 @@ import { merge } from './utils'
 export function prismaQueryJoin<T>(queries: PrismaArgs[], operators: PrismaOperator[]): T {
     const prismaArgs: PrismaArgs = {}
 
+    // 'where', 'orderBy', 'select', 'skip', 'take', ...
     operators.forEach((operator: PrismaOperator) => {
         queries.forEach((query: PrismaArgs) => {
             if (query?.[operator]) {
                 if (operator === 'where') {
-                    if (prismaArgs[operator]?.AND) {
-                        prismaArgs[operator].AND.push(query[operator])
+                    if (prismaArgs.where?.AND) {
+                        prismaArgs.where.AND.push(query.where)
                     }
-                    else if (prismaArgs[operator]) {
-                        prismaArgs[operator] = {
-                            AND: [prismaArgs[operator], query[operator]],
+                    else if (prismaArgs.where) {
+                        prismaArgs.where = {
+                            ...prismaArgs.where,
+                            AND: [query.where],
                         }
                     }
                     else {
-                        prismaArgs[operator] = query[operator]
+                        prismaArgs.where = query.where
                     }
                 }
                 else if (prismaArgs?.[operator]) {
-                    prismaArgs[operator] = merge(prismaArgs[operator], query[operator]) as never
+                    prismaArgs[operator] = merge(prismaArgs[operator], query[operator]) as any
                 }
                 else {
-                    prismaArgs[operator] = query[operator] as never
+                    prismaArgs[operator] = query[operator] as any
                 }
             }
         })
@@ -51,6 +53,7 @@ export function prismaQueryJoin<T>(queries: PrismaArgs[], operators: PrismaOpera
 
     return prismaArgs as T
 }
+
 export const queryBuilder: QueryBuilder = {
     prismaGet: (...prismaQueries: PrismaArgs[]) => {
         return prismaQueryJoin<PrismaGet>(prismaQueries, ['where', 'select'])
