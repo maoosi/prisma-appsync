@@ -46,6 +46,7 @@ This project follows the [all-contributors](https://allcontributors.org/) specif
       <td align="center" valign="top" width="14.28%"><a href="http://ryanparker.dev"><img src="https://avatars.githubusercontent.com/u/17558268?v=4?s=100" width="100px;" alt="Ryan Parker"/><br /><sub><b>Ryan Parker</b></sub></a><br /><a href="https://github.com/maoosi/prisma-appsync/commits?author=ryparker" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://www.cameronjjenkinson.com"><img src="https://avatars.githubusercontent.com/u/5429478?v=4?s=100" width="100px;" alt="Cameron Jenkinson"/><br /><sub><b>Cameron Jenkinson</b></sub></a><br /><a href="https://github.com/maoosi/prisma-appsync/commits?author=cjjenkinson" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="http://bell.moe"><img src="https://avatars.githubusercontent.com/u/3979239?v=4?s=100" width="100px;" alt="Bell"/><br /><sub><b>Bell</b></sub></a><br /><a href="https://github.com/maoosi/prisma-appsync/commits?author=Tenrys" title="Code">💻</a> <a href="#ideas-Tenrys" title="Ideas, Planning, & Feedback">🤔</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/jeremy-white"><img src="https://avatars.githubusercontent.com/u/42325631?v=4?s=100" width="100px;" alt="jeremy-white"/><br /><sub><b>jeremy-white</b></sub></a><br /><a href="https://github.com/maoosi/prisma-appsync/commits?author=jeremy-white" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
