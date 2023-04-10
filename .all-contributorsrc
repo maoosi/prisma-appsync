@@ -64,6 +64,15 @@
         "code",
         "ideas"
       ]
+    },
+    {
+      "login": "jeremy-white",
+      "name": "jeremy-white",
+      "avatar_url": "https://avatars.githubusercontent.com/u/42325631?v=4",
+      "profile": "https://github.com/jeremy-white",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "commitConvention": "angular",
