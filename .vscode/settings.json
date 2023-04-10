@@ -119,6 +119,11 @@
             "language": "markdown",
             "scheme": "file",
             "pattern": "docs/changelog/1.0.0-rc.5.md"
+        },
+        {
+            "language": "markdown",
+            "scheme": "file",
+            "pattern": "docs/changelog/1.0.0-rc.6.md"
         }
     ]
 }

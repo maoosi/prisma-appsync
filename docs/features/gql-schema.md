@@ -1,6 +1,6 @@
 # Tweaking GraphQL Schema
 
-AWS AppSync provides ways to tweak and customise the GraphQL Schema output.
+Prisma-AppSync provides ways to tweak and customise the GraphQL Schema output.
 
 ## 👉 Models directives
 
