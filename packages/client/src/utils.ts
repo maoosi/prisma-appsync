@@ -244,7 +244,9 @@ export async function traverseNodes(
     key?: string | number,
     path: (string | number)[] = [],
 ): Promise<any> {
-    if (node && Array.isArray(node)) {
+    if (
+        node && Array.isArray(node)
+    ) {
         let newArray: any[] = [...node]
         let shouldContinue = true
 
@@ -285,8 +287,12 @@ export async function traverseNodes(
         return newArray
     }
     else if (
-        typeof node === 'function'
-        || (typeof node === 'object' && !!node)
+        node
+        && typeof node === 'object'
+        && !Array.isArray(node)
+        && typeof node !== 'function'
+        && node !== null
+        && !(node instanceof Date)
     ) {
         let newObject: any = { ...node }
         let shouldContinue = true
