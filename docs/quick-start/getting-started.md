@@ -1,6 +1,6 @@
 # Getting started
 
-**Prisma-AppSync** is a [Prisma](https://www.prisma.io) Generator, that instantly converts your Schema into a full-blown GraphQL API for [AWS AppSync](https://aws.amazon.com/appsync/).
+**Prisma-AppSync** is a [Prisma](https://www.prisma.io) Generator, that instantly converts your Schema into a full-blown GraphQL&#160;API for [AWS AppSync](https://aws.amazon.com/appsync/).
 
 <table><tr><td width="500px" valign="top">
 

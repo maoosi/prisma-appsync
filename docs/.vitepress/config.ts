@@ -31,7 +31,7 @@ export default defineConfig({
 
         nav: [
             { text: 'Documentation', link: '/quick-start/getting-started' },
-            { text: 'Changelog', link: '/changelog/1.0.0-rc.5' },
+            { text: 'Changelog', link: '/changelog/1.0.0-rc.6' },
             {
                 text: 'Links',
                 items: [

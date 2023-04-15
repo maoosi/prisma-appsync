@@ -9,9 +9,9 @@
   "imageSize": 100,
   "commit": true,
   "types": {
-    "maintainer": {
-      "symbol": "🧙‍♂️",
-      "description": "Maintainer"
+    "creator": {
+      "symbol": "🐙",
+      "description": "Creator & maintainer"
     }
   },
   "contributors": [
@@ -21,10 +21,20 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/4679377?v=4",
       "profile": "https://sylvainsimao.fr",
       "contributions": [
-        "maintainer",
+        "creator",
         "code",
         "ideas",
         "doc"
+      ]
+    },
+    {
+      "login": "Tenrys",
+      "name": "Bell",
+      "avatar_url": "https://avatars.githubusercontent.com/u/3979239?v=4",
+      "profile": "http://bell.moe",
+      "contributions": [
+        "code",
+        "ideas"
       ]
     },
     {
@@ -32,6 +42,16 @@
       "name": "Ciprian Caba",
       "avatar_url": "https://avatars.githubusercontent.com/u/695515?v=4",
       "profile": "http://www.cipriancaba.com",
+      "contributions": [
+        "code",
+        "ideas"
+      ]
+    },
+    {
+      "login": "tomschut",
+      "name": "Tom",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4933446?v=4",
+      "profile": "https://github.com/tomschut",
       "contributions": [
         "code",
         "ideas"
@@ -56,32 +76,12 @@
       ]
     },
     {
-      "login": "Tenrys",
-      "name": "Bell",
-      "avatar_url": "https://avatars.githubusercontent.com/u/3979239?v=4",
-      "profile": "http://bell.moe",
-      "contributions": [
-        "code",
-        "ideas"
-      ]
-    },
-    {
       "login": "jeremy-white",
       "name": "jeremy-white",
       "avatar_url": "https://avatars.githubusercontent.com/u/42325631?v=4",
       "profile": "https://github.com/jeremy-white",
       "contributions": [
         "code"
-      ]
-    },
-    {
-      "login": "tomschut",
-      "name": "Tom",
-      "avatar_url": "https://avatars.githubusercontent.com/u/4933446?v=4",
-      "profile": "https://github.com/tomschut",
-      "contributions": [
-        "code",
-        "ideas"
       ]
     }
   ],
