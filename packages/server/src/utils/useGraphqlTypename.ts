@@ -1,3 +1,4 @@
+import { GraphQLList, GraphQLObjectType } from 'graphql'
 import type { GraphQLSchema } from 'graphql'
 import { _ } from '../../../client/src'
 
@@ -12,12 +13,15 @@ export async function addTypename(
 
             let fields = schema.getQueryType()?.getFields()?.[pathsWithoutArrays?.[0]]
 
-            for (let index = 1; index < pathsWithoutArrays.length - 1; index++)
-                fields = fields?.type?.ofType?.getFields()?.[pathsWithoutArrays[index]]
+            for (let index = 1; index < pathsWithoutArrays.length - 1; index++) {
+                if (fields?.type.constructor.name === GraphQLObjectType.name)
+                    fields = (fields?.type as GraphQLObjectType)?.getFields()?.[pathsWithoutArrays[index]]
+                else if (fields?.type.constructor.name === GraphQLList.name)
+                    fields = (fields?.type as GraphQLList<any>)?.ofType?.getFields()?.[pathsWithoutArrays[index]]
+            }
 
             if (fields?.type)
                 node.set(String(fields.type).replace(/[\])}[{(]/g, ''))
         }
     })
 }
-
