@@ -73,6 +73,16 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "tomschut",
+      "name": "Tom",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4933446?v=4",
+      "profile": "https://github.com/tomschut",
+      "contributions": [
+        "code",
+        "ideas"
+      ]
     }
   ],
   "commitConvention": "angular",
