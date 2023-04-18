@@ -181,12 +181,29 @@ function checkEachVariableInQueryIsDefined(defintion: ActualDefinitionNode, vari
     return varsList
 }
 
+function replaceNulls(obj: any) {
+    return mapValues(obj, (value) => {
+        if (value === null)
+            return undefined
+        else if (isObject(value) && !isArray(value))
+            return replaceNulls(value)
+        else
+            return value
+    })
+}
 function replaceVariables(obj: any, variables: any): any {
     return mapValues(obj, (value) => {
         if (isString(value) && new RegExp(`${isVariableDropinConst}$`).test(value)) {
             const variableName = value.replace(isVariableDropinConst, '')
 
-            return variables[variableName]
+            const variable = variables[variableName]
+
+            if (variable === null)
+                return undefined
+            else if (isObject(variable) && !isArray(variable))
+                return replaceNulls(variable)
+            else
+                return variable
         }
         else if (isObject(value) && !isArray(value)) {
             return replaceVariables(value, variables)
