@@ -48,7 +48,7 @@ enum NullArg {
             input {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput {
                 {% for field in model.fields -%}
                     {% if field.name in uniqueIndex.fields -%}
-                        {{ field.name }}: {% if field.isList -%}[{{ field.scalar }}]{% else %}{{ field.scalar }}{% endif %}
+                        {{ field.name }}: {% if field.isList -%}[{{ field.scalar }}!]{% else %}{{ field.scalar }}{% endif %}
                     {% endif -%}
                 {% endfor %}
             }
@@ -159,7 +159,7 @@ enum NullArg {
     input {{ model.name }}WhereUniqueInput {
         {% for field in model.fields -%}
             {% if field.isUnique -%}
-                {{ field.name }}: {% if field.isList -%}[{{ field.scalar }}]{% else %}{{ field.scalar }}{% endif %}
+                {{ field.name }}: {% if field.isList -%}[{{ field.scalar }}!]{% else %}{{ field.scalar }}{% endif %}
             {% endif -%}
         {% endfor %}
         {%- if model.uniqueIndexes | length -%}
@@ -175,7 +175,7 @@ enum NullArg {
         AND: [{{ model.name }}WhereInput!]
         {% for field in model.fields -%}
             {% if field.isUnique -%}
-                {{ field.name }}: {% if field.isList -%}[{{ field.scalar }}]{% else %}{{ field.scalar }}{% endif %}
+                {{ field.name }}: {% if field.isList -%}[{{ field.scalar }}!]{% else %}{{ field.scalar }}{% endif %}
             {% else -%}
                 {% if not field.relation -%}
                     {% if field.isList -%}
@@ -226,7 +226,7 @@ enum NullArg {
             {% for field in model.fields -%}
                 {% if field.isEditable and not field.relation -%}
                     {{ field.name }}:
-                        {% if field.isList -%}[{{ field.scalar }}]{% else %}{{ field.scalar }}{% endif %}{% if field.isRequired and not field.isAutopopulated -%}!{% endif %}
+                        {% if field.isList -%}[{{ field.scalar }}!]{% else %}{{ field.scalar }}{% endif %}{% if field.isRequired and not field.isAutopopulated -%}!{% endif %}
                 {% elseif field.isEditable and field.relation -%}
                     {{ field.name }}:
                         {{ field.relation.name }}CreateNestedInput{% if field.isRequired and not field.isAutopopulated -%}!{% endif %}
@@ -238,7 +238,7 @@ enum NullArg {
             {% for field in model.fields -%}
                 {% if field.isEditable and not field.relation -%}
                     {{ field.name }}:
-                        {% if field.isList -%}[{{ field.scalar }}]{% else %}{{ field.scalar }}{% endif %}{% if field.isRequired and not field.isAutopopulated -%}!{% endif %}
+                        {% if field.isList -%}[{{ field.scalar }}!]{% else %}{{ field.scalar }}{% endif %}{% if field.isRequired and not field.isAutopopulated -%}!{% endif %}
                 {% endif -%}
             {% endfor %}
         }
@@ -246,7 +246,7 @@ enum NullArg {
         input {{ model.name }}UpdateInput {
             {% for field in model.fields -%}
                 {% if field.isEditable and not field.relation -%}
-                    {{ field.name }}: {% if field.isList -%}[{{ field.scalar }}]{% else %}{{ field.scalar }}{% endif %}
+                    {{ field.name }}: {% if field.isList -%}[{{ field.scalar }}!]{% else %}{{ field.scalar }}{% endif %}
                 {% elseif field.isEditable and field.relation -%}
                     {{ field.name }}: {{ field.relation.name }}UpdateNestedInput
                 {% endif -%}
