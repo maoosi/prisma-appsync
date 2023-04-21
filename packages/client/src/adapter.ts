@@ -429,11 +429,11 @@ export async function getPrismaArgs({
     if (typeof _arguments.skipDuplicates !== 'undefined')
         prismaArgs.skipDuplicates = _arguments.skipDuplicates
 
-    if (_selectionSetGraphQL)
+    if (_selectionSetGraphQL) {
         prismaArgs.select = await parseSelectionGraphQL(_selectionSetGraphQL, _fieldName, _variables, _sanitize)
-
-    if (isEmpty(prismaArgs.select))
-        delete prismaArgs.select
+        if (isEmpty(prismaArgs.select))
+            delete prismaArgs.select
+    }
 
     if (typeof _arguments.skip !== 'undefined')
         prismaArgs.skip = parseInt(_arguments.skip)
