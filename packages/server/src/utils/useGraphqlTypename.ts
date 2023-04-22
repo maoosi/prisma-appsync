@@ -21,7 +21,7 @@ export async function addTypename(
             }
 
             if (fields?.type)
-                node.set(String(fields.type).replace(/[\])}[{(]/g, ''))
+                node.set(String(fields.type).replace(/[\])}[{(!]/g, ''))
         }
     })
 }
