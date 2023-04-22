@@ -42,10 +42,10 @@ export function prismaQueryJoin<T>(queries: PrismaArgs[], operators: PrismaOpera
                     }
                 }
                 else if (prismaArgs?.[operator]) {
-                    prismaArgs[operator] = merge(prismaArgs[operator], query[operator]) as any
+                    prismaArgs[operator] = merge(prismaArgs[operator], query[operator]) as never
                 }
                 else {
-                    prismaArgs[operator] = query[operator] as any
+                    prismaArgs[operator] = query[operator] as never
                 }
             }
         })
