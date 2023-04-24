@@ -229,7 +229,7 @@ enum NullArg {
                         {% if field.isList -%}[{{ field.scalar }}!]{% else %}{{ field.scalar }}{% endif %}{% if field.isRequired and not field.isAutopopulated -%}!{% endif %}
                 {% elseif field.isEditable and field.relation -%}
                     {{ field.name }}:
-                        {{ field.relation.name }}CreateNestedInput{% if field.isRequired and not field.isAutopopulated -%}!{% endif %}
+                        {{ field.relation.name }}CreateNestedInput{% if field.isRequired and not field.isList and not field.isAutopopulated -%}!{% endif %}
                 {% endif -%}
             {% endfor %}
         }
