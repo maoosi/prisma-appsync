@@ -1,4 +1,5 @@
 // adapted from: https://github.com/trayio/graphql-query-to-json
+import type { FragmentDefinitionNode } from 'graphql'
 import { parse } from 'graphql'
 import mapValues from 'lodash/mapValues'
 
@@ -85,15 +86,15 @@ export function isObject(arg: any): boolean {
     return arg instanceof Object
 }
 
-export function getArgument(arg: any) {
+export function getArgument(arg: any, fragments: FragmentDefinitionNode[]) {
     if (arg.value.kind === 'ObjectValue')
-        return getArguments(arg.value.fields)
+        return getArguments(arg.value.fields, fragments)
 
     else if (arg.value.kind === 'Variable')
         return `${arg.value.name.value}${isVariableDropinConst}`
 
     else if (arg.selectionSet)
-        return getSelections(arg.selectionSet.selections)
+        return getSelections(arg.selectionSet.selections, fragments)
 
     else if (arg.value.kind === 'EnumValue')
         return arg.value.value
@@ -102,41 +103,48 @@ export function getArgument(arg: any) {
         return parseInt(arg.value.value)
 
     else if (arg.value.kind === 'ListValue')
-        return flatMap(arg.value.values, (argValue: any) => getArgument({ value: argValue }))
+        return flatMap(arg.value.values, (argValue: any) => getArgument({ value: argValue }, fragments))
 
     else return arg.value.value
 }
 
-export function getArguments(args: any[]) {
+export function getArguments(args: any[], fragments: FragmentDefinitionNode[]) {
     const argsObj: any = {}
 
     args.forEach((arg: any) => {
-        argsObj[arg.name.value] = getArgument(arg)
+        argsObj[arg.name.value] = getArgument(arg, fragments)
     })
 
     return argsObj
 }
 
-function getSelections(selections: Selection[]) {
+function getSelections(selections: Selection[], fragments: FragmentDefinitionNode[]) {
     const selObj: any = {}
 
     selections.forEach((selection) => {
+        const fragment = fragments
+            .find(def => def.name.value === selection.name.value)
+        if (fragment) {
+            Object.assign(selObj, getSelections(fragment.selectionSet.selections as Selection[], fragments))
+            return
+        }
+
         const selectionHasAlias = selection.alias
         const selectionName = selectionHasAlias ? selection.alias.value : selection.name.value
 
         if (selection.selectionSet) {
-            selObj[selectionName] = getSelections(selection.selectionSet.selections)
+            selObj[selectionName] = getSelections(selection.selectionSet.selections, fragments)
 
             if (selectionHasAlias)
                 selObj[selection.alias.value].__aliasFor = selection.name.value
 
             if (selection.arguments && selection.arguments.length > 0)
-                selObj[selectionName].__args = getArguments(selection.arguments)
+                selObj[selectionName].__args = getArguments(selection.arguments, fragments)
         }
         else {
             if (selection.arguments && selection.arguments.length > 0) {
                 selObj[selectionName] = {
-                    __args: getArguments(selection.arguments),
+                    __args: getArguments(selection.arguments, fragments),
                 }
             }
             else if (!selection.arguments || !selection.arguments.length) {
@@ -225,7 +233,9 @@ export function graphQlQueryToJson(
 
     checkEachVariableInQueryIsDefined(definition, options.variables)
 
-    const selections = getSelections(definition.selectionSet.selections)
+    const fragments = parsedQuery.definitions
+        .filter((def): def is FragmentDefinitionNode => def.kind === 'FragmentDefinition')
+    const selections = getSelections(definition.selectionSet.selections, fragments)
     jsonObject[operation] = selections
 
     const varsReplacedWithValues = replaceVariables(jsonObject, options.variables)
