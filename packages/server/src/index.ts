@@ -93,6 +93,7 @@ export async function createServer({ defaultQuery, lambdaHandler, port, schema, 
                             try { prismaAppSyncHeader = JSON.parse(request?.headers?.['x-prisma-appsync']) }
                             catch { prismaAppSyncHeader = {} }
 
+                            const authorizationHeader = request?.headers?.authorization
                             const authorization = prismaAppSyncHeader?.authorization || Authorizations.AWS_IAM || null
                             const signature = prismaAppSyncHeader?.signature || {}
 
@@ -102,6 +103,7 @@ export async function createServer({ defaultQuery, lambdaHandler, port, schema, 
                                     username: 'johndoe',
                                     sub: 'xxxxxx',
                                     resolverContext: {},
+                                    jwt: authorizationHeader,
                                 },
                                 ...signature,
                             })
