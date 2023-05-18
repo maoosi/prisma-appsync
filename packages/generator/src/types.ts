@@ -4,6 +4,7 @@ export interface CompilerOptions {
     defaultDirective?: string
     previewFeatures?: string[]
     debug?: boolean
+    skipModels?: boolean
 }
 
 export interface CompilerOptionsPrivate extends CompilerOptions {

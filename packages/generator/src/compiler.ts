@@ -43,6 +43,7 @@ export class PrismaAppSyncCompiler {
             schemaPath,
             outputDir: options.outputDir || join(dirname(schemaPath), '/generated/prisma-appsync'),
             defaultDirective: options.defaultDirective || String(),
+            skipModels: typeof options.skipModels !== 'undefined' ? options.skipModels : false,
             debug: typeof options.debug !== 'undefined' ? options.debug : false,
             template: {
                 model: {
@@ -181,6 +182,9 @@ export class PrismaAppSyncCompiler {
     private parseDMMF(): this {
         const defaultDirective: Document_Comments = this.parseComments(this.options.defaultDirective)
         this.document.defaultAuthDirective = this.getDirectives(defaultDirective.auth)
+
+        if (this.options.skipModels)
+            return this
 
         // models
         this.dmmf.datamodel.models.forEach((model: DMMF.Model) => {

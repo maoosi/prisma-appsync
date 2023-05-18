@@ -28,6 +28,11 @@ generatorHandler({
                     ? Boolean(options.generator.config.debug)
                     : false
 
+                // Is skipModel mode enabled?
+                const skipModels: boolean = typeof options?.generator?.config?.skipModels !== undefined
+                    ? Boolean(options.generator.config.skipModels)
+                    : false
+
                 // Read output dir (ensures previous version of prisma are still supported)
                 const outputDir: string = options?.generator?.output?.value || String()
 
@@ -49,6 +54,7 @@ generatorHandler({
                     defaultDirective: options?.generator?.config?.defaultDirective || String(),
                     previewFeatures,
                     debug,
+                    skipModels,
                 })
 
                 console.log('[Prisma-AppSync] Generating client.')

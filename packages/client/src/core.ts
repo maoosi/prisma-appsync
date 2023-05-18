@@ -144,11 +144,11 @@ export class PrismaAppSync {
         }
 
         // Make sure injected config isn't empty
-        if (Object.keys(this.options.modelsMapping).length === 0) {
-            throw new CustomError('Issue with auto-injected models mapping config.', {
-                type: 'INTERNAL_SERVER_ERROR',
-            })
-        }
+        // if (Object.keys(this.options.modelsMapping).length === 0) {
+        //     throw new CustomError('Issue with auto-injected models mapping config.', {
+        //         type: 'INTERNAL_SERVER_ERROR',
+        //     })
+        // }
 
         // Set ENV variable for log level
         process.env.PRISMA_APPSYNC_LOG_LEVEL = this.options.logLevel
