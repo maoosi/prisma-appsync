@@ -405,6 +405,6 @@ export function replaceAll(str: string, findArray: string[], replaceArray: strin
  * @param {any[]} array
  * @returns any[]
  */
-export function unique(array): any {
+export function unique(array: Iterable<any> | null | undefined): any[] {
     return [...new Set(array)]
 }

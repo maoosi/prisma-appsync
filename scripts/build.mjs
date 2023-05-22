@@ -23,7 +23,7 @@ try {
 
         // build Prisma-AppSync Client TS Declarations
         console.log(chalk.blue('\nBuild :: Client TS Declarations\n'))
-        await $`tsc packages/client/src/*.ts --outDir dist/client/ --declaration --emitDeclarationOnly --esModuleInterop`.nothrow()
+        await $`tsc packages/client/src/*.ts --outDir dist/client/ --declaration --emitDeclarationOnly --esModuleInterop --downlevelIteration`.nothrow()
     }
 
     if (!argv?.ignoreInstaller) {
