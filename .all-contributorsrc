@@ -83,8 +83,18 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "max-konin",
+      "name": "Max Konin",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1570356?v=4",
+      "profile": "https://github.com/max-konin",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "commitConvention": "angular",
-  "contributorsPerLine": 7
+  "contributorsPerLine": 7,
+  "commitType": "docs"
 }
