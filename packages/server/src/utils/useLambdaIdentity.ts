@@ -26,11 +26,12 @@ export default function useLambdaIdentity(identity: Authorization, opts?: mockOp
         return mock
     }
     else if (identity === Authorizations.AMAZON_COGNITO_USER_POOLS) {
+        const decodedJWTToken = opts?.jwt ? JSON.parse(Buffer.from(opts?.jwt?.split('.')[1], 'base64').toString()) : {}
         const mock: AMAZON_COGNITO_USER_POOLS = {
-            sub: opts?.sub || 'undefined',
+            sub: decodedJWTToken?.sub || 'undefined',
             issuer: 'string',
-            username: opts?.username || 'undefined',
-            claims: {},
+            username: decodedJWTToken?.['cognito:username'] || 'undefined',
+            claims: decodedJWTToken,
             sourceIp: [opts?.sourceIp || 'undefined'],
             defaultAuthStrategy: 'string',
             groups: ['admin', 'member'],
@@ -70,4 +71,5 @@ interface mockOptions {
     username: string
     sourceIp: string
     resolverContext: any
+    jwt: string
 }
