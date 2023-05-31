@@ -663,7 +663,7 @@ export class PrismaAppSyncCompiler {
 
     // Return true if field is required
     private isFieldRequired(searchField: DMMF.Field): boolean {
-        return searchField.isRequired && !searchField.isList
+        return searchField.isRequired
     }
 
     // Return true if field is an enum type
