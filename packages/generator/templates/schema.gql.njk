@@ -1,13 +1,13 @@
 {% for model in models %}
     type {{ model.name }} {{ model.directives.model | safe }} {
         {% for field in model.fields -%}
-            {{ field.name }}: {% if field.isList -%}[{{ field.scalar }}]{% else %}{{ field.scalar }}{% endif %}{% if field.isRequired -%}!{% endif %} {{ field.directives.field | safe }}
+            {{ field.name }}: {% if field.isList -%}[{{ field.scalar }}!]{% else %}{{ field.scalar }}{% endif %}{% if field.isRequired -%}!{% endif %} {{ field.directives.field | safe }}
         {% endfor %}
     }
 {% endfor %}
 
 type BatchPayload {{ defaultAuthDirective.model | safe }} {
-    count: Int
+    count: Int!
 }
 
 enum OrderByArg {
@@ -48,7 +48,7 @@ enum NullArg {
             input {{ uniqueIndex.fields | join(" ") | pascalCase }}FieldsInput {
                 {% for field in model.fields -%}
                     {% if field.name in uniqueIndex.fields -%}
-                        {{ field.name }}: {% if field.isList -%}[{{ field.scalar }}]{% else %}{{ field.scalar }}{% endif %}
+                        {{ field.name }}: {% if field.isList -%}[{{ field.scalar }}!]{% else %}{{ field.scalar }}{% endif %}
                     {% endif -%}
                 {% endfor %}
             }
@@ -62,9 +62,9 @@ enum NullArg {
     }
 
     input {{ model.name }}WhereInputWithoutNullables {
-        OR: [{{ model.name }}WhereInput]
-        NOT: [{{ model.name }}WhereInput]
-        AND: [{{ model.name }}WhereInput]
+        OR: [{{ model.name }}WhereInput!]
+        NOT: [{{ model.name }}WhereInput!]
+        AND: [{{ model.name }}WhereInput!]
         {% for field in model.fields -%}
             {% if not field.relation -%}
                 {% if field.isList -%}
@@ -97,9 +97,9 @@ enum NullArg {
     input {{ model.name }}WhereInput {
         is: NullArg
         isNot: NullArg
-        OR: [{{ model.name }}WhereInput]
-        NOT: [{{ model.name }}WhereInput]
-        AND: [{{ model.name }}WhereInput]
+        OR: [{{ model.name }}WhereInput!]
+        NOT: [{{ model.name }}WhereInput!]
+        AND: [{{ model.name }}WhereInput!]
         {% for field in model.fields -%}
             {% if not field.relation -%}
                 {% if field.isList -%}
@@ -128,11 +128,11 @@ enum NullArg {
             {% endif -%}
         {% endfor %}
     }
-    
+
     input {{ model.name }}ScalarWhereInput {
-        OR: [{{ model.name }}ScalarWhereInput]
-        NOT: [{{ model.name }}ScalarWhereInput]
-        AND: [{{ model.name }}ScalarWhereInput]
+        OR: [{{ model.name }}ScalarWhereInput!]
+        NOT: [{{ model.name }}ScalarWhereInput!]
+        AND: [{{ model.name }}ScalarWhereInput!]
         {% for field in model.fields -%}
             {% if not field.relation -%}
                 {% if field.isList -%}
@@ -159,7 +159,7 @@ enum NullArg {
     input {{ model.name }}WhereUniqueInput {
         {% for field in model.fields -%}
             {% if field.isUnique -%}
-                {{ field.name }}: {% if field.isList -%}[{{ field.scalar }}]{% else %}{{ field.scalar }}{% endif %}
+                {{ field.name }}: {% if field.isList -%}[{{ field.scalar }}!]{% else %}{{ field.scalar }}{% endif %}
             {% endif -%}
         {% endfor %}
         {%- if model.uniqueIndexes | length -%}
@@ -168,14 +168,14 @@ enum NullArg {
             {% endfor -%}
         {% endif %}
     }
-    
+
     input {{ model.name }}ExtendedWhereUniqueInput {
-        OR: [{{ model.name }}WhereInput]
-        NOT: [{{ model.name }}WhereInput]
-        AND: [{{ model.name }}WhereInput]
+        OR: [{{ model.name }}WhereInput!]
+        NOT: [{{ model.name }}WhereInput!]
+        AND: [{{ model.name }}WhereInput!]
         {% for field in model.fields -%}
             {% if field.isUnique -%}
-                {{ field.name }}: {% if field.isList -%}[{{ field.scalar }}]{% else %}{{ field.scalar }}{% endif %}
+                {{ field.name }}: {% if field.isList -%}[{{ field.scalar }}!]{% else %}{{ field.scalar }}{% endif %}
             {% else -%}
                 {% if not field.relation -%}
                     {% if field.isList -%}
@@ -225,11 +225,11 @@ enum NullArg {
         input {{ model.name }}CreateInput {
             {% for field in model.fields -%}
                 {% if field.isEditable and not field.relation -%}
-                    {{ field.name }}: 
-                        {% if field.isList -%}[{{ field.scalar }}]{% else %}{{ field.scalar }}{% endif %}{% if field.isRequired and not field.isAutopopulated -%}!{% endif %}
+                    {{ field.name }}:
+                        {% if field.isList -%}[{{ field.scalar }}!]{% else %}{{ field.scalar }}{% endif %}{% if field.isRequired and not field.isAutopopulated -%}!{% endif %}
                 {% elseif field.isEditable and field.relation -%}
-                    {{ field.name }}: 
-                        {{ field.relation.name }}CreateNestedInput{% if field.isRequired and not field.isAutopopulated -%}!{% endif %}
+                    {{ field.name }}:
+                        {{ field.relation.name }}CreateNestedInput{% if field.isRequired and not field.isList and not field.isAutopopulated -%}!{% endif %}
                 {% endif -%}
             {% endfor %}
         }
@@ -237,8 +237,8 @@ enum NullArg {
         input {{ model.name }}CreateManyInput {
             {% for field in model.fields -%}
                 {% if field.isEditable and not field.relation -%}
-                    {{ field.name }}: 
-                        {% if field.isList -%}[{{ field.scalar }}]{% else %}{{ field.scalar }}{% endif %}{% if field.isRequired and not field.isAutopopulated -%}!{% endif %}
+                    {{ field.name }}:
+                        {% if field.isList -%}[{{ field.scalar }}!]{% else %}{{ field.scalar }}{% endif %}{% if field.isRequired and not field.isAutopopulated -%}!{% endif %}
                 {% endif -%}
             {% endfor %}
         }
@@ -246,7 +246,7 @@ enum NullArg {
         input {{ model.name }}UpdateInput {
             {% for field in model.fields -%}
                 {% if field.isEditable and not field.relation -%}
-                    {{ field.name }}: {% if field.isList -%}[{{ field.scalar }}]{% else %}{{ field.scalar }}{% endif %}
+                    {{ field.name }}: {% if field.isList -%}[{{ field.scalar }}!]{% else %}{{ field.scalar }}{% endif %}
                 {% elseif field.isEditable and field.relation -%}
                     {{ field.name }}: {{ field.relation.name }}UpdateNestedInput
                 {% endif -%}
@@ -304,9 +304,9 @@ enum NullArg {
                 connect: {{ field.relation.type }}WhereUniqueInput
                 connectOrCreate: {{ field.relation.type }}ConnectOrCreateInput
                 {% else  -%}
-                create: [{{ field.relation.type }}CreateInput]
-                connect: [{{ field.relation.type }}WhereUniqueInput]
-                connectOrCreate: [{{ field.relation.type }}ConnectOrCreateInput]
+                create: [{{ field.relation.type }}CreateInput!]
+                connect: [{{ field.relation.type }}WhereUniqueInput!]
+                connectOrCreate: [{{ field.relation.type }}ConnectOrCreateInput!]
                 {% endif -%}
             }
 
@@ -320,21 +320,21 @@ enum NullArg {
                 delete: Boolean
                 disconnect: Boolean
                 {% else  -%}
-                connect: [{{ field.relation.type }}WhereUniqueInput]
-                create: [{{ field.relation.type }}CreateInput]
-                connectOrCreate: [{{ field.relation.type }}ConnectOrCreateInput]
-                update: [{{ field.relation.type }}UpdateUniqueInput]
-                upsert: [{{ field.relation.type }}UpsertUniqueInput]
+                connect: [{{ field.relation.type }}WhereUniqueInput!]
+                create: [{{ field.relation.type }}CreateInput!]
+                connectOrCreate: [{{ field.relation.type }}ConnectOrCreateInput!]
+                update: [{{ field.relation.type }}UpdateUniqueInput!]
+                upsert: [{{ field.relation.type }}UpsertUniqueInput!]
                 {% if "extendedWhereUnique" in previewFeatures -%}
-                delete: [{{ field.relation.type }}ExtendedWhereUniqueInput]
-                disconnect: [{{ field.relation.type }}ExtendedWhereUniqueInput]
+                delete: [{{ field.relation.type }}ExtendedWhereUniqueInput!]
+                disconnect: [{{ field.relation.type }}ExtendedWhereUniqueInput!]
                 {% else  -%}
-                delete: [{{ field.relation.type }}WhereUniqueInput]
-                disconnect: [{{ field.relation.type }}WhereUniqueInput]
+                delete: [{{ field.relation.type }}WhereUniqueInput!]
+                disconnect: [{{ field.relation.type }}WhereUniqueInput!]
                 {% endif -%}
-                deleteMany: [{{ field.relation.type }}ScalarWhereInput]
-                set: [{{ field.relation.type }}WhereUniqueInput]
-                updateMany: [{{ field.relation.type }}UpdateManyInput]
+                deleteMany: [{{ field.relation.type }}ScalarWhereInput!]
+                set: [{{ field.relation.type }}WhereUniqueInput!]
+                updateMany: [{{ field.relation.type }}UpdateManyInput!]
                 {% endif -%}
             }
         {% endif -%}
@@ -598,7 +598,7 @@ type Mutation {
             """
             {{ model.gql.create }}(
                 data: {{ model.name }}CreateInput!
-            ): {{ model.name }} {{ model.directives.create | safe }}
+            ): {{ model.name }}! {{ model.directives.create | safe }}
             {% endif %}
             {% if model.gql.createMany -%}
             """
@@ -607,7 +607,7 @@ type Mutation {
             {{ model.gql.createMany }}(
                 data: [{{ model.name }}CreateManyInput!],
                 skipDuplicates: Boolean
-            ): BatchPayload {{ model.directives.createMany | safe }}
+            ): BatchPayload! {{ model.directives.createMany | safe }}
             {% endif %}
             {% if model.gql.update -%}
             """
@@ -625,7 +625,7 @@ type Mutation {
                 {% else -%}
                 data: {{ model.name }}UpdateInput,
                 {% endif %}
-            ): {{ model.name }} {{ model.directives.update | safe }}
+            ): {{ model.name }}! {{ model.directives.update | safe }}
             {% endif %}
             {% if model.gql.updateMany -%}
             """
@@ -639,7 +639,7 @@ type Mutation {
                 {% else -%}
                 data: {{ model.name }}UpdateInput,
                 {% endif %}
-            ): BatchPayload {{ model.directives.updateMany | safe }}
+            ): BatchPayload! {{ model.directives.updateMany | safe }}
             {% endif %}
             {% if model.gql.upsert -%}
             """
@@ -653,7 +653,7 @@ type Mutation {
                 {% else  -%}
                 where: {{ model.name }}WhereUniqueInput!
                 {% endif -%}
-            ): {{ model.name }} {{ model.directives.upsert | safe }}
+            ): {{ model.name }}! {{ model.directives.upsert | safe }}
             {% endif %}
             {% if model.gql.delete -%}
             """
@@ -665,7 +665,7 @@ type Mutation {
                 {% else  -%}
                 where: {{ model.name }}WhereUniqueInput!
                 {% endif -%}
-            ): {{ model.name }} {{ model.directives.delete | safe }}
+            ): {{ model.name }}! {{ model.directives.delete | safe }}
             {% endif %}
             {% if model.gql.deleteMany -%}
             """
@@ -673,7 +673,7 @@ type Mutation {
             """
             {{ model.gql.deleteMany }}(
                 where: {{ model.name }}WhereInput!
-            ): BatchPayload {{ model.directives.deleteMany | safe }}
+            ): BatchPayload! {{ model.directives.deleteMany | safe }}
             {% endif %}
         {% endif -%}
     {% endfor %}
@@ -701,10 +701,10 @@ type Query {
         """
         {{ model.gql.list }}(
             where: {{ model.name }}WhereInput,
-            orderBy: [{{ model.name }}OrderByInput],
+            orderBy: [{{ model.name }}OrderByInput!],
             skip: Int,
             take: Int
-        ): [{{ model.name }}] {{ model.directives.list | safe }}
+        ): [{{ model.name }}!] {{ model.directives.list | safe }}
         {% endif %}
         {% if model.gql.count -%}
         """
@@ -712,10 +712,10 @@ type Query {
         """
         {{ model.gql.count }}(
             where: {{ model.name }}WhereInput,
-            orderBy: [{{ model.name }}OrderByInput],
+            orderBy: [{{ model.name }}OrderByInput!],
             skip: Int,
             take: Int
-        ): Int {{ model.directives.count | safe }}
+        ): Int! {{ model.directives.count | safe }}
         {% endif %}
     {% endfor %}
 }
@@ -738,7 +738,7 @@ type Subscription {
                 {% for field in model.subscriptionFields -%}
                     {{ field.name }}: {{ field.scalar }}
                 {% endfor %}
-            ): {{ model.name }}
+            ): {{ model.name }}!
                 @aws_subscribe(mutations: ["{{ model.gql.create }}"]) {{ model.directives.onCreated | safe }}
             {% endif %}
             {% if model.gql.onUpdated and model.gql.update -%}
@@ -754,7 +754,7 @@ type Subscription {
                 {% for field in model.subscriptionFields -%}
                     {{ field.name }}: {{ field.scalar }}
                 {% endfor %}
-            ): {{ model.name }}
+            ): {{ model.name }}!
                 @aws_subscribe(mutations: ["{{ model.gql.update }}"]) {{ model.directives.onUpdated | safe }}
             {% endif %}
             {% if model.gql.onUpserted and model.gql.upsert -%}
@@ -770,7 +770,7 @@ type Subscription {
                 {% for field in model.subscriptionFields -%}
                     {{ field.name }}: {{ field.scalar }}
                 {% endfor %}
-            ): {{ model.name }}
+            ): {{ model.name }}!
                 @aws_subscribe(mutations: ["{{ model.gql.upsert }}"]) {{ model.directives.onUpserted | safe }}
             {% endif %}
             {% if model.gql.onDeleted and model.gql.delete -%}
@@ -786,7 +786,7 @@ type Subscription {
                 {% for field in model.subscriptionFields -%}
                     {{ field.name }}: {{ field.scalar }}
                 {% endfor %}
-            ): {{ model.name }}
+            ): {{ model.name }}!
                 @aws_subscribe(mutations: ["{{ model.gql.delete }}"]) {{ model.directives.onDeleted | safe }}
             {% endif %}
             {% if model.gql.onMutated and model.gql.create and model.gql.update and model.gql.upsert and model.gql.delete -%}
@@ -802,35 +802,35 @@ type Subscription {
                 {% for field in model.subscriptionFields -%}
                     {{ field.name }}: {{ field.scalar }}
                 {% endfor %}
-            ): {{ model.name }}
+            ): {{ model.name }}!
                 @aws_subscribe(mutations: ["{{ model.gql.create }}", "{{ model.gql.update }}", "{{ model.gql.upsert }}", "{{ model.gql.delete }}"]) {{ model.directives.onMutated | safe }}
             {% endif %}
             {% if model.gql.onCreatedMany and model.gql.createMany -%}
             """
             Triggered from `{{ model.gql.createMany }}` mutation.
             """
-            {{ model.gql.onCreatedMany }}: BatchPayload
+            {{ model.gql.onCreatedMany }}: BatchPayload!
                 @aws_subscribe(mutations: ["{{ model.gql.createMany }}"]) {{ model.directives.onCreatedMany | safe }}
             {% endif %}
             {% if model.gql.onUpdatedMany and model.gql.updateMany -%}
             """
             Triggered from `{{ model.gql.updateMany }}` mutation.
             """
-            {{ model.gql.onUpdatedMany }}: BatchPayload
+            {{ model.gql.onUpdatedMany }}: BatchPayload!
                 @aws_subscribe(mutations: ["{{ model.gql.updateMany }}"]) {{ model.directives.onUpdatedMany | safe }}
             {% endif %}
             {% if model.gql.onMutatedMany and model.gql.createMany and model.gql.updateMany and model.gql.deleteMany -%}
             """
             Triggered from ANY MULTIPLE records mutation.
             """
-            {{ model.gql.onMutatedMany }}: BatchPayload
+            {{ model.gql.onMutatedMany }}: BatchPayload!
                 @aws_subscribe(mutations: ["{{ model.gql.createMany }}", "{{ model.gql.updateMany }}", "{{ model.gql.deleteMany }}"]) {{ model.directives.onMutatedMany | safe }}
             {% endif %}
             {% if model.gql.onDeletedMany and model.gql.deleteMany -%}
             """
             Triggered from `{{ model.gql.deleteMany }}` mutation.
             """
-            {{ model.gql.onDeletedMany }}: BatchPayload
+            {{ model.gql.onDeletedMany }}: BatchPayload!
                 @aws_subscribe(mutations: ["{{ model.gql.deleteMany }}"]) {{ model.directives.onDeletedMany | safe }}
             {% endif %}
         {% endif -%}
