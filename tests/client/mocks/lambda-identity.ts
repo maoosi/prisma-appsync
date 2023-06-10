@@ -6,12 +6,12 @@ import type {
     Authorization,
     Identity,
     OPENID_CONNECT,
-} from '../../../client/src'
+} from '../../../packages/client/src'
 import {
     Authorizations,
-} from '../../../client/src'
+} from '../../../packages/client/src'
 
-export default function useLambdaIdentity(identity: Authorization, opts?: mockOptions): Identity {
+export default function mockLambdaIdentity(identity: Authorization, opts?: mockOptions): Identity {
     if (identity === Authorizations.AWS_IAM) {
         const mock: AWS_IAM = {
             accountId: 'string',
@@ -66,10 +66,10 @@ export default function useLambdaIdentity(identity: Authorization, opts?: mockOp
     }
 }
 
-interface mockOptions {
+type mockOptions = {
     sub: string
     username: string
     sourceIp: string
     resolverContext: any
-    jwt: string
+    jwt?: string
 }

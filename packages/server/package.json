@@ -5,15 +5,8 @@
     "author": "maoosi <hello@sylvainsimao.fr>",
     "license": "BSD-2-Clause",
     "devDependencies": {
-        "@envelop/types": "^3.0.0",
-        "@types/lodash": "^4.14.186",
-        "@types/prettier": "^2.7.1",
+        "amplify-appsync-simulator": "^2.4.1",
         "chokidar": "^3.5.3",
-        "cleye": "^1.2.1",
-        "graphql": "^16.6.0",
-        "graphql-tag": "^2.12.6",
-        "graphql-yoga": "^3.1.1",
-        "lodash": "^4.17.21",
-        "prettier": "^2.7.1"
+        "cleye": "^1.2.1"
     }
 }

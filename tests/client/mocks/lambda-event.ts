@@ -1,8 +1,8 @@
-import type { AppSyncEvent, AppSyncIdentity, Identity } from '../../../client/src'
-import { _ } from '../../../client/src'
-import { graphQlQueryToJson } from './useGraphqlToJson'
+import type { AppSyncEvent, AppSyncIdentity, Identity } from '../../../packages/client/src'
+import { _ } from '../../../packages/client/src'
+import { graphQlQueryToJson } from './graphql-json'
 
-export default function useLambdaEvents({
+export default function mockLambdaEvent({
     request,
     graphQLParams,
     identity,

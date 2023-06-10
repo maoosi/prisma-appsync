@@ -40,10 +40,6 @@ try {
         // build server TS Declarations
         console.log(chalk.blue('\nBuild :: Server TS Declarations\n'))
         await $`cp packages/server/src/index.d.ts dist/server/index.d.ts && chmod -R 755 dist`
-
-        // copy server files into build folder
-        console.log(chalk.blue('\nBuild :: Server files\n'))
-        await $`cp -R packages/server/src/gql dist/server/gql && chmod -R 755 dist`
     }
 }
 catch (error) {

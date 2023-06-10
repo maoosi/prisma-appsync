@@ -2,11 +2,11 @@
 import { parse } from 'graphql'
 import mapValues from 'lodash/mapValues'
 
-interface variablesObject {
+type variablesObject = {
     [variableName: string]: any
 }
 
-interface Argument {
+type Argument = {
     kind: string
     name: {
         kind: string
@@ -25,7 +25,7 @@ interface Argument {
     }
 }
 
-interface Selection {
+type Selection = {
     kind: string
     alias: {
         kind: string
@@ -39,12 +39,12 @@ interface Selection {
     selectionSet?: SelectionSet
 }
 
-interface SelectionSet {
+type SelectionSet = {
     kind: string
     selections: Selection[]
 }
 
-interface VariableDefinition {
+type VariableDefinition = {
     kind: string
     variable: {
         kind: string
@@ -62,7 +62,7 @@ interface VariableDefinition {
     }
 }
 
-interface ActualDefinitionNode {
+type ActualDefinitionNode = {
     operation: string
     selectionSet: SelectionSet
     variableDefinitions?: VariableDefinition[]

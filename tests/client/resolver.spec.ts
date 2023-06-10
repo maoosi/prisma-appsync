@@ -2,8 +2,8 @@ import { describe, expect } from 'vitest'
 import * as queries from '@client/resolver'
 import type { Model, QueryParams } from '@client/defs'
 import { Actions, ActionsAliases, Authorizations } from '@client/defs'
-import useLambdaIdentity from '@appsync-server/utils/useLambdaIdentity'
-import { testEach } from './_helpers'
+import mockLambdaIdentity from './mocks/lambda-identity'
+import { testEach } from './utils'
 
 process.env.PRISMA_APPSYNC_TESTING = 'true'
 
@@ -15,7 +15,7 @@ const TESTING = {
     },
 }
 
-const identity = useLambdaIdentity(Authorizations.AMAZON_COGNITO_USER_POOLS, {
+const identity = mockLambdaIdentity(Authorizations.AMAZON_COGNITO_USER_POOLS, {
     sourceIp: 'xxx.xxx.xxx.x',
     username: 'johndoe',
     sub: 'xxxxxx',

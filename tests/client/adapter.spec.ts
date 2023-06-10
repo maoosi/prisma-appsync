@@ -14,13 +14,13 @@ import {
 import type { Action, Authorization, Options } from '@client/defs'
 import { Actions, ActionsAliases, Authorizations } from '@client/defs'
 import { Prisma } from '@prisma/client'
-import useLambdaIdentity from '@appsync-server/utils/useLambdaIdentity'
-import useLambdaEvents from '@appsync-server/utils/useLambdaEvents'
 import { plural } from 'pluralize'
 import flow from 'lodash/flow'
 import camelCase from 'lodash/camelCase'
 import upperFirst from 'lodash/upperFirst'
-import { testEach } from './_helpers'
+import mockLambdaEvent from './mocks/lambda-event'
+import mockLambdaIdentity from './mocks/lambda-identity'
+import { testEach } from './utils'
 
 const pascalCase = flow(camelCase, upperFirst)
 const models: {
@@ -73,7 +73,7 @@ const TESTING: {
 }
 
 function mockAppSyncEvent(identity: NonNullable<Authorization>) {
-    return useLambdaEvents({
+    return mockLambdaEvent({
         request: {},
         graphQLParams: {
             query: 'query getPost { getPost { title } }',
@@ -81,7 +81,7 @@ function mockAppSyncEvent(identity: NonNullable<Authorization>) {
             operationName: 'getPost',
             raw: {},
         },
-        identity: useLambdaIdentity(identity, {
+        identity: mockLambdaIdentity(identity, {
             sourceIp: 'xxx.xxx.xxx.xxx',
             username: 'johndoe',
             sub: 'xxxxxx',
@@ -409,6 +409,26 @@ describe('CLIENT #adapter', () => {
                 'getPost/comment/author/badges/label',
                 'getPost/comment/author/badges/owners',
                 'getPost/comment/author/badges/owners/email',
+            ])
+        })
+
+        test('expect count to return matching paths', () => {
+            const result = getPaths({
+                operation: 'countPosts',
+                context: {
+                    action: Actions.count,
+                    alias: ActionsAliases.access,
+                    model: TESTING.models.Post,
+                },
+                prismaArgs: getPrismaArgs({
+                    action: Actions.count,
+                    _selectionSetList: [],
+                    _arguments: {},
+                    defaultPagination: false,
+                }),
+            })
+            expect(result).toEqual([
+                'countPosts',
             ])
         })
 
