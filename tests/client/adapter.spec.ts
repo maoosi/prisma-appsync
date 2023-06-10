@@ -412,6 +412,26 @@ describe('CLIENT #adapter', () => {
             ])
         })
 
+        test('expect count to return matching paths', () => {
+            const result = getPaths({
+                operation: 'countPosts',
+                context: {
+                    action: Actions.count,
+                    alias: ActionsAliases.access,
+                    model: TESTING.models.Post,
+                },
+                prismaArgs: getPrismaArgs({
+                    action: Actions.count,
+                    _selectionSetList: [],
+                    _arguments: {},
+                    defaultPagination: false,
+                }),
+            })
+            expect(result).toEqual([
+                'countPosts',
+            ])
+        })
+
         test('expect nested update to return matching paths', () => {
             const args = {
                 data: {
