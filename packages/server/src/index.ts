@@ -7,6 +7,7 @@ import { type ServerOptions, useAppSyncSimulator } from './appsync-simulator'
 //      --resolvers prisma/generated/prisma-appsync/resolvers.yaml
 //      --port 4000
 //      --wsPort 4001
+
 //      --watchers '[{"watch":["**/*.prisma","*.prisma"],"exec":"npx prisma generate && touch ./server.ts"}]'
 //      --headers '{"x-fingerprint":"123456"}'
 export const argv = cleye({
@@ -50,6 +51,22 @@ export async function createServer(serverOptions: ServerOptions) {
     const simulator = useAppSyncSimulator(serverOptions)
 
     await simulator.start()
+
+    // @ts-expect-error: 'import.meta' meta-property not allowed
+    if (import.meta?.hot) {
+        // @ts-expect-error: 'import.meta' meta-property not allowed
+        import.meta.hot.on('vite:beforeFullReload', () => {
+            // eslint-disable-next-line no-console
+            console.log('vite:beforeFullReload')
+            simulator.stop()
+        })
+        // @ts-expect-error: 'import.meta' meta-property not allowed
+        import.meta.hot.on('vite:beforeUpdate', () => {
+            // eslint-disable-next-line no-console
+            console.log('vite:beforeUpdate')
+            simulator.stop()
+        })
+    }
 
     // eslint-disable-next-line no-console
     console.log(`🧩 GraphQL server at http://localhost:${serverOptions.port}/graphql`)

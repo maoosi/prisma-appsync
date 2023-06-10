@@ -10,6 +10,11 @@ import {
 } from 'amplify-appsync-simulator'
 import { readVTL } from './vtl/readVTL'
 
+declare global {
+    // eslint-disable-next-line no-var, vars-on-top
+    var __prismaAppSyncServer: any
+}
+
 export function useAppSyncSimulator({
     lambdaHandler, schema, resolvers, port, wsPort,
 }: ServerOptions) {
@@ -48,15 +53,18 @@ export function useAppSyncSimulator({
         })),
     }
 
-    const amplifySimulator = new AmplifyAppSyncSimulator({ port, wsPort })
+    if (globalThis?.__prismaAppSyncServer)
+        globalThis?.__prismaAppSyncServer?.stop()
+
+    globalThis.__prismaAppSyncServer = new AmplifyAppSyncSimulator({ port, wsPort })
 
     return {
         start: async () => {
-            await amplifySimulator.start()
-            amplifySimulator.init(simulatorConfig)
+            await globalThis.__prismaAppSyncServer.start()
+            globalThis.__prismaAppSyncServer.init(simulatorConfig)
         },
         stop: () => {
-            amplifySimulator.stop()
+            globalThis.__prismaAppSyncServer.stop()
         },
     }
 }
