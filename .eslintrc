@@ -11,7 +11,8 @@
                 "ignoredNodes": ["TemplateLiteral *", "TSTypeParameterInstantiation"],
                 "SwitchCase": 1
             }
-        ]
+        ],
+        "@typescript-eslint/consistent-type-definitions": ["error", "type"]
     },
     "globals": {
         "$": true,

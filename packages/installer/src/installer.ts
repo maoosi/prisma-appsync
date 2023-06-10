@@ -310,6 +310,7 @@ export class Installer {
                 ...this.installConfig.dependencies,
                 ...[
                     { package: '@types/node', dev: true },
+                    { package: 'js-yaml', dev: true },
                 ],
             ]
 
@@ -326,10 +327,15 @@ export class Installer {
                     path.join(path.dirname(this.userChoices.prismaSchemaPath), 'generated/prisma-appsync/schema.gql'),
                 )
 
+                const yamlResolversPath = path.relative(
+                    path.join(this.detected.rootPath),
+                    path.join(path.dirname(this.userChoices.prismaSchemaPath), 'generated/prisma-appsync/resolvers.yaml'),
+                )
+
                 const devCmd = [
                     'npx prisma generate',
                     `DATABASE_URL='${databaseUrl}' npx prisma db push --accept-data-loss`,
-                    `DATABASE_URL='${databaseUrl}' npx vite-node ./server.ts --watch -- --schema ${gqlSchemaPath} --watchers '[{"watch":["**/*.prisma","*.prisma"],"exec":"npx prisma generate && DATABASE_URL='${databaseUrl}' npx prisma db push --accept-data-loss && touch ./server.ts"}]'`,
+                    `DATABASE_URL='${databaseUrl}' npx vite-node ./server.ts --watch -- --schema ${gqlSchemaPath} --resolvers ${yamlResolversPath} --watchers '[{"watch":["**/*.prisma","*.prisma"],"exec":"npx prisma generate && DATABASE_URL='${databaseUrl}' npx prisma db push --accept-data-loss && touch ./server.ts"}]'`,
                 ]
 
                 this.installConfig.scripts.push({
@@ -355,11 +361,16 @@ export class Installer {
                     path.join(path.dirname(this.userChoices.prismaSchemaPath), 'generated/prisma-appsync/schema.gql'),
                 )
 
+                const yamlResolversPath = path.relative(
+                    path.join(this.detected.rootPath),
+                    path.join(path.dirname(this.userChoices.prismaSchemaPath), 'generated/prisma-appsync/resolvers.yaml'),
+                )
+
                 const devCmd = [
                     'docker-compose up -d',
                     'npx prisma generate',
                     `DATABASE_URL='${databaseUrl}' npx prisma db push --accept-data-loss`,
-                    `DATABASE_URL='${databaseUrl}' npx vite-node ./server.ts --watch -- --schema ${gqlSchemaPath} --watchers '[{"watch":"../packages/(client|generator)/**","exec":"cd ../ && pnpm run build --ignoreServer && cd playground && npx prisma generate && touch ./server.ts"},{"watch":["**/*.prisma","*.prisma"],"exec":"npx prisma generate && DATABASE_URL='${databaseUrl}' npx prisma db push --accept-data-loss && touch ./server.ts"}]'`,
+                    `DATABASE_URL='${databaseUrl}' npx vite-node ./server.ts --watch -- --schema ${gqlSchemaPath} --resolvers ${yamlResolversPath} --watchers '[{"watch":"../packages/(client|generator)/**","exec":"cd ../ && pnpm run build --ignoreServer && cd playground && npx prisma generate && touch ./server.ts"},{"watch":["**/*.prisma","*.prisma"],"exec":"npx prisma generate && DATABASE_URL='${databaseUrl}' npx prisma db push --accept-data-loss && touch ./server.ts"}]'`,
                 ]
 
                 this.installConfig.scripts.push({

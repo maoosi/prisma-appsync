@@ -8,6 +8,7 @@
         "@envelop/types": "^3.0.0",
         "@types/lodash": "^4.14.186",
         "@types/prettier": "^2.7.1",
+        "amplify-appsync-simulator": "^2.4.1",
         "chokidar": "^3.5.3",
         "cleye": "^1.2.1",
         "graphql": "^16.6.0",
