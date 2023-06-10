@@ -64,7 +64,6 @@ export default defineConfig({
             {
                 text: 'Features',
                 collapsible: true,
-                collapsed: true,
                 items: [
                     { text: 'Adding Hooks', link: '/features/hooks' },
                     { text: 'Custom resolvers', link: '/features/resolvers' },
@@ -74,7 +73,6 @@ export default defineConfig({
             {
                 text: 'Security',
                 collapsible: true,
-                collapsed: true,
                 items: [
                     { text: 'AppSync Authz', link: '/security/appsync-authz' },
                     { text: 'Shield (ACL rules)', link: '/security/shield-acl' },
@@ -86,7 +84,6 @@ export default defineConfig({
             {
                 text: 'Contributing',
                 collapsible: true,
-                collapsed: true,
                 items: [
                     { text: 'Contributions guide', link: '/contributing' },
                 ],
@@ -97,11 +94,7 @@ export default defineConfig({
                 collapsed: true,
                 items: [
                     { text: '(latest) 1.0.0-rc.6', link: '/changelog/1.0.0-rc.6' },
-                    { text: '1.0.0-rc.5', link: '/changelog/1.0.0-rc.5' },
-                    { text: '1.0.0-rc.4', link: '/changelog/1.0.0-rc.4' },
-                    { text: '1.0.0-rc.3', link: '/changelog/1.0.0-rc.3' },
-                    { text: '1.0.0-rc.2', link: '/changelog/1.0.0-rc.2' },
-                    { text: '1.0.0-rc.1', link: '/changelog/1.0.0-rc.1' },
+                    { text: 'Previous', link: '/changelog/' },
                 ],
             },
         ],
