@@ -3,8 +3,8 @@ import { join } from 'path'
 import { describe, test } from 'vitest'
 import EasyGraphQLTester from 'easygraphql-tester'
 
-const appsyncDirectives = readFileSync(join(__dirname, '../../packages/server/src/gql/appsync-directives.gql'), 'utf8')
-const appsyncScalars = readFileSync(join(__dirname, '../../packages/server/src/gql/appsync-scalars.gql'), 'utf8')
+const appsyncDirectives = readFileSync(join(__dirname, './mock/appsync-directives.gql'), 'utf8')
+const appsyncScalars = readFileSync(join(__dirname, './mock/appsync-scalars.gql'), 'utf8')
 const gqlSchema = readFileSync(join(__dirname, '../prisma/generated/prisma-appsync/schema.gql'), 'utf8')
 
 const schema = String([appsyncDirectives, appsyncScalars, gqlSchema].join('\n\n').replace(/\"\"\"(.|\n)*?\"\"\"\n/gim, ''))
