@@ -270,7 +270,7 @@ export async function createServer({ defaultQuery, lambdaHandler, port, schema, 
     globalThis.__prismaAppSyncServer = { serverInstance, chokidarInstances }
 }
 
-interface ServerOptions {
+type ServerOptions = {
     schema: string
     lambdaHandler: any
     port: number
