@@ -1,14 +1,16 @@
-import type {
-    AmplifyAppSyncAPIConfig,
-    AmplifyAppSyncSimulatorConfig,
-    AppSyncMockFile,
-} from 'amplify-appsync-simulator'
+/* eslint-disable no-console */
+import { readFileSync } from 'fs'
+import { resolve } from 'path'
+import { exec as nodeExec } from 'child_process'
+import chokidar from 'chokidar'
 import {
+    type AmplifyAppSyncAPIConfig,
     AmplifyAppSyncSimulator,
     AmplifyAppSyncSimulatorAuthenticationType,
+    type AmplifyAppSyncSimulatorConfig,
+    type AppSyncMockFile,
     RESOLVER_KIND,
 } from 'amplify-appsync-simulator'
-import { readVTL } from './vtl/readVTL'
 
 declare global {
     // eslint-disable-next-line no-var, vars-on-top
@@ -16,22 +18,25 @@ declare global {
 }
 
 export function useAppSyncSimulator({
-    lambdaHandler, schema, resolvers, port, wsPort,
+    lambdaHandler, schema, resolvers, port, wsPort, watchers,
 }: ServerOptions) {
     const mappingTemplates: AppSyncMockFile[] = [{
-        path: 'lambdaRequestMappingTemplate.vtl',
-        content: readVTL('lambdaRequestMappingTemplate.vtl'),
+        path: 'lambdaRequest.vtl',
+        content: readFileSync(resolve(__dirname, 'lambdaRequest.vtl'), 'utf8'),
     }, {
-        path: 'lambdaResponseMappingTemplate.vtl',
-        content: readVTL('lambdaResponseMappingTemplate.vtl'),
+        path: 'lambdaResponse.vtl',
+        content: readFileSync(resolve(__dirname, 'lambdaResponse.vtl'), 'utf8'),
     }]
 
     const appSync: AmplifyAppSyncAPIConfig = {
+        name: 'Prisma-AppSync',
         defaultAuthenticationType: {
-            authenticationType: AmplifyAppSyncSimulatorAuthenticationType.API_KEY,
+            authenticationType: AmplifyAppSyncSimulatorAuthenticationType.AMAZON_COGNITO_USER_POOLS,
+            cognitoUserPoolConfig: {
+                AppIdClientRegex: '',
+            },
         },
         apiKey: 'da2-fakeApiId123456', // this is the default for graphiql
-        name: 'Prisma-AppSync',
         additionalAuthenticationProviders: [],
     }
 
@@ -48,23 +53,62 @@ export function useAppSyncSimulator({
             ...resolver,
             dataSourceName: resolver.dataSource,
             kind: RESOLVER_KIND.UNIT,
-            requestMappingTemplateLocation: 'lambdaRequestMappingTemplate.vtl',
-            responseMappingTemplateLocation: 'lambdaResponseMappingTemplate.vtl',
+            requestMappingTemplateLocation: 'lambdaRequest.vtl',
+            responseMappingTemplateLocation: 'lambdaResponse.vtl',
         })),
     }
 
-    if (globalThis?.__prismaAppSyncServer)
-        globalThis?.__prismaAppSyncServer?.stop()
+    if (globalThis?.__prismaAppSyncServer?.serverInstance)
+        globalThis?.__prismaAppSyncServer?.serverInstance?.stop()
 
-    globalThis.__prismaAppSyncServer = new AmplifyAppSyncSimulator({ port, wsPort })
+    const serverInstance = new AmplifyAppSyncSimulator({ port, wsPort })
+    const watcherInstances: any[] = globalThis?.__prismaAppSyncServer?.watcherInstances || []
+
+    if (watchers?.length && !globalThis?.__prismaAppSyncServer?.watcherInstances) {
+        const shell = (command: string): Promise<{ err: any; strdout: any; stderr: any }> =>
+            new Promise((resolve) => {
+                nodeExec(
+                    command,
+                    (err: any, strdout: any, stderr: any) => {
+                        if (err)
+                            console.error(stderr)
+                        else if (strdout)
+                            console.log(strdout)
+
+                        resolve({ err, strdout, stderr })
+                    },
+                )
+            })
+
+        watchers.forEach(({ watch, exec }) => {
+            const chok = chokidar.watch(watch, {
+                ignored: '**/node_modules/**',
+                ignoreInitial: true,
+                awaitWriteFinish: true,
+            })
+
+            chok.on('change', async (path) => {
+                console.log(`Change detected on ${path}`)
+
+                if (exec) {
+                    console.log(`Executing ${exec}`)
+                    await shell(exec)
+                }
+            })
+
+            watcherInstances.push(chok)
+        })
+    }
+
+    globalThis.__prismaAppSyncServer = { serverInstance, watcherInstances }
 
     return {
         start: async () => {
-            await globalThis.__prismaAppSyncServer.start()
-            globalThis.__prismaAppSyncServer.init(simulatorConfig)
+            await globalThis.__prismaAppSyncServer.serverInstance.start()
+            globalThis.__prismaAppSyncServer.serverInstance.init(simulatorConfig)
         },
         stop: () => {
-            globalThis.__prismaAppSyncServer.stop()
+            globalThis.__prismaAppSyncServer.serverInstance.stop()
         },
     }
 }
@@ -81,7 +125,8 @@ export type ServerOptions = {
     }[]
     port: number
     wsPort?: number
-    defaultQuery?: string
-    headers?: any
     watchers?: { watch: string | string[]; exec: string }[]
+    appSync?: AmplifyAppSyncAPIConfig
 }
+
+export { AmplifyAppSyncSimulatorAuthenticationType as AuthenticationType }
