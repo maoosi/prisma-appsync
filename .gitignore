@@ -12,6 +12,7 @@ dist/
 
 # Docs
 docs/.vitepress/dist/
+docs/.vitepress/cache/
 tmp.md
 
 # Boilerplate files
