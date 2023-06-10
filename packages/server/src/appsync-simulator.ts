@@ -9,6 +9,7 @@ import {
     AmplifyAppSyncSimulatorAuthenticationType,
     type AmplifyAppSyncSimulatorConfig,
     type AppSyncMockFile,
+    type AppSyncSimulatorDataSourceConfig,
     RESOLVER_KIND,
 } from 'amplify-appsync-simulator'
 
@@ -18,7 +19,7 @@ declare global {
 }
 
 export function useAppSyncSimulator({
-    lambdaHandler, schema, resolvers, port, wsPort, watchers,
+    lambdaHandler, schema, resolvers, port, wsPort, watchers, appSync, dataSources,
 }: ServerOptions) {
     const mappingTemplates: AppSyncMockFile[] = [{
         path: 'lambdaRequest.vtl',
@@ -28,23 +29,20 @@ export function useAppSyncSimulator({
         content: readFileSync(resolve(__dirname, 'lambdaResponse.vtl'), 'utf8'),
     }]
 
-    const appSync: AmplifyAppSyncAPIConfig = {
+    const appSyncWithDefaults: AmplifyAppSyncAPIConfig = {
         name: 'Prisma-AppSync',
         defaultAuthenticationType: {
-            authenticationType: AmplifyAppSyncSimulatorAuthenticationType.AMAZON_COGNITO_USER_POOLS,
-            cognitoUserPoolConfig: {
-                AppIdClientRegex: '',
-            },
+            authenticationType: AmplifyAppSyncSimulatorAuthenticationType.API_KEY,
         },
         apiKey: 'da2-fakeApiId123456', // this is the default for graphiql
         additionalAuthenticationProviders: [],
     }
 
     const simulatorConfig: AmplifyAppSyncSimulatorConfig = {
-        appSync,
+        appSync: appSync || appSyncWithDefaults,
         schema: { content: schema },
         mappingTemplates,
-        dataSources: [{
+        dataSources: dataSources || [{
             type: 'AWS_LAMBDA',
             name: 'prisma-appsync',
             invoke: lambdaHandler.main,
@@ -114,6 +112,7 @@ export function useAppSyncSimulator({
 }
 
 export type ServerOptions = {
+    // required
     schema: string
     lambdaHandler: any
     resolvers: {
@@ -124,9 +123,14 @@ export type ServerOptions = {
         responseMappingTemplate: string
     }[]
     port: number
+
+    // optional
     wsPort?: number
     watchers?: { watch: string | string[]; exec: string }[]
+
+    // advanced
     appSync?: AmplifyAppSyncAPIConfig
+    dataSources?: AppSyncSimulatorDataSourceConfig[]
 }
 
 export { AmplifyAppSyncSimulatorAuthenticationType as AuthenticationType }
