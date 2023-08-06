@@ -41,13 +41,19 @@ export class Installer {
     }
 
     constructor() {
-        // defaults
-        this.gitBranch = ['preview', 'contributor'].includes(String(process.env?.INSTALL_MODE))
-            ? 'maoosi/prisma-appsync#dev'
-            : 'maoosi/prisma-appsync#latest'
-        this.installPackage = ['preview', 'contributor'].includes(String(process.env?.INSTALL_MODE))
-            ? 'prisma-appsync@preview'
-            : 'prisma-appsync'
+        this.gitBranch = 'maoosi/prisma-appsync#main'
+        this.installPackage = 'prisma-appsync'
+
+        if (String(process.env?.COMPILE_MODE) === 'preview') {
+            this.gitBranch = 'maoosi/prisma-appsync#dev'
+            this.installPackage = 'prisma-appsync@preview'
+        }
+        
+        if (['preview', 'contributor'].includes(String(process.env?.INSTALL_MODE))) {
+            this.gitBranch = 'maoosi/prisma-appsync#dev'
+            this.installPackage = 'prisma-appsync@preview'
+        }
+
         this.cwd = process.cwd()
         this.timestamp = new Date().getTime()
         this.isContributorMode = String(process.env?.INSTALL_MODE) === 'contributor'
@@ -311,6 +317,7 @@ export class Installer {
                 ...[
                     { package: '@types/node', dev: true },
                     { package: 'js-yaml', dev: true },
+                    { package: 'amplify-appsync-simulator', dev: true },
                 ],
             ]
 

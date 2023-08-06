@@ -118,6 +118,10 @@ if (publishConfig.versionOk) {
     await fs.writeJson(corePkgFile, corePkg, { spaces: 4 })
     await fs.writeJson(installerPkgFile, installerPkg, { spaces: 4 })
 
+    // preview?
+    if (publishConfig.tag === 'preview')
+        process.env.COMPILE_MODE = "preview"
+
     // build + test
     console.log('Building + Testing...')
     await $`zx scripts/test.mjs`
