@@ -71,13 +71,7 @@ Thanks go to these wonderful sponsors!
         <td align="center" style="width:300px;">
             <a href="https://kuizto.co" rel="noopener" target="_blank">
                 <img src="https://prisma-appsync.vercel.app/sponsors/kuizto-logo.jpg" width="120px;" alt="Go to kuizto.co"/>
-                <br /><sub><b>Solve and sparkle up your daily food life</b></sub>
-            </a>
-        </td>
-        <td align="center" style="width:300px;">
-            <a href="https://travistravis.co" rel="noopener" target="_blank">
-                <img src="https://prisma-appsync.vercel.app/sponsors/travistravis-logo.jpg" width="120px;" alt="Go to travistravis.co"/>
-                <br /><sub><b>Collaborative travel planning</b></sub>
+                <br /><sub><b>Reconnect with home cooking</b></sub>
             </a>
         </td>
     </tr>
