@@ -50,6 +50,7 @@ export interface Document_Field {
     isEnum: boolean
     isUnique: boolean
     isAutopopulated: boolean
+    isCompositeField: boolean
 }
 
 export type Document_UniqueFields = string[]

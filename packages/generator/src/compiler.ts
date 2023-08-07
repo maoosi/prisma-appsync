@@ -217,10 +217,32 @@ export class PrismaAppSyncCompiler {
                                     type: this.getFieldScalar(field),
                                 },
                             }),
+                            isCompositeField: false,
                             directives,
                         })
                     }
                 })
+
+                if (model?.primaryKey) {
+                    if (model.primaryKey.fields.length === 1) {
+                        const fieldIndex = fields.findIndex(f => f.name === model.primaryKey!.fields[0])
+                        if (fieldIndex > -1) fields[fieldIndex].isUnique = true
+                    }
+                    else if (model.primaryKey.fields.length > 1) {
+                        fields.push({
+                            name: model.primaryKey?.name || model.primaryKey.fields.join('_'),
+                            type: 'string',
+                            scalar: 'String',
+                            isRequired: false,
+                            isList: false,
+                            isEditable: false,
+                            isEnum: false,
+                            isUnique: true,
+                            isAutopopulated: true,
+                            isCompositeField: true,
+                        })
+                    }
+                }
 
                 this.document.models.push({
                     name,
@@ -648,6 +670,7 @@ export class PrismaAppSyncCompiler {
                         isEditable: false,
                         isUnique: true,
                         isAutopopulated: true,
+                        isCompositeField: true,
                     }),
                 )
             }
