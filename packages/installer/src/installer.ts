@@ -48,7 +48,7 @@ export class Installer {
             this.gitBranch = 'maoosi/prisma-appsync#dev'
             this.installPackage = 'prisma-appsync@preview'
         }
-        
+
         if (['preview', 'contributor'].includes(String(process.env?.INSTALL_MODE))) {
             this.gitBranch = 'maoosi/prisma-appsync#dev'
             this.installPackage = 'prisma-appsync@preview'
@@ -396,7 +396,7 @@ export class Installer {
         // package
         if (!this.fileExists(path.join(this.detected.rootPath, 'package.json'))) {
             this.installConfig.shells.push({
-                cmd: `${this.detected.packageManager} init -y`,
+                cmd: `${this.detected.packageManager} init ${!(this.detected.packageManager === 'pnpm') ? `-y` : ''}`,
                 dir: this.detected.rootPath,
                 when: 'before',
             })
