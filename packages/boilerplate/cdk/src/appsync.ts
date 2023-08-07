@@ -3,17 +3,16 @@ import { readFileSync } from 'fs'
 import type { Construct } from 'constructs'
 import { camelCase, kebabCase, pascalCase } from 'scule'
 import { load } from 'js-yaml'
-import type { StackProps } from 'aws-cdk-lib'
 import {
     Duration,
     RemovalPolicy,
     Stack,
-    aws_appsync as appsync,
+    aws_appsync as appSync,
     aws_iam as iam,
     aws_lambda as lambda,
     aws_lambda_nodejs as lambdaNodejs,
+    type StackProps
 } from 'aws-cdk-lib'
-import * as appsync_alpha from '@aws-cdk/aws-appsync-alpha'
 
 export interface AppSyncStackProps {
     resourcesPrefix: string
@@ -29,19 +28,19 @@ export interface AppSyncStackProps {
         environment?: {}
     }
     additionalApiKeys?: string[]
-    authorizationConfig: appsync_alpha.AuthorizationConfig
+    authorizationConfig: appSync.AuthorizationConfig
 }
 
 export class AppSyncStack extends Stack {
     private props: AppSyncStackProps
     private resourcesPrefix: string
     private resourcesPrefixCamel: string
-    private graphqlApi: appsync_alpha.GraphqlApi
+    private graphqlApi: appSync.GraphqlApi
     private directResolverFn: lambda.Alias
     private apiRole: iam.Role
     private dataSources: {
-        lambda?: appsync_alpha.LambdaDataSource
-        none?: appsync_alpha.NoneDataSource
+        lambda?: appSync.LambdaDataSource
+        none?: appSync.NoneDataSource
     }
 
     constructor(scope: Construct, id: string, tplProps: AppSyncStackProps, props?: StackProps) {
@@ -60,18 +59,18 @@ export class AppSyncStack extends Stack {
 
     createGraphQLApi() {
         // create appsync instance
-        this.graphqlApi = new appsync_alpha.GraphqlApi(this, `${this.resourcesPrefixCamel}Api`, {
+        this.graphqlApi = new appSync.GraphqlApi(this, `${this.resourcesPrefixCamel}Api`, {
             name: this.resourcesPrefix,
-            schema: appsync_alpha.Schema.fromAsset(this.props.schema),
+            schema: appSync.SchemaFile.fromAsset(this.props.schema),
             authorizationConfig: this.props.authorizationConfig,
             logConfig: {
-                fieldLogLevel: appsync_alpha.FieldLogLevel.ERROR,
+                fieldLogLevel: appSync.FieldLogLevel.ERROR,
             },
             xrayEnabled: true,
         })
 
         // create default API key
-        new appsync.CfnApiKey(this, `${this.resourcesPrefixCamel}ApiKey`, {
+        new appSync.CfnApiKey(this, `${this.resourcesPrefixCamel}ApiKey`, {
             apiId: this.graphqlApi.apiId,
             description: `${this.resourcesPrefix}_api-key`,
             expires: Math.floor(new Date().setDate(new Date().getDate() + 365) / 1000.0),
@@ -80,7 +79,7 @@ export class AppSyncStack extends Stack {
         // create additional API keys
         if (this.props.additionalApiKeys) {
             this.props.additionalApiKeys.forEach((apiKey: string) => {
-                new appsync.CfnApiKey(this, `${this.resourcesPrefixCamel}ApiKey${pascalCase(apiKey)}`, {
+                new appSync.CfnApiKey(this, `${this.resourcesPrefixCamel}ApiKey${pascalCase(apiKey)}`, {
                     apiId: this.graphqlApi.apiId,
                     description: `${this.resourcesPrefix}_api-key_${kebabCase(apiKey)}`,
                     expires: Math.floor(new Date().setDate(new Date().getDate() + 365) / 1000.0),
@@ -112,7 +111,7 @@ export class AppSyncStack extends Stack {
             functionName: `${this.resourcesPrefix}_fn`,
             role: lambdaExecutionRole,
             environment: this.props.function.environment || {},
-            runtime: lambda.Runtime.NODEJS_16_X,
+            runtime: lambda.Runtime.NODEJS_18_X,
             timeout: Duration.seconds(10),
             handler: 'main',
             entry: this.props.function.code,
@@ -163,7 +162,7 @@ export class AppSyncStack extends Stack {
                 const resolvername = `${resolver.fieldName}${resolver.typeName}_resolver`
 
                 if (['lambda', 'prisma-appsync'].includes(resolver.dataSource) && this.dataSources.lambda) {
-                    new appsync_alpha.Resolver(this, resolvername, {
+                    new appSync.Resolver(this, resolvername, {
                         api: this.graphqlApi,
                         typeName: resolver.typeName,
                         fieldName: resolver.fieldName,
@@ -171,15 +170,15 @@ export class AppSyncStack extends Stack {
                     })
                 }
                 else if (resolver.dataSource === 'none' && this.dataSources.none) {
-                    new appsync_alpha.Resolver(this, resolvername, {
+                    new appSync.Resolver(this, resolvername, {
                         api: this.graphqlApi,
                         typeName: resolver.typeName,
                         fieldName: resolver.fieldName,
                         dataSource: this.dataSources.none,
-                        requestMappingTemplate: appsync_alpha.MappingTemplate.fromString(
+                        requestMappingTemplate: appSync.MappingTemplate.fromString(
                             resolver.requestMappingTemplate,
                         ),
-                        responseMappingTemplate: appsync_alpha.MappingTemplate.fromString(
+                        responseMappingTemplate: appSync.MappingTemplate.fromString(
                             resolver.responseMappingTemplate,
                         ),
                     })
@@ -192,7 +191,7 @@ export class AppSyncStack extends Stack {
         this.dataSources = {}
 
         // create datasource of type "lambda"
-        this.dataSources.lambda = new appsync_alpha.LambdaDataSource(
+        this.dataSources.lambda = new appSync.LambdaDataSource(
             this,
             `${this.resourcesPrefixCamel}LambdaDatasource`,
             {
@@ -204,7 +203,7 @@ export class AppSyncStack extends Stack {
         )
 
         // create datasource of type "none"
-        this.dataSources.none = new appsync_alpha.NoneDataSource(this, `${this.resourcesPrefixCamel}NoneDatasource`, {
+        this.dataSources.none = new appSync.NoneDataSource(this, `${this.resourcesPrefixCamel}NoneDatasource`, {
             api: this.graphqlApi,
             name: `${this.resourcesPrefixCamel}NoneDataSource`,
         })
