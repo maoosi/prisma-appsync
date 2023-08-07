@@ -93,7 +93,7 @@ export default defineConfig({
                 collapsible: true,
                 collapsed: true,
                 items: [
-                    { text: '(latest) 1.0.0-rc.6', link: '/changelog/1.0.0-rc.6' },
+                    { text: '(latest) 1.0.0-rc.7', link: '/changelog/1.0.0-rc.7' },
                     { text: 'Previous', link: '/changelog/' },
                 ],
             },
