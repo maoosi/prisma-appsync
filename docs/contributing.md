@@ -12,7 +12,7 @@ We use `pnpm` as the core package manager, `yarn` and `docker` for creating the 
 git clone https://github.com/maoosi/prisma-appsync.git
 ```
 
-**Checkout the `dev` branch (latest working branch):**
+**Checkout the `dev` branch (working branch):**
 
 ```bash
 git checkout dev
