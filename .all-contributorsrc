@@ -92,6 +92,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "michachan",
+      "name": "Michael Chan",
+      "avatar_url": "https://avatars.githubusercontent.com/u/27760344?v=4",
+      "profile": "https://github.com/michachan",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "commitConvention": "angular",
