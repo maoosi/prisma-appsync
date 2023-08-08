@@ -51,6 +51,7 @@ This project follows the [all-contributors](https://allcontributors.org/) specif
     </tr>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/max-konin"><img src="https://avatars.githubusercontent.com/u/1570356?v=4?s=100" width="100px;" alt="Max Konin"/><br /><sub><b>Max Konin</b></sub></a><br /><a href="https://github.com/maoosi/prisma-appsync/commits?author=max-konin" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/michachan"><img src="https://avatars.githubusercontent.com/u/27760344?v=4?s=100" width="100px;" alt="Michael Chan"/><br /><sub><b>Michael Chan</b></sub></a><br /><a href="https://github.com/maoosi/prisma-appsync/commits?author=michachan" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
