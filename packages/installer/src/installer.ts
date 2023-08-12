@@ -396,7 +396,7 @@ export class Installer {
         // package
         if (!this.fileExists(path.join(this.detected.rootPath, 'package.json'))) {
             this.installConfig.shells.push({
-                cmd: `${this.detected.packageManager} init ${this.detected.packageManager === 'pnpm' ? '' : '-y'}`,
+                cmd: `${this.detected.packageManager === 'pnpm' ? 'pnpm init' : `${this.detected.packageManager} init -y`}`,
                 dir: this.detected.rootPath,
                 when: 'before',
             })
