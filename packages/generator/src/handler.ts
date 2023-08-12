@@ -24,7 +24,7 @@ generatorHandler({
                 const clientGenerator = options?.otherGenerators?.find(g => g?.provider?.value === 'prisma-client-js')
 
                 // Is debug mode enabled?
-                const debug: boolean = typeof options?.generator?.config?.debug !== undefined
+                const debug: boolean = typeof options?.generator?.config?.debug !== 'undefined'
                     ? Boolean(options.generator.config.debug)
                     : false
 
