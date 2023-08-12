@@ -1,7 +1,8 @@
+/* eslint-disable n/prefer-global/process */
 import { describe, expect } from 'vitest'
 import * as queries from '@client/resolver'
-import type { Model, QueryParams } from '@client/defs'
-import { Actions, ActionsAliases, Authorizations } from '@client/defs'
+import type { Model, QueryParams } from '@client/types'
+import { Actions, ActionsAliases, Authorizations } from '@client/consts'
 import mockLambdaIdentity from './mocks/lambda-identity'
 import { testEach } from './utils'
 

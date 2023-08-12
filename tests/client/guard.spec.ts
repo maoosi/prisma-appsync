@@ -1,6 +1,7 @@
+/* eslint-disable n/prefer-global/process */
 import { describe, expect, test } from 'vitest'
 import { getDepth, getShieldAuthorization, runHooks } from '@client/guard'
-import { Actions, ActionsAliases, Authorizations } from '@client/defs'
+import { Actions, ActionsAliases, Authorizations } from '@client/consts'
 import { PrismaClient } from '@prisma/client'
 
 process.env.DATABASE_URL = 'postgresql://USER:PASSWORD@HOST:PORT/DATABASE'

@@ -1,6 +1,7 @@
+/* eslint-disable n/prefer-global/process */
 /* eslint-disable no-console */
-import { inspect as nodeInspect } from 'util'
-import type { logLevel } from './defs'
+import { inspect as nodeInspect } from 'node:util'
+import type { logLevel } from './types'
 
 const errorCodes = {
     FORBIDDEN: 401,
@@ -9,12 +10,12 @@ const errorCodes = {
     TOO_MANY_REQUESTS: 429,
 }
 
-export interface ErrorExtensions {
+export type ErrorExtensions = {
     type: keyof typeof errorCodes
     cause?: any
 }
 
-export interface ErrorDetails {
+export type ErrorDetails = {
     error: string
     type: ErrorExtensions['type']
     code: number
@@ -111,7 +112,7 @@ export function printLog(message: any, level: logLevel): void {
         console.info(`\x1B[36m${log}`)
 }
 
-function canPrintLog(level: logLevel): Boolean {
+function canPrintLog(level: logLevel): boolean {
     if (process?.env?.PRISMA_APPSYNC_TESTING === 'true')
         return false
 

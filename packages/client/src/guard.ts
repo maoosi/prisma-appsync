@@ -6,8 +6,8 @@ import type {
     Shield,
     ShieldAuthorization,
     ShieldRule,
-} from './defs'
-import { DebugTestingKey } from './defs'
+} from './types'
+import { DebugTestingKey } from './consts'
 import { decode, encode, filterXSS, isEmpty, isMatchingGlob, merge, walk } from './utils'
 import { CustomError } from './inspector'
 

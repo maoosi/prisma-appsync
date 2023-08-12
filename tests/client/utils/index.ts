@@ -6,6 +6,7 @@ function format(str, ...args) {
     })
 }
 
+// eslint-disable-next-line @typescript-eslint/ban-types
 export function testEach(cases: any[][]): (name: string, fn: Function) => void {
     return (name, fn) => {
         cases.forEach((items) => {

@@ -14,7 +14,7 @@ import type {
     PrismaUpsert,
     QueryBuilder,
     QueryParams,
-} from './defs'
+} from './types'
 import { merge } from './utils'
 
 /**

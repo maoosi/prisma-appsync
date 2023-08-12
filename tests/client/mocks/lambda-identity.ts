@@ -26,6 +26,7 @@ export default function mockLambdaIdentity(identity: Authorization, opts?: mockO
         return mock
     }
     else if (identity === Authorizations.AMAZON_COGNITO_USER_POOLS) {
+        // eslint-disable-next-line n/prefer-global/buffer
         const decodedJWTToken = opts?.jwt ? JSON.parse(Buffer.from(opts?.jwt?.split('.')[1], 'base64').toString()) : {}
         const mock: AMAZON_COGNITO_USER_POOLS = {
             sub: decodedJWTToken?.sub || 'undefined',

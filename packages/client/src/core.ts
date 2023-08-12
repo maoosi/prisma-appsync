@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/ban-types */
+/* eslint-disable no-restricted-globals */
+/* eslint-disable n/prefer-global/process */
 import type {
     AfterHookParams,
     InjectedConfig,
@@ -6,13 +9,15 @@ import type {
     ResolveParams,
     Shield,
     ShieldAuthorization,
-} from './defs'
+} from './types'
+import {
+    Prisma,
+    PrismaClient,
+} from './types'
 import {
     BatchActionsList,
     DebugTestingKey,
-    Prisma,
-    PrismaClient,
-} from './defs'
+} from './consts'
 import { CustomError, log, parseError } from './inspector'
 import {
     clarify,
@@ -154,7 +159,8 @@ export class PrismaAppSync {
         process.env.PRISMA_APPSYNC_LOG_LEVEL = this.options.logLevel
 
         // Debug logs
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
+        // eslint-disable-next-line unused-imports/no-unused-vars
         const { fieldsMapping, ...newInstanceLogs } = this.options
         log('New Prisma-AppSync instance created:', newInstanceLogs)
 

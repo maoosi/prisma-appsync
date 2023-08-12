@@ -1,7 +1,8 @@
+/* eslint-disable n/prefer-global/process */
 /* eslint-disable no-new */
 import { describe, expect, test } from 'vitest'
 import { PrismaAppSync } from '@client'
-import { Actions, ActionsAliases, Authorizations } from '@client/defs'
+import { Actions, ActionsAliases, Authorizations } from '@client/consts'
 import mockLambdaEvent from './mocks/lambda-event'
 import mockLambdaIdentity from './mocks/lambda-identity'
 

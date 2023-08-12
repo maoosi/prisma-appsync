@@ -22,7 +22,6 @@ export {
     QueryParamsCustom,
     BeforeHookParams,
     AfterHookParams,
-    Authorizations,
     Authorization,
     AppSyncEvent,
     Identity,
@@ -34,7 +33,8 @@ export {
     AppSyncResolverHandler,
     AppSyncResolverEvent,
     AppSyncIdentity,
-} from './defs'
+} from './types'
+export { Authorizations } from './consts'
 
 const _ = {
     merge,

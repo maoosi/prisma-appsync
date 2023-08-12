@@ -1,3 +1,4 @@
+/* eslint-disable n/prefer-global/process */
 import { describe, expect, test } from 'vitest'
 import {
     addNullables,
@@ -11,8 +12,8 @@ import {
     getPrismaArgs,
     getType,
 } from '@client/adapter'
-import type { Action, Authorization, Options } from '@client/defs'
-import { Actions, ActionsAliases, Authorizations } from '@client/defs'
+import type { Action, Authorization, Options } from '@client/types'
+import { Actions, ActionsAliases, Authorizations } from '@client/consts'
 import { Prisma } from '@prisma/client'
 import { plural } from 'pluralize'
 import flow from 'lodash/flow'

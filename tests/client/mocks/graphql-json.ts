@@ -99,7 +99,7 @@ function getArgument(arg: any) {
         return arg.value.value
 
     else if (arg.value.kind === 'IntValue')
-        return parseInt(arg.value.value)
+        return Number.parseInt(arg.value.value)
 
     else if (arg.value.kind === 'ListValue')
         return flatMap(arg.value.values, (argValue: any) => getArgument({ value: argValue }))

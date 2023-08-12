@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { basename, dirname, extname, join } from 'path'
+import { basename, dirname, extname, join } from 'node:path'
 import { load as loadYaml } from 'js-yaml'
 import type { DMMF } from '@prisma/generator-helper'
 import { plural } from 'pluralize'
@@ -11,7 +11,7 @@ import camelCase from 'lodash/camelCase'
 import upperFirst from 'lodash/upperFirst'
 import merge from 'lodash/merge'
 import { isObject, isUndefined, replaceAll } from '@client/utils'
-import type { InjectedConfig } from '@client/defs'
+import type { InjectedConfig } from '@client/types'
 import type {
     CompilerOptions,
     CompilerOptionsPrivate,
@@ -226,7 +226,8 @@ export class PrismaAppSyncCompiler {
                 if (model?.primaryKey) {
                     if (model.primaryKey.fields.length === 1) {
                         const fieldIndex = fields.findIndex(f => f.name === model.primaryKey!.fields[0])
-                        if (fieldIndex > -1) fields[fieldIndex].isUnique = true
+                        if (fieldIndex > -1)
+                            fields[fieldIndex].isUnique = true
                     }
                     else if (model.primaryKey.fields.length > 1) {
                         fields.push({

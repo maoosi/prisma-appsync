@@ -23,14 +23,14 @@ import type {
     Options,
     PrismaArgs,
     QueryParams,
-} from './defs'
+} from './types'
 import {
     Actions,
     ActionsAliasesList,
     Authorizations,
     BatchActionsList,
     Prisma_ReservedKeysForPaths,
-} from './defs'
+} from './consts'
 
 /**
  * #### Parse AppSync direct resolver `event` and returns Query Params.
