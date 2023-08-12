@@ -101,6 +101,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "nhu-mai-101",
+      "name": "Nhu Mai",
+      "avatar_url": "https://avatars.githubusercontent.com/u/84061316?v=4",
+      "profile": "https://www.linkedin.com/in/nhu-mai/",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "commitConvention": "angular",
