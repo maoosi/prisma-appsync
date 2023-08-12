@@ -11,7 +11,7 @@ import {
     lowerFirst,
     merge,
     replaceAll,
-    traverseNodes,
+    walk,
 } from './utils'
 
 export { PrismaAppSync } from './core'
@@ -48,7 +48,7 @@ const _ = {
     isUndefined,
     lowerFirst,
     isObject,
-    traverseNodes,
+    walk,
     replaceAll,
 }
 

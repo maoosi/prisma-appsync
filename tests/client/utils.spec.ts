@@ -13,11 +13,12 @@ import {
     merge,
     objectToPaths,
     omit,
-    traverseNodes,
     unique,
     upperFirst,
+    walk,
 } from '@client/utils'
 
+// eslint-disable-next-line n/prefer-global/process
 process.env.PRISMA_APPSYNC_TESTING = 'true'
 
 describe('CLIENT #utils', () => {
@@ -239,9 +240,9 @@ describe('CLIENT #utils', () => {
             expect(isObject([])).toEqual(false)
         })
     })
-    describe('.traverse?', () => {
-        test('expect traverse to allow traverse an modify an Object', async () => {
-            const result = await traverseNodes(
+    describe('.walk?', () => {
+        test('expect walk to allow modify an Object', async () => {
+            const result = await walk(
                 {
                     select: {
                         title: true,
@@ -252,9 +253,10 @@ describe('CLIENT #utils', () => {
                         ],
                     },
                 },
-                async (node) => {
-                    if (typeof node?.value === 'boolean')
-                        node.set(!node.value)
+                async ({ key, value }) => {
+                    if (typeof value === 'boolean')
+                        value = !value
+                    return { key, value }
                 },
             )
             expect(result).toEqual({
@@ -268,8 +270,8 @@ describe('CLIENT #utils', () => {
                 },
             })
         })
-        test('expect traverse to allow exclude keys in Object', async () => {
-            const result = await traverseNodes(
+        test('expect walk to allow exclude keys in Object', async () => {
+            const result = await walk(
                 {
                     select: {
                         title: true,
@@ -280,11 +282,12 @@ describe('CLIENT #utils', () => {
                         ],
                     },
                 },
-                async (node) => {
-                    if (typeof node?.key === 'string' && node?.key === 'authors')
-                        node.break()
-                    if (typeof node?.value === 'boolean')
-                        node.set(!node.value)
+                async ({ key, value }, node) => {
+                    if (key === 'authors')
+                        node.ignoreChilds()
+                    if (typeof value === 'boolean')
+                        value = !value
+                    return { key, value }
                 },
             )
             expect(result).toEqual({
@@ -298,22 +301,25 @@ describe('CLIENT #utils', () => {
                 },
             })
         })
-        test('expect traverse to allow traverse an modify an Array', async () => {
-            const result = await traverseNodes([{ authors: { username: true } }, { comments: { username: true } }], async (node) => {
-                if (typeof node?.value === 'boolean')
-                    node.set(!node.value)
-            })
+        test('expect walk to allow modify an Array', async () => {
+            const result = await walk(
+                [{ authors: { username: true } }, { comments: { username: true } }],
+                async ({ key, value }) => {
+                    if (typeof value === 'boolean')
+                        value = !value
+                    return { key, value }
+                })
             expect(result).toEqual([{ authors: { username: false } }, { comments: { username: false } }])
         })
-        test('expect traverse to allow excluding elements in Array', async () => {
-            const result = await traverseNodes(
+        test('expect walk to allow excluding elements in Array', async () => {
+            const result = await walk(
                 [{ authors: { username: true } }, { comments: { username: true } }],
-                async (node) => {
-                    if (typeof node?.value === 'boolean')
-                        node.set(!node.value)
-
-                    if (typeof node?.key === 'string' && node?.key === 'comments')
-                        node.break()
+                async ({ key, value }, node) => {
+                    if (typeof value === 'boolean')
+                        value = !value
+                    if (key === 'comments')
+                        node.ignoreChilds()
+                    return { key, value }
                 },
             )
             expect(result).toEqual([{ authors: { username: false } }, { comments: { username: true } }])

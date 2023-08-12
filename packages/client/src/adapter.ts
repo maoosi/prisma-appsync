@@ -3,12 +3,13 @@ import { sanitize } from './guard'
 import {
     clone,
     isEmpty,
+    isObject,
     isUndefined,
     lowerFirst,
     merge,
     objectToPaths,
-    traverseNodes,
     unique,
+    walk,
 } from './utils'
 import type {
     Action,
@@ -105,22 +106,23 @@ export async function parseEvent(appsyncEvent: AppSyncEvent, options: Options, c
  * @returns any
  */
 export async function addNullables(data: any): Promise<any> {
-    return await traverseNodes(data, async (node) => {
-        if (typeof node?.key === 'string' && (node?.key === 'is' || node?.key === 'isNot')) {
-            node.set(node?.value === 'NULL' ? null : undefined)
-            node.break()
-        }
+    return await walk(data, async ({ key, value }, node) => {
+        if (key === 'is' || key === 'isNot') {
+            value = value === 'NULL' ? null : undefined
 
-        else if (typeof node?.key === 'string' && node?.childKeys?.includes('isNull')) {
-            const { isNull, ...value } = node.value
+            node.ignoreChilds()
+        }
+        else if (value && isObject(value) && Object.keys(value).includes('isNull')) {
+            const { isNull, ...val } = value
 
             if (isNull === true)
-                node.set({ ...value, equals: null })
+                value = { ...val, equals: null }
             else
-                node.set({ ...value, not: null })
+                value = { ...val, not: null }
 
-            node.break()
+            node.ignoreChilds()
         }
+        return { key, value }
     })
 }
 
@@ -422,12 +424,12 @@ export function getPrismaArgs({
         delete prismaArgs.select
 
     if (typeof _arguments.skip !== 'undefined')
-        prismaArgs.skip = parseInt(_arguments.skip)
+        prismaArgs.skip = Number.parseInt(_arguments.skip)
     else if (defaultPagination !== false && action === Actions.list)
         prismaArgs.skip = 0
 
     if (typeof _arguments.take !== 'undefined')
-        prismaArgs.take = parseInt(_arguments.take)
+        prismaArgs.take = Number.parseInt(_arguments.take)
     else if (defaultPagination !== false && action === Actions.list)
         prismaArgs.take = defaultPagination
 
