@@ -118,8 +118,7 @@ function getAppSyncDirectives(
         }
     })
 
-    // eslint-disable-next-line no-console
-    console.log('\n', JSON.stringify({ model: modelDMMF.name, action, directives, authDirectives, appSyncDirectives: uniq(appSyncDirectives) }, null, 2))
+    // console.log('\n', JSON.stringify({ model: modelDMMF.name, action, directives, authDirectives, appSyncDirectives: uniq(appSyncDirectives) }, null, 2))
 
     return uniq(appSyncDirectives)
 }
