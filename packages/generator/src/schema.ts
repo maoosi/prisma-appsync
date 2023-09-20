@@ -666,7 +666,7 @@ export default class SchemaBuilder {
             })
         }
 
-        if (model.gqlFields.whereUniqueInput?.length) {
+        if (model.gqlFields.extendedWhereUniqueInput?.length) {
             this.inputs.push({
                 name: `${model.singular}ExtendedWhereUniqueInput`,
                 fields: [
