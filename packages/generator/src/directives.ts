@@ -34,7 +34,7 @@ export function parseDirectives(modelDMMF: DMMF.Model, doc: string): Directives 
     return {
         auth,
         gql,
-        get: (action: Action) => {
+        get: (action: Action | 'model') => {
             return getAppSyncDirectives(modelDMMF, action, { gql, auth })
         },
     }
@@ -128,7 +128,7 @@ export type Action = 'get' | 'list' | 'count' | 'create' | 'createMany' | 'updat
 export type Directives = {
     gql: DirectiveGql
     auth: DirectiveAuth
-    get: (action: Action) => string[]
+    get: (action: Action | 'model') => string[]
 }
 
 type Authz = {

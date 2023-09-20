@@ -3,7 +3,7 @@ import type { DMMF } from '@prisma/generator-helper'
 import { plural } from 'pluralize'
 import * as prettier from 'prettier'
 import { merge, uniq } from '@client/utils'
-import { type DirectiveAuth, type DirectiveGql, parseDirectives } from './directives'
+import { type Directives, parseDirectives } from './directives'
 
 export default class ClientConfigBuilder {
     private runtimeConfig: Required<RuntimeConfig> = { modelsMapping: {}, fieldsMapping: {}, operations: [] }
@@ -227,10 +227,7 @@ type ParsedModel = {
     prismaRef: string
     singular: string
     plural: string
-    directives: {
-        auth: DirectiveAuth
-        gql: DirectiveGql
-    }
+    directives: Directives
     fields: DMMF.Field[]
 }
 

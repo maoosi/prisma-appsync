@@ -1,5 +1,5 @@
 import { dirname, join } from 'node:path'
-import { copy, readFile, writeFile } from 'fs-extra'
+import { copy, outputFile, readFile } from 'fs-extra'
 import type { DMMF } from '@prisma/generator-helper'
 import SchemaBuilder from './schema'
 import ResolversBuilder from './resolvers'
@@ -25,98 +25,80 @@ export default class PrismaAppSyncGenerator {
     public async makeAppSyncSchema() {
         let schema: string
 
-        try {
-            const builder = new SchemaBuilder()
+        const builder = new SchemaBuilder()
 
-            // create schema from prisma dmmf
-            schema = await builder.createSchema(this.prismaDmmf, { defaultDirective: this.defaultDirective })
+        // create schema from prisma dmmf
+        schema = await builder.createSchema(this.prismaDmmf, { defaultDirective: this.defaultDirective })
 
-            // extendSchema option
-            if (this.userGraphQLPath) {
-                // read user schema
-                const userSchema = await readFile(join(dirname(this.prismaSchemaPath), this.userGraphQLPath), {
-                    encoding: 'utf-8',
-                })
+        // extendSchema option
+        if (this.userGraphQLPath) {
+            // read user schema
+            const userSchema = await readFile(join(dirname(this.prismaSchemaPath), this.userGraphQLPath), {
+                encoding: 'utf-8',
+            })
 
-                // merge with generated schema
-                schema = await builder.mergeSchemas(schema, userSchema)
-            }
-
-            // output graphql schema
-            await writeFile(join(this.outputDir, 'schema.gql'), schema, 'utf-8')
+            // merge with generated schema
+            schema = await builder.mergeSchemas(schema, userSchema)
         }
-        catch (error) {
-            console.error(error)
-            throw new Error('Error while generating AppSync Schema')
-        }
+
+        // output graphql schema
+        await outputFile(join(this.outputDir, 'schema.gql'), schema, 'utf-8')
     }
 
     public async makeAppSyncResolvers() {
         let resolvers: string
 
-        try {
-            const builder = new ResolversBuilder()
+        const builder = new ResolversBuilder()
 
-            // create schema from prisma dmmf
-            resolvers = await builder.createResolvers(this.prismaDmmf, { defaultDirective: this.defaultDirective })
+        // create schema from prisma dmmf
+        resolvers = await builder.createResolvers(this.prismaDmmf, { defaultDirective: this.defaultDirective })
 
-            // extendResolvers option
-            if (this.userResolversPath) {
-                // read user resolvers
-                const userResolvers = await readFile(join(dirname(this.prismaSchemaPath), this.userResolversPath), {
-                    encoding: 'utf8',
-                })
+        // extendResolvers option
+        if (this.userResolversPath) {
+            // read user resolvers
+            const userResolvers = await readFile(join(dirname(this.prismaSchemaPath), this.userResolversPath), {
+                encoding: 'utf8',
+            })
 
-                // merge with generated resolvers
-                resolvers = await builder.mergeResolvers(resolvers, userResolvers)
-            }
-
-            // output yaml resolvers
-            await writeFile(join(this.outputDir, 'resolvers.yaml'), resolvers, 'utf-8')
+            // merge with generated resolvers
+            resolvers = await builder.mergeResolvers(resolvers, userResolvers)
         }
-        catch (error) {
-            console.error(error)
-            throw new Error('Error while generating AppSync Resolvers')
-        }
+
+        // output yaml resolvers
+        await outputFile(join(this.outputDir, 'resolvers.yaml'), resolvers, 'utf-8')
     }
 
     public async makeClientRuntimeConfig() {
-        try {
-            const builder = new ClientConfigBuilder()
+        const builder = new ClientConfigBuilder()
 
-            // create config from prisma dmmf
-            const runtimeConfig = await builder.createRuntimeConfig(this.prismaDmmf, { defaultDirective: this.defaultDirective })
+        // create config from prisma dmmf
+        const runtimeConfig = await builder.createRuntimeConfig(this.prismaDmmf, { defaultDirective: this.defaultDirective })
 
-            // copy client to outputDir
-            await copy(join(__dirname, './client'), join(this.outputDir, 'client'))
+        // copy client to outputDir
+        await copy(join(__dirname, './client'), join(this.outputDir, 'client'))
 
-            // client files (js + ts defs)
-            await this.replaceInFile(
-                join(this.outputDir, 'client', 'index.js'),
-                /((?: )*{}\;*\s*\/\/\!\s+inject:config)/g,
-                JSON.stringify(runtimeConfig),
-            )
+        // client files (js + ts defs)
+        await this.replaceInFile(
+            join(this.outputDir, 'client', 'index.js'),
+            /((?: )*{}\;*\s*\/\/\!\s+inject:config)/g,
+            JSON.stringify(runtimeConfig),
+        )
 
-            // inject in client ts defs
-            await this.replaceInFile(
-                join(this.outputDir, 'client', 'core.d.ts'),
-                /((?: )*(\'|\")\/\/\!\s+inject:type:operations(\'|\"))/g,
-                runtimeConfig.operations
-                    .sort()
-                    .map((o: string) => `"${o}"`)
-                    .join(' | '),
-            )
-        }
-        catch (error) {
-            console.error(error)
-            throw new Error('Error while generating Client Runtime Config')
-        }
+        // inject in client ts defs
+        await this.replaceInFile(
+            join(this.outputDir, 'client', 'core.d.ts'),
+            /((?: )*(\'|\")\/\/\!\s+inject:type:operations(\'|\"))/g,
+            runtimeConfig.operations
+                .sort()
+                .map((o: string) => `"${o}"`)
+                .join(' | '),
+        )
     }
 
     private async replaceInFile(file: string, findRegex: RegExp, replace: string) {
         const content = await readFile(file, 'utf-8')
         const newContent = content.replace(findRegex, replace)
-        await writeFile(file, newContent, 'utf-8')
+        await outputFile(file, newContent, 'utf-8')
 
         return newContent
     }
