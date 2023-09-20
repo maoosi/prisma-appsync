@@ -76,19 +76,51 @@ export default class SchemaBuilder {
     }
 
     private parseModelDMMF(modelDMMF: DMMF.Model, options?: { defaultDirective?: string }): ParsedModel {
-        const directives = parseDirectives(modelDMMF, [options?.defaultDirective, modelDMMF.documentation].filter(Boolean).join('\n'))
-
+        const directives = parseDirectives(
+            modelDMMF, [options?.defaultDirective, modelDMMF.documentation].filter(Boolean).join('\n'),
+        )
         const fields = modelDMMF.fields.filter(field => !(directives?.gql?.fields?.[field.name] === null))
 
         const getScalar = (field: DMMF.Field, inject?: FieldScalarOptions) => {
             return this.getFieldScalar(field, { scalar: directives?.gql?.scalars?.[field.name], ...inject })
         }
 
-        const primaryKeys = modelDMMF.primaryKey?.fields || []
+        const uniqueComposites = [
+            modelDMMF.primaryKey,
+            ...modelDMMF.uniqueIndexes,
+        ]
+            .filter(composite => composite?.fields?.length)
+            .map((composite) => {
+                const compositeFields = ((composite as DMMF.PrimaryKey).fields
+                    .map(compositeField => fields.find(f => f.name === compositeField))
+                    .filter(Boolean)
+                ) as DMMF.Field[]
 
-        const primaryKeysFields = fields
-            ?.filter(field => primaryKeys.includes(field.name))
-            ?.map(field => ({ name: field.name, scalar: getScalar(field) })) || []
+                const name = (composite as DMMF.PrimaryKey)?.name
+                    || compositeFields
+                        .map(compositeField => compositeField.name)
+                        .join('_')
+
+                const scalar = `${pascalCase(
+                    compositeFields
+                        .map(compositeField => compositeField.name)
+                        .join(' '),
+                )}FieldsInput`
+
+                const subfields: GqlField[] = compositeFields
+                    .map((compositeField) => {
+                        return {
+                            name: compositeField.name,
+                            scalar: getScalar(compositeField),
+                        }
+                    })
+
+                return {
+                    name,
+                    scalar,
+                    fields: subfields,
+                }
+            })
 
         const operationsFields = fields
             ?.filter(field => !field?.relationName && !field?.isReadOnly && !field.isId && ['Int', 'Float'].includes(getScalar(field)))
@@ -123,9 +155,7 @@ export default class SchemaBuilder {
             ...fields
                 ?.filter(field => field?.isUnique || field?.isId)
                 ?.map(field => ({ name: field.name, scalar: getScalar(field, { required: false }) })) || [],
-            ...primaryKeysFields?.length
-                ? [{ name: primaryKeysFields.map(pK => pK.name).join('_'), scalar: `${pascalCase(primaryKeys.join(' '))}FieldsInput` }]
-                : [],
+            ...uniqueComposites?.map(field => ({ name: field.name, scalar: field.scalar })),
         ]
 
         const extendedWhereUniqueInputFields = uniqBy([
@@ -161,14 +191,13 @@ export default class SchemaBuilder {
             plural: plural(modelDMMF.name),
             fields,
             directives,
-            primaryKeys,
             gqlFields: {
                 operations: operationsFields,
                 whereInput: whereInputFields,
                 whereUniqueInput: whereUniqueInputFields,
                 extendedWhereUniqueInput: extendedWhereUniqueInputFields,
                 scalarWhereInput: scalarWhereInputFields,
-                primaryKeys: primaryKeysFields,
+                uniqueComposites,
             },
             getScalar,
             documentation: modelDMMF.documentation || '',
@@ -611,12 +640,12 @@ export default class SchemaBuilder {
     }
 
     private createModelInputs(model: ParsedModel) {
-        if (model.primaryKeys?.length) {
+        model.gqlFields?.uniqueComposites?.forEach((uniqueComposite) => {
             this.inputs.push({
-                name: `${pascalCase(model.primaryKeys.join(' '))}FieldsInput`,
-                fields: model.gqlFields.primaryKeys,
+                name: uniqueComposite.scalar,
+                fields: uniqueComposite.fields,
             })
-        }
+        })
 
         this.inputs.push({
             name: `${model.singular}Filter`,
@@ -1260,14 +1289,17 @@ type ParsedModel = {
     fields: DMMF.Field[]
     gqlFields: {
         operations: GqlField[]
-        primaryKeys: GqlField[]
         whereInput: GqlField[]
         whereUniqueInput: GqlField[]
         extendedWhereUniqueInput: GqlField[]
         scalarWhereInput: GqlField[]
+        uniqueComposites: {
+            name: string
+            scalar: string
+            fields: GqlField[]
+        }[]
     }
     directives: Directives
-    primaryKeys: string[]
     getScalar: (field: DMMF.Field, inject?: FieldScalarOptions) => string
     documentation: string
     defaultDirective: string
