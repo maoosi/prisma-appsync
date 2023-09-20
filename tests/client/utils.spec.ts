@@ -13,7 +13,7 @@ import {
     merge,
     objectToPaths,
     omit,
-    unique,
+    uniq,
     upperFirst,
     walk,
 } from '@client/utils'
@@ -325,9 +325,9 @@ describe('CLIENT #utils', () => {
             expect(result).toEqual([{ authors: { username: false } }, { comments: { username: true } }])
         })
     })
-    describe('.unique?', () => {
-        test('expect unique to return a unique array', () => {
-            expect(unique(['a', 'b', 'a'])).toEqual(['a', 'b'])
+    describe('.uniq?', () => {
+        test('expect uniq to return a unique array', () => {
+            expect(uniq(['a', 'b', 'a'])).toEqual(['a', 'b'])
         })
     })
 })

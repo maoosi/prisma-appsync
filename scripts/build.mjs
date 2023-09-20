@@ -1,4 +1,5 @@
 #!/usr/bin/env zx
+/* eslint-disable n/prefer-global/process */
 import './env.mjs'
 
 try {
@@ -11,9 +12,6 @@ try {
 
         // build Prisma-AppSync Generator
         await $`esbuild packages/generator/src/index.ts --bundle --format=cjs --keep-names --platform=node --target=node16 --external:fsevents --external:_http_common --outfile=dist/generator.js`
-
-        // copy Prisma-AppSync Generator template files into build folder
-        await $`cp -R packages/generator/templates dist/templates && chmod -R 755 dist`
     }
 
     if (!argv?.ignoreClient) {
@@ -28,18 +26,19 @@ try {
 
     if (!argv?.ignoreInstaller) {
         console.log(chalk.blue('\nBuild :: Installer\n'))
-        
+
         if (process.env.COMPILE_MODE === 'preview') {
             // build installer (preview mode)
             await $`esbuild packages/installer/src/index.ts --bundle '--define:process.env.NODE_ENV="production"' '--define:process.env.COMPILE_MODE="preview"' --format=cjs --minify --keep-names --platform=node --target=node16 --external:fsevents --external:_http_common --outfile=dist/installer/bin/index.js`
-        } else {
+        }
+        else {
             // build installer (default)
             await $`esbuild packages/installer/src/index.ts --bundle '--define:process.env.NODE_ENV="production"' --format=cjs --minify --keep-names --platform=node --target=node16 --external:fsevents --external:_http_common --outfile=dist/installer/bin/index.js`
         }
     }
 
     if (!argv?.ignoreServer) {
-         console.log(chalk.blue('\nBuild :: Local Server\n'))
+        console.log(chalk.blue('\nBuild :: Local Server\n'))
 
         // build server
         await $`esbuild packages/server/src/index.ts --bundle --format=cjs --minify --keep-names --platform=node --target=node16 --external:fsevents --external:@prisma/client --external:amplify-appsync-simulator --external:_http_common --outfile=dist/server/index.js`

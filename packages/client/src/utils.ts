@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-types */
 import { flatten } from 'wild-wild-utils'
 import { isMatch } from 'micromatch'
 import deepmerge from 'deepmerge'
@@ -13,7 +14,7 @@ import xss from 'xss'
  * @returns any
  */
 export function merge(...sources: any[]): any {
-    return deepmerge.all(sources)
+    return deepmerge.all([{}, ...sources])
 }
 
 /**
@@ -179,6 +180,16 @@ export function isUndefined(element: any): boolean {
 }
 
 /**
+ * #### Return true if element is an Array
+ *
+ * @example isArray(element)
+ *
+ * @param {any} element
+ * @returns boolean
+ */
+export const isArray = (val: any): val is any[] => Array.isArray(val)
+
+/**
  * #### Return string with first letter lowercase.
  *
  * @example lowerFirst("PostOffice")
@@ -212,20 +223,22 @@ export function upperFirst(str: string): string {
 /**
  * #### Return true if element is an object
  *
- * @example const isObj = isObject(element)
+ * @example isObject(element)
  *
  * @param {any} element
  * @returns boolean
  */
-export function isObject(element): boolean {
-    return (
-        typeof element === 'object'
-        && !Array.isArray(element)
-        && typeof element !== 'function'
-        && element !== null
-        && !(element instanceof Date)
-    )
-}
+export const isObject = (val: any): val is object => Object.prototype.toString.call(val) === '[object Object]'
+
+/**
+ * #### Return true if element is a function
+ *
+ * @example isFunction(element)
+ *
+ * @param {any} element
+ * @returns boolean
+ */
+export const isFunction = <T extends Function>(val: any): val is T => typeof val === 'function'
 
 /**
  * Applies a mutation function to each key and value of an object recursively.
@@ -235,27 +248,40 @@ export function isObject(element): boolean {
  * @param {Function} fn - Async mutator function, should return an object with potentially new key-value pair.
  * @return {Object} - A new mutated object.
  */
+export async function walk(
+    jsonObj: any,
+    fn: (arg: { key: string; value: any }, node: WalkNode) => Promise<{ key: string; value: any }>,
+) {
+    if (Array.isArray(jsonObj))
+        return await Promise.all(jsonObj.map(async value => await walkObj(value, fn)))
+
+    else if (isObject(jsonObj))
+        return await walkObj(jsonObj, fn)
+
+    else
+        return jsonObj
+}
 async function walkObj(
-    obj: any,
+    jsonObj: any,
     fn: (arg: { key: string; value: any }, node: WalkNode) => Promise<{ key: string; value: any }>,
     node: WalkNode = new WalkNode(),
 ): Promise<any> {
-    const clonedObj = clone(obj)
+    const cloneObj = clone(jsonObj)
     const out: any = {}
-    const keys = Object.keys(clonedObj)
+    const keys = Object.keys(cloneObj)
 
     for (const key of keys) {
-        const newNode = new WalkNode([...node.path, key])
-        let { key: newKey, value: newValue } = await fn({ key, value: clonedObj[key] }, newNode)
+        const newNode = new WalkNode([...node._path, key])
+        let { key: newKey, value: newValue } = await fn({ key, value: cloneObj[key] }, newNode)
 
-        if (newValue && isObject(newValue) && !newNode.ignoreChildren) {
+        if (newValue && isObject(newValue) && !newNode._ignoreChildren) {
             newValue = await walkObj(newValue, fn, newNode)
         }
 
-        else if (newValue && Array.isArray(newValue) && !newNode.ignoreChildren) {
+        else if (newValue && isArray(newValue) && !newNode._ignoreChildren) {
             for (let idx = 0; idx < newValue.length; idx++) {
                 if (newValue[idx] && isObject(newValue[idx]))
-                    newValue[idx] = await walkObj(newValue[idx], fn, new WalkNode([...newNode.path, idx]))
+                    newValue[idx] = await walkObj(newValue[idx], fn, new WalkNode([...newNode._path, idx]))
             }
         }
 
@@ -264,22 +290,14 @@ async function walkObj(
 
     return out
 }
-export async function walk(
-    obj: any,
-    fn: (arg: { key: string; value: any }, node: WalkNode) => Promise<{ key: string; value: any }>,
-): Promise<any> {
-    return Array.isArray(obj)
-        ? await Promise.all(obj.map(async value => await walkObj(value, fn)))
-        : await walkObj(obj, fn)
-}
 class WalkNode {
-    constructor(public path: (string | number)[] = [], public ignoreChildren: boolean = false) {
-        this.path = path
-        this.ignoreChildren = ignoreChildren
+    constructor(public _path: (string | number)[] = [], public _ignoreChildren: boolean = false) {
+        this._path = _path
+        this._ignoreChildren = _ignoreChildren
     }
 
-    ignoreChilds() { this.ignoreChildren = true }
-    getPath() { return this.path }
+    ignoreChilds() { this._ignoreChildren = true }
+    getPath() { return this._path }
 }
 
 /**
@@ -311,13 +329,32 @@ export function replaceAll(str: string, findArray: string[], replaceArray: strin
 }
 
 /**
- * #### Return unique array
+ * #### Creates a duplicate-free version of an array
  *
- * @example unique(['a', 'b', 'a'])
+ * @example uniq(['a', 'b', 'a'])
  *
  * @param {any[]} array
  * @returns any[]
  */
-export function unique(array: Iterable<any> | null | undefined): any[] {
-    return [...new Set(array)]
+export function uniq<T>(array: readonly T[]): T[] {
+    return Array.from(new Set(array))
+}
+
+/**
+ * #### Creates a duplicate-free version of an array using iteratee
+ *
+ * @category Array
+ */
+export function uniqBy<T>(array: readonly T[], iteratee: keyof T | ((a: any) => any)): T[] {
+    return array.reduce((acc: T[], cur: any) => {
+        const computed = isFunction(iteratee)
+        const index = acc.findIndex((item: any) =>
+            computed
+                ? iteratee(item) === iteratee(cur)
+                : typeof cur?.[iteratee] !== 'undefined' && item?.[iteratee] === cur?.[iteratee],
+        )
+        if (index === -1)
+            acc.push(cur)
+        return acc
+    }, [])
 }

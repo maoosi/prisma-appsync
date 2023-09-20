@@ -1,5 +1,5 @@
 import type { Action } from './types'
-import { unique } from './utils'
+import { uniq } from './utils'
 
 // Enums
 
@@ -108,7 +108,7 @@ export const Prisma_JSONFilters = [
     'path', 'string_contains', 'string_starts_with', 'string_ends_with', 'array_contains', 'array_starts_with', 'array_ends_with',
 ]
 
-export const Prisma_ReservedKeysForPaths = unique([
+export const Prisma_ReservedKeysForPaths = uniq([
     ...Prisma_QueryOptions,
     ...Prisma_FilterConditionsAndOperatos,
     ...Prisma_FilterRelationFilters,
@@ -117,7 +117,7 @@ export const Prisma_ReservedKeysForPaths = unique([
     ...Prisma_JSONFilters,
 ])
 
-export const Prisma_ReservedKeys = unique([
+export const Prisma_ReservedKeys = uniq([
     ...Prisma_QueryOptions,
     ...Prisma_NestedQueries,
     ...Prisma_FilterConditionsAndOperatos,

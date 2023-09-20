@@ -8,7 +8,7 @@ import {
     lowerFirst,
     merge,
     objectToPaths,
-    unique,
+    uniq,
     walk,
 } from './utils'
 import type {
@@ -113,7 +113,7 @@ export async function addNullables(data: any): Promise<any> {
             node.ignoreChilds()
         }
         else if (value && isObject(value) && Object.keys(value).includes('isNull')) {
-            const { isNull, ...val } = value
+            const { isNull, ...val } = value as any
 
             if (isNull === true)
                 value = { ...val, equals: null }
@@ -583,7 +583,7 @@ export function getPaths({
         }
     })
 
-    return unique(
+    return uniq(
         paths.map(
             (path: string) => path
                 .split('/')

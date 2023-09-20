@@ -32,6 +32,12 @@ export type InjectedConfig = {
     operations?: string
 }
 
+export type RuntimeConfig = {
+    modelsMapping: { [modelVariant: string]: { prismaRef: string; singular: string; plural: string } }
+    fieldsMapping: { [fieldPath: string]: { type: string; isRelation: boolean } }
+    operations: string[]
+}
+
 export type Action = typeof Actions[keyof typeof Actions] | string
 
 export type ActionsAlias = typeof ActionsAliases[keyof typeof ActionsAliases] | 'custom' | null

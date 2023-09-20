@@ -1,10 +1,10 @@
 /* eslint-disable no-console */
 // Dependencies
 import { generatorHandler } from '@prisma/generator-helper'
-import { PrismaAppSyncCompiler } from './compiler'
+import PrismaAppSyncGenerator from './generator'
 
 // Read Prisma AppSync version
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
 const generatorVersion = require('../../../package.json').version
 
 // Prisma AppSync Generator Handler
@@ -42,28 +42,27 @@ generatorHandler({
                     })
                 }
 
-                // Init compiler with user options
-                const compiler = new PrismaAppSyncCompiler(options.dmmf, {
-                    schemaPath: options.schemaPath,
-                    outputDir,
-                    defaultDirective: options?.generator?.config?.defaultDirective || String(),
-                    previewFeatures,
-                    debug,
+                // Initiate generator
+                const generator = new PrismaAppSyncGenerator({
+                    outputDir, // output directory
+                    prismaDmmf: options.dmmf, // prisma dmmf object
+                    prismaSchemaPath: options.schemaPath, // prisma schema path
+                    userGraphQLPath: options.generator?.config?.extendSchema, // user gql path
+                    userResolversPath: options.generator?.config?.extendResolvers, // user resolvers path
+                    defaultDirective: options?.generator?.config?.defaultDirective, // default directive(s)
                 })
 
-                console.log('[Prisma-AppSync] Generating client.')
+                // Make appsync schema
+                console.log('[Prisma-AppSync] Generating AppSync Schema.')
+                await generator.makeAppSyncSchema()
 
-                // Generate client
-                await compiler.makeClient()
-                console.log('[Prisma-AppSync] Generating schema.')
+                // Make appsync resolvers
+                console.log('[Prisma-AppSync] Generating AppSync Resolvers.')
+                await generator.makeAppSyncResolvers()
 
-                // Generate schema
-                await compiler.makeSchema(options.generator.config.extendSchema)
-                console.log('[Prisma-AppSync] Generating resolvers.')
-
-                // Generate resolvers
-                await compiler.makeResolvers(options.generator.config.extendResolvers)
-                console.log('[Prisma-AppSync] Generating models mapping.')
+                // Make client config
+                console.log('[Prisma-AppSync] Generating Client Runtime Config.')
+                await generator.makeClientRuntimeConfig()
             }
             catch (e) {
                 console.error('Error: unable to compile files for Prisma AppSync Generator')
