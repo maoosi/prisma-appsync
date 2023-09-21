@@ -1196,6 +1196,17 @@ export default class SchemaBuilder {
                 type = 'Boolean'
             else if (lowerType === 'string')
                 type = 'String'
+
+            if (type === 'String') {
+                switch (field.name.toLocaleLowerCase()) {
+                    case 'email':
+                        type = 'AWSEmail'
+                        break
+                    case 'url':
+                        type = 'AWSURL'
+                        break
+                }
+            }
         }
 
         else if (field.kind === 'enum') {
