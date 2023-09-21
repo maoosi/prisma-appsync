@@ -31,15 +31,22 @@ export default class SchemaBuilder {
         this.createEnumsInputs(dmmf.datamodel)
         this.createEnumsTypes(dmmf.datamodel)
 
+        // parse all models
+        const models: ParsedModel[] = dmmf.datamodel?.models
+            ?.map(modelDMMF => this.parseModelDMMF(modelDMMF, options)) || []
+
         // schema models
         dmmf.datamodel?.models.forEach((modelDMMF: DMMF.Model) => {
-            const model = this.parseModelDMMF(modelDMMF, options)
+            const model = models
+                .find(m => m.singular === modelDMMF.name)
 
-            this.createModelTypes(model)
-            this.createModelInputs(model)
-            this.createModelQueries(model)
-            this.createModelMutations(model)
-            this.createModelSubscriptions(model)
+            if (model) {
+                this.createModelTypes(model)
+                this.createModelInputs(model, models)
+                this.createModelQueries(model)
+                this.createModelMutations(model)
+                this.createModelSubscriptions(model)
+            }
         })
 
         // return appsync gql schema (string)
@@ -635,11 +642,11 @@ export default class SchemaBuilder {
                     scalar: model.getScalar(field),
                 }
             }),
-            directives: model?.directives?.get('model'),
+            directives: model?.directives?.getGQLDirectives('model'),
         })
     }
 
-    private createModelInputs(model: ParsedModel) {
+    private createModelInputs(model: ParsedModel, allModels: ParsedModel[]) {
         model.gqlFields?.uniqueComposites?.forEach((uniqueComposite) => {
             this.inputs.push({
                 name: uniqueComposite.scalar,
@@ -726,17 +733,25 @@ export default class SchemaBuilder {
                         ? `${model.singular}${upperFirst(plural(field.name))}CreateNestedInput`
                         : `${model.singular}${upperFirst(field.name)}CreateNestedInput`
 
-                    const fields = field.isList
-                        ? [
-                                { name: 'create', scalar: `[${field.type}CreateInput!]` },
-                                { name: 'connect', scalar: `[${field.type}WhereUniqueInput!]` },
-                                { name: 'connectOrCreate', scalar: `[${field.type}ConnectOrCreateInput!]` },
-                            ]
-                        : [
-                                { name: 'create', scalar: `${field.type}CreateInput` },
-                                { name: 'connect', scalar: `${field.type}WhereUniqueInput` },
-                                { name: 'connectOrCreate', scalar: `${field.type}ConnectOrCreateInput` },
-                            ]
+                    const refModel = allModels.find(m => m.singular === field.type)
+                    const fields: GqlField[] = []
+
+                    if (field.isList) {
+                        fields.push({ name: 'connect', scalar: `[${field.type}WhereUniqueInput!]` })
+
+                        if (refModel?.directives.canOutputGQL('create')) {
+                            fields.push({ name: 'create', scalar: `[${field.type}CreateInput!]` })
+                            fields.push({ name: 'connectOrCreate', scalar: `[${field.type}ConnectOrCreateInput!]` })
+                        }
+                    }
+                    else {
+                        fields.push({ name: 'connect', scalar: `${field.type}WhereUniqueInput` })
+
+                        if (refModel?.directives.canOutputGQL('create')) {
+                            fields.push({ name: 'create', scalar: `${field.type}CreateInput` })
+                            fields.push({ name: 'connectOrCreate', scalar: `${field.type}ConnectOrCreateInput` })
+                        }
+                    }
 
                     return {
                         name,
@@ -757,28 +772,52 @@ export default class SchemaBuilder {
                         ? `${model.singular}${upperFirst(plural(field.name))}UpdateNestedInput`
                         : `${model.singular}${upperFirst(field.name)}UpdateNestedInput`
 
-                    const fields = field.isList
-                        ? [
-                                { name: 'connect', scalar: `[${field.type}WhereUniqueInput!]` },
-                                { name: 'create', scalar: `[${field.type}CreateInput!]` },
-                                { name: 'connectOrCreate', scalar: `[${field.type}ConnectOrCreateInput!]` },
-                                { name: 'update', scalar: `[${field.type}UpdateUniqueInput!]` },
-                                { name: 'upsert', scalar: `[${field.type}UpsertUniqueInput!]` },
-                                { name: 'delete', scalar: `[${field.type}ExtendedWhereUniqueInput!]` },
-                                { name: 'disconnect', scalar: `[${field.type}ExtendedWhereUniqueInput!]` },
-                                { name: 'deleteMany', scalar: `[${field.type}ScalarWhereInput!]` },
-                                { name: 'set', scalar: `[${field.type}WhereUniqueInput!]` },
-                                { name: 'updateMany', scalar: `[${field.type}UpdateManyInput!]` },
-                            ]
-                        : [
-                                { name: 'connect', scalar: `${field.type}WhereUniqueInput` },
-                                { name: 'create', scalar: `${field.type}CreateInput` },
-                                { name: 'connectOrCreate', scalar: `${field.type}ConnectOrCreateInput` },
-                                { name: 'update', scalar: `${field.type}UpdateInput` },
-                                { name: 'upsert', scalar: `${field.type}UpsertInput` },
-                                { name: 'delete', scalar: 'Boolean' },
-                                { name: 'disconnect', scalar: 'Boolean' },
-                            ]
+                    const refModel = allModels.find(m => m.singular === field.type)
+                    const fields: GqlField[] = []
+
+                    if (field.isList) {
+                        fields.push({ name: 'connect', scalar: `[${field.type}WhereUniqueInput!]` })
+                        fields.push({ name: 'disconnect', scalar: `[${field.type}ExtendedWhereUniqueInput!]` })
+                        fields.push({ name: 'set', scalar: `[${field.type}WhereUniqueInput!]` })
+
+                        if (refModel?.directives.canOutputGQL('create')) {
+                            fields.push({ name: 'create', scalar: `[${field.type}CreateInput!]` })
+                            fields.push({ name: 'connectOrCreate', scalar: `[${field.type}ConnectOrCreateInput!]` })
+                        }
+
+                        if (refModel?.directives.canOutputGQL('update'))
+                            fields.push({ name: 'update', scalar: `[${field.type}UpdateUniqueInput!]` })
+
+                        if (refModel?.directives.canOutputGQL('upsert'))
+                            fields.push({ name: 'upsert', scalar: `[${field.type}UpsertUniqueInput!]` })
+
+                        if (refModel?.directives.canOutputGQL('delete'))
+                            fields.push({ name: 'delete', scalar: `[${field.type}ExtendedWhereUniqueInput!]` })
+
+                        if (refModel?.directives.canOutputGQL('deleteMany'))
+                            fields.push({ name: 'deleteMany', scalar: `[${field.type}ScalarWhereInput!]` })
+
+                        if (refModel?.directives.canOutputGQL('updateMany'))
+                            fields.push({ name: 'updateMany', scalar: `[${field.type}UpdateManyInput!]` })
+                    }
+                    else {
+                        fields.push({ name: 'connect', scalar: `${field.type}WhereUniqueInput` })
+                        fields.push({ name: 'disconnect', scalar: 'Boolean' })
+
+                        if (refModel?.directives.canOutputGQL('create')) {
+                            fields.push({ name: 'create', scalar: `${field.type}CreateInput` })
+                            fields.push({ name: 'connectOrCreate', scalar: `${field.type}ConnectOrCreateInput` })
+                        }
+
+                        if (refModel?.directives.canOutputGQL('update'))
+                            fields.push({ name: 'update', scalar: `${field.type}UpdateInput` })
+
+                        if (refModel?.directives.canOutputGQL('upsert'))
+                            fields.push({ name: 'upsert', scalar: `${field.type}UpsertInput` })
+
+                        if (refModel?.directives.canOutputGQL('delete'))
+                            fields.push({ name: 'delete', scalar: 'Boolean' })
+                    }
 
                     return {
                         name,
@@ -791,344 +830,346 @@ export default class SchemaBuilder {
             this.inputs.push(nestedUpdateInput)
         })
 
-        this.inputs.push({
-            name: `${model.singular}CreateInput`,
-            fields: model.fields
-                ?.filter(field => !field?.isReadOnly)
-                ?.map((field) => {
-                    if (field?.relationName) {
-                        const scalar = field.isList
-                            ? `${model.singular}${upperFirst(plural(field.name))}CreateNestedInput`
-                            : `${model.singular}${upperFirst(field.name)}CreateNestedInput`
-
-                        return {
-                            name: field.name,
-                            scalar: model.getScalar(field, { scalar, required: false, list: false }),
-                        }
-                    }
-                    else {
-                        return {
-                            name: field.name,
-                            scalar: model.getScalar(field, { required: (field.isRequired && !field.default) }),
-                        }
-                    }
-                }) || [],
-        })
-
-        this.inputs.push({
-            name: `${model.singular}CreateManyInput`,
-            fields: model.fields
-                ?.filter(field => !field?.relationName && !field?.isReadOnly)
-                ?.map(field => ({ name: field.name, scalar: model.getScalar(field, { required: (field.isRequired && !field.default) }) })) || [],
-        })
-
-        this.inputs.push({
-            name: `${model.singular}UpdateInput`,
-            fields: model.fields
-                ?.filter(field => !field?.isReadOnly)
-                ?.map((field) => {
-                    if (field?.relationName) {
-                        const scalar = field.isList
-                            ? `${model.singular}${upperFirst(plural(field.name))}UpdateNestedInput`
-                            : `${model.singular}${upperFirst(field.name)}UpdateNestedInput`
-
-                        return {
-                            name: field.name,
-                            scalar: model.getScalar(field, { scalar, required: false, list: false }),
-                        }
-                    }
-                    else {
-                        return { name: field.name, scalar: model.getScalar(field, { required: false }) }
-                    }
-                }) || [],
-        })
-
-        if (model.gqlFields?.operations?.length) {
+        if (model?.directives.canOutputGQL('create')) {
             this.inputs.push({
-                name: `${model.singular}OperationInput`,
-                fields: model.gqlFields.operations,
+                name: `${model.singular}CreateInput`,
+                fields: model.fields
+                    ?.filter(field => !field?.isReadOnly)
+                    ?.map((field) => {
+                        if (field?.relationName) {
+                            const scalar = field.isList
+                                ? `${model.singular}${upperFirst(plural(field.name))}CreateNestedInput`
+                                : `${model.singular}${upperFirst(field.name)}CreateNestedInput`
+
+                            return {
+                                name: field.name,
+                                scalar: model.getScalar(field, { scalar, required: false, list: false }),
+                            }
+                        }
+                        else {
+                            return {
+                                name: field.name,
+                                scalar: model.getScalar(field, { required: (field.isRequired && !field.default) }),
+                            }
+                        }
+                    }) || [],
             })
         }
 
-        this.inputs.push({
-            name: `${model.singular}UpdateUniqueInput`,
-            fields: [
-                { name: 'data', scalar: `${model.singular}UpdateInput!` },
-                { name: 'where', scalar: `${model.singular}ExtendedWhereUniqueInput!` },
-            ],
-        })
+        if (model?.directives.canOutputGQL('createMany')) {
+            this.inputs.push({
+                name: `${model.singular}CreateManyInput`,
+                fields: model.fields
+                    ?.filter(field => !field?.relationName && !field?.isReadOnly)
+                    ?.map(field => ({ name: field.name, scalar: model.getScalar(field, { required: (field.isRequired && !field.default) }) })) || [],
+            })
+        }
 
-        this.inputs.push({
-            name: `${model.singular}UpdateManyInput`,
-            fields: [
-                { name: 'where', scalar: `${model.singular}ScalarWhereInput!` },
-                { name: 'data', scalar: `${model.singular}UpdateInput!` },
-            ],
-        })
+        if (model?.directives.canOutputGQL('update')) {
+            this.inputs.push({
+                name: `${model.singular}UpdateInput`,
+                fields: model.fields
+                    ?.filter(field => !field?.isReadOnly)
+                    ?.map((field) => {
+                        if (field?.relationName) {
+                            const scalar = field.isList
+                                ? `${model.singular}${upperFirst(plural(field.name))}UpdateNestedInput`
+                                : `${model.singular}${upperFirst(field.name)}UpdateNestedInput`
 
-        this.inputs.push({
-            name: `${model.singular}UpsertInput`,
-            fields: [
-                { name: 'create', scalar: `${model.singular}CreateInput!` },
-                { name: 'update', scalar: `${model.singular}UpdateInput!` },
-            ],
-        })
+                            return {
+                                name: field.name,
+                                scalar: model.getScalar(field, { scalar, required: false, list: false }),
+                            }
+                        }
+                        else {
+                            return { name: field.name, scalar: model.getScalar(field, { required: false }) }
+                        }
+                    }) || [],
+            })
 
-        this.inputs.push({
-            name: `${model.singular}UpsertUniqueInput`,
-            fields: [
-                { name: 'where', scalar: `${model.singular}ExtendedWhereUniqueInput!` },
-                { name: 'create', scalar: `${model.singular}CreateInput!` },
-                { name: 'update', scalar: `${model.singular}UpdateInput!` },
-            ],
-        })
+            if (model.gqlFields?.operations?.length) {
+                this.inputs.push({
+                    name: `${model.singular}OperationInput`,
+                    fields: model.gqlFields.operations,
+                })
+            }
 
-        this.inputs.push({
-            name: `${model.singular}ConnectOrCreateInput`,
-            fields: [
-                { name: 'where', scalar: `${model.singular}WhereUniqueInput!` },
-                { name: 'create', scalar: `${model.singular}CreateInput!` },
-            ],
-        })
+            this.inputs.push({
+                name: `${model.singular}UpdateUniqueInput`,
+                fields: [
+                    { name: 'data', scalar: `${model.singular}UpdateInput!` },
+                    { name: 'where', scalar: `${model.singular}ExtendedWhereUniqueInput!` },
+                ],
+            })
+        }
+
+        if (model?.directives.canOutputGQL('updateMany')) {
+            this.inputs.push({
+                name: `${model.singular}UpdateManyInput`,
+                fields: [
+                    { name: 'where', scalar: `${model.singular}ScalarWhereInput!` },
+                    { name: 'data', scalar: `${model.singular}UpdateInput!` },
+                ],
+            })
+        }
+
+        if (model?.directives.canOutputGQL('upsert')) {
+            this.inputs.push({
+                name: `${model.singular}UpsertInput`,
+                fields: [
+                    { name: 'create', scalar: `${model.singular}CreateInput!` },
+                    { name: 'update', scalar: `${model.singular}UpdateInput!` },
+                ],
+            })
+
+            this.inputs.push({
+                name: `${model.singular}UpsertUniqueInput`,
+                fields: [
+                    { name: 'where', scalar: `${model.singular}ExtendedWhereUniqueInput!` },
+                    { name: 'create', scalar: `${model.singular}CreateInput!` },
+                    { name: 'update', scalar: `${model.singular}UpdateInput!` },
+                ],
+            })
+        }
+
+        if (model?.directives.canOutputGQL('create')) {
+            this.inputs.push({
+                name: `${model.singular}ConnectOrCreateInput`,
+                fields: [
+                    { name: 'where', scalar: `${model.singular}WhereUniqueInput!` },
+                    { name: 'create', scalar: `${model.singular}CreateInput!` },
+                ],
+            })
+        }
     }
 
     private createModelQueries(model: ParsedModel) {
-        if (!(model?.directives?.gql?.model === null || model?.directives?.gql?.queries === null)) {
-            // get
-            if (!(model?.directives?.gql?.queries?.get === null)) {
-                this.queries.push({
-                    name: model?.directives?.gql?.queries?.get || `get${model.singular}`,
-                    comment: `Find a single ${model.singular} record by unique identifier.`,
-                    args: [
-                        { name: 'where', scalar: `${model.singular}ExtendedWhereUniqueInput!` },
-                    ],
-                    scalar: `${model.singular}`,
-                    directives: model?.directives?.get('get'),
-                })
-            }
+        // get
+        if (model?.directives.canOutputGQL('get')) {
+            this.queries.push({
+                name: model?.directives?.gql?.queries?.get || `get${model.singular}`,
+                comment: `Find a single ${model.singular} record by unique identifier.`,
+                args: [
+                    { name: 'where', scalar: `${model.singular}ExtendedWhereUniqueInput!` },
+                ],
+                scalar: `${model.singular}`,
+                directives: model?.directives?.getGQLDirectives('get'),
+            })
+        }
 
-            // list
-            if (!(model?.directives?.gql?.queries?.list === null)) {
-                this.queries.push({
-                    name: model?.directives?.gql?.queries?.list || `list${model.plural}`,
-                    args: [
-                        { name: 'where', scalar: `${model.singular}WhereInput` },
-                        { name: 'orderBy', scalar: `[${model.singular}OrderByInput!]` },
-                        { name: 'skip', scalar: 'Int' },
-                        { name: 'take', scalar: 'Int' },
-                    ],
-                    scalar: `[${model.singular}!]`,
-                    directives: model?.directives?.get('list'),
-                })
-            }
+        // list
+        if (model?.directives.canOutputGQL('list')) {
+            this.queries.push({
+                name: model?.directives?.gql?.queries?.list || `list${model.plural}`,
+                args: [
+                    { name: 'where', scalar: `${model.singular}WhereInput` },
+                    { name: 'orderBy', scalar: `[${model.singular}OrderByInput!]` },
+                    { name: 'skip', scalar: 'Int' },
+                    { name: 'take', scalar: 'Int' },
+                ],
+                scalar: `[${model.singular}!]`,
+                directives: model?.directives?.getGQLDirectives('list'),
+            })
+        }
 
-            // count
-            if (!(model?.directives?.gql?.queries?.count === null)) {
-                this.queries.push({
-                    name: model?.directives?.gql?.queries?.count || `count${model.plural}`,
-                    args: [
-                        { name: 'where', scalar: `${model.singular}WhereInput` },
-                        { name: 'orderBy', scalar: `[${model.singular}OrderByInput!]` },
-                        { name: 'skip', scalar: 'Int' },
-                        { name: 'take', scalar: 'Int' },
-                    ],
-                    scalar: 'Int!',
-                    directives: model?.directives?.get('count'),
-                })
-            }
+        // count
+        if (model?.directives.canOutputGQL('count')) {
+            this.queries.push({
+                name: model?.directives?.gql?.queries?.count || `count${model.plural}`,
+                args: [
+                    { name: 'where', scalar: `${model.singular}WhereInput` },
+                    { name: 'orderBy', scalar: `[${model.singular}OrderByInput!]` },
+                    { name: 'skip', scalar: 'Int' },
+                    { name: 'take', scalar: 'Int' },
+                ],
+                scalar: 'Int!',
+                directives: model?.directives?.getGQLDirectives('count'),
+            })
         }
     }
 
     private createModelMutations(model: ParsedModel) {
-        if (!(model?.directives?.gql?.model === null || model?.directives?.gql?.mutations === null)) {
-            // create
-            if (!(model?.directives?.gql?.mutations?.create === null)) {
-                this.mutations.push({
-                    name: model?.directives?.gql?.mutations?.create || `create${model.singular}`,
-                    args: [
-                        { name: 'data', scalar: `${model.singular}CreateInput!` },
-                    ],
-                    scalar: `${model.singular}!`,
-                    directives: model?.directives?.get('create'),
-                })
-            }
+        // create
+        if (model?.directives.canOutputGQL('create')) {
+            this.mutations.push({
+                name: model?.directives?.gql?.mutations?.create || `create${model.singular}`,
+                args: [
+                    { name: 'data', scalar: `${model.singular}CreateInput!` },
+                ],
+                scalar: `${model.singular}!`,
+                directives: model?.directives?.getGQLDirectives('create'),
+            })
+        }
 
-            // createMany
-            if (!(model?.directives?.gql?.mutations?.createMany === null)) {
-                this.mutations.push({
-                    name: model?.directives?.gql?.mutations?.createMany || `createMany${model.plural}`,
-                    args: [
-                        { name: 'data', scalar: `[${model.singular}CreateManyInput!]` },
-                        { name: 'skipDuplicates', scalar: 'Boolean' },
-                    ],
-                    scalar: 'BatchPayload!',
-                    directives: model?.directives?.get('createMany'),
-                })
-            }
+        // createMany
+        if (model?.directives.canOutputGQL('createMany')) {
+            this.mutations.push({
+                name: model?.directives?.gql?.mutations?.createMany || `createMany${model.plural}`,
+                args: [
+                    { name: 'data', scalar: `[${model.singular}CreateManyInput!]` },
+                    { name: 'skipDuplicates', scalar: 'Boolean' },
+                ],
+                scalar: 'BatchPayload!',
+                directives: model?.directives?.getGQLDirectives('createMany'),
+            })
+        }
 
-            // update
-            if (!(model?.directives?.gql?.mutations?.update === null)) {
-                this.mutations.push({
-                    name: model?.directives?.gql?.mutations?.update || `update${model.singular}`,
-                    args: [
-                        { name: 'where', scalar: `${model.singular}ExtendedWhereUniqueInput!` },
-                        { name: 'data', scalar: `${model.singular}UpdateInput` },
-                        ...model.gqlFields?.operations?.length ? [{ name: 'operation', scalar: `${model.singular}OperationInput` }] : [],
-                    ],
-                    scalar: `${model.singular}!`,
-                    directives: model?.directives?.get('update'),
-                })
-            }
+        // update
+        if (model?.directives.canOutputGQL('update')) {
+            this.mutations.push({
+                name: model?.directives?.gql?.mutations?.update || `update${model.singular}`,
+                args: [
+                    { name: 'where', scalar: `${model.singular}ExtendedWhereUniqueInput!` },
+                    { name: 'data', scalar: `${model.singular}UpdateInput` },
+                    ...model.gqlFields?.operations?.length ? [{ name: 'operation', scalar: `${model.singular}OperationInput` }] : [],
+                ],
+                scalar: `${model.singular}!`,
+                directives: model?.directives?.getGQLDirectives('update'),
+            })
+        }
 
-            // updateMany
-            if (!(model?.directives?.gql?.mutations?.updateMany === null)) {
-                this.mutations.push({
-                    name: model?.directives?.gql?.mutations?.updateMany || `updateMany${model.plural}`,
-                    args: [
-                        { name: 'where', scalar: `${model.singular}WhereInput!` },
-                        { name: 'data', scalar: `${model.singular}UpdateInput` },
-                        ...model.gqlFields?.operations?.length ? [{ name: 'operation', scalar: `${model.singular}OperationInput` }] : [],
-                    ],
-                    scalar: 'BatchPayload!',
-                    directives: model?.directives?.get('updateMany'),
-                })
-            }
+        // updateMany
+        if (model?.directives.canOutputGQL('updateMany')) {
+            this.mutations.push({
+                name: model?.directives?.gql?.mutations?.updateMany || `updateMany${model.plural}`,
+                args: [
+                    { name: 'where', scalar: `${model.singular}WhereInput!` },
+                    { name: 'data', scalar: `${model.singular}UpdateInput` },
+                    ...model.gqlFields?.operations?.length ? [{ name: 'operation', scalar: `${model.singular}OperationInput` }] : [],
+                ],
+                scalar: 'BatchPayload!',
+                directives: model?.directives?.getGQLDirectives('updateMany'),
+            })
+        }
 
-            // upsert
-            if (!(model?.directives?.gql?.mutations?.upsert === null)) {
-                this.mutations.push({
-                    name: model?.directives?.gql?.mutations?.upsert || `upsert${model.singular}`,
-                    args: [
-                        { name: 'create', scalar: `${model.singular}CreateInput!` },
-                        { name: 'update', scalar: `${model.singular}UpdateInput!` },
-                        { name: 'where', scalar: `${model.singular}ExtendedWhereUniqueInput!` },
-                    ],
-                    scalar: `${model.singular}!`,
-                    directives: model?.directives?.get('upsert'),
-                })
-            }
+        // upsert
+        if (model?.directives.canOutputGQL('upsert')) {
+            this.mutations.push({
+                name: model?.directives?.gql?.mutations?.upsert || `upsert${model.singular}`,
+                args: [
+                    { name: 'create', scalar: `${model.singular}CreateInput!` },
+                    { name: 'update', scalar: `${model.singular}UpdateInput!` },
+                    { name: 'where', scalar: `${model.singular}ExtendedWhereUniqueInput!` },
+                ],
+                scalar: `${model.singular}!`,
+                directives: model?.directives?.getGQLDirectives('upsert'),
+            })
+        }
 
-            // delete
-            if (!(model?.directives?.gql?.mutations?.delete === null)) {
-                this.mutations.push({
-                    name: model?.directives?.gql?.mutations?.delete || `delete${model.singular}`,
-                    args: [
-                        { name: 'where', scalar: `${model.singular}ExtendedWhereUniqueInput!` },
-                    ],
-                    scalar: `${model.singular}!`,
-                    directives: model?.directives?.get('delete'),
-                })
-            }
+        // delete
+        if (model?.directives.canOutputGQL('delete')) {
+            this.mutations.push({
+                name: model?.directives?.gql?.mutations?.delete || `delete${model.singular}`,
+                args: [
+                    { name: 'where', scalar: `${model.singular}ExtendedWhereUniqueInput!` },
+                ],
+                scalar: `${model.singular}!`,
+                directives: model?.directives?.getGQLDirectives('delete'),
+            })
+        }
 
-            // deleteMany
-            if (!(model?.directives?.gql?.mutations?.deleteMany === null)) {
-                this.mutations.push({
-                    name: model?.directives?.gql?.mutations?.deleteMany || `deleteMany${model.plural}`,
-                    args: [
-                        { name: 'where', scalar: `${model.singular}WhereInput!` },
-                    ],
-                    scalar: 'BatchPayload!',
-                    directives: model?.directives?.get('deleteMany'),
-                })
-            }
+        // deleteMany
+        if (model?.directives.canOutputGQL('deleteMany')) {
+            this.mutations.push({
+                name: model?.directives?.gql?.mutations?.deleteMany || `deleteMany${model.plural}`,
+                args: [
+                    { name: 'where', scalar: `${model.singular}WhereInput!` },
+                ],
+                scalar: 'BatchPayload!',
+                directives: model?.directives?.getGQLDirectives('deleteMany'),
+            })
         }
     }
 
     private createModelSubscriptions(model: ParsedModel) {
-        if (!(
-            model?.directives?.gql?.model === null
-            || model?.directives?.gql?.subscriptions === null
-            || model?.directives?.gql?.mutations === null
-        )) {
-            // onCreated
-            if (!(model?.directives?.gql?.subscriptions?.onCreated === null)) {
-                this.subscriptions.push({
-                    name: model?.directives?.gql?.subscriptions?.onCreated || `onCreated${model.singular}`,
-                    args: model.gqlFields.whereUniqueInput.slice(0, 8),
-                    scalar: `${model.singular}!`,
-                    directives: [`@aws_subscribe(mutations: ["create${model.singular}"])`, ...model?.directives?.get('onCreated')],
-                })
-            }
+        // onCreated
+        if (model?.directives.canOutputGQL('onCreated')) {
+            this.subscriptions.push({
+                name: model?.directives?.gql?.subscriptions?.onCreated || `onCreated${model.singular}`,
+                args: model.gqlFields.whereUniqueInput.slice(0, 8),
+                scalar: `${model.singular}!`,
+                directives: [`@aws_subscribe(mutations: ["create${model.singular}"])`, ...model?.directives?.getGQLDirectives('onCreated')],
+            })
+        }
 
-            // onUpdated
-            if (!(model?.directives?.gql?.subscriptions?.onUpdated === null)) {
-                this.subscriptions.push({
-                    name: model?.directives?.gql?.subscriptions?.onUpdated || `onUpdated${model.singular}`,
-                    args: model.gqlFields.whereUniqueInput.slice(0, 8),
-                    scalar: `${model.singular}!`,
-                    directives: [`@aws_subscribe(mutations: ["update${model.singular}"])`, ...model?.directives?.get('onUpdated')],
-                })
-            }
+        // onUpdated
+        if (model?.directives.canOutputGQL('onUpdated')) {
+            this.subscriptions.push({
+                name: model?.directives?.gql?.subscriptions?.onUpdated || `onUpdated${model.singular}`,
+                args: model.gqlFields.whereUniqueInput.slice(0, 8),
+                scalar: `${model.singular}!`,
+                directives: [`@aws_subscribe(mutations: ["update${model.singular}"])`, ...model?.directives?.getGQLDirectives('onUpdated')],
+            })
+        }
 
-            // onUpserted
-            if (!(model?.directives?.gql?.subscriptions?.onUpserted === null)) {
-                this.subscriptions.push({
-                    name: model?.directives?.gql?.subscriptions?.onUpserted || `onUpserted${model.singular}`,
-                    args: model.gqlFields.whereUniqueInput.slice(0, 8),
-                    scalar: `${model.singular}!`,
-                    directives: [`@aws_subscribe(mutations: ["upsert${model.singular}"])`, ...model?.directives?.get('onUpserted')],
-                })
-            }
+        // onUpserted
+        if (model?.directives.canOutputGQL('onUpserted')) {
+            this.subscriptions.push({
+                name: model?.directives?.gql?.subscriptions?.onUpserted || `onUpserted${model.singular}`,
+                args: model.gqlFields.whereUniqueInput.slice(0, 8),
+                scalar: `${model.singular}!`,
+                directives: [`@aws_subscribe(mutations: ["upsert${model.singular}"])`, ...model?.directives?.getGQLDirectives('onUpserted')],
+            })
+        }
 
-            // onDeleted
-            if (!(model?.directives?.gql?.subscriptions?.onDeleted === null)) {
-                this.subscriptions.push({
-                    name: model?.directives?.gql?.subscriptions?.onDeleted || `onDeleted${model.singular}`,
-                    args: model.gqlFields.whereUniqueInput.slice(0, 8),
-                    scalar: `${model.singular}!`,
-                    directives: [`@aws_subscribe(mutations: ["delete${model.singular}"])`, ...model?.directives?.get('onDeleted')],
-                })
-            }
+        // onDeleted
+        if (model?.directives.canOutputGQL('onDeleted')) {
+            this.subscriptions.push({
+                name: model?.directives?.gql?.subscriptions?.onDeleted || `onDeleted${model.singular}`,
+                args: model.gqlFields.whereUniqueInput.slice(0, 8),
+                scalar: `${model.singular}!`,
+                directives: [`@aws_subscribe(mutations: ["delete${model.singular}"])`, ...model?.directives?.getGQLDirectives('onDeleted')],
+            })
+        }
 
-            // onMutated
-            if (!(model?.directives?.gql?.subscriptions?.onMutated === null)) {
-                this.subscriptions.push({
-                    name: model?.directives?.gql?.subscriptions?.onMutated || `onMutated${model.singular}`,
-                    args: model.gqlFields.whereUniqueInput.slice(0, 8),
-                    scalar: `${model.singular}!`,
-                    directives: [`@aws_subscribe(mutations: ["create${model.singular}", "update${model.singular}", "upsert${model.singular}", "delete${model.singular}"])`, ...model?.directives?.get('onMutated')],
-                })
-            }
+        // onMutated
+        if (model?.directives.canOutputGQL('onMutated')) {
+            this.subscriptions.push({
+                name: model?.directives?.gql?.subscriptions?.onMutated || `onMutated${model.singular}`,
+                args: model.gqlFields.whereUniqueInput.slice(0, 8),
+                scalar: `${model.singular}!`,
+                directives: [`@aws_subscribe(mutations: ["create${model.singular}", "update${model.singular}", "upsert${model.singular}", "delete${model.singular}"])`, ...model?.directives?.getGQLDirectives('onMutated')],
+            })
+        }
 
-            // onCreatedMany
-            if (!(model?.directives?.gql?.subscriptions?.onCreatedMany === null)) {
-                this.subscriptions.push({
-                    name: model?.directives?.gql?.subscriptions?.onCreatedMany || `onCreatedMany${model.plural}`,
-                    args: [],
-                    scalar: 'BatchPayload!',
-                    directives: [`@aws_subscribe(mutations: ["createMany${model.plural}"])`, ...model?.directives?.get('onCreatedMany')],
-                })
-            }
+        // onCreatedMany
+        if (model?.directives.canOutputGQL('onCreatedMany')) {
+            this.subscriptions.push({
+                name: model?.directives?.gql?.subscriptions?.onCreatedMany || `onCreatedMany${model.plural}`,
+                args: [],
+                scalar: 'BatchPayload!',
+                directives: [`@aws_subscribe(mutations: ["createMany${model.plural}"])`, ...model?.directives?.getGQLDirectives('onCreatedMany')],
+            })
+        }
 
-            // onUpdatedMany
-            if (!(model?.directives?.gql?.subscriptions?.onUpdatedMany === null)) {
-                this.subscriptions.push({
-                    name: model?.directives?.gql?.subscriptions?.onUpdatedMany || `onUpdatedMany${model.plural}`,
-                    args: [],
-                    scalar: 'BatchPayload!',
-                    directives: [`@aws_subscribe(mutations: ["updateMany${model.plural}"])`, ...model?.directives?.get('onUpdatedMany')],
-                })
-            }
+        // onUpdatedMany
+        if (model?.directives.canOutputGQL('onUpdatedMany')) {
+            this.subscriptions.push({
+                name: model?.directives?.gql?.subscriptions?.onUpdatedMany || `onUpdatedMany${model.plural}`,
+                args: [],
+                scalar: 'BatchPayload!',
+                directives: [`@aws_subscribe(mutations: ["updateMany${model.plural}"])`, ...model?.directives?.getGQLDirectives('onUpdatedMany')],
+            })
+        }
 
-            // onDeletedMany
-            if (!(model?.directives?.gql?.subscriptions?.onDeletedMany === null)) {
-                this.subscriptions.push({
-                    name: model?.directives?.gql?.subscriptions?.onDeletedMany || `onDeletedMany${model.plural}`,
-                    args: [],
-                    scalar: 'BatchPayload!',
-                    directives: [`@aws_subscribe(mutations: ["deleteMany${model.plural}"])`, ...model?.directives?.get('onDeletedMany')],
-                })
-            }
+        // onDeletedMany
+        if (model?.directives.canOutputGQL('onDeletedMany')) {
+            this.subscriptions.push({
+                name: model?.directives?.gql?.subscriptions?.onDeletedMany || `onDeletedMany${model.plural}`,
+                args: [],
+                scalar: 'BatchPayload!',
+                directives: [`@aws_subscribe(mutations: ["deleteMany${model.plural}"])`, ...model?.directives?.getGQLDirectives('onDeletedMany')],
+            })
+        }
 
-            // onMutatedMany
-            if (!(model?.directives?.gql?.subscriptions?.onMutatedMany === null)) {
-                this.subscriptions.push({
-                    name: model?.directives?.gql?.subscriptions?.onMutatedMany || `onMutatedMany${model.plural}`,
-                    args: [],
-                    scalar: 'BatchPayload!',
-                    directives: [`@aws_subscribe(mutations: ["createMany${model.plural}", "updateMany${model.plural}", "deleteMany${model.plural}"])`, ...model?.directives?.get('onMutatedMany')],
-                })
-            }
+        // onMutatedMany
+        if (model?.directives.canOutputGQL('onMutatedMany')) {
+            this.subscriptions.push({
+                name: model?.directives?.gql?.subscriptions?.onMutatedMany || `onMutatedMany${model.plural}`,
+                args: [],
+                scalar: 'BatchPayload!',
+                directives: [`@aws_subscribe(mutations: ["createMany${model.plural}", "updateMany${model.plural}", "deleteMany${model.plural}"])`, ...model?.directives?.getGQLDirectives('onMutatedMany')],
+            })
         }
     }
 
@@ -1219,56 +1260,62 @@ export default class SchemaBuilder {
             }).join('\n\n'),
         ].join('\n')
 
-        const queries = [
-            'type Query {',
-            this.queries.map((q) => {
-                const args = q.args.map(arg => `${arg.name}: ${arg.scalar}`)
-                return [
-                    q?.comment ? `# ${q.comment}` : '',
-                    [
-                        q.name,
-                        args?.length ? `(\n${args.join(',\n')}\n)` : '',
+        const queries = this.queries?.length
+            ? [
+                    'type Query {',
+                    this.queries.map((q) => {
+                        const args = q.args.map(arg => `${arg.name}: ${arg.scalar}`)
+                        return [
+                            q?.comment ? `# ${q.comment}` : '',
+                            [
+                                q.name,
+                                args?.length ? `(\n${args.join(',\n')}\n)` : '',
                         `: ${q.scalar}`,
                         q?.directives?.join(' '),
-                    ].filter(Boolean).join(''),
-                ].filter(Boolean).join('\n')
-            }).join('\n\n'),
-            '}',
-        ].join('\n')
+                            ].filter(Boolean).join(''),
+                        ].filter(Boolean).join('\n')
+                    }).join('\n\n'),
+                    '}',
+                ].join('\n')
+            : ''
 
-        const mutations = [
-            'type Mutation {',
-            this.mutations.map((m) => {
-                const args = m.args.map(arg => `${arg.name}: ${arg.scalar}`)
-                return [
-                    m?.comment ? `# ${m.comment}` : '',
-                    [
-                        m.name,
-                        args?.length ? `(\n${args.join(',\n')}\n)` : '',
+        const mutations = this.mutations?.length
+            ? [
+                    'type Mutation {',
+                    this.mutations.map((m) => {
+                        const args = m.args.map(arg => `${arg.name}: ${arg.scalar}`)
+                        return [
+                            m?.comment ? `# ${m.comment}` : '',
+                            [
+                                m.name,
+                                args?.length ? `(\n${args.join(',\n')}\n)` : '',
                         `: ${m.scalar}`,
                         m?.directives?.join(' '),
-                    ].filter(Boolean).join(''),
-                ].filter(Boolean).join('\n')
-            }).join('\n\n'),
-            '}',
-        ].join('\n')
+                            ].filter(Boolean).join(''),
+                        ].filter(Boolean).join('\n')
+                    }).join('\n\n'),
+                    '}',
+                ].join('\n')
+            : ''
 
-        const subscriptions = [
-            'type Subscription {',
-            this.subscriptions.map((s) => {
-                const args = s.args.map(arg => `${arg.name}: ${arg.scalar}`)
-                return [
-                    s?.comment ? `# ${s.comment}` : '',
-                    [
-                        s.name,
-                        args?.length ? `(\n${args.join(',\n')}\n)` : '',
+        const subscriptions = this.subscriptions?.length
+            ? [
+                    'type Subscription {',
+                    this.subscriptions.map((s) => {
+                        const args = s.args.map(arg => `${arg.name}: ${arg.scalar}`)
+                        return [
+                            s?.comment ? `# ${s.comment}` : '',
+                            [
+                                s.name,
+                                args?.length ? `(\n${args.join(',\n')}\n)` : '',
                         `: ${s.scalar}`,
                         s.directives.join(' '),
-                    ].filter(Boolean).join(''),
-                ].filter(Boolean).join('\n')
-            }).join('\n\n'),
-            '}',
-        ].join('\n')
+                            ].filter(Boolean).join(''),
+                        ].filter(Boolean).join('\n')
+                    }).join('\n\n'),
+                    '}',
+                ].join('\n')
+            : ''
 
         const doc = [
             types,

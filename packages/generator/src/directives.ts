@@ -1,6 +1,33 @@
 import { merge, replaceAll, uniq } from '@client/utils'
 import type { DMMF } from '@prisma/generator-helper'
 
+const actionsMapping = {
+    // queries
+    get: 'queries',
+    list: 'queries',
+    count: 'queries',
+
+    // mutations
+    create: 'mutations',
+    createMany: 'mutations',
+    update: 'mutations',
+    updateMany: 'mutations',
+    upsert: 'mutations',
+    delete: 'mutations',
+    deleteMany: 'mutations',
+
+    // subscriptions
+    onCreated: 'subscriptions',
+    onUpdated: 'subscriptions',
+    onUpserted: 'subscriptions',
+    onDeleted: 'subscriptions',
+    onMutated: 'subscriptions',
+    onCreatedMany: 'subscriptions',
+    onUpdatedMany: 'subscriptions',
+    onMutatedMany: 'subscriptions',
+    onDeletedMany: 'subscriptions',
+} as const
+
 export function parseDirectives(modelDMMF: DMMF.Model, doc: string): Directives {
     let gql: DirectiveGql = {}
     let auth: DirectiveAuth = {}
@@ -34,13 +61,58 @@ export function parseDirectives(modelDMMF: DMMF.Model, doc: string): Directives 
     return {
         auth,
         gql,
-        get: (action: Action | 'model') => {
-            return getAppSyncDirectives(modelDMMF, action, { gql, auth })
+        getGQLDirectives: (action: Action | 'model') => {
+            return getGQLDirectives(modelDMMF, action, { gql, auth })
+        },
+        canOutputGQL: (action: Action) => {
+            return canOutputGQL(modelDMMF, action, { gql, auth })
         },
     }
 }
 
-function getAppSyncDirectives(
+function canOutputGQL(
+    modelDMMF: DMMF.Model,
+    action: Action,
+    directives: {
+        gql: DirectiveGql
+        auth: DirectiveAuth
+    },
+): boolean {
+    let can = false
+
+    /**
+     * Cascading rules:
+     *
+     *  - Disabling model [cascade] on all queries, mutations and subscriptions
+     *  - Disabling queries, mutations, or subscription [cascade] on all related operations
+     *  - Disabling update [cascade] on upsert
+     *  - Disabling create [cascade] on upsert
+     *  - Disabling mutations [cascade] on subscriptions
+     */
+
+    const actionGroup = actionsMapping?.[action]
+
+    if (actionGroup === 'queries') {
+        can = !(directives?.gql?.model === null || directives?.gql?.queries === null) && !(directives?.gql?.queries?.[action] === null)
+    }
+    else if (actionGroup === 'mutations' && action === 'upsert') {
+        can = !(directives?.gql?.model === null || directives?.gql?.mutations === null) && !(directives?.gql?.mutations?.[action] === null) && !(directives?.gql?.mutations?.create === null) && !(directives?.gql?.mutations?.update === null)
+    }
+    else if (actionGroup === 'mutations') {
+        can = !(directives?.gql?.model === null || directives?.gql?.mutations === null) && !(directives?.gql?.mutations?.[action] === null)
+    }
+    else if (actionGroup === 'subscriptions') {
+        can = !(
+            directives?.gql?.model === null
+            || directives?.gql?.subscriptions === null
+            || directives?.gql?.mutations === null
+        ) && !(directives?.gql?.subscriptions?.[action] === null)
+    }
+
+    return can
+}
+
+function getGQLDirectives(
     modelDMMF: DMMF.Model,
     action: Action | 'model',
     directives: {
@@ -48,33 +120,6 @@ function getAppSyncDirectives(
         auth: DirectiveAuth
     },
 ): string[] {
-    const actionsMapping = {
-        // queries
-        get: 'queries',
-        list: 'queries',
-        count: 'queries',
-
-        // mutations
-        create: 'mutations',
-        createMany: 'mutations',
-        update: 'mutations',
-        updateMany: 'mutations',
-        upsert: 'mutations',
-        delete: 'mutations',
-        deleteMany: 'mutations',
-
-        // subscriptions
-        onCreated: 'subscriptions',
-        onUpdated: 'subscriptions',
-        onUpserted: 'subscriptions',
-        onDeleted: 'subscriptions',
-        onMutated: 'subscriptions',
-        onCreatedMany: 'subscriptions',
-        onUpdatedMany: 'subscriptions',
-        onMutatedMany: 'subscriptions',
-        onDeletedMany: 'subscriptions',
-    } as const
-
     const actionGroup = actionsMapping?.[action]
 
     let authDirectives: Authz[] = []
@@ -128,7 +173,8 @@ export type Action = 'get' | 'list' | 'count' | 'create' | 'createMany' | 'updat
 export type Directives = {
     gql: DirectiveGql
     auth: DirectiveAuth
-    get: (action: Action | 'model') => string[]
+    getGQLDirectives: (action: Action | 'model') => string[]
+    canOutputGQL: (action: Action) => boolean
 }
 
 type Authz = {
