@@ -947,7 +947,7 @@ export default class SchemaBuilder {
         // get
         if (model?.directives.canOutputGQL('get')) {
             this.queries.push({
-                name: model?.directives?.gql?.queries?.get || `get${model.singular}`,
+                name: `get${model.singular}`,
                 comment: `Find a single ${model.singular} record by unique identifier.`,
                 args: [
                     { name: 'where', scalar: `${model.singular}ExtendedWhereUniqueInput!` },
@@ -960,7 +960,7 @@ export default class SchemaBuilder {
         // list
         if (model?.directives.canOutputGQL('list')) {
             this.queries.push({
-                name: model?.directives?.gql?.queries?.list || `list${model.plural}`,
+                name: `list${model.plural}`,
                 args: [
                     { name: 'where', scalar: `${model.singular}WhereInput` },
                     { name: 'orderBy', scalar: `[${model.singular}OrderByInput!]` },
@@ -975,7 +975,7 @@ export default class SchemaBuilder {
         // count
         if (model?.directives.canOutputGQL('count')) {
             this.queries.push({
-                name: model?.directives?.gql?.queries?.count || `count${model.plural}`,
+                name: `count${model.plural}`,
                 args: [
                     { name: 'where', scalar: `${model.singular}WhereInput` },
                     { name: 'orderBy', scalar: `[${model.singular}OrderByInput!]` },
@@ -992,7 +992,7 @@ export default class SchemaBuilder {
         // create
         if (model?.directives.canOutputGQL('create')) {
             this.mutations.push({
-                name: model?.directives?.gql?.mutations?.create || `create${model.singular}`,
+                name: `create${model.singular}`,
                 args: [
                     { name: 'data', scalar: `${model.singular}CreateInput!` },
                 ],
@@ -1004,7 +1004,7 @@ export default class SchemaBuilder {
         // createMany
         if (model?.directives.canOutputGQL('createMany')) {
             this.mutations.push({
-                name: model?.directives?.gql?.mutations?.createMany || `createMany${model.plural}`,
+                name: `createMany${model.plural}`,
                 args: [
                     { name: 'data', scalar: `[${model.singular}CreateManyInput!]` },
                     { name: 'skipDuplicates', scalar: 'Boolean' },
@@ -1017,7 +1017,7 @@ export default class SchemaBuilder {
         // update
         if (model?.directives.canOutputGQL('update')) {
             this.mutations.push({
-                name: model?.directives?.gql?.mutations?.update || `update${model.singular}`,
+                name: `update${model.singular}`,
                 args: [
                     { name: 'where', scalar: `${model.singular}ExtendedWhereUniqueInput!` },
                     { name: 'data', scalar: `${model.singular}UpdateInput` },
@@ -1031,7 +1031,7 @@ export default class SchemaBuilder {
         // updateMany
         if (model?.directives.canOutputGQL('updateMany')) {
             this.mutations.push({
-                name: model?.directives?.gql?.mutations?.updateMany || `updateMany${model.plural}`,
+                name: `updateMany${model.plural}`,
                 args: [
                     { name: 'where', scalar: `${model.singular}WhereInput!` },
                     { name: 'data', scalar: `${model.singular}UpdateInput` },
@@ -1045,7 +1045,7 @@ export default class SchemaBuilder {
         // upsert
         if (model?.directives.canOutputGQL('upsert')) {
             this.mutations.push({
-                name: model?.directives?.gql?.mutations?.upsert || `upsert${model.singular}`,
+                name: `upsert${model.singular}`,
                 args: [
                     { name: 'create', scalar: `${model.singular}CreateInput!` },
                     { name: 'update', scalar: `${model.singular}UpdateInput!` },
@@ -1059,7 +1059,7 @@ export default class SchemaBuilder {
         // delete
         if (model?.directives.canOutputGQL('delete')) {
             this.mutations.push({
-                name: model?.directives?.gql?.mutations?.delete || `delete${model.singular}`,
+                name: `delete${model.singular}`,
                 args: [
                     { name: 'where', scalar: `${model.singular}ExtendedWhereUniqueInput!` },
                 ],
@@ -1071,7 +1071,7 @@ export default class SchemaBuilder {
         // deleteMany
         if (model?.directives.canOutputGQL('deleteMany')) {
             this.mutations.push({
-                name: model?.directives?.gql?.mutations?.deleteMany || `deleteMany${model.plural}`,
+                name: `deleteMany${model.plural}`,
                 args: [
                     { name: 'where', scalar: `${model.singular}WhereInput!` },
                 ],
@@ -1085,7 +1085,7 @@ export default class SchemaBuilder {
         // onCreated
         if (model?.directives.canOutputGQL('onCreated')) {
             this.subscriptions.push({
-                name: model?.directives?.gql?.subscriptions?.onCreated || `onCreated${model.singular}`,
+                name: `onCreated${model.singular}`,
                 args: model.gqlFields.whereUniqueInput.slice(0, 8),
                 scalar: `${model.singular}!`,
                 directives: [`@aws_subscribe(mutations: ["create${model.singular}"])`, ...model?.directives?.getGQLDirectives('onCreated')],
@@ -1095,7 +1095,7 @@ export default class SchemaBuilder {
         // onUpdated
         if (model?.directives.canOutputGQL('onUpdated')) {
             this.subscriptions.push({
-                name: model?.directives?.gql?.subscriptions?.onUpdated || `onUpdated${model.singular}`,
+                name: `onUpdated${model.singular}`,
                 args: model.gqlFields.whereUniqueInput.slice(0, 8),
                 scalar: `${model.singular}!`,
                 directives: [`@aws_subscribe(mutations: ["update${model.singular}"])`, ...model?.directives?.getGQLDirectives('onUpdated')],
@@ -1105,7 +1105,7 @@ export default class SchemaBuilder {
         // onUpserted
         if (model?.directives.canOutputGQL('onUpserted')) {
             this.subscriptions.push({
-                name: model?.directives?.gql?.subscriptions?.onUpserted || `onUpserted${model.singular}`,
+                name: `onUpserted${model.singular}`,
                 args: model.gqlFields.whereUniqueInput.slice(0, 8),
                 scalar: `${model.singular}!`,
                 directives: [`@aws_subscribe(mutations: ["upsert${model.singular}"])`, ...model?.directives?.getGQLDirectives('onUpserted')],
@@ -1115,7 +1115,7 @@ export default class SchemaBuilder {
         // onDeleted
         if (model?.directives.canOutputGQL('onDeleted')) {
             this.subscriptions.push({
-                name: model?.directives?.gql?.subscriptions?.onDeleted || `onDeleted${model.singular}`,
+                name: `onDeleted${model.singular}`,
                 args: model.gqlFields.whereUniqueInput.slice(0, 8),
                 scalar: `${model.singular}!`,
                 directives: [`@aws_subscribe(mutations: ["delete${model.singular}"])`, ...model?.directives?.getGQLDirectives('onDeleted')],
@@ -1125,7 +1125,7 @@ export default class SchemaBuilder {
         // onMutated
         if (model?.directives.canOutputGQL('onMutated')) {
             this.subscriptions.push({
-                name: model?.directives?.gql?.subscriptions?.onMutated || `onMutated${model.singular}`,
+                name: `onMutated${model.singular}`,
                 args: model.gqlFields.whereUniqueInput.slice(0, 8),
                 scalar: `${model.singular}!`,
                 directives: [`@aws_subscribe(mutations: ["create${model.singular}", "update${model.singular}", "upsert${model.singular}", "delete${model.singular}"])`, ...model?.directives?.getGQLDirectives('onMutated')],
@@ -1135,7 +1135,7 @@ export default class SchemaBuilder {
         // onCreatedMany
         if (model?.directives.canOutputGQL('onCreatedMany')) {
             this.subscriptions.push({
-                name: model?.directives?.gql?.subscriptions?.onCreatedMany || `onCreatedMany${model.plural}`,
+                name: `onCreatedMany${model.plural}`,
                 args: [],
                 scalar: 'BatchPayload!',
                 directives: [`@aws_subscribe(mutations: ["createMany${model.plural}"])`, ...model?.directives?.getGQLDirectives('onCreatedMany')],
@@ -1145,7 +1145,7 @@ export default class SchemaBuilder {
         // onUpdatedMany
         if (model?.directives.canOutputGQL('onUpdatedMany')) {
             this.subscriptions.push({
-                name: model?.directives?.gql?.subscriptions?.onUpdatedMany || `onUpdatedMany${model.plural}`,
+                name: `onUpdatedMany${model.plural}`,
                 args: [],
                 scalar: 'BatchPayload!',
                 directives: [`@aws_subscribe(mutations: ["updateMany${model.plural}"])`, ...model?.directives?.getGQLDirectives('onUpdatedMany')],
@@ -1155,7 +1155,7 @@ export default class SchemaBuilder {
         // onDeletedMany
         if (model?.directives.canOutputGQL('onDeletedMany')) {
             this.subscriptions.push({
-                name: model?.directives?.gql?.subscriptions?.onDeletedMany || `onDeletedMany${model.plural}`,
+                name: `onDeletedMany${model.plural}`,
                 args: [],
                 scalar: 'BatchPayload!',
                 directives: [`@aws_subscribe(mutations: ["deleteMany${model.plural}"])`, ...model?.directives?.getGQLDirectives('onDeletedMany')],
@@ -1165,7 +1165,7 @@ export default class SchemaBuilder {
         // onMutatedMany
         if (model?.directives.canOutputGQL('onMutatedMany')) {
             this.subscriptions.push({
-                name: model?.directives?.gql?.subscriptions?.onMutatedMany || `onMutatedMany${model.plural}`,
+                name: `onMutatedMany${model.plural}`,
                 args: [],
                 scalar: 'BatchPayload!',
                 directives: [`@aws_subscribe(mutations: ["createMany${model.plural}", "updateMany${model.plural}", "deleteMany${model.plural}"])`, ...model?.directives?.getGQLDirectives('onMutatedMany')],
