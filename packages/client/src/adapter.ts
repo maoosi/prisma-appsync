@@ -461,6 +461,7 @@ function getOrderBy(sortObj: any): any {
 function parseOrderBy(orderByInputs: any): any[] {
     const orderByOutput: any = []
     const orderByInputsArray = Array.isArray(orderByInputs) ? orderByInputs : [orderByInputs]
+
     orderByInputsArray.forEach((orderByInput: any) => {
         orderByOutput.push(getOrderBy(orderByInput))
     })

@@ -166,22 +166,10 @@ export class PrismaAppSync {
 
         // Prisma client options
         const prismaLogDef: Prisma.LogDefinition[] = [
-            {
-                emit: 'event',
-                level: 'query',
-            },
-            {
-                emit: 'event',
-                level: 'error',
-            },
-            {
-                emit: 'event',
-                level: 'info',
-            },
-            {
-                emit: 'event',
-                level: 'warn',
-            },
+            { emit: 'event', level: 'query' },
+            { emit: 'event', level: 'error' },
+            { emit: 'event', level: 'info' },
+            { emit: 'event', level: 'warn' },
         ]
 
         // Create new Prisma Client
