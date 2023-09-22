@@ -177,9 +177,9 @@ export default class SchemaBuilder {
                 if (!field?.relationName) {
                     if (field.isList) {
                         if (field.kind === 'enum')
-                            scalar = getScalar(field, { after: 'EnumListFilter', required: false })
+                            scalar = getScalar(field, { after: 'EnumListFilter', required: false, list: false })
                         else
-                            scalar = getScalar(field, { after: 'ListFilter', required: false })
+                            scalar = getScalar(field, { after: 'ListFilter', required: false, list: false })
                     }
                     else {
                         if (field.kind === 'enum')
@@ -639,7 +639,7 @@ export default class SchemaBuilder {
             fields: model.fields.map((field) => {
                 return {
                     name: field.name,
-                    scalar: model.getScalar(field),
+                    scalar: model.getScalar(field, { required: field.isRequired }),
                 }
             }),
             directives: model?.directives?.getGQLDirectives('model'),
@@ -729,10 +729,7 @@ export default class SchemaBuilder {
             model.fields
                 ?.filter(field => !field?.isReadOnly && field?.relationName)
                 ?.map((field) => {
-                    const name = field.isList
-                        ? `${model.singular}${upperFirst(plural(field.name))}CreateNestedInput`
-                        : `${model.singular}${upperFirst(field.name)}CreateNestedInput`
-
+                    const name = `${model.singular}${upperFirst(field.name)}CreateNestedInput`
                     const refModel = allModels.find(m => m.singular === field.type)
                     const fields: GqlField[] = []
 
@@ -768,10 +765,7 @@ export default class SchemaBuilder {
             model.fields
                 ?.filter(field => !field?.isReadOnly && field?.relationName)
                 ?.map((field) => {
-                    const name = field.isList
-                        ? `${model.singular}${upperFirst(plural(field.name))}UpdateNestedInput`
-                        : `${model.singular}${upperFirst(field.name)}UpdateNestedInput`
-
+                    const name = `${model.singular}${upperFirst(field.name)}UpdateNestedInput`
                     const refModel = allModels.find(m => m.singular === field.type)
                     const fields: GqlField[] = []
 
@@ -837,9 +831,7 @@ export default class SchemaBuilder {
                     ?.filter(field => !field?.isReadOnly)
                     ?.map((field) => {
                         if (field?.relationName) {
-                            const scalar = field.isList
-                                ? `${model.singular}${upperFirst(plural(field.name))}CreateNestedInput`
-                                : `${model.singular}${upperFirst(field.name)}CreateNestedInput`
+                            const scalar = `${model.singular}${upperFirst(field.name)}CreateNestedInput`
 
                             return {
                                 name: field.name,
@@ -849,7 +841,7 @@ export default class SchemaBuilder {
                         else {
                             return {
                                 name: field.name,
-                                scalar: model.getScalar(field, { required: (field.isRequired && !field.default) }),
+                                scalar: model.getScalar(field),
                             }
                         }
                     }) || [],
@@ -861,7 +853,10 @@ export default class SchemaBuilder {
                 name: `${model.singular}CreateManyInput`,
                 fields: model.fields
                     ?.filter(field => !field?.relationName && !field?.isReadOnly)
-                    ?.map(field => ({ name: field.name, scalar: model.getScalar(field, { required: (field.isRequired && !field.default) }) })) || [],
+                    ?.map(field => ({
+                        name: field.name,
+                        scalar: model.getScalar(field),
+                    })) || [],
             })
         }
 
@@ -872,9 +867,7 @@ export default class SchemaBuilder {
                     ?.filter(field => !field?.isReadOnly)
                     ?.map((field) => {
                         if (field?.relationName) {
-                            const scalar = field.isList
-                                ? `${model.singular}${upperFirst(plural(field.name))}UpdateNestedInput`
-                                : `${model.singular}${upperFirst(field.name)}UpdateNestedInput`
+                            const scalar = `${model.singular}${upperFirst(field.name)}UpdateNestedInput`
 
                             return {
                                 name: field.name,
@@ -948,7 +941,7 @@ export default class SchemaBuilder {
         if (model?.directives.canOutputGQL('get')) {
             this.queries.push({
                 name: `get${model.singular}`,
-                comment: `Find a single ${model.singular} record by unique identifier.`,
+                comment: `Retrieve a single ${model.singular} record by unique identifier.`,
                 args: [
                     { name: 'where', scalar: `${model.singular}ExtendedWhereUniqueInput!` },
                 ],
@@ -961,6 +954,7 @@ export default class SchemaBuilder {
         if (model?.directives.canOutputGQL('list')) {
             this.queries.push({
                 name: `list${model.plural}`,
+                comment: `Retrieve a list of ${model.plural} records.`,
                 args: [
                     { name: 'where', scalar: `${model.singular}WhereInput` },
                     { name: 'orderBy', scalar: `[${model.singular}OrderByInput!]` },
@@ -976,6 +970,7 @@ export default class SchemaBuilder {
         if (model?.directives.canOutputGQL('count')) {
             this.queries.push({
                 name: `count${model.plural}`,
+                comment: `Count the number of ${model.plural} records.`,
                 args: [
                     { name: 'where', scalar: `${model.singular}WhereInput` },
                     { name: 'orderBy', scalar: `[${model.singular}OrderByInput!]` },
@@ -993,6 +988,7 @@ export default class SchemaBuilder {
         if (model?.directives.canOutputGQL('create')) {
             this.mutations.push({
                 name: `create${model.singular}`,
+                comment: `Create a new ${model.singular} record.`,
                 args: [
                     { name: 'data', scalar: `${model.singular}CreateInput!` },
                 ],
@@ -1005,6 +1001,7 @@ export default class SchemaBuilder {
         if (model?.directives.canOutputGQL('createMany')) {
             this.mutations.push({
                 name: `createMany${model.plural}`,
+                comment: `Create multiple new ${model.plural} records.`,
                 args: [
                     { name: 'data', scalar: `[${model.singular}CreateManyInput!]` },
                     { name: 'skipDuplicates', scalar: 'Boolean' },
@@ -1018,6 +1015,7 @@ export default class SchemaBuilder {
         if (model?.directives.canOutputGQL('update')) {
             this.mutations.push({
                 name: `update${model.singular}`,
+                comment: `Update a single existing ${model.singular} record.`,
                 args: [
                     { name: 'where', scalar: `${model.singular}ExtendedWhereUniqueInput!` },
                     { name: 'data', scalar: `${model.singular}UpdateInput` },
@@ -1032,6 +1030,7 @@ export default class SchemaBuilder {
         if (model?.directives.canOutputGQL('updateMany')) {
             this.mutations.push({
                 name: `updateMany${model.plural}`,
+                comment: `Update multiple existing ${model.plural} records.`,
                 args: [
                     { name: 'where', scalar: `${model.singular}WhereInput!` },
                     { name: 'data', scalar: `${model.singular}UpdateInput` },
@@ -1046,6 +1045,7 @@ export default class SchemaBuilder {
         if (model?.directives.canOutputGQL('upsert')) {
             this.mutations.push({
                 name: `upsert${model.singular}`,
+                comment: `Create a new ${model.singular} record if it does not exist, or updates it if it does.`,
                 args: [
                     { name: 'create', scalar: `${model.singular}CreateInput!` },
                     { name: 'update', scalar: `${model.singular}UpdateInput!` },
@@ -1060,6 +1060,7 @@ export default class SchemaBuilder {
         if (model?.directives.canOutputGQL('delete')) {
             this.mutations.push({
                 name: `delete${model.singular}`,
+                comment: `Delete a single existing ${model.singular} record.`,
                 args: [
                     { name: 'where', scalar: `${model.singular}ExtendedWhereUniqueInput!` },
                 ],
@@ -1072,6 +1073,7 @@ export default class SchemaBuilder {
         if (model?.directives.canOutputGQL('deleteMany')) {
             this.mutations.push({
                 name: `deleteMany${model.plural}`,
+                comment: `Delete multiple existing ${model.plural} records.`,
                 args: [
                     { name: 'where', scalar: `${model.singular}WhereInput!` },
                 ],
@@ -1086,6 +1088,7 @@ export default class SchemaBuilder {
         if (model?.directives.canOutputGQL('onCreated')) {
             this.subscriptions.push({
                 name: `onCreated${model.singular}`,
+                comment: `Event triggered when a new ${model.singular} record is created.`,
                 args: model.gqlFields.whereUniqueInput.slice(0, 8),
                 scalar: `${model.singular}!`,
                 directives: [`@aws_subscribe(mutations: ["create${model.singular}"])`, ...model?.directives?.getGQLDirectives('onCreated')],
@@ -1096,6 +1099,7 @@ export default class SchemaBuilder {
         if (model?.directives.canOutputGQL('onUpdated')) {
             this.subscriptions.push({
                 name: `onUpdated${model.singular}`,
+                comment: `Event triggered when an existing ${model.singular} record is updated.`,
                 args: model.gqlFields.whereUniqueInput.slice(0, 8),
                 scalar: `${model.singular}!`,
                 directives: [`@aws_subscribe(mutations: ["update${model.singular}"])`, ...model?.directives?.getGQLDirectives('onUpdated')],
@@ -1106,6 +1110,7 @@ export default class SchemaBuilder {
         if (model?.directives.canOutputGQL('onUpserted')) {
             this.subscriptions.push({
                 name: `onUpserted${model.singular}`,
+                comment: `Event triggered when a ${model.singular} record is either created or updated.`,
                 args: model.gqlFields.whereUniqueInput.slice(0, 8),
                 scalar: `${model.singular}!`,
                 directives: [`@aws_subscribe(mutations: ["upsert${model.singular}"])`, ...model?.directives?.getGQLDirectives('onUpserted')],
@@ -1116,6 +1121,7 @@ export default class SchemaBuilder {
         if (model?.directives.canOutputGQL('onDeleted')) {
             this.subscriptions.push({
                 name: `onDeleted${model.singular}`,
+                comment: `Event triggered when an existing ${model.singular} record is deleted.`,
                 args: model.gqlFields.whereUniqueInput.slice(0, 8),
                 scalar: `${model.singular}!`,
                 directives: [`@aws_subscribe(mutations: ["delete${model.singular}"])`, ...model?.directives?.getGQLDirectives('onDeleted')],
@@ -1126,6 +1132,7 @@ export default class SchemaBuilder {
         if (model?.directives.canOutputGQL('onMutated')) {
             this.subscriptions.push({
                 name: `onMutated${model.singular}`,
+                comment: `Event triggered when a ${model.singular} record is either created, updated, or deleted.`,
                 args: model.gqlFields.whereUniqueInput.slice(0, 8),
                 scalar: `${model.singular}!`,
                 directives: [`@aws_subscribe(mutations: ["create${model.singular}", "update${model.singular}", "upsert${model.singular}", "delete${model.singular}"])`, ...model?.directives?.getGQLDirectives('onMutated')],
@@ -1136,6 +1143,7 @@ export default class SchemaBuilder {
         if (model?.directives.canOutputGQL('onCreatedMany')) {
             this.subscriptions.push({
                 name: `onCreatedMany${model.plural}`,
+                comment: `Event triggered when multiple new ${model.plural} records are created.`,
                 args: [],
                 scalar: 'BatchPayload!',
                 directives: [`@aws_subscribe(mutations: ["createMany${model.plural}"])`, ...model?.directives?.getGQLDirectives('onCreatedMany')],
@@ -1146,6 +1154,7 @@ export default class SchemaBuilder {
         if (model?.directives.canOutputGQL('onUpdatedMany')) {
             this.subscriptions.push({
                 name: `onUpdatedMany${model.plural}`,
+                comment: `Event triggered when multiple existing ${model.plural} records are updated.`,
                 args: [],
                 scalar: 'BatchPayload!',
                 directives: [`@aws_subscribe(mutations: ["updateMany${model.plural}"])`, ...model?.directives?.getGQLDirectives('onUpdatedMany')],
@@ -1156,6 +1165,7 @@ export default class SchemaBuilder {
         if (model?.directives.canOutputGQL('onDeletedMany')) {
             this.subscriptions.push({
                 name: `onDeletedMany${model.plural}`,
+                comment: `Event triggered when multiple existing ${model.plural} records are deleted.`,
                 args: [],
                 scalar: 'BatchPayload!',
                 directives: [`@aws_subscribe(mutations: ["deleteMany${model.plural}"])`, ...model?.directives?.getGQLDirectives('onDeletedMany')],
@@ -1166,6 +1176,7 @@ export default class SchemaBuilder {
         if (model?.directives.canOutputGQL('onMutatedMany')) {
             this.subscriptions.push({
                 name: `onMutatedMany${model.plural}`,
+                comment: `Event triggered when multiple ${model.plural} records are either created, updated, or deleted.`,
                 args: [],
                 scalar: 'BatchPayload!',
                 directives: [`@aws_subscribe(mutations: ["createMany${model.plural}", "updateMany${model.plural}", "deleteMany${model.plural}"])`, ...model?.directives?.getGQLDirectives('onMutatedMany')],
@@ -1174,8 +1185,16 @@ export default class SchemaBuilder {
     }
 
     private getFieldScalar(field: DMMF.Field, inject?: FieldScalarOptions) {
-        const isRequired = typeof inject?.required !== 'undefined' ? inject.required : field.isRequired
-        const isList = typeof inject?.list !== 'undefined' ? inject.list : field.isList
+        console.log({
+            field,
+        })
+
+        const isRequired = typeof inject?.required !== 'undefined'
+            ? inject.required
+            : (field.isRequired && !field.hasDefaultValue && !field.isUpdatedAt)
+        const isList = typeof inject?.list !== 'undefined'
+            ? inject.list
+            : field.isList
 
         let type = 'String'
 
@@ -1277,7 +1296,7 @@ export default class SchemaBuilder {
                     this.queries.map((q) => {
                         const args = q.args.map(arg => `${arg.name}: ${arg.scalar}`)
                         return [
-                            q?.comment ? `# ${q.comment}` : '',
+                            q?.comment ? `"""\n${q.comment}\n"""` : '',
                             [
                                 q.name,
                                 args?.length ? `(\n${args.join(',\n')}\n)` : '',
@@ -1296,7 +1315,7 @@ export default class SchemaBuilder {
                     this.mutations.map((m) => {
                         const args = m.args.map(arg => `${arg.name}: ${arg.scalar}`)
                         return [
-                            m?.comment ? `# ${m.comment}` : '',
+                            m?.comment ? `"""\n${m.comment}\n"""` : '',
                             [
                                 m.name,
                                 args?.length ? `(\n${args.join(',\n')}\n)` : '',
@@ -1315,7 +1334,7 @@ export default class SchemaBuilder {
                     this.subscriptions.map((s) => {
                         const args = s.args.map(arg => `${arg.name}: ${arg.scalar}`)
                         return [
-                            s?.comment ? `# ${s.comment}` : '',
+                            s?.comment ? `"""\n${s.comment}\n"""` : '',
                             [
                                 s.name,
                                 args?.length ? `(\n${args.join(',\n')}\n)` : '',

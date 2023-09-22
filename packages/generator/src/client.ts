@@ -101,118 +101,61 @@ export default class ClientConfigBuilder {
         // fields mapping + operations
         model.fields.forEach((field) => {
             // get
-            map({
-                operation: model?.directives?.gql?.queries?.get || `get${model.singular}`,
-                field,
-            })
+            map({ operation: `get${model.singular}`, field })
 
             // list
-            map({
-                operation: model?.directives?.gql?.queries?.list || `list${model.plural}`,
-                field,
-            })
+            map({ operation: `list${model.plural}`, field })
 
             // count
-            map({
-                operation: model?.directives?.gql?.queries?.count || `count${model.plural}`,
-                field,
-            })
+            map({ operation: `count${model.plural}`, field })
 
             // create
-            map({
-                operation: model?.directives?.gql?.mutations?.create || `create${model.singular}`,
-                field,
-            })
+            map({ operation: `create${model.singular}`, field })
 
             // createMany
-            map({
-                operation: model?.directives?.gql?.mutations?.createMany || `createMany${model.plural}`,
-                field,
-            })
+            map({ operation: `createMany${model.plural}`, field })
 
             // update
-            map({
-                operation: model?.directives?.gql?.mutations?.update || `update${model.singular}`,
-                field,
-            })
+            map({ operation: `update${model.singular}`, field })
 
             // updateMany
-            map({
-                operation: model?.directives?.gql?.mutations?.updateMany || `updateMany${model.plural}`,
-                field,
-            })
+            map({ operation: `updateMany${model.plural}`, field })
 
             // upsert
-            map({
-                operation: model?.directives?.gql?.mutations?.upsert || `upsert${model.singular}`,
-                field,
-            })
+            map({ operation: `upsert${model.singular}`, field })
 
             // delete
-            map({
-                operation: model?.directives?.gql?.mutations?.delete || `delete${model.singular}`,
-                field,
-            })
+            map({ operation: `delete${model.singular}`, field })
 
             // deleteMany
-            map({
-                operation: model?.directives?.gql?.mutations?.deleteMany || `deleteMany${model.plural}`,
-                field,
-            })
+            map({ operation: `deleteMany${model.plural}`, field })
 
             // onCreated
-            map({
-                operation: model?.directives?.gql?.subscriptions?.onCreated || `onCreated${model.singular}`,
-                field,
-            })
+            map({ operation: `onCreated${model.singular}`, field })
 
             // onUpdated
-            map({
-                operation: model?.directives?.gql?.subscriptions?.onUpdated || `onUpdated${model.singular}`,
-                field,
-            })
+            map({ operation: `onUpdated${model.singular}`, field })
 
             // onUpserted
-            map({
-                operation: model?.directives?.gql?.subscriptions?.onUpserted || `onUpserted${model.singular}`,
-                field,
-            })
+            map({ operation: `onUpserted${model.singular}`, field })
 
             // onDeleted
-            map({
-                operation: model?.directives?.gql?.subscriptions?.onDeleted || `onDeleted${model.singular}`,
-                field,
-            })
+            map({ operation: `onDeleted${model.singular}`, field })
 
             // onMutated
-            map({
-                operation: model?.directives?.gql?.subscriptions?.onMutated || `onMutated${model.singular}`,
-                field,
-            })
+            map({ operation: `onMutated${model.singular}`, field })
 
             // onCreatedMany
-            map({
-                operation: model?.directives?.gql?.subscriptions?.onCreatedMany || `onCreatedMany${model.plural}`,
-                field,
-            })
+            map({ operation: `onCreatedMany${model.plural}`, field })
 
             // onUpdatedMany
-            map({
-                operation: model?.directives?.gql?.subscriptions?.onUpdatedMany || `onUpdatedMany${model.plural}`,
-                field,
-            })
+            map({ operation: `onUpdatedMany${model.plural}`, field })
 
             // onDeletedMany
-            map({
-                operation: model?.directives?.gql?.subscriptions?.onDeletedMany || `onDeletedMany${model.plural}`,
-                field,
-            })
+            map({ operation: `onDeletedMany${model.plural}`, field })
 
             // onMutatedMany
-            map({
-                operation: model?.directives?.gql?.subscriptions?.onMutatedMany || `onMutatedMany${model.plural}`,
-                field,
-            })
+            map({ operation: `onMutatedMany${model.plural}`, field })
         })
 
         return {

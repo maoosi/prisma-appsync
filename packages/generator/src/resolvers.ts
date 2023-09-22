@@ -62,189 +62,179 @@ export default class ResolversBuilder {
     }
 
     private createQueryResolvers(model: ParsedModel) {
-        if (!(model?.directives?.gql?.model === null || model?.directives?.gql?.queries === null)) {
-            // get
-            if (!(model?.directives?.gql?.queries?.get === null)) {
-                this.resolvers.push({
-                    typeName: 'Query',
-                    fieldName: model?.directives?.gql?.queries?.get || `get${model.singular}`,
-                    dataSource: 'prisma-appsync',
-                })
-            }
+        // get
+        if (model?.directives.canOutputGQL('get')) {
+            this.resolvers.push({
+                typeName: 'Query',
+                fieldName: `get${model.singular}`,
+                dataSource: 'prisma-appsync',
+            })
+        }
 
-            // list
-            if (!(model?.directives?.gql?.queries?.list === null)) {
-                this.resolvers.push({
-                    typeName: 'Query',
-                    fieldName: model?.directives?.gql?.queries?.list || `list${model.plural}`,
-                    dataSource: 'prisma-appsync',
-                })
-            }
+        // list
+        if (model?.directives.canOutputGQL('list')) {
+            this.resolvers.push({
+                typeName: 'Query',
+                fieldName: `list${model.plural}`,
+                dataSource: 'prisma-appsync',
+            })
+        }
 
-            // count
-            if (!(model?.directives?.gql?.queries?.count === null)) {
-                this.resolvers.push({
-                    typeName: 'Query',
-                    fieldName: model?.directives?.gql?.queries?.count || `count${model.plural}`,
-                    dataSource: 'prisma-appsync',
-                })
-            }
+        // count
+        if (model?.directives.canOutputGQL('count')) {
+            this.resolvers.push({
+                typeName: 'Query',
+                fieldName: `count${model.plural}`,
+                dataSource: 'prisma-appsync',
+            })
         }
     }
 
     private createMutationResolvers(model: ParsedModel) {
-        if (!(model?.directives?.gql?.model === null || model?.directives?.gql?.mutations === null)) {
-            // create
-            if (!(model?.directives?.gql?.mutations?.create === null)) {
-                this.resolvers.push({
-                    typeName: 'Mutation',
-                    fieldName: model?.directives?.gql?.mutations?.create || `create${model.singular}`,
-                    dataSource: 'prisma-appsync',
-                })
-            }
+        // create
+        if (model?.directives.canOutputGQL('create')) {
+            this.resolvers.push({
+                typeName: 'Mutation',
+                fieldName: `create${model.singular}`,
+                dataSource: 'prisma-appsync',
+            })
+        }
 
-            // createMany
-            if (!(model?.directives?.gql?.mutations?.createMany === null)) {
-                this.resolvers.push({
-                    typeName: 'Mutation',
-                    fieldName: model?.directives?.gql?.mutations?.createMany || `createMany${model.plural}`,
-                    dataSource: 'prisma-appsync',
-                })
-            }
+        // createMany
+        if (model?.directives.canOutputGQL('createMany')) {
+            this.resolvers.push({
+                typeName: 'Mutation',
+                fieldName: `createMany${model.plural}`,
+                dataSource: 'prisma-appsync',
+            })
+        }
 
-            // update
-            if (!(model?.directives?.gql?.mutations?.update === null)) {
-                this.resolvers.push({
-                    typeName: 'Mutation',
-                    fieldName: model?.directives?.gql?.mutations?.update || `update${model.singular}`,
-                    dataSource: 'prisma-appsync',
-                })
-            }
+        // update
+        if (model?.directives.canOutputGQL('update')) {
+            this.resolvers.push({
+                typeName: 'Mutation',
+                fieldName: `update${model.singular}`,
+                dataSource: 'prisma-appsync',
+            })
+        }
 
-            // updateMany
-            if (!(model?.directives?.gql?.mutations?.updateMany === null)) {
-                this.resolvers.push({
-                    typeName: 'Mutation',
-                    fieldName: model?.directives?.gql?.mutations?.updateMany || `updateMany${model.plural}`,
-                    dataSource: 'prisma-appsync',
-                })
-            }
+        // updateMany
+        if (model?.directives.canOutputGQL('updateMany')) {
+            this.resolvers.push({
+                typeName: 'Mutation',
+                fieldName: `updateMany${model.plural}`,
+                dataSource: 'prisma-appsync',
+            })
+        }
 
-            // upsert
-            if (!(model?.directives?.gql?.mutations?.upsert === null)) {
-                this.resolvers.push({
-                    typeName: 'Mutation',
-                    fieldName: model?.directives?.gql?.mutations?.upsert || `upsert${model.singular}`,
-                    dataSource: 'prisma-appsync',
-                })
-            }
+        // upsert
+        if (model?.directives.canOutputGQL('upsert')) {
+            this.resolvers.push({
+                typeName: 'Mutation',
+                fieldName: `upsert${model.singular}`,
+                dataSource: 'prisma-appsync',
+            })
+        }
 
-            // delete
-            if (!(model?.directives?.gql?.mutations?.delete === null)) {
-                this.resolvers.push({
-                    typeName: 'Mutation',
-                    fieldName: model?.directives?.gql?.mutations?.delete || `delete${model.singular}`,
-                    dataSource: 'prisma-appsync',
-                })
-            }
+        // delete
+        if (model?.directives.canOutputGQL('delete')) {
+            this.resolvers.push({
+                typeName: 'Mutation',
+                fieldName: `delete${model.singular}`,
+                dataSource: 'prisma-appsync',
+            })
+        }
 
-            // deleteMany
-            if (!(model?.directives?.gql?.mutations?.deleteMany === null)) {
-                this.resolvers.push({
-                    typeName: 'Mutation',
-                    fieldName: model?.directives?.gql?.mutations?.deleteMany || `deleteMany${model.plural}`,
-                    dataSource: 'prisma-appsync',
-                })
-            }
+        // deleteMany
+        if (model?.directives.canOutputGQL('deleteMany')) {
+            this.resolvers.push({
+                typeName: 'Mutation',
+                fieldName: `deleteMany${model.plural}`,
+                dataSource: 'prisma-appsync',
+            })
         }
     }
 
     private createSubscriptionResolvers(model: ParsedModel) {
-        if (!(
-            model?.directives?.gql?.model === null
-            || model?.directives?.gql?.subscriptions === null
-            || model?.directives?.gql?.mutations === null
-        )) {
-            // onCreated
-            if (!(model?.directives?.gql?.subscriptions?.onCreated === null)) {
-                this.resolvers.push({
-                    typeName: 'Subscription',
-                    fieldName: model?.directives?.gql?.subscriptions?.onCreated || `onCreated${model.singular}`,
-                    dataSource: 'prisma-appsync',
-                })
-            }
+        // onCreated
+        if (model?.directives.canOutputGQL('onCreated')) {
+            this.resolvers.push({
+                typeName: 'Subscription',
+                fieldName: `onCreated${model.singular}`,
+                dataSource: 'prisma-appsync',
+            })
+        }
 
-            // onUpdated
-            if (!(model?.directives?.gql?.subscriptions?.onUpdated === null)) {
-                this.resolvers.push({
-                    typeName: 'Subscription',
-                    fieldName: model?.directives?.gql?.subscriptions?.onUpdated || `onUpdated${model.singular}`,
-                    dataSource: 'prisma-appsync',
-                })
-            }
+        // onUpdated
+        if (model?.directives.canOutputGQL('onUpdated')) {
+            this.resolvers.push({
+                typeName: 'Subscription',
+                fieldName: `onUpdated${model.singular}`,
+                dataSource: 'prisma-appsync',
+            })
+        }
 
-            // onUpserted
-            if (!(model?.directives?.gql?.subscriptions?.onUpserted === null)) {
-                this.resolvers.push({
-                    typeName: 'Subscription',
-                    fieldName: model?.directives?.gql?.subscriptions?.onUpserted || `onUpserted${model.singular}`,
-                    dataSource: 'prisma-appsync',
-                })
-            }
+        // onUpserted
+        if (model?.directives.canOutputGQL('onUpserted')) {
+            this.resolvers.push({
+                typeName: 'Subscription',
+                fieldName: `onUpserted${model.singular}`,
+                dataSource: 'prisma-appsync',
+            })
+        }
 
-            // onDeleted
-            if (!(model?.directives?.gql?.subscriptions?.onDeleted === null)) {
-                this.resolvers.push({
-                    typeName: 'Subscription',
-                    fieldName: model?.directives?.gql?.subscriptions?.onDeleted || `onDeleted${model.singular}`,
-                    dataSource: 'prisma-appsync',
-                })
-            }
+        // onDeleted
+        if (model?.directives.canOutputGQL('onDeleted')) {
+            this.resolvers.push({
+                typeName: 'Subscription',
+                fieldName: `onDeleted${model.singular}`,
+                dataSource: 'prisma-appsync',
+            })
+        }
 
-            // onMutated
-            if (!(model?.directives?.gql?.subscriptions?.onMutated === null)) {
-                this.resolvers.push({
-                    typeName: 'Subscription',
-                    fieldName: model?.directives?.gql?.subscriptions?.onMutated || `onMutated${model.singular}`,
-                    dataSource: 'prisma-appsync',
-                })
-            }
+        // onMutated
+        if (model?.directives.canOutputGQL('onMutated')) {
+            this.resolvers.push({
+                typeName: 'Subscription',
+                fieldName: `onMutated${model.singular}`,
+                dataSource: 'prisma-appsync',
+            })
+        }
 
-            // onCreatedMany
-            if (!(model?.directives?.gql?.subscriptions?.onCreatedMany === null)) {
-                this.resolvers.push({
-                    typeName: 'Subscription',
-                    fieldName: model?.directives?.gql?.subscriptions?.onCreatedMany || `onCreatedMany${model.plural}`,
-                    dataSource: 'prisma-appsync',
-                })
-            }
+        // onCreatedMany
+        if (model?.directives.canOutputGQL('onCreatedMany')) {
+            this.resolvers.push({
+                typeName: 'Subscription',
+                fieldName: `onCreatedMany${model.plural}`,
+                dataSource: 'prisma-appsync',
+            })
+        }
 
-            // onUpdatedMany
-            if (!(model?.directives?.gql?.subscriptions?.onUpdatedMany === null)) {
-                this.resolvers.push({
-                    typeName: 'Subscription',
-                    fieldName: model?.directives?.gql?.subscriptions?.onUpdatedMany || `onUpdatedMany${model.plural}`,
-                    dataSource: 'prisma-appsync',
-                })
-            }
+        // onUpdatedMany
+        if (model?.directives.canOutputGQL('onUpdatedMany')) {
+            this.resolvers.push({
+                typeName: 'Subscription',
+                fieldName: `onUpdatedMany${model.plural}`,
+                dataSource: 'prisma-appsync',
+            })
+        }
 
-            // onDeletedMany
-            if (!(model?.directives?.gql?.subscriptions?.onDeletedMany === null)) {
-                this.resolvers.push({
-                    typeName: 'Subscription',
-                    fieldName: model?.directives?.gql?.subscriptions?.onDeletedMany || `onDeletedMany${model.plural}`,
-                    dataSource: 'prisma-appsync',
-                })
-            }
+        // onDeletedMany
+        if (model?.directives.canOutputGQL('onDeletedMany')) {
+            this.resolvers.push({
+                typeName: 'Subscription',
+                fieldName: `onDeletedMany${model.plural}`,
+                dataSource: 'prisma-appsync',
+            })
+        }
 
-            // onMutatedMany
-            if (!(model?.directives?.gql?.subscriptions?.onMutatedMany === null)) {
-                this.resolvers.push({
-                    typeName: 'Subscription',
-                    fieldName: model?.directives?.gql?.subscriptions?.onMutatedMany || `onMutatedMany${model.plural}`,
-                    dataSource: 'prisma-appsync',
-                })
-            }
+        // onMutatedMany
+        if (model?.directives.canOutputGQL('onMutatedMany')) {
+            this.resolvers.push({
+                typeName: 'Subscription',
+                fieldName: `onMutatedMany${model.plural}`,
+                dataSource: 'prisma-appsync',
+            })
         }
     }
 }
