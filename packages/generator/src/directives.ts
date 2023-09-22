@@ -35,8 +35,8 @@ export function parseDirectives(modelDMMF: DMMF.Model, doc: string): Directives 
     const gqlRegex = /@(?:gql)\(([^)]+)\)/gm
     const authRegex = /@(?:auth)\(([^)]+)\)/gm
 
-    const find = ['apiKey', 'userPools', 'iam', 'oidc']
-    const replace = ['"apiKey"', '"userPools"', '"iam"', '"oidc"']
+    const find = ['apiKey', 'userPools', 'iam', 'oidc', 'lambda']
+    const replace = ['"apiKey"', '"userPools"', '"iam"', '"oidc"', '"lambda"']
 
     const gqlDirectives = doc.match(gqlRegex)
 
@@ -145,6 +145,9 @@ function getGQLDirectives(
         else if (authDirective?.allow === 'oidc') {
             appSyncDirectives.push('@aws_oidc')
         }
+        else if (authDirective?.allow === 'lambda') {
+            appSyncDirectives.push('@aws_lambda')
+        }
         else if (authDirective?.allow === 'userPools') {
             // You can’t use the @aws_auth directive along with additional authorization modes. @aws_auth works only in the context of AMAZON_COGNITO_USER_POOLS authorization with no additional authorization modes.
             // https://docs.aws.amazon.com/appsync/latest/devguide/security-authz.html
@@ -178,7 +181,7 @@ export type Directives = {
 }
 
 type Authz = {
-    allow: 'apiKey' | 'iam' | 'oidc' | 'userPools'
+    allow: 'apiKey' | 'iam' | 'oidc' | 'userPools' | 'lambda'
     groups?: string[]
 }
 

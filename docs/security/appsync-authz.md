@@ -73,6 +73,9 @@ model Post {
 // OPENID_CONNECT
 @auth(model: [{ allow: oidc }])
 
+// AWS_LAMBDA
+@auth(model: [{ allow: lambda }])
+
 // AMAZON_COGNITO_USER_POOLS
 @auth(model: [{ allow: userPools }])
 
