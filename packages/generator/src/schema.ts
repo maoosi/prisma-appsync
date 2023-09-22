@@ -842,6 +842,7 @@ export default class SchemaBuilder {
                             return {
                                 name: field.name,
                                 scalar: model.getScalar(field),
+                                defaultValue: field.default,
                             }
                         }
                     }) || [],
@@ -856,6 +857,7 @@ export default class SchemaBuilder {
                     ?.map(field => ({
                         name: field.name,
                         scalar: model.getScalar(field),
+                        defaultValue: field.default,
                     })) || [],
             })
         }
@@ -1185,10 +1187,6 @@ export default class SchemaBuilder {
     }
 
     private getFieldScalar(field: DMMF.Field, inject?: FieldScalarOptions) {
-        console.log({
-            field,
-        })
-
         const isRequired = typeof inject?.required !== 'undefined'
             ? inject.required
             : (field.isRequired && !field.hasDefaultValue && !field.isUpdatedAt)
@@ -1284,7 +1282,12 @@ export default class SchemaBuilder {
             this.inputs.map((i) => {
                 return [
                     `input ${i.name} {`,
-                    i.fields.map(f => `${f.name}: ${f.scalar}`).join('\n'),
+                    i.fields.map((f) => {
+                        const defaultValue = ['boolean', 'string', 'number'].includes(typeof f.defaultValue)
+                            ? ` = ${f.defaultValue}`
+                            : ''
+                        return `${f.name}: ${f.scalar}${defaultValue}`
+                    }).join('\n'),
                     '}',
                 ].join('\n')
             }).join('\n\n'),
@@ -1385,6 +1388,7 @@ type ParsedModel = {
 type GqlField = {
     name: string
     scalar: string
+    defaultValue?: any
 }
 
 type GqlArg = {
