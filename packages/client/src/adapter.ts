@@ -180,7 +180,6 @@ export function getAuthIdentity({ appsyncEvent }: { appsyncEvent: AppSyncEvent }
         && typeof (appsyncEvent.identity as any).username !== 'undefined'
         && typeof (appsyncEvent.identity as any).claims !== 'undefined'
         && typeof (appsyncEvent.identity as any).sourceIp !== 'undefined'
-        && typeof (appsyncEvent.identity as any).defaultAuthStrategy !== 'undefined'
     ) {
         authorization = Authorizations.AMAZON_COGNITO_USER_POOLS
         identity = appsyncEvent.identity
