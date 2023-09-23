@@ -1,15 +1,18 @@
 import type { DMMF } from '@prisma/generator-helper'
 import { plural } from 'pluralize'
 import * as prettier from 'prettier'
-import { type Directives, parseDirectives } from './directives'
+import { type Directives, parseDirectives, parseSchemaAuthzModes } from './directives'
 
 export default class ResolversBuilder {
     private resolvers: Resolver[] = []
 
     public async createResolvers(dmmf: DMMF.Document, options?: { defaultDirective?: string }): Promise<string> {
+        // get all schema authz modes
+        const schemaAuthzModes = parseSchemaAuthzModes(dmmf.datamodel, options)
+
         // schema models
         dmmf.datamodel?.models.forEach((modelDMMF: DMMF.Model) => {
-            const model = this.parseModelDMMF(modelDMMF, options)
+            const model = this.parseModelDMMF(modelDMMF, { ...options, schemaAuthzModes })
 
             this.createQueryResolvers(model)
             this.createMutationResolvers(model)
@@ -39,8 +42,12 @@ export default class ResolversBuilder {
         return prettyYaml
     }
 
-    private parseModelDMMF(modelDMMF: DMMF.Model, options?: { defaultDirective?: string }): ParsedModel {
-        const directives = parseDirectives(modelDMMF, [options?.defaultDirective, modelDMMF.documentation].filter(Boolean).join('\n'))
+    private parseModelDMMF(modelDMMF: DMMF.Model, options?: { defaultDirective?: string; schemaAuthzModes: string[] }): ParsedModel {
+        const directives = parseDirectives({
+            modelDMMF,
+            defaultDirective: options?.defaultDirective || '',
+            schemaAuthzModes: options?.schemaAuthzModes || [],
+        })
 
         return {
             singular: modelDMMF.name,

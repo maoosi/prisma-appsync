@@ -3,15 +3,18 @@ import type { DMMF } from '@prisma/generator-helper'
 import { plural } from 'pluralize'
 import * as prettier from 'prettier'
 import { merge, uniq } from '@client/utils'
-import { type Directives, parseDirectives } from './directives'
+import { type Directives, parseDirectives, parseSchemaAuthzModes } from './directives'
 
 export default class ClientConfigBuilder {
     private runtimeConfig: Required<RuntimeConfig> = { modelsMapping: {}, fieldsMapping: {}, operations: [] }
 
     public async createRuntimeConfig(dmmf: DMMF.Document, options?: { defaultDirective?: string }): Promise<RuntimeConfig> {
+        // get all schema authz modes
+        const schemaAuthzModes = parseSchemaAuthzModes(dmmf.datamodel, options)
+
         // schema models
         dmmf.datamodel?.models.forEach((modelDMMF: DMMF.Model) => {
-            const model = this.parseModelDMMF(modelDMMF, options)
+            const model = this.parseModelDMMF(modelDMMF, { ...options, schemaAuthzModes })
             const modelConfig = this.createModelConfig(model)
 
             this.runtimeConfig.modelsMapping = merge(
@@ -55,8 +58,12 @@ export default class ClientConfigBuilder {
         return prettyYaml
     }
 
-    private parseModelDMMF(modelDMMF: DMMF.Model, options?: { defaultDirective?: string }): ParsedModel {
-        const directives = parseDirectives(modelDMMF, [options?.defaultDirective, modelDMMF.documentation].filter(Boolean).join('\n'))
+    private parseModelDMMF(modelDMMF: DMMF.Model, options?: { defaultDirective?: string; schemaAuthzModes: string[] }): ParsedModel {
+        const directives = parseDirectives({
+            modelDMMF,
+            defaultDirective: options?.defaultDirective || '',
+            schemaAuthzModes: options?.schemaAuthzModes || [],
+        })
         const singular = modelDMMF.name
         const prismaRef = singular.charAt(0).toLowerCase() + singular.slice(1)
 

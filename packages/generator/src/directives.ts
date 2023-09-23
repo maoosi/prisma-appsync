@@ -1,5 +1,7 @@
-import { merge, replaceAll, uniq } from '@client/utils'
+import { merge, replaceAll, uniq, uniqBy } from '@client/utils'
 import type { DMMF } from '@prisma/generator-helper'
+
+const authzModes = ['apiKey', 'userPools', 'iam', 'oidc', 'lambda']
 
 const actionsMapping = {
     // queries
@@ -28,16 +30,32 @@ const actionsMapping = {
     onDeletedMany: 'subscriptions',
 } as const
 
-export function parseDirectives(modelDMMF: DMMF.Model, doc: string): Directives {
+export function parseSchemaAuthzModes(datamodel: DMMF.Datamodel, opts?: { defaultDirective?: string }): string[] {
+    const schemaDirectives = datamodel?.models
+        ?.map(modelDMMF => [opts?.defaultDirective, modelDMMF.documentation].filter(Boolean).join(' '))
+        ?.join(' ') || ''
+
+    const regex = new RegExp(`(${authzModes.join('|')})`, 'gm')
+    const found = schemaDirectives.match(regex)
+    const uniqAuthzModes = found ? uniq(found) : []
+
+    return uniqAuthzModes
+}
+
+export function parseDirectives(
+    { modelDMMF, defaultDirective, schemaAuthzModes }:
+    { modelDMMF: DMMF.Model; defaultDirective: string; schemaAuthzModes: string[] },
+): Directives {
+    const doc = [defaultDirective, modelDMMF.documentation].filter(Boolean).join('\n')
+
     let gql: DirectiveGql = {}
     let auth: DirectiveAuth = {}
 
     const gqlRegex = /@(?:gql)\(([^)]+)\)/gm
     const authRegex = /@(?:auth)\(([^)]+)\)/gm
 
-    const find = ['apiKey', 'userPools', 'iam', 'oidc', 'lambda']
-    const replace = ['"apiKey"', '"userPools"', '"iam"', '"oidc"', '"lambda"']
-
+    const find = authzModes
+    const replace = authzModes.map(authzMode => `"${authzMode}"`)
     const gqlDirectives = doc.match(gqlRegex)
 
     if (gqlDirectives) {
@@ -61,22 +79,17 @@ export function parseDirectives(modelDMMF: DMMF.Model, doc: string): Directives 
     return {
         auth,
         gql,
-        getGQLDirectives: (action: Action | 'model') => {
-            return getGQLDirectives(modelDMMF, action, { gql, auth })
+        getGQLDirectives: (action: Action) => {
+            return getGQLDirectives({ modelDMMF, action, directives: { gql, auth }, schemaAuthzModes })
         },
         canOutputGQL: (action: Action) => {
-            return canOutputGQL(modelDMMF, action, { gql, auth })
+            return canOutputGQL({ modelDMMF, action, directives: { gql, auth }, schemaAuthzModes })
         },
     }
 }
 
 function canOutputGQL(
-    modelDMMF: DMMF.Model,
-    action: Action,
-    directives: {
-        gql: DirectiveGql
-        auth: DirectiveAuth
-    },
+    { action, directives }: DirectiveHelperFunc,
 ): boolean {
     let can = false
 
@@ -113,29 +126,27 @@ function canOutputGQL(
 }
 
 function getGQLDirectives(
-    modelDMMF: DMMF.Model,
-    action: Action | 'model',
-    directives: {
-        gql: DirectiveGql
-        auth: DirectiveAuth
-    },
+    { action, directives, schemaAuthzModes }: DirectiveHelperFunc,
 ): string[] {
     const actionGroup = actionsMapping?.[action]
 
     let authDirectives: Authz[] = []
 
-    if (action !== 'model' && directives.auth?.[actionGroup]?.[action])
-        authDirectives = directives.auth[actionGroup]?.[action] as Authz[]
+    // model
+    if (directives.auth?.model && Array.isArray(directives.auth?.model))
+        authDirectives = [...authDirectives, ...directives.auth?.model as Authz[]]
 
-    else if (action !== 'model' && directives.auth?.[actionGroup] && Array.isArray(directives.auth?.[actionGroup]))
-        authDirectives = directives.auth?.[actionGroup] as unknown as Authz[]
+    // queries, mutation, etc..
+    if (directives.auth?.[actionGroup] && Array.isArray(directives.auth?.[actionGroup]))
+        authDirectives = [...authDirectives, ...directives.auth?.[actionGroup] as unknown as Authz[]]
 
-    else if (directives.auth?.model && Array.isArray(directives.auth?.model))
-        authDirectives = directives.auth?.model as Authz[]
+    // get, list, count, create, etc..
+    if (directives.auth?.[actionGroup]?.[action] && Array.isArray(directives.auth?.[actionGroup]?.[action]))
+        authDirectives = [...authDirectives, ...directives.auth[actionGroup]?.[action] as Authz[]]
 
     const appSyncDirectives: string[] = []
 
-    authDirectives.forEach((authDirective) => {
+    uniqBy(authDirectives, 'allow').forEach((authDirective) => {
         if (authDirective?.allow === 'apiKey') {
             appSyncDirectives.push('@aws_api_key')
         }
@@ -151,7 +162,7 @@ function getGQLDirectives(
         else if (authDirective?.allow === 'userPools') {
             // You can’t use the @aws_auth directive along with additional authorization modes. @aws_auth works only in the context of AMAZON_COGNITO_USER_POOLS authorization with no additional authorization modes.
             // https://docs.aws.amazon.com/appsync/latest/devguide/security-authz.html
-            const cognitoDirective = authDirectives.some(d => d.allow !== 'userPools')
+            const cognitoDirective = schemaAuthzModes.length > 1
                 ? '@aws_cognito_user_pools'
                 : '@aws_auth'
 
@@ -166,8 +177,6 @@ function getGQLDirectives(
         }
     })
 
-    // console.log('\n', JSON.stringify({ model: modelDMMF.name, action, directives, authDirectives, appSyncDirectives: uniq(appSyncDirectives) }, null, 2))
-
     return uniq(appSyncDirectives)
 }
 
@@ -176,7 +185,7 @@ export type Action = 'get' | 'list' | 'count' | 'create' | 'createMany' | 'updat
 export type Directives = {
     gql: DirectiveGql
     auth: DirectiveAuth
-    getGQLDirectives: (action: Action | 'model') => string[]
+    getGQLDirectives: (action: Action) => string[]
     canOutputGQL: (action: Action) => boolean
 }
 
@@ -200,4 +209,14 @@ type DirectiveAuth = {
     queries?: Record<'get' | 'list' | 'count', Authz[]>
     mutations?: Record<'create' | 'createMany' | 'update' | 'updateMany' | 'upsert' | 'delete' | 'deleteMany', Authz[]>
     subscriptions?: Record<'onCreated' | 'onUpdated' | 'onUpserted' | 'onDeleted' | 'onMutated' | 'onCreatedMany' | 'onUpdatedMany' | 'onMutatedMany' | 'onDeletedMany', Authz[]>
+}
+
+type DirectiveHelperFunc = {
+    modelDMMF: DMMF.Model
+    action: Action
+    directives: {
+        gql: DirectiveGql
+        auth: DirectiveAuth
+    }
+    schemaAuthzModes: string[]
 }

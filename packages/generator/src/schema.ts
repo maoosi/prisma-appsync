@@ -5,7 +5,7 @@ import camelCase from 'lodash/camelCase'
 import upperFirst from 'lodash/upperFirst'
 import { uniqBy } from '@client/utils'
 import * as prettier from 'prettier'
-import { type Directives, parseDirectives } from './directives'
+import { type Directives, parseDirectives, parseSchemaAuthzModes } from './directives'
 
 const pascalCase = flow(camelCase, upperFirst)
 
@@ -31,9 +31,12 @@ export default class SchemaBuilder {
         this.createEnumsInputs(dmmf.datamodel)
         this.createEnumsTypes(dmmf.datamodel)
 
+        // get all schema authz modes
+        const schemaAuthzModes = parseSchemaAuthzModes(dmmf.datamodel, options)
+
         // parse all models
         const models: ParsedModel[] = dmmf.datamodel?.models
-            ?.map(modelDMMF => this.parseModelDMMF(modelDMMF, options)) || []
+            ?.map(modelDMMF => this.parseModelDMMF(modelDMMF, { ...options, schemaAuthzModes })) || []
 
         // schema models
         dmmf.datamodel?.models.forEach((modelDMMF: DMMF.Model) => {
@@ -82,10 +85,13 @@ export default class SchemaBuilder {
         return perttyGraphQL
     }
 
-    private parseModelDMMF(modelDMMF: DMMF.Model, options?: { defaultDirective?: string }): ParsedModel {
-        const directives = parseDirectives(
-            modelDMMF, [options?.defaultDirective, modelDMMF.documentation].filter(Boolean).join('\n'),
-        )
+    private parseModelDMMF(modelDMMF: DMMF.Model, options?: { defaultDirective?: string; schemaAuthzModes?: string[] }): ParsedModel {
+        const directives = parseDirectives({
+            modelDMMF,
+            defaultDirective: options?.defaultDirective || '',
+            schemaAuthzModes: options?.schemaAuthzModes || [],
+        })
+
         const fields = modelDMMF.fields.filter(field => !(directives?.gql?.fields?.[field.name] === null))
 
         const getScalar = (field: DMMF.Field, inject?: FieldScalarOptions) => {
@@ -642,7 +648,6 @@ export default class SchemaBuilder {
                     scalar: model.getScalar(field, { required: field.isRequired }),
                 }
             }),
-            directives: model?.directives?.getGQLDirectives('model'),
         })
     }
 
