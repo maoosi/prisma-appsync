@@ -1,3 +1,4 @@
+/* eslint-disable n/prefer-global/process */
 /* eslint-disable no-console */
 import { cli as cleye } from 'cleye'
 import { type ServerOptions, useAppSyncSimulator } from './appsync-simulator'
