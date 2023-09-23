@@ -59,6 +59,13 @@ model Post {
 @auth(subscriptions: { onCreated: [{ allow: iam }] })
 ```
 
+### Fields
+
+```prisma
+// Apply to specific Type fields
+@auth(fields: { password: [{ allow: apiKey }] })
+```
+
 ## 👉 Supported Authorization modes
 
 <https://docs.aws.amazon.com/appsync/latest/devguide/security-authz.html>
