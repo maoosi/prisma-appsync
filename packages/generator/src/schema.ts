@@ -5,7 +5,7 @@ import camelCase from 'lodash/camelCase'
 import upperFirst from 'lodash/upperFirst'
 import { uniqBy } from '@client/utils'
 import * as prettier from 'prettier'
-import { type Directives, parseDirectives, parseSchemaAuthzModes } from './directives'
+import { type Directives, parseModelDirectives, extractUniqueAuthzModes } from './directives'
 
 const pascalCase = flow(camelCase, upperFirst)
 
@@ -32,7 +32,7 @@ export default class SchemaBuilder {
         this.createEnumsTypes(dmmf.datamodel)
 
         // get all schema authz modes
-        const schemaAuthzModes = parseSchemaAuthzModes(dmmf.datamodel, options)
+        const schemaAuthzModes = extractUniqueAuthzModes(dmmf.datamodel, options)
 
         // parse all models
         const models: ParsedModel[] = dmmf.datamodel?.models
@@ -86,7 +86,7 @@ export default class SchemaBuilder {
     }
 
     private parseModelDMMF(modelDMMF: DMMF.Model, options?: { defaultDirective?: string; schemaAuthzModes?: string[] }): ParsedModel {
-        const directives = parseDirectives({
+        const directives = parseModelDirectives({
             modelDMMF,
             defaultDirective: options?.defaultDirective || '',
             schemaAuthzModes: options?.schemaAuthzModes || [],
@@ -742,7 +742,7 @@ export default class SchemaBuilder {
                     if (field.isList) {
                         fields.push({ name: 'connect', scalar: `[${field.type}WhereUniqueInput!]` })
 
-                        if (refModel?.directives.canOutputGQL('create')) {
+                        if (refModel?.directives.isActionEligibleForGQL('create')) {
                             fields.push({ name: 'create', scalar: `[${field.type}CreateInput!]` })
                             fields.push({ name: 'connectOrCreate', scalar: `[${field.type}ConnectOrCreateInput!]` })
                         }
@@ -750,7 +750,7 @@ export default class SchemaBuilder {
                     else {
                         fields.push({ name: 'connect', scalar: `${field.type}WhereUniqueInput` })
 
-                        if (refModel?.directives.canOutputGQL('create')) {
+                        if (refModel?.directives.isActionEligibleForGQL('create')) {
                             fields.push({ name: 'create', scalar: `${field.type}CreateInput` })
                             fields.push({ name: 'connectOrCreate', scalar: `${field.type}ConnectOrCreateInput` })
                         }
@@ -780,42 +780,42 @@ export default class SchemaBuilder {
                         fields.push({ name: 'disconnect', scalar: `[${field.type}ExtendedWhereUniqueInput!]` })
                         fields.push({ name: 'set', scalar: `[${field.type}WhereUniqueInput!]` })
 
-                        if (refModel?.directives.canOutputGQL('create')) {
+                        if (refModel?.directives.isActionEligibleForGQL('create')) {
                             fields.push({ name: 'create', scalar: `[${field.type}CreateInput!]` })
                             fields.push({ name: 'connectOrCreate', scalar: `[${field.type}ConnectOrCreateInput!]` })
                         }
 
-                        if (refModel?.directives.canOutputGQL('update'))
+                        if (refModel?.directives.isActionEligibleForGQL('update'))
                             fields.push({ name: 'update', scalar: `[${field.type}UpdateUniqueInput!]` })
 
-                        if (refModel?.directives.canOutputGQL('upsert'))
+                        if (refModel?.directives.isActionEligibleForGQL('upsert'))
                             fields.push({ name: 'upsert', scalar: `[${field.type}UpsertUniqueInput!]` })
 
-                        if (refModel?.directives.canOutputGQL('delete'))
+                        if (refModel?.directives.isActionEligibleForGQL('delete'))
                             fields.push({ name: 'delete', scalar: `[${field.type}ExtendedWhereUniqueInput!]` })
 
-                        if (refModel?.directives.canOutputGQL('deleteMany'))
+                        if (refModel?.directives.isActionEligibleForGQL('deleteMany'))
                             fields.push({ name: 'deleteMany', scalar: `[${field.type}ScalarWhereInput!]` })
 
-                        if (refModel?.directives.canOutputGQL('updateMany'))
+                        if (refModel?.directives.isActionEligibleForGQL('updateMany'))
                             fields.push({ name: 'updateMany', scalar: `[${field.type}UpdateManyInput!]` })
                     }
                     else {
                         fields.push({ name: 'connect', scalar: `${field.type}WhereUniqueInput` })
                         fields.push({ name: 'disconnect', scalar: 'Boolean' })
 
-                        if (refModel?.directives.canOutputGQL('create')) {
+                        if (refModel?.directives.isActionEligibleForGQL('create')) {
                             fields.push({ name: 'create', scalar: `${field.type}CreateInput` })
                             fields.push({ name: 'connectOrCreate', scalar: `${field.type}ConnectOrCreateInput` })
                         }
 
-                        if (refModel?.directives.canOutputGQL('update'))
+                        if (refModel?.directives.isActionEligibleForGQL('update'))
                             fields.push({ name: 'update', scalar: `${field.type}UpdateInput` })
 
-                        if (refModel?.directives.canOutputGQL('upsert'))
+                        if (refModel?.directives.isActionEligibleForGQL('upsert'))
                             fields.push({ name: 'upsert', scalar: `${field.type}UpsertInput` })
 
-                        if (refModel?.directives.canOutputGQL('delete'))
+                        if (refModel?.directives.isActionEligibleForGQL('delete'))
                             fields.push({ name: 'delete', scalar: 'Boolean' })
                     }
 
@@ -830,7 +830,7 @@ export default class SchemaBuilder {
             this.inputs.push(nestedUpdateInput)
         })
 
-        if (model?.directives.canOutputGQL('create')) {
+        if (model?.directives.isActionEligibleForGQL('create')) {
             this.inputs.push({
                 name: `${model.singular}CreateInput`,
                 fields: model.fields
@@ -855,7 +855,7 @@ export default class SchemaBuilder {
             })
         }
 
-        if (model?.directives.canOutputGQL('createMany')) {
+        if (model?.directives.isActionEligibleForGQL('createMany')) {
             this.inputs.push({
                 name: `${model.singular}CreateManyInput`,
                 fields: model.fields
@@ -868,7 +868,7 @@ export default class SchemaBuilder {
             })
         }
 
-        if (model?.directives.canOutputGQL('update')) {
+        if (model?.directives.isActionEligibleForGQL('update')) {
             this.inputs.push({
                 name: `${model.singular}UpdateInput`,
                 fields: model.fields
@@ -904,7 +904,7 @@ export default class SchemaBuilder {
             })
         }
 
-        if (model?.directives.canOutputGQL('updateMany')) {
+        if (model?.directives.isActionEligibleForGQL('updateMany')) {
             this.inputs.push({
                 name: `${model.singular}UpdateManyInput`,
                 fields: [
@@ -914,7 +914,7 @@ export default class SchemaBuilder {
             })
         }
 
-        if (model?.directives.canOutputGQL('upsert')) {
+        if (model?.directives.isActionEligibleForGQL('upsert')) {
             this.inputs.push({
                 name: `${model.singular}UpsertInput`,
                 fields: [
@@ -933,7 +933,7 @@ export default class SchemaBuilder {
             })
         }
 
-        if (model?.directives.canOutputGQL('create')) {
+        if (model?.directives.isActionEligibleForGQL('create')) {
             this.inputs.push({
                 name: `${model.singular}ConnectOrCreateInput`,
                 fields: [
@@ -946,7 +946,7 @@ export default class SchemaBuilder {
 
     private createModelQueries(model: ParsedModel) {
         // get
-        if (model?.directives.canOutputGQL('get')) {
+        if (model?.directives.isActionEligibleForGQL('get')) {
             this.queries.push({
                 name: `get${model.singular}`,
                 comment: `Retrieve a single ${model.singular} record by unique identifier.`,
@@ -959,7 +959,7 @@ export default class SchemaBuilder {
         }
 
         // list
-        if (model?.directives.canOutputGQL('list')) {
+        if (model?.directives.isActionEligibleForGQL('list')) {
             this.queries.push({
                 name: `list${model.plural}`,
                 comment: `Retrieve a list of ${model.plural} records.`,
@@ -975,7 +975,7 @@ export default class SchemaBuilder {
         }
 
         // count
-        if (model?.directives.canOutputGQL('count')) {
+        if (model?.directives.isActionEligibleForGQL('count')) {
             this.queries.push({
                 name: `count${model.plural}`,
                 comment: `Count the number of ${model.plural} records.`,
@@ -993,7 +993,7 @@ export default class SchemaBuilder {
 
     private createModelMutations(model: ParsedModel) {
         // create
-        if (model?.directives.canOutputGQL('create')) {
+        if (model?.directives.isActionEligibleForGQL('create')) {
             this.mutations.push({
                 name: `create${model.singular}`,
                 comment: `Create a new ${model.singular} record.`,
@@ -1006,7 +1006,7 @@ export default class SchemaBuilder {
         }
 
         // createMany
-        if (model?.directives.canOutputGQL('createMany')) {
+        if (model?.directives.isActionEligibleForGQL('createMany')) {
             this.mutations.push({
                 name: `createMany${model.plural}`,
                 comment: `Create multiple new ${model.plural} records.`,
@@ -1020,7 +1020,7 @@ export default class SchemaBuilder {
         }
 
         // update
-        if (model?.directives.canOutputGQL('update')) {
+        if (model?.directives.isActionEligibleForGQL('update')) {
             this.mutations.push({
                 name: `update${model.singular}`,
                 comment: `Update a single existing ${model.singular} record.`,
@@ -1035,7 +1035,7 @@ export default class SchemaBuilder {
         }
 
         // updateMany
-        if (model?.directives.canOutputGQL('updateMany')) {
+        if (model?.directives.isActionEligibleForGQL('updateMany')) {
             this.mutations.push({
                 name: `updateMany${model.plural}`,
                 comment: `Update multiple existing ${model.plural} records.`,
@@ -1050,7 +1050,7 @@ export default class SchemaBuilder {
         }
 
         // upsert
-        if (model?.directives.canOutputGQL('upsert')) {
+        if (model?.directives.isActionEligibleForGQL('upsert')) {
             this.mutations.push({
                 name: `upsert${model.singular}`,
                 comment: `Create a new ${model.singular} record if it does not exist, or updates it if it does.`,
@@ -1065,7 +1065,7 @@ export default class SchemaBuilder {
         }
 
         // delete
-        if (model?.directives.canOutputGQL('delete')) {
+        if (model?.directives.isActionEligibleForGQL('delete')) {
             this.mutations.push({
                 name: `delete${model.singular}`,
                 comment: `Delete a single existing ${model.singular} record.`,
@@ -1078,7 +1078,7 @@ export default class SchemaBuilder {
         }
 
         // deleteMany
-        if (model?.directives.canOutputGQL('deleteMany')) {
+        if (model?.directives.isActionEligibleForGQL('deleteMany')) {
             this.mutations.push({
                 name: `deleteMany${model.plural}`,
                 comment: `Delete multiple existing ${model.plural} records.`,
@@ -1093,7 +1093,7 @@ export default class SchemaBuilder {
 
     private createModelSubscriptions(model: ParsedModel) {
         // onCreated
-        if (model?.directives.canOutputGQL('onCreated')) {
+        if (model?.directives.isActionEligibleForGQL('onCreated')) {
             this.subscriptions.push({
                 name: `onCreated${model.singular}`,
                 comment: `Event triggered when a new ${model.singular} record is created.`,
@@ -1104,7 +1104,7 @@ export default class SchemaBuilder {
         }
 
         // onUpdated
-        if (model?.directives.canOutputGQL('onUpdated')) {
+        if (model?.directives.isActionEligibleForGQL('onUpdated')) {
             this.subscriptions.push({
                 name: `onUpdated${model.singular}`,
                 comment: `Event triggered when an existing ${model.singular} record is updated.`,
@@ -1115,7 +1115,7 @@ export default class SchemaBuilder {
         }
 
         // onUpserted
-        if (model?.directives.canOutputGQL('onUpserted')) {
+        if (model?.directives.isActionEligibleForGQL('onUpserted')) {
             this.subscriptions.push({
                 name: `onUpserted${model.singular}`,
                 comment: `Event triggered when a ${model.singular} record is either created or updated.`,
@@ -1126,7 +1126,7 @@ export default class SchemaBuilder {
         }
 
         // onDeleted
-        if (model?.directives.canOutputGQL('onDeleted')) {
+        if (model?.directives.isActionEligibleForGQL('onDeleted')) {
             this.subscriptions.push({
                 name: `onDeleted${model.singular}`,
                 comment: `Event triggered when an existing ${model.singular} record is deleted.`,
@@ -1137,7 +1137,7 @@ export default class SchemaBuilder {
         }
 
         // onMutated
-        if (model?.directives.canOutputGQL('onMutated')) {
+        if (model?.directives.isActionEligibleForGQL('onMutated')) {
             this.subscriptions.push({
                 name: `onMutated${model.singular}`,
                 comment: `Event triggered when a ${model.singular} record is either created, updated, or deleted.`,
@@ -1148,7 +1148,7 @@ export default class SchemaBuilder {
         }
 
         // onCreatedMany
-        if (model?.directives.canOutputGQL('onCreatedMany')) {
+        if (model?.directives.isActionEligibleForGQL('onCreatedMany')) {
             this.subscriptions.push({
                 name: `onCreatedMany${model.plural}`,
                 comment: `Event triggered when multiple new ${model.plural} records are created.`,
@@ -1159,7 +1159,7 @@ export default class SchemaBuilder {
         }
 
         // onUpdatedMany
-        if (model?.directives.canOutputGQL('onUpdatedMany')) {
+        if (model?.directives.isActionEligibleForGQL('onUpdatedMany')) {
             this.subscriptions.push({
                 name: `onUpdatedMany${model.plural}`,
                 comment: `Event triggered when multiple existing ${model.plural} records are updated.`,
@@ -1170,7 +1170,7 @@ export default class SchemaBuilder {
         }
 
         // onDeletedMany
-        if (model?.directives.canOutputGQL('onDeletedMany')) {
+        if (model?.directives.isActionEligibleForGQL('onDeletedMany')) {
             this.subscriptions.push({
                 name: `onDeletedMany${model.plural}`,
                 comment: `Event triggered when multiple existing ${model.plural} records are deleted.`,
@@ -1181,7 +1181,7 @@ export default class SchemaBuilder {
         }
 
         // onMutatedMany
-        if (model?.directives.canOutputGQL('onMutatedMany')) {
+        if (model?.directives.isActionEligibleForGQL('onMutatedMany')) {
             this.subscriptions.push({
                 name: `onMutatedMany${model.plural}`,
                 comment: `Event triggered when multiple ${model.plural} records are either created, updated, or deleted.`,

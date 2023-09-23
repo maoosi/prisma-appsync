@@ -3,14 +3,14 @@ import type { DMMF } from '@prisma/generator-helper'
 import { plural } from 'pluralize'
 import * as prettier from 'prettier'
 import { merge, uniq } from '@client/utils'
-import { type Directives, parseDirectives, parseSchemaAuthzModes } from './directives'
+import { type Directives, parseModelDirectives, extractUniqueAuthzModes } from './directives'
 
 export default class ClientConfigBuilder {
     private runtimeConfig: Required<RuntimeConfig> = { modelsMapping: {}, fieldsMapping: {}, operations: [] }
 
     public async createRuntimeConfig(dmmf: DMMF.Document, options?: { defaultDirective?: string }): Promise<RuntimeConfig> {
         // get all schema authz modes
-        const schemaAuthzModes = parseSchemaAuthzModes(dmmf.datamodel, options)
+        const schemaAuthzModes = extractUniqueAuthzModes(dmmf.datamodel, options)
 
         // schema models
         dmmf.datamodel?.models.forEach((modelDMMF: DMMF.Model) => {
@@ -59,7 +59,7 @@ export default class ClientConfigBuilder {
     }
 
     private parseModelDMMF(modelDMMF: DMMF.Model, options?: { defaultDirective?: string; schemaAuthzModes: string[] }): ParsedModel {
-        const directives = parseDirectives({
+        const directives = parseModelDirectives({
             modelDMMF,
             defaultDirective: options?.defaultDirective || '',
             schemaAuthzModes: options?.schemaAuthzModes || [],

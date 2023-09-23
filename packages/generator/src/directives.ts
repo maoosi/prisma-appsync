@@ -1,80 +1,66 @@
 import { merge, replaceAll, uniq, uniqBy } from '@client/utils'
 import type { DMMF } from '@prisma/generator-helper'
 
-const authzModes = ['apiKey', 'userPools', 'iam', 'oidc', 'lambda']
+const AuthzModes = ['apiKey', 'userPools', 'iam', 'oidc', 'lambda']
+const QueryActions = ['get', 'list', 'count']
+const MutationActions = ['create', 'createMany', 'update', 'updateMany', 'upsert', 'delete', 'deleteMany']
+const SubscriptionActions = ['onCreated', 'onUpdated', 'onUpserted', 'onDeleted', 'onMutated', 'onCreatedMany', 'onUpdatedMany', 'onDeletedMany', 'onMutatedMany']
+const Actions = [...QueryActions, ...MutationActions, ...SubscriptionActions]
 
-const actionsMapping = {
-    // queries
-    get: 'queries',
-    list: 'queries',
-    count: 'queries',
+function getActionType(action) {
+    if (QueryActions.includes(action))
+        return 'queries'
+    if (MutationActions.includes(action))
+        return 'mutations'
+    if (SubscriptionActions.includes(action))
+        return 'subscriptions'
+    else
+        return 'model'
+}
 
-    // mutations
-    create: 'mutations',
-    createMany: 'mutations',
-    update: 'mutations',
-    updateMany: 'mutations',
-    upsert: 'mutations',
-    delete: 'mutations',
-    deleteMany: 'mutations',
-
-    // subscriptions
-    onCreated: 'subscriptions',
-    onUpdated: 'subscriptions',
-    onUpserted: 'subscriptions',
-    onDeleted: 'subscriptions',
-    onMutated: 'subscriptions',
-    onCreatedMany: 'subscriptions',
-    onUpdatedMany: 'subscriptions',
-    onMutatedMany: 'subscriptions',
-    onDeletedMany: 'subscriptions',
-} as const
-
-export function parseSchemaAuthzModes(datamodel: DMMF.Datamodel, opts?: { defaultDirective?: string }): string[] {
+export function extractUniqueAuthzModes(
+    datamodel: DMMF.Datamodel, opts?: { defaultDirective?: string },
+): string[] {
     const schemaDirectives = datamodel?.models
         ?.map(modelDMMF => [opts?.defaultDirective, modelDMMF.documentation].filter(Boolean).join(' '))
         ?.join(' ') || ''
-
-    const regex = new RegExp(`(${authzModes.join('|')})`, 'gm')
+    const regex = new RegExp(`(${AuthzModes.join('|')})`, 'gm')
     const found = schemaDirectives.match(regex)
     const uniqAuthzModes = found ? uniq(found) : []
 
     return uniqAuthzModes
 }
 
-export function parseDirectives(
+function parseDocumentationMatches(regex, doc, find, replace) {
+    let directive = {}
+
+    const matches = doc.match(regex)
+
+    if (matches) {
+        for (let i = 0; i < matches.length; i++) {
+            const str = replaceAll(matches[i].replace(regex, '$1'), find, replace)
+            // eslint-disable-next-line no-new-func
+            directive = merge(directive, new Function(`return ({${str}})`)())
+        }
+    }
+
+    return directive
+}
+
+export function parseModelDirectives(
     { modelDMMF, defaultDirective, schemaAuthzModes }:
     { modelDMMF: DMMF.Model; defaultDirective: string; schemaAuthzModes: string[] },
 ): Directives {
     const doc = [defaultDirective, modelDMMF.documentation].filter(Boolean).join('\n')
 
-    let gql: DirectiveGql = {}
-    let auth: DirectiveAuth = {}
-
     const gqlRegex = /@(?:gql)\(([^)]+)\)/gm
     const authRegex = /@(?:auth)\(([^)]+)\)/gm
 
-    const find = authzModes
-    const replace = authzModes.map(authzMode => `"${authzMode}"`)
-    const gqlDirectives = doc.match(gqlRegex)
+    const find = AuthzModes
+    const replace = AuthzModes.map(authzMode => `"${authzMode}"`)
 
-    if (gqlDirectives) {
-        for (let i = 0; i < gqlDirectives.length; i++) {
-            const str = replaceAll(gqlDirectives[i].replace(gqlRegex, '$1'), find, replace)
-            // eslint-disable-next-line no-new-func
-            gql = merge(gql, new Function(`return ({${str}})`)())
-        }
-    }
-
-    const authDirectives = doc.match(authRegex)
-
-    if (authDirectives) {
-        for (let j = 0; j < authDirectives.length; j++) {
-            const str = replaceAll(authDirectives[j].replace(authRegex, '$1'), find, replace)
-            // eslint-disable-next-line no-new-func
-            auth = merge(auth, new Function(`return ({${str}})`)())
-        }
-    }
+    const gql: DirectiveGql = parseDocumentationMatches(gqlRegex, doc, find, replace)
+    const auth: DirectiveAuth = parseDocumentationMatches(authRegex, doc, find, replace)
 
     return {
         auth,
@@ -82,13 +68,13 @@ export function parseDirectives(
         getGQLDirectives: (action: Action | 'model') => {
             return getGQLDirectives({ modelDMMF, action, directives: { gql, auth }, schemaAuthzModes })
         },
-        canOutputGQL: (action: Action) => {
-            return canOutputGQL({ modelDMMF, action, directives: { gql, auth }, schemaAuthzModes })
+        isActionEligibleForGQL: (action: Action) => {
+            return isActionEligibleForGQL({ modelDMMF, action, directives: { gql, auth }, schemaAuthzModes })
         },
     }
 }
 
-function canOutputGQL(
+function isActionEligibleForGQL(
     { action, directives }: DirectiveHelperFunc,
 ): boolean {
     let can = false
@@ -103,7 +89,7 @@ function canOutputGQL(
      *  - Disabling mutations [cascade] on subscriptions
      */
 
-    const actionGroup = actionsMapping?.[action]
+    const actionGroup = getActionType(action)
 
     if (actionGroup === 'queries') {
         can = !(directives?.gql?.model === null || directives?.gql?.queries === null) && !(directives?.gql?.queries?.[action] === null)
@@ -125,6 +111,13 @@ function canOutputGQL(
     return can
 }
 
+function mergeIfArray(target, source) {
+    if (Array.isArray(source))
+        return [...target, ...source]
+
+    return target
+}
+
 function getAuthzDirectives(
     { action, directives }: DirectiveHelperFunc,
 ): Authz[] {
@@ -132,58 +125,36 @@ function getAuthzDirectives(
 
     if (action === 'model') {
         // model
-        if (directives.auth?.model && Array.isArray(directives.auth?.model))
-            authDirectives = [...authDirectives, ...directives.auth?.model as Authz[]]
+        authDirectives = mergeIfArray(authDirectives, directives.auth?.model)
 
         // queries, mutation, etc..
         ;['queries', 'mutations', 'subscriptions'].forEach((thisActionGroup) => {
-            if (Array.isArray(directives.auth?.[thisActionGroup])) {
-                authDirectives = [
-                    ...authDirectives,
-                    ...directives.auth?.[thisActionGroup] as unknown as Authz[],
-                ]
-            }
+            authDirectives = mergeIfArray(authDirectives, directives.auth?.[thisActionGroup])
         })
 
         // get, list, count, create, etc..
-        ;[
-            // queries
-            'get', 'list', 'count',
-            // mutations
-            'create', 'createMany', 'update', 'updateMany', 'upsert', 'delete', 'deleteMany',
-            // subscriptions
-            'onCreated', 'onUpdated', 'onUpserted', 'onDeleted', 'onMutated', 'onCreatedMany', 'onUpdatedMany', 'onDeletedMany', 'onMutatedMany',
-        ].forEach((thisAction) => {
-            const thisActionGroup = actionsMapping?.[thisAction]
-
-            if (Array.isArray(directives.auth?.[thisActionGroup]?.[thisAction])) {
-                authDirectives = [
-                    ...authDirectives,
-                    ...directives.auth[thisActionGroup]?.[thisAction] as Authz[],
-                ]
-            }
+        Actions.forEach((thisAction) => {
+            const thisActionGroup = getActionType(thisAction)
+            authDirectives = mergeIfArray(authDirectives, directives.auth?.[thisActionGroup]?.[thisAction])
         })
     }
     else {
-        const actionGroup = actionsMapping?.[action]
+        const actionGroup = getActionType(action)
 
         // model
-        if (Array.isArray(directives.auth?.model))
-            authDirectives = [...authDirectives, ...directives.auth?.model as Authz[]]
+        authDirectives = mergeIfArray(authDirectives, directives.auth?.model)
 
         // queries, mutation, etc..
-        if (Array.isArray(directives.auth?.[actionGroup]))
-            authDirectives = [...authDirectives, ...directives.auth?.[actionGroup] as unknown as Authz[]]
+        authDirectives = mergeIfArray(authDirectives, directives.auth?.[actionGroup])
 
         // get, list, count, create, etc..
-        if (Array.isArray(directives.auth?.[actionGroup]?.[action]))
-            authDirectives = [...authDirectives, ...directives.auth[actionGroup]?.[action] as Authz[]]
+        authDirectives = mergeIfArray(authDirectives, directives.auth?.[actionGroup]?.[action])
     }
 
-    return mergePrismaAuthDirectives(authDirectives)
+    return combineUniqueAuthDirectives(authDirectives)
 }
 
-function mergePrismaAuthDirectives(authDirectives: Authz[]): Authz[] {
+function combineUniqueAuthDirectives(authDirectives: Authz[]): Authz[] {
     return uniqBy(
         Array.from(
             authDirectives
@@ -254,7 +225,7 @@ export type Directives = {
     gql: DirectiveGql
     auth: DirectiveAuth
     getGQLDirectives: (action: Action | 'model') => string[]
-    canOutputGQL: (action: Action) => boolean
+    isActionEligibleForGQL: (action: Action) => boolean
 }
 
 type Authz = {

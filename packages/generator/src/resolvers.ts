@@ -1,14 +1,14 @@
 import type { DMMF } from '@prisma/generator-helper'
 import { plural } from 'pluralize'
 import * as prettier from 'prettier'
-import { type Directives, parseDirectives, parseSchemaAuthzModes } from './directives'
+import { type Directives, parseModelDirectives, extractUniqueAuthzModes } from './directives'
 
 export default class ResolversBuilder {
     private resolvers: Resolver[] = []
 
     public async createResolvers(dmmf: DMMF.Document, options?: { defaultDirective?: string }): Promise<string> {
         // get all schema authz modes
-        const schemaAuthzModes = parseSchemaAuthzModes(dmmf.datamodel, options)
+        const schemaAuthzModes = extractUniqueAuthzModes(dmmf.datamodel, options)
 
         // schema models
         dmmf.datamodel?.models.forEach((modelDMMF: DMMF.Model) => {
@@ -43,7 +43,7 @@ export default class ResolversBuilder {
     }
 
     private parseModelDMMF(modelDMMF: DMMF.Model, options?: { defaultDirective?: string; schemaAuthzModes: string[] }): ParsedModel {
-        const directives = parseDirectives({
+        const directives = parseModelDirectives({
             modelDMMF,
             defaultDirective: options?.defaultDirective || '',
             schemaAuthzModes: options?.schemaAuthzModes || [],
@@ -70,7 +70,7 @@ export default class ResolversBuilder {
 
     private createQueryResolvers(model: ParsedModel) {
         // get
-        if (model?.directives.canOutputGQL('get')) {
+        if (model?.directives.isActionEligibleForGQL('get')) {
             this.resolvers.push({
                 typeName: 'Query',
                 fieldName: `get${model.singular}`,
@@ -79,7 +79,7 @@ export default class ResolversBuilder {
         }
 
         // list
-        if (model?.directives.canOutputGQL('list')) {
+        if (model?.directives.isActionEligibleForGQL('list')) {
             this.resolvers.push({
                 typeName: 'Query',
                 fieldName: `list${model.plural}`,
@@ -88,7 +88,7 @@ export default class ResolversBuilder {
         }
 
         // count
-        if (model?.directives.canOutputGQL('count')) {
+        if (model?.directives.isActionEligibleForGQL('count')) {
             this.resolvers.push({
                 typeName: 'Query',
                 fieldName: `count${model.plural}`,
@@ -99,7 +99,7 @@ export default class ResolversBuilder {
 
     private createMutationResolvers(model: ParsedModel) {
         // create
-        if (model?.directives.canOutputGQL('create')) {
+        if (model?.directives.isActionEligibleForGQL('create')) {
             this.resolvers.push({
                 typeName: 'Mutation',
                 fieldName: `create${model.singular}`,
@@ -108,7 +108,7 @@ export default class ResolversBuilder {
         }
 
         // createMany
-        if (model?.directives.canOutputGQL('createMany')) {
+        if (model?.directives.isActionEligibleForGQL('createMany')) {
             this.resolvers.push({
                 typeName: 'Mutation',
                 fieldName: `createMany${model.plural}`,
@@ -117,7 +117,7 @@ export default class ResolversBuilder {
         }
 
         // update
-        if (model?.directives.canOutputGQL('update')) {
+        if (model?.directives.isActionEligibleForGQL('update')) {
             this.resolvers.push({
                 typeName: 'Mutation',
                 fieldName: `update${model.singular}`,
@@ -126,7 +126,7 @@ export default class ResolversBuilder {
         }
 
         // updateMany
-        if (model?.directives.canOutputGQL('updateMany')) {
+        if (model?.directives.isActionEligibleForGQL('updateMany')) {
             this.resolvers.push({
                 typeName: 'Mutation',
                 fieldName: `updateMany${model.plural}`,
@@ -135,7 +135,7 @@ export default class ResolversBuilder {
         }
 
         // upsert
-        if (model?.directives.canOutputGQL('upsert')) {
+        if (model?.directives.isActionEligibleForGQL('upsert')) {
             this.resolvers.push({
                 typeName: 'Mutation',
                 fieldName: `upsert${model.singular}`,
@@ -144,7 +144,7 @@ export default class ResolversBuilder {
         }
 
         // delete
-        if (model?.directives.canOutputGQL('delete')) {
+        if (model?.directives.isActionEligibleForGQL('delete')) {
             this.resolvers.push({
                 typeName: 'Mutation',
                 fieldName: `delete${model.singular}`,
@@ -153,7 +153,7 @@ export default class ResolversBuilder {
         }
 
         // deleteMany
-        if (model?.directives.canOutputGQL('deleteMany')) {
+        if (model?.directives.isActionEligibleForGQL('deleteMany')) {
             this.resolvers.push({
                 typeName: 'Mutation',
                 fieldName: `deleteMany${model.plural}`,
@@ -164,7 +164,7 @@ export default class ResolversBuilder {
 
     private createSubscriptionResolvers(model: ParsedModel) {
         // onCreated
-        if (model?.directives.canOutputGQL('onCreated')) {
+        if (model?.directives.isActionEligibleForGQL('onCreated')) {
             this.resolvers.push({
                 typeName: 'Subscription',
                 fieldName: `onCreated${model.singular}`,
@@ -173,7 +173,7 @@ export default class ResolversBuilder {
         }
 
         // onUpdated
-        if (model?.directives.canOutputGQL('onUpdated')) {
+        if (model?.directives.isActionEligibleForGQL('onUpdated')) {
             this.resolvers.push({
                 typeName: 'Subscription',
                 fieldName: `onUpdated${model.singular}`,
@@ -182,7 +182,7 @@ export default class ResolversBuilder {
         }
 
         // onUpserted
-        if (model?.directives.canOutputGQL('onUpserted')) {
+        if (model?.directives.isActionEligibleForGQL('onUpserted')) {
             this.resolvers.push({
                 typeName: 'Subscription',
                 fieldName: `onUpserted${model.singular}`,
@@ -191,7 +191,7 @@ export default class ResolversBuilder {
         }
 
         // onDeleted
-        if (model?.directives.canOutputGQL('onDeleted')) {
+        if (model?.directives.isActionEligibleForGQL('onDeleted')) {
             this.resolvers.push({
                 typeName: 'Subscription',
                 fieldName: `onDeleted${model.singular}`,
@@ -200,7 +200,7 @@ export default class ResolversBuilder {
         }
 
         // onMutated
-        if (model?.directives.canOutputGQL('onMutated')) {
+        if (model?.directives.isActionEligibleForGQL('onMutated')) {
             this.resolvers.push({
                 typeName: 'Subscription',
                 fieldName: `onMutated${model.singular}`,
@@ -209,7 +209,7 @@ export default class ResolversBuilder {
         }
 
         // onCreatedMany
-        if (model?.directives.canOutputGQL('onCreatedMany')) {
+        if (model?.directives.isActionEligibleForGQL('onCreatedMany')) {
             this.resolvers.push({
                 typeName: 'Subscription',
                 fieldName: `onCreatedMany${model.plural}`,
@@ -218,7 +218,7 @@ export default class ResolversBuilder {
         }
 
         // onUpdatedMany
-        if (model?.directives.canOutputGQL('onUpdatedMany')) {
+        if (model?.directives.isActionEligibleForGQL('onUpdatedMany')) {
             this.resolvers.push({
                 typeName: 'Subscription',
                 fieldName: `onUpdatedMany${model.plural}`,
@@ -227,7 +227,7 @@ export default class ResolversBuilder {
         }
 
         // onDeletedMany
-        if (model?.directives.canOutputGQL('onDeletedMany')) {
+        if (model?.directives.isActionEligibleForGQL('onDeletedMany')) {
             this.resolvers.push({
                 typeName: 'Subscription',
                 fieldName: `onDeletedMany${model.plural}`,
@@ -236,7 +236,7 @@ export default class ResolversBuilder {
         }
 
         // onMutatedMany
-        if (model?.directives.canOutputGQL('onMutatedMany')) {
+        if (model?.directives.isActionEligibleForGQL('onMutatedMany')) {
             this.resolvers.push({
                 typeName: 'Subscription',
                 fieldName: `onMutatedMany${model.plural}`,
