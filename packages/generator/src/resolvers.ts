@@ -1,7 +1,7 @@
 import type { DMMF } from '@prisma/generator-helper'
 import { plural } from 'pluralize'
 import * as prettier from 'prettier'
-import { type Directives, extractUniqueAuthzModes, parseModelDirectives } from './directives'
+import { type ModelDirectives, extractUniqueAuthzModes, parseModelDirectives } from './directives'
 
 export default class ResolversBuilder {
     private resolvers: Resolver[] = []
@@ -249,7 +249,7 @@ export default class ResolversBuilder {
 type ParsedModel = {
     singular: string
     plural: string
-    directives: Directives
+    directives: ModelDirectives
 }
 
 export type Resolver = {

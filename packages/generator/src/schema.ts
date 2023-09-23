@@ -5,7 +5,7 @@ import camelCase from 'lodash/camelCase'
 import upperFirst from 'lodash/upperFirst'
 import { uniqBy } from '@client/utils'
 import * as prettier from 'prettier'
-import { type Directives, extractUniqueAuthzModes, parseModelDirectives } from './directives'
+import { type ModelDirectives, extractUniqueAuthzModes, parseModelDirectives } from './directives'
 
 const pascalCase = flow(camelCase, upperFirst)
 
@@ -1389,7 +1389,7 @@ type ParsedModel = {
             fields: GqlField[]
         }[]
     }
-    directives: Directives
+    directives: ModelDirectives
     getScalar: (field: DMMF.Field, inject?: FieldScalarOptions) => string
     documentation: string
     defaultDirective: string

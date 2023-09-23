@@ -50,7 +50,7 @@ function parseDocumentationMatches(regex, doc, find, replace) {
 export function parseModelDirectives(
     { modelDMMF, defaultDirective, schemaAuthzModes }:
     { modelDMMF: DMMF.Model; defaultDirective: string; schemaAuthzModes: string[] },
-): Directives {
+): ModelDirectives {
     const doc = [defaultDirective, modelDMMF.documentation].filter(Boolean).join('\n')
 
     const gqlRegex = /@(?:gql)\(([^)]+)\)/gm
@@ -79,8 +79,11 @@ export function parseModelDirectives(
             const authzDirectives = getAuthzDirectivesForModel(directives)
             return convertToGQLDirectives(authzDirectives, schemaAuthzModes)
         },
+        isFieldEligibleForGQL: (field: string) => {
+            return isFieldEligibleForGQL({ field, directives })
+        },
         isActionEligibleForGQL: (action: Action) => {
-            return isActionEligibleForGQL({ modelDMMF, action, directives: { gql, auth }, schemaAuthzModes })
+            return isActionEligibleForGQL({ action, directives })
         },
     }
 }
@@ -94,7 +97,7 @@ function isDirectiveDefined(directive, ...properties) {
 }
 
 function isActionEligibleForGQL(
-    { action, directives }: DirectiveHelperFunc,
+    { action, directives }: { action: Action; directives: Directives },
 ): boolean {
     let can = false
 
@@ -123,6 +126,12 @@ function isActionEligibleForGQL(
         can = isDirectiveDefined(directives?.gql, 'model', 'subscriptions', 'mutations', `subscriptions.${action}`)
 
     return can
+}
+
+function isFieldEligibleForGQL(
+    { field, directives }: { field: string; directives: Directives },
+): boolean {
+    return isDirectiveDefined(directives?.gql, `fields.${field}`)
 }
 
 function mergeIfArray(target, source) {
@@ -236,10 +245,16 @@ export type Action = 'get' | 'list' | 'count' | 'create' | 'createMany' | 'updat
 export type Directives = {
     gql: DirectiveGql
     auth: DirectiveAuth
+}
+
+export type ModelDirectives = {
+    gql: DirectiveGql
+    auth: DirectiveAuth
     getGQLDirectivesForAction: (action: Action) => string[]
     getGQLDirectivesForField: (field: string) => string[]
     getGQLDirectivesForModel: () => string[]
     isActionEligibleForGQL: (action: Action) => boolean
+    isFieldEligibleForGQL: (field: string) => boolean
 }
 
 type Authz = {
@@ -262,14 +277,4 @@ type DirectiveAuth = {
     queries?: Record<'get' | 'list' | 'count', Authz[]>
     mutations?: Record<'create' | 'createMany' | 'update' | 'updateMany' | 'upsert' | 'delete' | 'deleteMany', Authz[]>
     subscriptions?: Record<'onCreated' | 'onUpdated' | 'onUpserted' | 'onDeleted' | 'onMutated' | 'onCreatedMany' | 'onUpdatedMany' | 'onMutatedMany' | 'onDeletedMany', Authz[]>
-}
-
-type DirectiveHelperFunc = {
-    modelDMMF: DMMF.Model
-    action: Action | 'model'
-    directives: {
-        gql: DirectiveGql
-        auth: DirectiveAuth
-    }
-    schemaAuthzModes: string[]
 }

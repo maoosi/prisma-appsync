@@ -3,7 +3,7 @@ import type { DMMF } from '@prisma/generator-helper'
 import { plural } from 'pluralize'
 import * as prettier from 'prettier'
 import { merge, uniq } from '@client/utils'
-import { type Directives, parseModelDirectives, extractUniqueAuthzModes } from './directives'
+import { type ModelDirectives, extractUniqueAuthzModes, parseModelDirectives } from './directives'
 
 export default class ClientConfigBuilder {
     private runtimeConfig: Required<RuntimeConfig> = { modelsMapping: {}, fieldsMapping: {}, operations: [] }
@@ -107,62 +107,83 @@ export default class ClientConfigBuilder {
 
         // fields mapping + operations
         model.fields.forEach((field) => {
-            // get
-            map({ operation: `get${model.singular}`, field })
+            if (model?.directives.isFieldEligibleForGQL(field.name)) {
+                // get
+                if (model?.directives.isActionEligibleForGQL('get'))
+                    map({ operation: `get${model.singular}`, field })
 
-            // list
-            map({ operation: `list${model.plural}`, field })
+                // list
+                if (model?.directives.isActionEligibleForGQL('list'))
+                    map({ operation: `list${model.plural}`, field })
 
-            // count
-            map({ operation: `count${model.plural}`, field })
+                // count
+                if (model?.directives.isActionEligibleForGQL('count'))
+                    map({ operation: `count${model.plural}`, field })
 
-            // create
-            map({ operation: `create${model.singular}`, field })
+                // create
+                if (model?.directives.isActionEligibleForGQL('create'))
+                    map({ operation: `create${model.singular}`, field })
 
-            // createMany
-            map({ operation: `createMany${model.plural}`, field })
+                // createMany
+                if (model?.directives.isActionEligibleForGQL('createMany'))
+                    map({ operation: `createMany${model.plural}`, field })
 
-            // update
-            map({ operation: `update${model.singular}`, field })
+                // update
+                if (model?.directives.isActionEligibleForGQL('update'))
+                    map({ operation: `update${model.singular}`, field })
 
-            // updateMany
-            map({ operation: `updateMany${model.plural}`, field })
+                // updateMany
+                if (model?.directives.isActionEligibleForGQL('updateMany'))
+                    map({ operation: `updateMany${model.plural}`, field })
 
-            // upsert
-            map({ operation: `upsert${model.singular}`, field })
+                // upsert
+                if (model?.directives.isActionEligibleForGQL('upsert'))
+                    map({ operation: `upsert${model.singular}`, field })
 
-            // delete
-            map({ operation: `delete${model.singular}`, field })
+                // delete
+                if (model?.directives.isActionEligibleForGQL('delete'))
+                    map({ operation: `delete${model.singular}`, field })
 
-            // deleteMany
-            map({ operation: `deleteMany${model.plural}`, field })
+                // deleteMany
+                if (model?.directives.isActionEligibleForGQL('deleteMany'))
+                    map({ operation: `deleteMany${model.plural}`, field })
 
-            // onCreated
-            map({ operation: `onCreated${model.singular}`, field })
+                // onCreated
+                if (model?.directives.isActionEligibleForGQL('onCreated'))
+                    map({ operation: `onCreated${model.singular}`, field })
 
-            // onUpdated
-            map({ operation: `onUpdated${model.singular}`, field })
+                // onUpdated
+                if (model?.directives.isActionEligibleForGQL('onUpdated'))
+                    map({ operation: `onUpdated${model.singular}`, field })
 
-            // onUpserted
-            map({ operation: `onUpserted${model.singular}`, field })
+                // onUpserted
+                if (model?.directives.isActionEligibleForGQL('onUpserted'))
+                    map({ operation: `onUpserted${model.singular}`, field })
 
-            // onDeleted
-            map({ operation: `onDeleted${model.singular}`, field })
+                // onDeleted
+                if (model?.directives.isActionEligibleForGQL('onDeleted'))
+                    map({ operation: `onDeleted${model.singular}`, field })
 
-            // onMutated
-            map({ operation: `onMutated${model.singular}`, field })
+                // onMutated
+                if (model?.directives.isActionEligibleForGQL('onMutated'))
+                    map({ operation: `onMutated${model.singular}`, field })
 
-            // onCreatedMany
-            map({ operation: `onCreatedMany${model.plural}`, field })
+                // onCreatedMany
+                if (model?.directives.isActionEligibleForGQL('onCreatedMany'))
+                    map({ operation: `onCreatedMany${model.plural}`, field })
 
-            // onUpdatedMany
-            map({ operation: `onUpdatedMany${model.plural}`, field })
+                // onUpdatedMany
+                if (model?.directives.isActionEligibleForGQL('onUpdatedMany'))
+                    map({ operation: `onUpdatedMany${model.plural}`, field })
 
-            // onDeletedMany
-            map({ operation: `onDeletedMany${model.plural}`, field })
+                // onDeletedMany
+                if (model?.directives.isActionEligibleForGQL('onDeletedMany'))
+                    map({ operation: `onDeletedMany${model.plural}`, field })
 
-            // onMutatedMany
-            map({ operation: `onMutatedMany${model.plural}`, field })
+                // onMutatedMany
+                if (model?.directives.isActionEligibleForGQL('onMutatedMany'))
+                    map({ operation: `onMutatedMany${model.plural}`, field })
+            }
         })
 
         return {
@@ -177,7 +198,7 @@ type ParsedModel = {
     prismaRef: string
     singular: string
     plural: string
-    directives: Directives
+    directives: ModelDirectives
     fields: DMMF.Field[]
 }
 
