@@ -744,16 +744,16 @@ export default class SchemaBuilder {
                         fields.push({ name: 'connect', scalar: `[${field.type}WhereUniqueInput!]` })
 
                         if (refModel?.directives.isActionEligibleForGQL('create')) {
-                            fields.push({ name: 'create', scalar: `[${field.type}CreateInput!]` })
-                            fields.push({ name: 'connectOrCreate', scalar: `[${field.type}ConnectOrCreateInput!]` })
+                            fields.push({ name: 'create', scalar: `[${field.type}CreateWithout${model.singular}Input!]` })
+                            fields.push({ name: 'connectOrCreate', scalar: `[${field.type}ConnectOrCreateWithout${model.singular}Input!]` })
                         }
                     }
                     else {
                         fields.push({ name: 'connect', scalar: `${field.type}WhereUniqueInput` })
 
                         if (refModel?.directives.isActionEligibleForGQL('create')) {
-                            fields.push({ name: 'create', scalar: `${field.type}CreateInput` })
-                            fields.push({ name: 'connectOrCreate', scalar: `${field.type}ConnectOrCreateInput` })
+                            fields.push({ name: 'create', scalar: `${field.type}CreateWithout${model.singular}Input` })
+                            fields.push({ name: 'connectOrCreate', scalar: `${field.type}ConnectOrCreateWithout${model.singular}Input` })
                         }
                     }
 
@@ -782,15 +782,15 @@ export default class SchemaBuilder {
                         fields.push({ name: 'set', scalar: `[${field.type}WhereUniqueInput!]` })
 
                         if (refModel?.directives.isActionEligibleForGQL('create')) {
-                            fields.push({ name: 'create', scalar: `[${field.type}CreateInput!]` })
-                            fields.push({ name: 'connectOrCreate', scalar: `[${field.type}ConnectOrCreateInput!]` })
+                            fields.push({ name: 'create', scalar: `[${field.type}CreateWithout${model.singular}Input!]` })
+                            fields.push({ name: 'connectOrCreate', scalar: `[${field.type}ConnectOrCreateWithout${model.singular}Input!]` })
                         }
 
                         if (refModel?.directives.isActionEligibleForGQL('update'))
-                            fields.push({ name: 'update', scalar: `[${field.type}UpdateUniqueInput!]` })
+                            fields.push({ name: 'update', scalar: `[${field.type}UpdateWithWhereUniqueWithout${model.singular}Input!]` })
 
                         if (refModel?.directives.isActionEligibleForGQL('upsert'))
-                            fields.push({ name: 'upsert', scalar: `[${field.type}UpsertUniqueInput!]` })
+                            fields.push({ name: 'upsert', scalar: `[${field.type}UpsertWithWhereUniqueWithout${model.singular}Input!]` })
 
                         if (refModel?.directives.isActionEligibleForGQL('delete'))
                             fields.push({ name: 'delete', scalar: `[${field.type}ExtendedWhereUniqueInput!]` })
@@ -806,15 +806,15 @@ export default class SchemaBuilder {
                         fields.push({ name: 'disconnect', scalar: 'Boolean' })
 
                         if (refModel?.directives.isActionEligibleForGQL('create')) {
-                            fields.push({ name: 'create', scalar: `${field.type}CreateInput` })
-                            fields.push({ name: 'connectOrCreate', scalar: `${field.type}ConnectOrCreateInput` })
+                            fields.push({ name: 'create', scalar: `${field.type}CreateWithout${model.singular}Input` })
+                            fields.push({ name: 'connectOrCreate', scalar: `${field.type}ConnectOrCreateWithout${model.singular}Input` })
                         }
 
                         if (refModel?.directives.isActionEligibleForGQL('update'))
-                            fields.push({ name: 'update', scalar: `${field.type}UpdateInput` })
+                            fields.push({ name: 'update', scalar: `${field.type}UpdateWithout${model.singular}Input` })
 
                         if (refModel?.directives.isActionEligibleForGQL('upsert'))
-                            fields.push({ name: 'upsert', scalar: `${field.type}UpsertInput` })
+                            fields.push({ name: 'upsert', scalar: `${field.type}UpsertWithout${model.singular}Input` })
 
                         if (refModel?.directives.isActionEligibleForGQL('delete'))
                             fields.push({ name: 'delete', scalar: 'Boolean' })
@@ -854,6 +854,50 @@ export default class SchemaBuilder {
                         }
                     }) || [],
             })
+
+            model.fields
+                ?.filter(field => field?.relationName)
+                ?.forEach((fieldWithRelation) => {
+                    this.inputs.push({
+                        name: `${model.singular}CreateWithout${upperFirst(fieldWithRelation.type)}Input`,
+                        fields: model.fields
+                            ?.filter((field) => {
+                                return field.name !== fieldWithRelation.name
+                                    && !fieldWithRelation.relationFromFields?.includes(field.name)
+                            })
+                            ?.map((field) => {
+                                if (field?.relationName) {
+                                    const scalar = `${model.singular}${upperFirst(field.name)}CreateNestedInput`
+
+                                    return {
+                                        name: field.name,
+                                        scalar: model.getScalar(field, { scalar, required: false, list: false }),
+                                    }
+                                }
+                                else {
+                                    return {
+                                        name: field.name,
+                                        scalar: model.getScalar(field),
+                                        defaultValue: field.default,
+                                    }
+                                }
+                            }) || [],
+                    })
+                })
+        }
+
+        if (model?.directives.isActionEligibleForGQL('create')) {
+            model.fields
+                ?.filter(field => field?.relationName)
+                ?.forEach((fieldWithRelation) => {
+                    this.inputs.push({
+                        name: `${model.singular}ConnectOrCreateWithout${upperFirst(fieldWithRelation.type)}Input`,
+                        fields: [
+                            { name: 'where', scalar: `${model.singular}WhereUniqueInput!` },
+                            { name: 'create', scalar: `${model.singular}CreateWithout${upperFirst(fieldWithRelation.type)}Input!` },
+                        ],
+                    })
+                })
         }
 
         if (model?.directives.isActionEligibleForGQL('createMany')) {
@@ -889,20 +933,50 @@ export default class SchemaBuilder {
                     }) || [],
             })
 
+            model.fields
+                ?.filter(field => field?.relationName)
+                ?.forEach((fieldWithRelation) => {
+                    this.inputs.push({
+                        name: `${model.singular}UpdateWithout${upperFirst(fieldWithRelation.type)}Input`,
+                        fields: model.fields
+                            ?.filter((field) => {
+                                return field.name !== fieldWithRelation.name
+                                    && !fieldWithRelation.relationFromFields?.includes(field.name)
+                            })
+                            ?.map((field) => {
+                                if (field?.relationName) {
+                                    const scalar = `${model.singular}${upperFirst(field.name)}UpdateNestedInput`
+
+                                    return {
+                                        name: field.name,
+                                        scalar: model.getScalar(field, { scalar, required: false, list: false }),
+                                    }
+                                }
+                                else {
+                                    return { name: field.name, scalar: model.getScalar(field, { required: false }) }
+                                }
+                            }) || [],
+                    })
+                })
+
+            model.fields
+                ?.filter(field => field?.relationName)
+                ?.forEach((fieldWithRelation) => {
+                    this.inputs.push({
+                        name: `${model.singular}UpdateWithWhereUniqueWithout${upperFirst(fieldWithRelation.type)}Input`,
+                        fields: [
+                            { name: 'data', scalar: `${model.singular}UpdateWithout${upperFirst(fieldWithRelation.type)}Input!` },
+                            { name: 'where', scalar: `${model.singular}ExtendedWhereUniqueInput!` },
+                        ],
+                    })
+                })
+
             if (model.gqlFields?.operations?.length) {
                 this.inputs.push({
                     name: `${model.singular}OperationInput`,
                     fields: model.gqlFields.operations,
                 })
             }
-
-            this.inputs.push({
-                name: `${model.singular}UpdateUniqueInput`,
-                fields: [
-                    { name: 'data', scalar: `${model.singular}UpdateInput!` },
-                    { name: 'where', scalar: `${model.singular}ExtendedWhereUniqueInput!` },
-                ],
-            })
         }
 
         if (model?.directives.isActionEligibleForGQL('updateMany')) {
@@ -916,32 +990,30 @@ export default class SchemaBuilder {
         }
 
         if (model?.directives.isActionEligibleForGQL('upsert')) {
-            this.inputs.push({
-                name: `${model.singular}UpsertInput`,
-                fields: [
-                    { name: 'create', scalar: `${model.singular}CreateInput!` },
-                    { name: 'update', scalar: `${model.singular}UpdateInput!` },
-                ],
-            })
+            model.fields
+                ?.filter(field => field?.relationName)
+                ?.forEach((fieldWithRelation) => {
+                    this.inputs.push({
+                        name: `${model.singular}UpsertWithout${upperFirst(fieldWithRelation.type)}Input`,
+                        fields: [
+                            { name: 'create', scalar: `${model.singular}CreateWithout${upperFirst(fieldWithRelation.type)}Input!` },
+                            { name: 'update', scalar: `${model.singular}UpdateWithout${upperFirst(fieldWithRelation.type)}Input!` },
+                        ],
+                    })
+                })
 
-            this.inputs.push({
-                name: `${model.singular}UpsertUniqueInput`,
-                fields: [
-                    { name: 'where', scalar: `${model.singular}ExtendedWhereUniqueInput!` },
-                    { name: 'create', scalar: `${model.singular}CreateInput!` },
-                    { name: 'update', scalar: `${model.singular}UpdateInput!` },
-                ],
-            })
-        }
-
-        if (model?.directives.isActionEligibleForGQL('create')) {
-            this.inputs.push({
-                name: `${model.singular}ConnectOrCreateInput`,
-                fields: [
-                    { name: 'where', scalar: `${model.singular}WhereUniqueInput!` },
-                    { name: 'create', scalar: `${model.singular}CreateInput!` },
-                ],
-            })
+            model.fields
+                ?.filter(field => field?.relationName)
+                ?.forEach((fieldWithRelation) => {
+                    this.inputs.push({
+                        name: `${model.singular}UpsertWithWhereUniqueWithout${upperFirst(fieldWithRelation.type)}Input`,
+                        fields: [
+                            { name: 'where', scalar: `${model.singular}ExtendedWhereUniqueInput!` },
+                            { name: 'create', scalar: `${model.singular}CreateWithout${upperFirst(fieldWithRelation.type)}Input!` },
+                            { name: 'update', scalar: `${model.singular}UpdateWithout${upperFirst(fieldWithRelation.type)}Input!` },
+                        ],
+                    })
+                })
         }
     }
 
@@ -1265,111 +1337,100 @@ export default class SchemaBuilder {
     }
 
     private async buildAppSyncSchema() {
-        const types = [
-            this.types.map((t) => {
-                return [
-                    `type ${t.name}${t?.directives?.length ? ` ${t.directives.join(' ')}` : ''} {`,
-                    t.fields.map((f) => {
-                        const d = f?.directives ? ` ${f?.directives?.join(' ')}` : ''
-                        return `${f.name}: ${f.scalar}${d}`
-                    }).join('\n'),
-                    '}',
-                ].join('\n')
-            }).join('\n\n'),
-        ].join('\n')
-
-        const enums = [
-            this.enums.map((e) => {
-                return [
-                    `enum ${e.name} {`,
-                    e.options.join('\n'),
-                    '}',
-                ].join('\n')
-            }).join('\n\n'),
-        ].join('\n')
-
-        const inputs = [
-            this.inputs.map((i) => {
-                return [
-                    `input ${i.name} {`,
-                    i.fields.map((f) => {
-                        const defaultValue = ['boolean', 'string', 'number'].includes(typeof f.defaultValue)
-                            ? ` = ${f.defaultValue}`
-                            : ''
-                        return `${f.name}: ${f.scalar}${defaultValue}`
-                    }).join('\n'),
-                    '}',
-                ].join('\n')
-            }).join('\n\n'),
-        ].join('\n')
-
-        const queries = this.queries?.length
-            ? [
-                    'type Query {',
-                    this.queries.map((q) => {
-                        const args = q.args.map(arg => `${arg.name}: ${arg.scalar}`)
-                        return [
-                            q?.comment ? `"""\n${q.comment}\n"""` : '',
-                            [
-                                q.name,
-                                args?.length ? `(\n${args.join(',\n')}\n)` : '',
-                        `: ${q.scalar}`,
-                        q?.directives?.join(' '),
-                            ].filter(Boolean).join(''),
-                        ].filter(Boolean).join('\n')
-                    }).join('\n\n'),
-                    '}',
-                ].join('\n')
-            : ''
-
-        const mutations = this.mutations?.length
-            ? [
-                    'type Mutation {',
-                    this.mutations.map((m) => {
-                        const args = m.args.map(arg => `${arg.name}: ${arg.scalar}`)
-                        return [
-                            m?.comment ? `"""\n${m.comment}\n"""` : '',
-                            [
-                                m.name,
-                                args?.length ? `(\n${args.join(',\n')}\n)` : '',
-                        `: ${m.scalar}`,
-                        m?.directives?.join(' '),
-                            ].filter(Boolean).join(''),
-                        ].filter(Boolean).join('\n')
-                    }).join('\n\n'),
-                    '}',
-                ].join('\n')
-            : ''
-
-        const subscriptions = this.subscriptions?.length
-            ? [
-                    'type Subscription {',
-                    this.subscriptions.map((s) => {
-                        const args = s.args.map(arg => `${arg.name}: ${arg.scalar}`)
-                        return [
-                            s?.comment ? `"""\n${s.comment}\n"""` : '',
-                            [
-                                s.name,
-                                args?.length ? `(\n${args.join(',\n')}\n)` : '',
-                        `: ${s.scalar}`,
-                        s.directives.join(' '),
-                            ].filter(Boolean).join(''),
-                        ].filter(Boolean).join('\n')
-                    }).join('\n\n'),
-                    '}',
-                ].join('\n')
-            : ''
-
         const doc = [
-            types,
-            enums,
-            inputs,
-            queries,
-            mutations,
-            subscriptions,
+            this.buildTypes(),
+            this.buildEnums(),
+            this.buildInputs(),
+            this.buildQueries(),
+            this.buildMutations(),
+            this.buildSubscriptions(),
         ].join('\n\n')
 
         return this.perttyGraphQL(doc)
+    }
+
+    private buildTypes() {
+        return this.types.map((t) => {
+            return [
+                `type ${t.name}${t?.directives?.length ? ` ${t.directives.join(' ')}` : ''} {`,
+                t.fields.map((f) => {
+                    const d = f?.directives ? ` ${f?.directives?.join(' ')}` : ''
+                    return `${f.name}: ${f.scalar}${d}`
+                }).join('\n'),
+                '}',
+            ].join('\n')
+        }).join('\n\n')
+    }
+
+    private buildEnums() {
+        return this.enums.map((e) => {
+            return [
+                `enum ${e.name} {`,
+                e.options.join('\n'),
+                '}',
+            ].join('\n')
+        }).join('\n\n')
+    }
+
+    private buildInputs() {
+        return uniqBy(this.inputs, 'name').map((i) => {
+            return [
+                `input ${i.name} {`,
+                i.fields.map((f) => {
+                    const defaultValue = ['boolean', 'string', 'number'].includes(typeof f.defaultValue)
+                        ? ` = ${f.defaultValue}`
+                        : ''
+                    return `${f.name}: ${f.scalar}${defaultValue}`
+                }).join('\n'),
+                '}',
+            ].join('\n')
+        }).join('\n\n')
+    }
+
+    private buildQueries() {
+        return this.buildOperations(this.queries, 'Query')
+    }
+
+    private buildMutations() {
+        return this.buildOperations(this.mutations, 'Mutation')
+    }
+
+    private buildSubscriptions() {
+        return this.buildOperations(this.subscriptions, 'Subscription')
+    }
+
+    private getFormattedObject(objects, keyword) {
+        return objects.map((object) => {
+            return [
+                `${keyword} ${object.name}${object.directives?.length ? ` ${object.directives.join(' ')}` : ''} {`,
+                object.fields?.map(field => `${field.name}: ${field.scalar}${field.directives ? ` ${field.directives.join(' ')}` : ''}`).join('\n'),
+                '}',
+            ].join('\n')
+        }).join('\n\n')
+    }
+
+    private buildOperations(operations, keyword) {
+        return operations?.length
+            ? [
+                `type ${keyword} {`,
+                operations.map(operation => this.formatOperation(operation)).join('\n\n'),
+                '}',
+                ].join('\n')
+            : ''
+    }
+
+    private formatOperation(operation) {
+        const args = operation.args?.map(arg => `${arg.name}: ${arg.scalar}`) || []
+
+        return [
+            operation?.comment ? `"""\n${operation.comment}\n"""` : '',
+            [
+                operation.name,
+                args.length ? `(\n${args.join(',\n')}\n)` : '',
+                `: ${operation.scalar}`,
+                operation?.directives?.join(' ') || '',
+            ].filter(Boolean).join(''),
+        ].filter(Boolean).join('\n')
     }
 }
 

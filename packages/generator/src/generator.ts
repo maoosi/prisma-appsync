@@ -40,6 +40,10 @@ export default class PrismaAppSyncGenerator {
             // merge with generated schema
             schema = await builder.mergeSchemas(schema, userSchema)
         }
+        else {
+            // merge with nothing
+            schema = await builder.mergeSchemas(schema, '')
+        }
 
         // output graphql schema
         await outputFile(join(this.outputDir, 'schema.gql'), schema, 'utf-8')
