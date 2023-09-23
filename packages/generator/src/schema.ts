@@ -646,9 +646,10 @@ export default class SchemaBuilder {
                 return {
                     name: field.name,
                     scalar: model.getScalar(field, { required: field.isRequired }),
+                    directives: model?.directives?.getGQLDirectivesForField(field.name),
                 }
             }),
-            directives: model?.directives?.getGQLDirectives('model'),
+            directives: model?.directives?.getGQLDirectivesForModel(),
         })
     }
 
@@ -954,7 +955,7 @@ export default class SchemaBuilder {
                     { name: 'where', scalar: `${model.singular}ExtendedWhereUniqueInput!` },
                 ],
                 scalar: `${model.singular}`,
-                directives: model?.directives?.getGQLDirectives('get'),
+                directives: model?.directives?.getGQLDirectivesForAction('get'),
             })
         }
 
@@ -970,7 +971,7 @@ export default class SchemaBuilder {
                     { name: 'take', scalar: 'Int' },
                 ],
                 scalar: `[${model.singular}!]`,
-                directives: model?.directives?.getGQLDirectives('list'),
+                directives: model?.directives?.getGQLDirectivesForAction('list'),
             })
         }
 
@@ -986,7 +987,7 @@ export default class SchemaBuilder {
                     { name: 'take', scalar: 'Int' },
                 ],
                 scalar: 'Int!',
-                directives: model?.directives?.getGQLDirectives('count'),
+                directives: model?.directives?.getGQLDirectivesForAction('count'),
             })
         }
     }
@@ -1001,7 +1002,7 @@ export default class SchemaBuilder {
                     { name: 'data', scalar: `${model.singular}CreateInput!` },
                 ],
                 scalar: `${model.singular}!`,
-                directives: model?.directives?.getGQLDirectives('create'),
+                directives: model?.directives?.getGQLDirectivesForAction('create'),
             })
         }
 
@@ -1015,7 +1016,7 @@ export default class SchemaBuilder {
                     { name: 'skipDuplicates', scalar: 'Boolean' },
                 ],
                 scalar: 'BatchPayload!',
-                directives: model?.directives?.getGQLDirectives('createMany'),
+                directives: model?.directives?.getGQLDirectivesForAction('createMany'),
             })
         }
 
@@ -1030,7 +1031,7 @@ export default class SchemaBuilder {
                     ...model.gqlFields?.operations?.length ? [{ name: 'operation', scalar: `${model.singular}OperationInput` }] : [],
                 ],
                 scalar: `${model.singular}!`,
-                directives: model?.directives?.getGQLDirectives('update'),
+                directives: model?.directives?.getGQLDirectivesForAction('update'),
             })
         }
 
@@ -1045,7 +1046,7 @@ export default class SchemaBuilder {
                     ...model.gqlFields?.operations?.length ? [{ name: 'operation', scalar: `${model.singular}OperationInput` }] : [],
                 ],
                 scalar: 'BatchPayload!',
-                directives: model?.directives?.getGQLDirectives('updateMany'),
+                directives: model?.directives?.getGQLDirectivesForAction('updateMany'),
             })
         }
 
@@ -1060,7 +1061,7 @@ export default class SchemaBuilder {
                     { name: 'where', scalar: `${model.singular}ExtendedWhereUniqueInput!` },
                 ],
                 scalar: `${model.singular}!`,
-                directives: model?.directives?.getGQLDirectives('upsert'),
+                directives: model?.directives?.getGQLDirectivesForAction('upsert'),
             })
         }
 
@@ -1073,7 +1074,7 @@ export default class SchemaBuilder {
                     { name: 'where', scalar: `${model.singular}ExtendedWhereUniqueInput!` },
                 ],
                 scalar: `${model.singular}!`,
-                directives: model?.directives?.getGQLDirectives('delete'),
+                directives: model?.directives?.getGQLDirectivesForAction('delete'),
             })
         }
 
@@ -1086,7 +1087,7 @@ export default class SchemaBuilder {
                     { name: 'where', scalar: `${model.singular}WhereInput!` },
                 ],
                 scalar: 'BatchPayload!',
-                directives: model?.directives?.getGQLDirectives('deleteMany'),
+                directives: model?.directives?.getGQLDirectivesForAction('deleteMany'),
             })
         }
     }
@@ -1099,7 +1100,7 @@ export default class SchemaBuilder {
                 comment: `Event triggered when a new ${model.singular} record is created.`,
                 args: model.gqlFields.whereUniqueInput.slice(0, 8),
                 scalar: `${model.singular}!`,
-                directives: [`@aws_subscribe(mutations: ["create${model.singular}"])`, ...model?.directives?.getGQLDirectives('onCreated')],
+                directives: [`@aws_subscribe(mutations: ["create${model.singular}"])`, ...model?.directives?.getGQLDirectivesForAction('onCreated')],
             })
         }
 
@@ -1110,7 +1111,7 @@ export default class SchemaBuilder {
                 comment: `Event triggered when an existing ${model.singular} record is updated.`,
                 args: model.gqlFields.whereUniqueInput.slice(0, 8),
                 scalar: `${model.singular}!`,
-                directives: [`@aws_subscribe(mutations: ["update${model.singular}"])`, ...model?.directives?.getGQLDirectives('onUpdated')],
+                directives: [`@aws_subscribe(mutations: ["update${model.singular}"])`, ...model?.directives?.getGQLDirectivesForAction('onUpdated')],
             })
         }
 
@@ -1121,7 +1122,7 @@ export default class SchemaBuilder {
                 comment: `Event triggered when a ${model.singular} record is either created or updated.`,
                 args: model.gqlFields.whereUniqueInput.slice(0, 8),
                 scalar: `${model.singular}!`,
-                directives: [`@aws_subscribe(mutations: ["upsert${model.singular}"])`, ...model?.directives?.getGQLDirectives('onUpserted')],
+                directives: [`@aws_subscribe(mutations: ["upsert${model.singular}"])`, ...model?.directives?.getGQLDirectivesForAction('onUpserted')],
             })
         }
 
@@ -1132,7 +1133,7 @@ export default class SchemaBuilder {
                 comment: `Event triggered when an existing ${model.singular} record is deleted.`,
                 args: model.gqlFields.whereUniqueInput.slice(0, 8),
                 scalar: `${model.singular}!`,
-                directives: [`@aws_subscribe(mutations: ["delete${model.singular}"])`, ...model?.directives?.getGQLDirectives('onDeleted')],
+                directives: [`@aws_subscribe(mutations: ["delete${model.singular}"])`, ...model?.directives?.getGQLDirectivesForAction('onDeleted')],
             })
         }
 
@@ -1143,7 +1144,7 @@ export default class SchemaBuilder {
                 comment: `Event triggered when a ${model.singular} record is either created, updated, or deleted.`,
                 args: model.gqlFields.whereUniqueInput.slice(0, 8),
                 scalar: `${model.singular}!`,
-                directives: [`@aws_subscribe(mutations: ["create${model.singular}", "update${model.singular}", "upsert${model.singular}", "delete${model.singular}"])`, ...model?.directives?.getGQLDirectives('onMutated')],
+                directives: [`@aws_subscribe(mutations: ["create${model.singular}", "update${model.singular}", "upsert${model.singular}", "delete${model.singular}"])`, ...model?.directives?.getGQLDirectivesForAction('onMutated')],
             })
         }
 
@@ -1154,7 +1155,7 @@ export default class SchemaBuilder {
                 comment: `Event triggered when multiple new ${model.plural} records are created.`,
                 args: [],
                 scalar: 'BatchPayload!',
-                directives: [`@aws_subscribe(mutations: ["createMany${model.plural}"])`, ...model?.directives?.getGQLDirectives('onCreatedMany')],
+                directives: [`@aws_subscribe(mutations: ["createMany${model.plural}"])`, ...model?.directives?.getGQLDirectivesForAction('onCreatedMany')],
             })
         }
 
@@ -1165,7 +1166,7 @@ export default class SchemaBuilder {
                 comment: `Event triggered when multiple existing ${model.plural} records are updated.`,
                 args: [],
                 scalar: 'BatchPayload!',
-                directives: [`@aws_subscribe(mutations: ["updateMany${model.plural}"])`, ...model?.directives?.getGQLDirectives('onUpdatedMany')],
+                directives: [`@aws_subscribe(mutations: ["updateMany${model.plural}"])`, ...model?.directives?.getGQLDirectivesForAction('onUpdatedMany')],
             })
         }
 
@@ -1176,7 +1177,7 @@ export default class SchemaBuilder {
                 comment: `Event triggered when multiple existing ${model.plural} records are deleted.`,
                 args: [],
                 scalar: 'BatchPayload!',
-                directives: [`@aws_subscribe(mutations: ["deleteMany${model.plural}"])`, ...model?.directives?.getGQLDirectives('onDeletedMany')],
+                directives: [`@aws_subscribe(mutations: ["deleteMany${model.plural}"])`, ...model?.directives?.getGQLDirectivesForAction('onDeletedMany')],
             })
         }
 
@@ -1187,7 +1188,7 @@ export default class SchemaBuilder {
                 comment: `Event triggered when multiple ${model.plural} records are either created, updated, or deleted.`,
                 args: [],
                 scalar: 'BatchPayload!',
-                directives: [`@aws_subscribe(mutations: ["createMany${model.plural}", "updateMany${model.plural}", "deleteMany${model.plural}"])`, ...model?.directives?.getGQLDirectives('onMutatedMany')],
+                directives: [`@aws_subscribe(mutations: ["createMany${model.plural}", "updateMany${model.plural}", "deleteMany${model.plural}"])`, ...model?.directives?.getGQLDirectivesForAction('onMutatedMany')],
             })
         }
     }
@@ -1268,7 +1269,10 @@ export default class SchemaBuilder {
             this.types.map((t) => {
                 return [
                     `type ${t.name}${t?.directives?.length ? ` ${t.directives.join(' ')}` : ''} {`,
-                    t.fields.map(f => `${f.name}: ${f.scalar}`).join('\n'),
+                    t.fields.map((f) => {
+                        const d = f?.directives ? ` ${f?.directives?.join(' ')}` : ''
+                        return `${f.name}: ${f.scalar}${d}`
+                    }).join('\n'),
                     '}',
                 ].join('\n')
             }).join('\n\n'),
@@ -1395,6 +1399,7 @@ type GqlField = {
     name: string
     scalar: string
     defaultValue?: any
+    directives?: string[]
 }
 
 type GqlArg = {
