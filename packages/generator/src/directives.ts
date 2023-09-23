@@ -74,6 +74,14 @@ export function parseModelDirectives(
     }
 }
 
+function accessNestedProperty(obj, path) {
+    return path.split('.').reduce((acc, part) => acc && acc[part], obj)
+}
+
+function isDirectiveDefined(directive, ...properties) {
+    return properties.every(p => accessNestedProperty(directive, p) !== null)
+}
+
 function isActionEligibleForGQL(
     { action, directives }: DirectiveHelperFunc,
 ): boolean {
@@ -91,22 +99,17 @@ function isActionEligibleForGQL(
 
     const actionGroup = getActionType(action)
 
-    if (actionGroup === 'queries') {
-        can = !(directives?.gql?.model === null || directives?.gql?.queries === null) && !(directives?.gql?.queries?.[action] === null)
-    }
-    else if (actionGroup === 'mutations' && action === 'upsert') {
-        can = !(directives?.gql?.model === null || directives?.gql?.mutations === null) && !(directives?.gql?.mutations?.[action] === null) && !(directives?.gql?.mutations?.create === null) && !(directives?.gql?.mutations?.update === null)
-    }
-    else if (actionGroup === 'mutations') {
-        can = !(directives?.gql?.model === null || directives?.gql?.mutations === null) && !(directives?.gql?.mutations?.[action] === null)
-    }
-    else if (actionGroup === 'subscriptions') {
-        can = !(
-            directives?.gql?.model === null
-            || directives?.gql?.subscriptions === null
-            || directives?.gql?.mutations === null
-        ) && !(directives?.gql?.subscriptions?.[action] === null)
-    }
+    if (actionGroup === 'queries')
+        can = isDirectiveDefined(directives?.gql, 'model', 'queries', `queries.${action}`)
+
+    else if (actionGroup === 'mutations' && action === 'upsert')
+        can = isDirectiveDefined(directives?.gql, 'model', 'mutations', `mutations.${action}`, 'mutations.create', 'mutations.update')
+
+    else if (actionGroup === 'mutations')
+        can = isDirectiveDefined(directives?.gql, 'model', 'mutations', `mutations.${action}`)
+
+    else if (actionGroup === 'subscriptions')
+        can = isDirectiveDefined(directives?.gql, 'model', 'subscriptions', 'mutations', `subscriptions.${action}`)
 
     return can
 }

@@ -5,7 +5,7 @@ import camelCase from 'lodash/camelCase'
 import upperFirst from 'lodash/upperFirst'
 import { uniqBy } from '@client/utils'
 import * as prettier from 'prettier'
-import { type Directives, parseModelDirectives, extractUniqueAuthzModes } from './directives'
+import { type Directives, extractUniqueAuthzModes, parseModelDirectives } from './directives'
 
 const pascalCase = flow(camelCase, upperFirst)
 
