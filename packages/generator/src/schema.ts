@@ -648,6 +648,7 @@ export default class SchemaBuilder {
                     scalar: model.getScalar(field, { required: field.isRequired }),
                 }
             }),
+            directives: model?.directives?.getGQLDirectives('model'),
         })
     }
 
