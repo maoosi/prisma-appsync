@@ -33,6 +33,15 @@ export default defineConfig({
             { text: 'Documentation', link: '/quick-start/getting-started' },
             { text: 'Changelog', link: '/changelog/1.0.0-rc.7' },
             {
+                text: 'Tools',
+                items: [
+                    {
+                        text: 'AppSync GraphQL Schema Diff',
+                        link: '/tools/gql-diff',
+                    },
+                ],
+            },
+            {
                 text: 'Links',
                 items: [
                     {

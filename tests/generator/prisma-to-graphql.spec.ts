@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/prefer-node-protocol */
 import { readFileSync } from 'fs'
 import { join } from 'path'
 import { describe, test } from 'vitest'
