@@ -37,7 +37,7 @@ export default defineConfig({
                 items: [
                     {
                         text: 'AppSync GraphQL Schema Diff',
-                        link: '/tools/gql-diff',
+                        link: '/tools/appsync-gql-schema-diff',
                     },
                 ],
             },

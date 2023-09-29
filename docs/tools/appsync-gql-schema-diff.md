@@ -76,7 +76,7 @@ Compare changes between AppSync GraphQL Schemas.
         </label>
     </div>
     <div class="output" v-if="old_schema && new_schema">
-        <label>Output:</label>
+        <label>Diff:</label>
         <ol>
             <li v-for="log in output" :class="{ breaking: log.level === 'BREAKING', dangerous: log.level === 'DANGEROUS' }">
                 {{ log.level }}: {{ log.message }}
