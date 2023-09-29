@@ -1,3 +1,7 @@
+---
+aside: false
+---
+
 <script lang="ts" setup>
 import { buildSchema } from 'graphql';
 import { diff as diffSchema } from '@graphql-inspector/core'
