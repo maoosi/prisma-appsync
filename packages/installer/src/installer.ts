@@ -1,6 +1,7 @@
+/* eslint-disable n/prefer-global/process */
 /* eslint-disable no-console */
 
-import path from 'path'
+import path from 'node:path'
 import fs from 'fs-extra'
 import prompts from 'prompts'
 import degit from 'degit'
