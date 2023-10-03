@@ -1,0 +1,51 @@
+datasource db {
+    provider = "postgres"
+    url      = env("DATABASE_URL")
+}
+
+generator client {
+    provider      = "prisma-client-js"
+    binaryTargets = ["native", "rhel-openssl-1.0.x"]
+}
+
+generator appsync {
+    provider = "./dist/generator.js"
+    output   = "./generated/@gql"
+}
+
+/// @gql(fields: { password: null }, mutations: null)
+model User {
+    id        Int       @id @default(autoincrement())
+    email     String    @unique
+    password  String
+    posts     Post[]
+    createdAt DateTime? @default(now())
+}
+
+/// @gql(subscriptions: null, mutations: { delete: null, deleteMany: null })
+/// @gql(scalars: { source: "AWSURL" })
+model Post {
+    id        Int       @id @default(autoincrement())
+    title     String
+    source    String?
+    author    User?     @relation(fields: [authorId], references: [id])
+    authorId  Int?
+    views     Int?      @default(1)
+    status    Status?   @default(DRAFT)
+    createdAt DateTime? @default(now())
+}
+
+enum Status {
+    DRAFT
+    PUBLISHED
+    DELETED
+}
+
+/// @gql(model: null)
+model Badge {
+    level Int
+    rank  Int
+
+    @@id([level, rank])
+    @@index([level, rank])
+}

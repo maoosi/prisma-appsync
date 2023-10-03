@@ -9,18 +9,11 @@ generator client {
 }
 
 generator appsync {
-  provider = "./dist/generator.js"
-
-  // optional params
-  debug            = true
-  output           = "./generated/prisma-appsync"
-  extendSchema     = "./custom-schema.gql"
-  extendResolvers  = "./custom-resolvers.yaml"
-  defaultDirective = "@auth(model: [{ allow: apiKey }])"
+  provider     = "./dist/generator.js"
+  output       = "./generated/crud"
+  extendSchema = "./crud.gql"
 }
 
-/// @gql(fields: { hiddenField: null }, subscriptions: null, scalars: { website: "AWSURL" })
-/// @auth(model: [{ allow: userPools, groups: ["admins"] }])
 model User {
   uuid        String    @id @default(uuid()) @db.VarChar(200)
   username    String    @unique
@@ -40,13 +33,6 @@ model Profile {
   bio       String?
 }
 
-/// @gql(model: null)
-model hiddenModel {
-  id Int @id @default(autoincrement())
-}
-
-/// @gql(queries: { list: null, count: "county" })
-/// @auth(model: [{ allow: userPools, groups: ["users", "admin"] }])
 model Post {
   id          Int       @id @default(autoincrement())
   title       String
@@ -68,7 +54,6 @@ model Comment {
   lastSavedAt DateTime? @default(now())
 }
 
-/// @auth(model: [{ allow: apiKey }, { allow: userPools, groups: ["admins"] }])
 model Like {
   id         Int    @id @default(autoincrement())
   authorUuid String @db.VarChar(200)

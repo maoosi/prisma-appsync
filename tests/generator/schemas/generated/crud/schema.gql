@@ -1,0 +1,1884 @@
+type BatchPayload {
+    count: Int!
+}
+
+type User {
+    uuid: String!
+    username: String!
+    email: AWSEmail!
+    website: String
+    hiddenField: String
+    role: Role
+    posts: [Post!]!
+    profile: Profile
+    comments: [Comment!]!
+}
+
+type Profile {
+    uuid: String!
+    owner: User
+    ownerUuid: String
+    bio: String
+}
+
+type Post {
+    id: Int!
+    title: String!
+    author: User
+    authorUuid: String
+    published: Boolean
+    comments: [Comment!]!
+    views: Int
+    lastSavedAt: AWSDateTime
+}
+
+type Comment {
+    id: Int!
+    author: User
+    authorUuid: String
+    post: Post!
+    postId: Int!
+    message: String!
+    lastSavedAt: AWSDateTime
+}
+
+type Like {
+    id: Int!
+    authorUuid: String!
+    postId: Int!
+}
+
+enum OrderByArg {
+    ASC
+    DESC
+}
+
+enum NullArg {
+    NULL
+}
+
+enum Role {
+    USER
+    ADMIN
+}
+
+input IntOperation {
+    set: Int
+    increment: Int
+    decrement: Int
+    multiply: Int
+    divide: Int
+}
+
+input FloatOperation {
+    set: Float
+    increment: Float
+    decrement: Float
+    multiply: Float
+    divide: Float
+}
+
+input AWSDateTimeFilter {
+    equals: AWSDateTime
+    gt: AWSDateTime
+    gte: AWSDateTime
+    in: [AWSDateTime!]
+    lt: AWSDateTime
+    lte: AWSDateTime
+    not: AWSDateTimeFilter
+    notIn: [AWSDateTime!]
+}
+
+input AWSDateTimeNullableFilter {
+    equals: AWSDateTime
+    gt: AWSDateTime
+    gte: AWSDateTime
+    in: [AWSDateTime!]
+    lt: AWSDateTime
+    lte: AWSDateTime
+    not: AWSDateTimeFilter
+    notIn: [AWSDateTime!]
+    isNull: Boolean
+}
+
+input AWSDateTimeListFilter {
+    equals: [AWSDateTime!]
+    has: AWSDateTime
+    hasEvery: [AWSDateTime!]
+    hasSome: [AWSDateTime!]
+    isEmpty: Boolean
+}
+
+input AWSDateFilter {
+    equals: AWSDate
+    gt: AWSDate
+    gte: AWSDate
+    in: [AWSDate!]
+    lt: AWSDate
+    lte: AWSDate
+    not: AWSDateFilter
+    notIn: [AWSDate!]
+}
+
+input AWSDateNullableFilter {
+    equals: AWSDate
+    gt: AWSDate
+    gte: AWSDate
+    in: [AWSDate!]
+    lt: AWSDate
+    lte: AWSDate
+    not: AWSDateFilter
+    notIn: [AWSDate!]
+    isNull: Boolean
+}
+
+input AWSDateListFilter {
+    equals: [AWSDate!]
+    has: AWSDate
+    hasEvery: [AWSDate!]
+    hasSome: [AWSDate!]
+    isEmpty: Boolean
+}
+
+input FloatFilter {
+    equals: Float
+    gt: Float
+    gte: Float
+    in: [Float!]
+    lt: Float
+    lte: Float
+    not: FloatFilter
+    notIn: [Float!]
+    isNull: Boolean
+}
+
+input FloatNullableFilter {
+    equals: Float
+    gt: Float
+    gte: Float
+    in: [Float!]
+    lt: Float
+    lte: Float
+    not: FloatFilter
+    notIn: [Float!]
+    isNull: Boolean
+}
+
+input FloatListFilter {
+    equals: [Float!]
+    has: Float
+    hasEvery: [Float!]
+    hasSome: [Float!]
+    isEmpty: Boolean
+}
+
+input IntFilter {
+    equals: Int
+    gt: Int
+    gte: Int
+    in: [Int!]
+    lt: Int
+    lte: Int
+    not: IntFilter
+    notIn: [Int!]
+}
+
+input IntNullableFilter {
+    equals: Int
+    gt: Int
+    gte: Int
+    in: [Int!]
+    lt: Int
+    lte: Int
+    not: IntFilter
+    notIn: [Int!]
+    isNull: Boolean
+}
+
+input IntListFilter {
+    equals: [Int!]
+    has: Int
+    hasEvery: [Int!]
+    hasSome: [Int!]
+    isEmpty: Boolean
+}
+
+input AWSJSONFilter {
+    contains: String
+    endsWith: String
+    equals: AWSJSON
+    in: [AWSJSON!]
+    not: AWSJSONFilter
+    notIn: [AWSJSON!]
+    startsWith: String
+}
+
+input AWSJSONNullableFilter {
+    contains: String
+    endsWith: String
+    equals: AWSJSON
+    in: [AWSJSON!]
+    not: AWSJSONFilter
+    notIn: [AWSJSON!]
+    startsWith: String
+    isNull: Boolean
+}
+
+input AWSJSONListFilter {
+    equals: [AWSJSON!]
+    has: AWSJSON
+    hasEvery: [AWSJSON!]
+    hasSome: [AWSJSON!]
+    isEmpty: Boolean
+}
+
+input AWSEmailFilter {
+    contains: String
+    endsWith: String
+    equals: AWSEmail
+    in: [AWSEmail!]
+    not: AWSEmailFilter
+    notIn: [AWSEmail!]
+    startsWith: String
+}
+
+input AWSEmailNullableFilter {
+    contains: String
+    endsWith: String
+    equals: AWSEmail
+    in: [AWSEmail!]
+    not: AWSEmailFilter
+    notIn: [AWSEmail!]
+    startsWith: String
+    isNull: Boolean
+}
+
+input AWSEmailListFilter {
+    equals: [AWSEmail!]
+    has: AWSEmail
+    hasEvery: [AWSEmail!]
+    hasSome: [AWSEmail!]
+    isEmpty: Boolean
+}
+
+input AWSURLFilter {
+    contains: String
+    endsWith: String
+    equals: AWSURL
+    in: [AWSURL!]
+    not: AWSURLFilter
+    notIn: [AWSURL!]
+    startsWith: String
+}
+
+input AWSURLNullableFilter {
+    contains: String
+    endsWith: String
+    equals: AWSURL
+    in: [AWSURL!]
+    not: AWSURLFilter
+    notIn: [AWSURL!]
+    startsWith: String
+    isNull: Boolean
+}
+
+input AWSURLListFilter {
+    equals: [AWSURL!]
+    has: AWSURL
+    hasEvery: [AWSURL!]
+    hasSome: [AWSURL!]
+    isEmpty: Boolean
+}
+
+input StringFilter {
+    contains: String
+    endsWith: String
+    equals: String
+    in: [String!]
+    not: StringFilter
+    notIn: [String!]
+    startsWith: String
+    mode: String
+}
+
+input StringNullableFilter {
+    contains: String
+    endsWith: String
+    equals: String
+    in: [String!]
+    not: StringFilter
+    notIn: [String!]
+    startsWith: String
+    mode: String
+    isNull: Boolean
+}
+
+input StringListFilter {
+    equals: [String!]
+    has: String
+    hasEvery: [String!]
+    hasSome: [String!]
+    isEmpty: Boolean
+}
+
+input BooleanFilter {
+    equals: Boolean
+    not: BooleanFilter
+}
+
+input BooleanNullableFilter {
+    equals: Boolean
+    not: BooleanFilter
+    isNull: Boolean
+}
+
+input BooleanListFilter {
+    equals: [Boolean!]
+    has: Boolean
+    hasEvery: [Boolean!]
+    hasSome: [Boolean!]
+}
+
+input RoleEnumFilter {
+    equals: Role
+    in: [Role!]
+    not: RoleEnumFilter
+    notIn: [Role!]
+}
+
+input RoleEnumListFilter {
+    equals: [Role!]
+    has: Role
+    hasEvery: [Role!]
+    hasSome: [Role!]
+    isEmpty: Boolean
+}
+
+input UserFilter {
+    some: UserWhereInputWithoutNullables
+    every: UserWhereInputWithoutNullables
+    none: UserWhereInputWithoutNullables
+}
+
+input UserWhereInputWithoutNullables {
+    OR: [UserWhereInput!]
+    NOT: [UserWhereInput!]
+    AND: [UserWhereInput!]
+    uuid: StringFilter
+    username: StringFilter
+    email: AWSEmailFilter
+    website: StringNullableFilter
+    hiddenField: StringNullableFilter
+    role: RoleEnumFilter
+    posts: PostFilter
+    profile: ProfileWhereInput
+    comments: CommentFilter
+}
+
+input UserWhereInput {
+    is: NullArg
+    isNot: NullArg
+    OR: [UserWhereInput!]
+    NOT: [UserWhereInput!]
+    AND: [UserWhereInput!]
+    uuid: StringFilter
+    username: StringFilter
+    email: AWSEmailFilter
+    website: StringNullableFilter
+    hiddenField: StringNullableFilter
+    role: RoleEnumFilter
+    posts: PostFilter
+    profile: ProfileWhereInput
+    comments: CommentFilter
+}
+
+input UserScalarWhereInput {
+    OR: [UserScalarWhereInput!]
+    NOT: [UserScalarWhereInput!]
+    AND: [UserScalarWhereInput!]
+    uuid: StringFilter
+    username: StringFilter
+    email: AWSEmailFilter
+    website: StringNullableFilter
+    hiddenField: StringNullableFilter
+    role: RoleEnumFilter
+}
+
+input UserWhereUniqueInput {
+    uuid: String
+    username: String
+    email: AWSEmail
+}
+
+input UserExtendedWhereUniqueInput {
+    OR: [UserWhereInput!]
+    NOT: [UserWhereInput!]
+    AND: [UserWhereInput!]
+    uuid: String
+    username: String
+    email: AWSEmail
+    website: StringNullableFilter
+    hiddenField: StringNullableFilter
+    role: RoleEnumFilter
+    posts: PostFilter
+    profile: ProfileWhereInput
+    comments: CommentFilter
+}
+
+input UserOrderByInput {
+    uuid: OrderByArg
+    username: OrderByArg
+    email: OrderByArg
+    website: OrderByArg
+    hiddenField: OrderByArg
+    role: OrderByArg
+    posts: PostOrderByInput
+    profile: ProfileOrderByInput
+    comments: CommentOrderByInput
+}
+
+input UserPostsCreateNestedInput {
+    connect: [PostWhereUniqueInput!]
+    create: [PostCreateWithoutUserInput!]
+    connectOrCreate: [PostConnectOrCreateWithoutUserInput!]
+}
+
+input UserProfileCreateNestedInput {
+    connect: ProfileWhereUniqueInput
+    create: ProfileCreateWithoutUserInput
+    connectOrCreate: ProfileConnectOrCreateWithoutUserInput
+}
+
+input UserCommentsCreateNestedInput {
+    connect: [CommentWhereUniqueInput!]
+    create: [CommentCreateWithoutUserInput!]
+    connectOrCreate: [CommentConnectOrCreateWithoutUserInput!]
+}
+
+input UserPostsUpdateNestedInput {
+    connect: [PostWhereUniqueInput!]
+    disconnect: [PostExtendedWhereUniqueInput!]
+    set: [PostWhereUniqueInput!]
+    create: [PostCreateWithoutUserInput!]
+    connectOrCreate: [PostConnectOrCreateWithoutUserInput!]
+    update: [PostUpdateWithWhereUniqueWithoutUserInput!]
+    upsert: [PostUpsertWithWhereUniqueWithoutUserInput!]
+    delete: [PostExtendedWhereUniqueInput!]
+    deleteMany: [PostScalarWhereInput!]
+    updateMany: [PostUpdateManyInput!]
+}
+
+input UserProfileUpdateNestedInput {
+    connect: ProfileWhereUniqueInput
+    disconnect: Boolean
+    create: ProfileCreateWithoutUserInput
+    connectOrCreate: ProfileConnectOrCreateWithoutUserInput
+    update: ProfileUpdateWithoutUserInput
+    upsert: ProfileUpsertWithoutUserInput
+    delete: Boolean
+}
+
+input UserCommentsUpdateNestedInput {
+    connect: [CommentWhereUniqueInput!]
+    disconnect: [CommentExtendedWhereUniqueInput!]
+    set: [CommentWhereUniqueInput!]
+    create: [CommentCreateWithoutUserInput!]
+    connectOrCreate: [CommentConnectOrCreateWithoutUserInput!]
+    update: [CommentUpdateWithWhereUniqueWithoutUserInput!]
+    upsert: [CommentUpsertWithWhereUniqueWithoutUserInput!]
+    delete: [CommentExtendedWhereUniqueInput!]
+    deleteMany: [CommentScalarWhereInput!]
+    updateMany: [CommentUpdateManyInput!]
+}
+
+input UserCreateInput {
+    uuid: String
+    username: String!
+    email: AWSEmail!
+    website: String
+    hiddenField: String
+    role: Role = USER
+    posts: UserPostsCreateNestedInput
+    profile: UserProfileCreateNestedInput
+    comments: UserCommentsCreateNestedInput
+}
+
+input UserCreateWithoutPostInput {
+    uuid: String
+    username: String!
+    email: AWSEmail!
+    website: String
+    hiddenField: String
+    role: Role = USER
+    profile: UserProfileCreateNestedInput
+    comments: UserCommentsCreateNestedInput
+}
+
+input UserCreateWithoutProfileInput {
+    uuid: String
+    username: String!
+    email: AWSEmail!
+    website: String
+    hiddenField: String
+    role: Role = USER
+    posts: UserPostsCreateNestedInput
+    comments: UserCommentsCreateNestedInput
+}
+
+input UserCreateWithoutCommentInput {
+    uuid: String
+    username: String!
+    email: AWSEmail!
+    website: String
+    hiddenField: String
+    role: Role = USER
+    posts: UserPostsCreateNestedInput
+    profile: UserProfileCreateNestedInput
+}
+
+input UserConnectOrCreateWithoutPostInput {
+    where: UserWhereUniqueInput!
+    create: UserCreateWithoutPostInput!
+}
+
+input UserConnectOrCreateWithoutProfileInput {
+    where: UserWhereUniqueInput!
+    create: UserCreateWithoutProfileInput!
+}
+
+input UserConnectOrCreateWithoutCommentInput {
+    where: UserWhereUniqueInput!
+    create: UserCreateWithoutCommentInput!
+}
+
+input UserCreateManyInput {
+    uuid: String
+    username: String!
+    email: AWSEmail!
+    website: String
+    hiddenField: String
+    role: Role = USER
+}
+
+input UserUpdateInput {
+    uuid: String
+    username: String
+    email: AWSEmail
+    website: String
+    hiddenField: String
+    role: Role
+    posts: UserPostsUpdateNestedInput
+    profile: UserProfileUpdateNestedInput
+    comments: UserCommentsUpdateNestedInput
+}
+
+input UserUpdateWithoutPostInput {
+    uuid: String
+    username: String
+    email: AWSEmail
+    website: String
+    hiddenField: String
+    role: Role
+    profile: UserProfileUpdateNestedInput
+    comments: UserCommentsUpdateNestedInput
+}
+
+input UserUpdateWithoutProfileInput {
+    uuid: String
+    username: String
+    email: AWSEmail
+    website: String
+    hiddenField: String
+    role: Role
+    posts: UserPostsUpdateNestedInput
+    comments: UserCommentsUpdateNestedInput
+}
+
+input UserUpdateWithoutCommentInput {
+    uuid: String
+    username: String
+    email: AWSEmail
+    website: String
+    hiddenField: String
+    role: Role
+    posts: UserPostsUpdateNestedInput
+    profile: UserProfileUpdateNestedInput
+}
+
+input UserUpdateWithWhereUniqueWithoutPostInput {
+    data: UserUpdateWithoutPostInput!
+    where: UserExtendedWhereUniqueInput!
+}
+
+input UserUpdateWithWhereUniqueWithoutProfileInput {
+    data: UserUpdateWithoutProfileInput!
+    where: UserExtendedWhereUniqueInput!
+}
+
+input UserUpdateWithWhereUniqueWithoutCommentInput {
+    data: UserUpdateWithoutCommentInput!
+    where: UserExtendedWhereUniqueInput!
+}
+
+input UserUpdateManyInput {
+    where: UserScalarWhereInput!
+    data: UserUpdateInput!
+}
+
+input UserUpsertWithoutPostInput {
+    create: UserCreateWithoutPostInput!
+    update: UserUpdateWithoutPostInput!
+}
+
+input UserUpsertWithoutProfileInput {
+    create: UserCreateWithoutProfileInput!
+    update: UserUpdateWithoutProfileInput!
+}
+
+input UserUpsertWithoutCommentInput {
+    create: UserCreateWithoutCommentInput!
+    update: UserUpdateWithoutCommentInput!
+}
+
+input UserUpsertWithWhereUniqueWithoutPostInput {
+    where: UserExtendedWhereUniqueInput!
+    create: UserCreateWithoutPostInput!
+    update: UserUpdateWithoutPostInput!
+}
+
+input UserUpsertWithWhereUniqueWithoutProfileInput {
+    where: UserExtendedWhereUniqueInput!
+    create: UserCreateWithoutProfileInput!
+    update: UserUpdateWithoutProfileInput!
+}
+
+input UserUpsertWithWhereUniqueWithoutCommentInput {
+    where: UserExtendedWhereUniqueInput!
+    create: UserCreateWithoutCommentInput!
+    update: UserUpdateWithoutCommentInput!
+}
+
+input ProfileFilter {
+    some: ProfileWhereInputWithoutNullables
+    every: ProfileWhereInputWithoutNullables
+    none: ProfileWhereInputWithoutNullables
+}
+
+input ProfileWhereInputWithoutNullables {
+    OR: [ProfileWhereInput!]
+    NOT: [ProfileWhereInput!]
+    AND: [ProfileWhereInput!]
+    uuid: StringFilter
+    owner: UserWhereInput
+    ownerUuid: StringNullableFilter
+    bio: StringNullableFilter
+}
+
+input ProfileWhereInput {
+    is: NullArg
+    isNot: NullArg
+    OR: [ProfileWhereInput!]
+    NOT: [ProfileWhereInput!]
+    AND: [ProfileWhereInput!]
+    uuid: StringFilter
+    owner: UserWhereInput
+    ownerUuid: StringNullableFilter
+    bio: StringNullableFilter
+}
+
+input ProfileScalarWhereInput {
+    OR: [ProfileScalarWhereInput!]
+    NOT: [ProfileScalarWhereInput!]
+    AND: [ProfileScalarWhereInput!]
+    uuid: StringFilter
+    ownerUuid: StringNullableFilter
+    bio: StringNullableFilter
+}
+
+input ProfileWhereUniqueInput {
+    uuid: String
+    ownerUuid: String
+}
+
+input ProfileExtendedWhereUniqueInput {
+    OR: [ProfileWhereInput!]
+    NOT: [ProfileWhereInput!]
+    AND: [ProfileWhereInput!]
+    uuid: String
+    ownerUuid: String
+    owner: UserWhereInput
+    bio: StringNullableFilter
+}
+
+input ProfileOrderByInput {
+    uuid: OrderByArg
+    owner: UserOrderByInput
+    ownerUuid: OrderByArg
+    bio: OrderByArg
+}
+
+input ProfileOwnerCreateNestedInput {
+    connect: UserWhereUniqueInput
+    create: UserCreateWithoutProfileInput
+    connectOrCreate: UserConnectOrCreateWithoutProfileInput
+}
+
+input ProfileOwnerUpdateNestedInput {
+    connect: UserWhereUniqueInput
+    disconnect: Boolean
+    create: UserCreateWithoutProfileInput
+    connectOrCreate: UserConnectOrCreateWithoutProfileInput
+    update: UserUpdateWithoutProfileInput
+    upsert: UserUpsertWithoutProfileInput
+    delete: Boolean
+}
+
+input ProfileCreateInput {
+    uuid: String
+    owner: ProfileOwnerCreateNestedInput
+    bio: String
+}
+
+input ProfileCreateWithoutUserInput {
+    uuid: String
+    bio: String
+}
+
+input ProfileConnectOrCreateWithoutUserInput {
+    where: ProfileWhereUniqueInput!
+    create: ProfileCreateWithoutUserInput!
+}
+
+input ProfileCreateManyInput {
+    uuid: String
+    bio: String
+}
+
+input ProfileUpdateInput {
+    uuid: String
+    owner: ProfileOwnerUpdateNestedInput
+    bio: String
+}
+
+input ProfileUpdateWithoutUserInput {
+    uuid: String
+    bio: String
+}
+
+input ProfileUpdateWithWhereUniqueWithoutUserInput {
+    data: ProfileUpdateWithoutUserInput!
+    where: ProfileExtendedWhereUniqueInput!
+}
+
+input ProfileUpdateManyInput {
+    where: ProfileScalarWhereInput!
+    data: ProfileUpdateInput!
+}
+
+input ProfileUpsertWithoutUserInput {
+    create: ProfileCreateWithoutUserInput!
+    update: ProfileUpdateWithoutUserInput!
+}
+
+input ProfileUpsertWithWhereUniqueWithoutUserInput {
+    where: ProfileExtendedWhereUniqueInput!
+    create: ProfileCreateWithoutUserInput!
+    update: ProfileUpdateWithoutUserInput!
+}
+
+input PostFilter {
+    some: PostWhereInputWithoutNullables
+    every: PostWhereInputWithoutNullables
+    none: PostWhereInputWithoutNullables
+}
+
+input PostWhereInputWithoutNullables {
+    OR: [PostWhereInput!]
+    NOT: [PostWhereInput!]
+    AND: [PostWhereInput!]
+    id: IntFilter
+    title: StringFilter
+    author: UserWhereInput
+    authorUuid: StringNullableFilter
+    published: BooleanNullableFilter
+    comments: CommentFilter
+    views: IntNullableFilter
+    lastSavedAt: AWSDateTimeNullableFilter
+}
+
+input PostWhereInput {
+    is: NullArg
+    isNot: NullArg
+    OR: [PostWhereInput!]
+    NOT: [PostWhereInput!]
+    AND: [PostWhereInput!]
+    id: IntFilter
+    title: StringFilter
+    author: UserWhereInput
+    authorUuid: StringNullableFilter
+    published: BooleanNullableFilter
+    comments: CommentFilter
+    views: IntNullableFilter
+    lastSavedAt: AWSDateTimeNullableFilter
+}
+
+input PostScalarWhereInput {
+    OR: [PostScalarWhereInput!]
+    NOT: [PostScalarWhereInput!]
+    AND: [PostScalarWhereInput!]
+    id: IntFilter
+    title: StringFilter
+    authorUuid: StringNullableFilter
+    published: BooleanNullableFilter
+    views: IntNullableFilter
+    lastSavedAt: AWSDateTimeNullableFilter
+}
+
+input PostWhereUniqueInput {
+    id: Int
+}
+
+input PostExtendedWhereUniqueInput {
+    OR: [PostWhereInput!]
+    NOT: [PostWhereInput!]
+    AND: [PostWhereInput!]
+    id: Int
+    title: StringFilter
+    author: UserWhereInput
+    authorUuid: StringNullableFilter
+    published: BooleanNullableFilter
+    comments: CommentFilter
+    views: IntNullableFilter
+    lastSavedAt: AWSDateTimeNullableFilter
+}
+
+input PostOrderByInput {
+    id: OrderByArg
+    title: OrderByArg
+    author: UserOrderByInput
+    authorUuid: OrderByArg
+    published: OrderByArg
+    comments: CommentOrderByInput
+    views: OrderByArg
+    lastSavedAt: OrderByArg
+}
+
+input PostAuthorCreateNestedInput {
+    connect: UserWhereUniqueInput
+    create: UserCreateWithoutPostInput
+    connectOrCreate: UserConnectOrCreateWithoutPostInput
+}
+
+input PostCommentsCreateNestedInput {
+    connect: [CommentWhereUniqueInput!]
+    create: [CommentCreateWithoutPostInput!]
+    connectOrCreate: [CommentConnectOrCreateWithoutPostInput!]
+}
+
+input PostAuthorUpdateNestedInput {
+    connect: UserWhereUniqueInput
+    disconnect: Boolean
+    create: UserCreateWithoutPostInput
+    connectOrCreate: UserConnectOrCreateWithoutPostInput
+    update: UserUpdateWithoutPostInput
+    upsert: UserUpsertWithoutPostInput
+    delete: Boolean
+}
+
+input PostCommentsUpdateNestedInput {
+    connect: [CommentWhereUniqueInput!]
+    disconnect: [CommentExtendedWhereUniqueInput!]
+    set: [CommentWhereUniqueInput!]
+    create: [CommentCreateWithoutPostInput!]
+    connectOrCreate: [CommentConnectOrCreateWithoutPostInput!]
+    update: [CommentUpdateWithWhereUniqueWithoutPostInput!]
+    upsert: [CommentUpsertWithWhereUniqueWithoutPostInput!]
+    delete: [CommentExtendedWhereUniqueInput!]
+    deleteMany: [CommentScalarWhereInput!]
+    updateMany: [CommentUpdateManyInput!]
+}
+
+input PostCreateInput {
+    id: Int
+    title: String!
+    author: PostAuthorCreateNestedInput
+    published: Boolean = false
+    comments: PostCommentsCreateNestedInput
+    views: Int = 0
+    lastSavedAt: AWSDateTime
+}
+
+input PostCreateWithoutUserInput {
+    id: Int
+    title: String!
+    published: Boolean = false
+    comments: PostCommentsCreateNestedInput
+    views: Int = 0
+    lastSavedAt: AWSDateTime
+}
+
+input PostCreateWithoutCommentInput {
+    id: Int
+    title: String!
+    author: PostAuthorCreateNestedInput
+    authorUuid: String
+    published: Boolean = false
+    views: Int = 0
+    lastSavedAt: AWSDateTime
+}
+
+input PostConnectOrCreateWithoutUserInput {
+    where: PostWhereUniqueInput!
+    create: PostCreateWithoutUserInput!
+}
+
+input PostConnectOrCreateWithoutCommentInput {
+    where: PostWhereUniqueInput!
+    create: PostCreateWithoutCommentInput!
+}
+
+input PostCreateManyInput {
+    id: Int
+    title: String!
+    published: Boolean = false
+    views: Int = 0
+    lastSavedAt: AWSDateTime
+}
+
+input PostUpdateInput {
+    id: Int
+    title: String
+    author: PostAuthorUpdateNestedInput
+    published: Boolean
+    comments: PostCommentsUpdateNestedInput
+    views: Int
+    lastSavedAt: AWSDateTime
+}
+
+input PostUpdateWithoutUserInput {
+    id: Int
+    title: String
+    published: Boolean
+    comments: PostCommentsUpdateNestedInput
+    views: Int
+    lastSavedAt: AWSDateTime
+}
+
+input PostUpdateWithoutCommentInput {
+    id: Int
+    title: String
+    author: PostAuthorUpdateNestedInput
+    authorUuid: String
+    published: Boolean
+    views: Int
+    lastSavedAt: AWSDateTime
+}
+
+input PostUpdateWithWhereUniqueWithoutUserInput {
+    data: PostUpdateWithoutUserInput!
+    where: PostExtendedWhereUniqueInput!
+}
+
+input PostUpdateWithWhereUniqueWithoutCommentInput {
+    data: PostUpdateWithoutCommentInput!
+    where: PostExtendedWhereUniqueInput!
+}
+
+input PostOperationInput {
+    views: IntOperation
+}
+
+input PostUpdateManyInput {
+    where: PostScalarWhereInput!
+    data: PostUpdateInput!
+}
+
+input PostUpsertWithoutUserInput {
+    create: PostCreateWithoutUserInput!
+    update: PostUpdateWithoutUserInput!
+}
+
+input PostUpsertWithoutCommentInput {
+    create: PostCreateWithoutCommentInput!
+    update: PostUpdateWithoutCommentInput!
+}
+
+input PostUpsertWithWhereUniqueWithoutUserInput {
+    where: PostExtendedWhereUniqueInput!
+    create: PostCreateWithoutUserInput!
+    update: PostUpdateWithoutUserInput!
+}
+
+input PostUpsertWithWhereUniqueWithoutCommentInput {
+    where: PostExtendedWhereUniqueInput!
+    create: PostCreateWithoutCommentInput!
+    update: PostUpdateWithoutCommentInput!
+}
+
+input CommentFilter {
+    some: CommentWhereInputWithoutNullables
+    every: CommentWhereInputWithoutNullables
+    none: CommentWhereInputWithoutNullables
+}
+
+input CommentWhereInputWithoutNullables {
+    OR: [CommentWhereInput!]
+    NOT: [CommentWhereInput!]
+    AND: [CommentWhereInput!]
+    id: IntFilter
+    author: UserWhereInput
+    authorUuid: StringNullableFilter
+    post: PostWhereInput
+    postId: IntFilter
+    message: StringFilter
+    lastSavedAt: AWSDateTimeNullableFilter
+}
+
+input CommentWhereInput {
+    is: NullArg
+    isNot: NullArg
+    OR: [CommentWhereInput!]
+    NOT: [CommentWhereInput!]
+    AND: [CommentWhereInput!]
+    id: IntFilter
+    author: UserWhereInput
+    authorUuid: StringNullableFilter
+    post: PostWhereInput
+    postId: IntFilter
+    message: StringFilter
+    lastSavedAt: AWSDateTimeNullableFilter
+}
+
+input CommentScalarWhereInput {
+    OR: [CommentScalarWhereInput!]
+    NOT: [CommentScalarWhereInput!]
+    AND: [CommentScalarWhereInput!]
+    id: IntFilter
+    authorUuid: StringNullableFilter
+    postId: IntFilter
+    message: StringFilter
+    lastSavedAt: AWSDateTimeNullableFilter
+}
+
+input CommentWhereUniqueInput {
+    id: Int
+}
+
+input CommentExtendedWhereUniqueInput {
+    OR: [CommentWhereInput!]
+    NOT: [CommentWhereInput!]
+    AND: [CommentWhereInput!]
+    id: Int
+    author: UserWhereInput
+    authorUuid: StringNullableFilter
+    post: PostWhereInput
+    postId: IntFilter
+    message: StringFilter
+    lastSavedAt: AWSDateTimeNullableFilter
+}
+
+input CommentOrderByInput {
+    id: OrderByArg
+    author: UserOrderByInput
+    authorUuid: OrderByArg
+    post: PostOrderByInput
+    postId: OrderByArg
+    message: OrderByArg
+    lastSavedAt: OrderByArg
+}
+
+input CommentAuthorCreateNestedInput {
+    connect: UserWhereUniqueInput
+    create: UserCreateWithoutCommentInput
+    connectOrCreate: UserConnectOrCreateWithoutCommentInput
+}
+
+input CommentPostCreateNestedInput {
+    connect: PostWhereUniqueInput
+    create: PostCreateWithoutCommentInput
+    connectOrCreate: PostConnectOrCreateWithoutCommentInput
+}
+
+input CommentAuthorUpdateNestedInput {
+    connect: UserWhereUniqueInput
+    disconnect: Boolean
+    create: UserCreateWithoutCommentInput
+    connectOrCreate: UserConnectOrCreateWithoutCommentInput
+    update: UserUpdateWithoutCommentInput
+    upsert: UserUpsertWithoutCommentInput
+    delete: Boolean
+}
+
+input CommentPostUpdateNestedInput {
+    connect: PostWhereUniqueInput
+    disconnect: Boolean
+    create: PostCreateWithoutCommentInput
+    connectOrCreate: PostConnectOrCreateWithoutCommentInput
+    update: PostUpdateWithoutCommentInput
+    upsert: PostUpsertWithoutCommentInput
+    delete: Boolean
+}
+
+input CommentCreateInput {
+    id: Int
+    author: CommentAuthorCreateNestedInput
+    post: CommentPostCreateNestedInput
+    message: String!
+    lastSavedAt: AWSDateTime
+}
+
+input CommentCreateWithoutUserInput {
+    id: Int
+    post: CommentPostCreateNestedInput
+    postId: Int!
+    message: String!
+    lastSavedAt: AWSDateTime
+}
+
+input CommentCreateWithoutPostInput {
+    id: Int
+    author: CommentAuthorCreateNestedInput
+    authorUuid: String
+    message: String!
+    lastSavedAt: AWSDateTime
+}
+
+input CommentConnectOrCreateWithoutUserInput {
+    where: CommentWhereUniqueInput!
+    create: CommentCreateWithoutUserInput!
+}
+
+input CommentConnectOrCreateWithoutPostInput {
+    where: CommentWhereUniqueInput!
+    create: CommentCreateWithoutPostInput!
+}
+
+input CommentCreateManyInput {
+    id: Int
+    message: String!
+    lastSavedAt: AWSDateTime
+}
+
+input CommentUpdateInput {
+    id: Int
+    author: CommentAuthorUpdateNestedInput
+    post: CommentPostUpdateNestedInput
+    message: String
+    lastSavedAt: AWSDateTime
+}
+
+input CommentUpdateWithoutUserInput {
+    id: Int
+    post: CommentPostUpdateNestedInput
+    postId: Int
+    message: String
+    lastSavedAt: AWSDateTime
+}
+
+input CommentUpdateWithoutPostInput {
+    id: Int
+    author: CommentAuthorUpdateNestedInput
+    authorUuid: String
+    message: String
+    lastSavedAt: AWSDateTime
+}
+
+input CommentUpdateWithWhereUniqueWithoutUserInput {
+    data: CommentUpdateWithoutUserInput!
+    where: CommentExtendedWhereUniqueInput!
+}
+
+input CommentUpdateWithWhereUniqueWithoutPostInput {
+    data: CommentUpdateWithoutPostInput!
+    where: CommentExtendedWhereUniqueInput!
+}
+
+input CommentUpdateManyInput {
+    where: CommentScalarWhereInput!
+    data: CommentUpdateInput!
+}
+
+input CommentUpsertWithoutUserInput {
+    create: CommentCreateWithoutUserInput!
+    update: CommentUpdateWithoutUserInput!
+}
+
+input CommentUpsertWithoutPostInput {
+    create: CommentCreateWithoutPostInput!
+    update: CommentUpdateWithoutPostInput!
+}
+
+input CommentUpsertWithWhereUniqueWithoutUserInput {
+    where: CommentExtendedWhereUniqueInput!
+    create: CommentCreateWithoutUserInput!
+    update: CommentUpdateWithoutUserInput!
+}
+
+input CommentUpsertWithWhereUniqueWithoutPostInput {
+    where: CommentExtendedWhereUniqueInput!
+    create: CommentCreateWithoutPostInput!
+    update: CommentUpdateWithoutPostInput!
+}
+
+input AuthorUuidPostIdFieldsInput {
+    authorUuid: String!
+    postId: Int!
+}
+
+input LikeFilter {
+    some: LikeWhereInputWithoutNullables
+    every: LikeWhereInputWithoutNullables
+    none: LikeWhereInputWithoutNullables
+}
+
+input LikeWhereInputWithoutNullables {
+    OR: [LikeWhereInput!]
+    NOT: [LikeWhereInput!]
+    AND: [LikeWhereInput!]
+    id: IntFilter
+    authorUuid: StringFilter
+    postId: IntFilter
+}
+
+input LikeWhereInput {
+    is: NullArg
+    isNot: NullArg
+    OR: [LikeWhereInput!]
+    NOT: [LikeWhereInput!]
+    AND: [LikeWhereInput!]
+    id: IntFilter
+    authorUuid: StringFilter
+    postId: IntFilter
+}
+
+input LikeScalarWhereInput {
+    OR: [LikeScalarWhereInput!]
+    NOT: [LikeScalarWhereInput!]
+    AND: [LikeScalarWhereInput!]
+    id: IntFilter
+    authorUuid: StringFilter
+    postId: IntFilter
+}
+
+input LikeWhereUniqueInput {
+    id: Int
+    authorUuid_postId: AuthorUuidPostIdFieldsInput
+}
+
+input LikeExtendedWhereUniqueInput {
+    OR: [LikeWhereInput!]
+    NOT: [LikeWhereInput!]
+    AND: [LikeWhereInput!]
+    id: Int
+    authorUuid_postId: AuthorUuidPostIdFieldsInput
+    authorUuid: StringFilter
+    postId: IntFilter
+}
+
+input LikeOrderByInput {
+    id: OrderByArg
+    authorUuid: OrderByArg
+    postId: OrderByArg
+}
+
+input LikeCreateInput {
+    id: Int
+    authorUuid: String!
+    postId: Int!
+}
+
+input LikeCreateManyInput {
+    id: Int
+    authorUuid: String!
+    postId: Int!
+}
+
+input LikeUpdateInput {
+    id: Int
+    authorUuid: String
+    postId: Int
+}
+
+input LikeUpdateManyInput {
+    where: LikeScalarWhereInput!
+    data: LikeUpdateInput!
+}
+
+type Query {
+    # Retrieve a single User record by unique identifier.
+    getUser(where: UserExtendedWhereUniqueInput!): User
+
+    # Retrieve a list of Users records.
+    listUsers(
+        where: UserWhereInput
+        orderBy: [UserOrderByInput!]
+        skip: Int
+        take: Int
+    ): [User!]
+
+    # Count the number of Users records.
+    countUsers(
+        where: UserWhereInput
+        orderBy: [UserOrderByInput!]
+        skip: Int
+        take: Int
+    ): Int!
+
+    # Retrieve a single Profile record by unique identifier.
+    getProfile(
+        where: ProfileExtendedWhereUniqueInput!
+    ): Profile
+
+    # Retrieve a list of Profiles records.
+    listProfiles(
+        where: ProfileWhereInput
+        orderBy: [ProfileOrderByInput!]
+        skip: Int
+        take: Int
+    ): [Profile!]
+
+    # Count the number of Profiles records.
+    countProfiles(
+        where: ProfileWhereInput
+        orderBy: [ProfileOrderByInput!]
+        skip: Int
+        take: Int
+    ): Int!
+
+    # Retrieve a single Post record by unique identifier.
+    getPost(where: PostExtendedWhereUniqueInput!): Post
+
+    # Retrieve a list of Posts records.
+    listPosts(
+        where: PostWhereInput
+        orderBy: [PostOrderByInput!]
+        skip: Int
+        take: Int
+    ): [Post!]
+
+    # Count the number of Posts records.
+    countPosts(
+        where: PostWhereInput
+        orderBy: [PostOrderByInput!]
+        skip: Int
+        take: Int
+    ): Int!
+
+    # Retrieve a single Comment record by unique identifier.
+    getComment(
+        where: CommentExtendedWhereUniqueInput!
+    ): Comment
+
+    # Retrieve a list of Comments records.
+    listComments(
+        where: CommentWhereInput
+        orderBy: [CommentOrderByInput!]
+        skip: Int
+        take: Int
+    ): [Comment!]
+
+    # Count the number of Comments records.
+    countComments(
+        where: CommentWhereInput
+        orderBy: [CommentOrderByInput!]
+        skip: Int
+        take: Int
+    ): Int!
+
+    # Retrieve a single Like record by unique identifier.
+    getLike(where: LikeExtendedWhereUniqueInput!): Like
+
+    # Retrieve a list of Likes records.
+    listLikes(
+        where: LikeWhereInput
+        orderBy: [LikeOrderByInput!]
+        skip: Int
+        take: Int
+    ): [Like!]
+
+    # Count the number of Likes records.
+    countLikes(
+        where: LikeWhereInput
+        orderBy: [LikeOrderByInput!]
+        skip: Int
+        take: Int
+    ): Int!
+}
+
+type Mutation {
+    # Create a new User record.
+    createUser(data: UserCreateInput!): User!
+
+    # Create multiple new Users records.
+    createManyUsers(
+        data: [UserCreateManyInput!]
+        skipDuplicates: Boolean
+    ): BatchPayload!
+
+    # Update a single existing User record.
+    updateUser(
+        where: UserExtendedWhereUniqueInput!
+        data: UserUpdateInput
+    ): User!
+
+    # Update multiple existing Users records.
+    updateManyUsers(
+        where: UserWhereInput!
+        data: UserUpdateInput
+    ): BatchPayload!
+
+    # Create a new User record if it does not exist, or updates it if it does.
+    upsertUser(
+        create: UserCreateInput!
+        update: UserUpdateInput!
+        where: UserExtendedWhereUniqueInput!
+    ): User!
+
+    # Delete a single existing User record.
+    deleteUser(where: UserExtendedWhereUniqueInput!): User!
+
+    # Delete multiple existing Users records.
+    deleteManyUsers(where: UserWhereInput!): BatchPayload!
+
+    # Create a new Profile record.
+    createProfile(data: ProfileCreateInput!): Profile!
+
+    # Create multiple new Profiles records.
+    createManyProfiles(
+        data: [ProfileCreateManyInput!]
+        skipDuplicates: Boolean
+    ): BatchPayload!
+
+    # Update a single existing Profile record.
+    updateProfile(
+        where: ProfileExtendedWhereUniqueInput!
+        data: ProfileUpdateInput
+    ): Profile!
+
+    # Update multiple existing Profiles records.
+    updateManyProfiles(
+        where: ProfileWhereInput!
+        data: ProfileUpdateInput
+    ): BatchPayload!
+
+    # Create a new Profile record if it does not exist, or updates it if it does.
+    upsertProfile(
+        create: ProfileCreateInput!
+        update: ProfileUpdateInput!
+        where: ProfileExtendedWhereUniqueInput!
+    ): Profile!
+
+    # Delete a single existing Profile record.
+    deleteProfile(
+        where: ProfileExtendedWhereUniqueInput!
+    ): Profile!
+
+    # Delete multiple existing Profiles records.
+    deleteManyProfiles(
+        where: ProfileWhereInput!
+    ): BatchPayload!
+
+    # Create a new Post record.
+    createPost(data: PostCreateInput!): Post!
+
+    # Create multiple new Posts records.
+    createManyPosts(
+        data: [PostCreateManyInput!]
+        skipDuplicates: Boolean
+    ): BatchPayload!
+
+    # Update a single existing Post record.
+    updatePost(
+        where: PostExtendedWhereUniqueInput!
+        data: PostUpdateInput
+        operation: PostOperationInput
+    ): Post!
+
+    # Update multiple existing Posts records.
+    updateManyPosts(
+        where: PostWhereInput!
+        data: PostUpdateInput
+        operation: PostOperationInput
+    ): BatchPayload!
+
+    # Create a new Post record if it does not exist, or updates it if it does.
+    upsertPost(
+        create: PostCreateInput!
+        update: PostUpdateInput!
+        where: PostExtendedWhereUniqueInput!
+    ): Post!
+
+    # Delete a single existing Post record.
+    deletePost(where: PostExtendedWhereUniqueInput!): Post!
+
+    # Delete multiple existing Posts records.
+    deleteManyPosts(where: PostWhereInput!): BatchPayload!
+
+    # Create a new Comment record.
+    createComment(data: CommentCreateInput!): Comment!
+
+    # Create multiple new Comments records.
+    createManyComments(
+        data: [CommentCreateManyInput!]
+        skipDuplicates: Boolean
+    ): BatchPayload!
+
+    # Update a single existing Comment record.
+    updateComment(
+        where: CommentExtendedWhereUniqueInput!
+        data: CommentUpdateInput
+    ): Comment!
+
+    # Update multiple existing Comments records.
+    updateManyComments(
+        where: CommentWhereInput!
+        data: CommentUpdateInput
+    ): BatchPayload!
+
+    # Create a new Comment record if it does not exist, or updates it if it does.
+    upsertComment(
+        create: CommentCreateInput!
+        update: CommentUpdateInput!
+        where: CommentExtendedWhereUniqueInput!
+    ): Comment!
+
+    # Delete a single existing Comment record.
+    deleteComment(
+        where: CommentExtendedWhereUniqueInput!
+    ): Comment!
+
+    # Delete multiple existing Comments records.
+    deleteManyComments(
+        where: CommentWhereInput!
+    ): BatchPayload!
+
+    # Create a new Like record.
+    createLike(data: LikeCreateInput!): Like!
+
+    # Create multiple new Likes records.
+    createManyLikes(
+        data: [LikeCreateManyInput!]
+        skipDuplicates: Boolean
+    ): BatchPayload!
+
+    # Update a single existing Like record.
+    updateLike(
+        where: LikeExtendedWhereUniqueInput!
+        data: LikeUpdateInput
+    ): Like!
+
+    # Update multiple existing Likes records.
+    updateManyLikes(
+        where: LikeWhereInput!
+        data: LikeUpdateInput
+    ): BatchPayload!
+
+    # Create a new Like record if it does not exist, or updates it if it does.
+    upsertLike(
+        create: LikeCreateInput!
+        update: LikeUpdateInput!
+        where: LikeExtendedWhereUniqueInput!
+    ): Like!
+
+    # Delete a single existing Like record.
+    deleteLike(where: LikeExtendedWhereUniqueInput!): Like!
+
+    # Delete multiple existing Likes records.
+    deleteManyLikes(where: LikeWhereInput!): BatchPayload!
+
+    # Send a notification.
+    notify(message: String!): PublishNotification
+}
+
+type Subscription {
+    # Event triggered when a new User record is created.
+    onCreatedUser(
+        uuid: String
+        username: String
+        email: AWSEmail
+    ): User! @aws_subscribe(mutations: ["createUser"])
+
+    # Event triggered when an existing User record is updated.
+    onUpdatedUser(
+        uuid: String
+        username: String
+        email: AWSEmail
+    ): User! @aws_subscribe(mutations: ["updateUser"])
+
+    # Event triggered when a User record is either created or updated.
+    onUpsertedUser(
+        uuid: String
+        username: String
+        email: AWSEmail
+    ): User! @aws_subscribe(mutations: ["upsertUser"])
+
+    # Event triggered when an existing User record is deleted.
+    onDeletedUser(
+        uuid: String
+        username: String
+        email: AWSEmail
+    ): User! @aws_subscribe(mutations: ["deleteUser"])
+
+    # Event triggered when a User record is either created, updated, or deleted.
+    onMutatedUser(
+        uuid: String
+        username: String
+        email: AWSEmail
+    ): User!
+        @aws_subscribe(
+            mutations: [
+                "createUser"
+                "updateUser"
+                "upsertUser"
+                "deleteUser"
+            ]
+        )
+
+    # Event triggered when multiple new Users records are created.
+    onCreatedManyUsers: BatchPayload!
+        @aws_subscribe(mutations: ["createManyUsers"])
+
+    # Event triggered when multiple existing Users records are updated.
+    onUpdatedManyUsers: BatchPayload!
+        @aws_subscribe(mutations: ["updateManyUsers"])
+
+    # Event triggered when multiple existing Users records are deleted.
+    onDeletedManyUsers: BatchPayload!
+        @aws_subscribe(mutations: ["deleteManyUsers"])
+
+    # Event triggered when multiple Users records are either created, updated, or deleted.
+    onMutatedManyUsers: BatchPayload!
+        @aws_subscribe(
+            mutations: [
+                "createManyUsers"
+                "updateManyUsers"
+                "deleteManyUsers"
+            ]
+        )
+
+    # Event triggered when a new Profile record is created.
+    onCreatedProfile(
+        uuid: String
+        ownerUuid: String
+    ): Profile! @aws_subscribe(mutations: ["createProfile"])
+
+    # Event triggered when an existing Profile record is updated.
+    onUpdatedProfile(
+        uuid: String
+        ownerUuid: String
+    ): Profile! @aws_subscribe(mutations: ["updateProfile"])
+
+    # Event triggered when a Profile record is either created or updated.
+    onUpsertedProfile(
+        uuid: String
+        ownerUuid: String
+    ): Profile! @aws_subscribe(mutations: ["upsertProfile"])
+
+    # Event triggered when an existing Profile record is deleted.
+    onDeletedProfile(
+        uuid: String
+        ownerUuid: String
+    ): Profile! @aws_subscribe(mutations: ["deleteProfile"])
+
+    # Event triggered when a Profile record is either created, updated, or deleted.
+    onMutatedProfile(
+        uuid: String
+        ownerUuid: String
+    ): Profile!
+        @aws_subscribe(
+            mutations: [
+                "createProfile"
+                "updateProfile"
+                "upsertProfile"
+                "deleteProfile"
+            ]
+        )
+
+    # Event triggered when multiple new Profiles records are created.
+    onCreatedManyProfiles: BatchPayload!
+        @aws_subscribe(mutations: ["createManyProfiles"])
+
+    # Event triggered when multiple existing Profiles records are updated.
+    onUpdatedManyProfiles: BatchPayload!
+        @aws_subscribe(mutations: ["updateManyProfiles"])
+
+    # Event triggered when multiple existing Profiles records are deleted.
+    onDeletedManyProfiles: BatchPayload!
+        @aws_subscribe(mutations: ["deleteManyProfiles"])
+
+    # Event triggered when multiple Profiles records are either created, updated, or deleted.
+    onMutatedManyProfiles: BatchPayload!
+        @aws_subscribe(
+            mutations: [
+                "createManyProfiles"
+                "updateManyProfiles"
+                "deleteManyProfiles"
+            ]
+        )
+
+    # Event triggered when a new Post record is created.
+    onCreatedPost(id: Int): Post!
+        @aws_subscribe(mutations: ["createPost"])
+
+    # Event triggered when an existing Post record is updated.
+    onUpdatedPost(id: Int): Post!
+        @aws_subscribe(mutations: ["updatePost"])
+
+    # Event triggered when a Post record is either created or updated.
+    onUpsertedPost(id: Int): Post!
+        @aws_subscribe(mutations: ["upsertPost"])
+
+    # Event triggered when an existing Post record is deleted.
+    onDeletedPost(id: Int): Post!
+        @aws_subscribe(mutations: ["deletePost"])
+
+    # Event triggered when a Post record is either created, updated, or deleted.
+    onMutatedPost(id: Int): Post!
+        @aws_subscribe(
+            mutations: [
+                "createPost"
+                "updatePost"
+                "upsertPost"
+                "deletePost"
+            ]
+        )
+
+    # Event triggered when multiple new Posts records are created.
+    onCreatedManyPosts: BatchPayload!
+        @aws_subscribe(mutations: ["createManyPosts"])
+
+    # Event triggered when multiple existing Posts records are updated.
+    onUpdatedManyPosts: BatchPayload!
+        @aws_subscribe(mutations: ["updateManyPosts"])
+
+    # Event triggered when multiple existing Posts records are deleted.
+    onDeletedManyPosts: BatchPayload!
+        @aws_subscribe(mutations: ["deleteManyPosts"])
+
+    # Event triggered when multiple Posts records are either created, updated, or deleted.
+    onMutatedManyPosts: BatchPayload!
+        @aws_subscribe(
+            mutations: [
+                "createManyPosts"
+                "updateManyPosts"
+                "deleteManyPosts"
+            ]
+        )
+
+    # Event triggered when a new Comment record is created.
+    onCreatedComment(id: Int): Comment!
+        @aws_subscribe(mutations: ["createComment"])
+
+    # Event triggered when an existing Comment record is updated.
+    onUpdatedComment(id: Int): Comment!
+        @aws_subscribe(mutations: ["updateComment"])
+
+    # Event triggered when a Comment record is either created or updated.
+    onUpsertedComment(id: Int): Comment!
+        @aws_subscribe(mutations: ["upsertComment"])
+
+    # Event triggered when an existing Comment record is deleted.
+    onDeletedComment(id: Int): Comment!
+        @aws_subscribe(mutations: ["deleteComment"])
+
+    # Event triggered when a Comment record is either created, updated, or deleted.
+    onMutatedComment(id: Int): Comment!
+        @aws_subscribe(
+            mutations: [
+                "createComment"
+                "updateComment"
+                "upsertComment"
+                "deleteComment"
+            ]
+        )
+
+    # Event triggered when multiple new Comments records are created.
+    onCreatedManyComments: BatchPayload!
+        @aws_subscribe(mutations: ["createManyComments"])
+
+    # Event triggered when multiple existing Comments records are updated.
+    onUpdatedManyComments: BatchPayload!
+        @aws_subscribe(mutations: ["updateManyComments"])
+
+    # Event triggered when multiple existing Comments records are deleted.
+    onDeletedManyComments: BatchPayload!
+        @aws_subscribe(mutations: ["deleteManyComments"])
+
+    # Event triggered when multiple Comments records are either created, updated, or deleted.
+    onMutatedManyComments: BatchPayload!
+        @aws_subscribe(
+            mutations: [
+                "createManyComments"
+                "updateManyComments"
+                "deleteManyComments"
+            ]
+        )
+
+    # Event triggered when a new Like record is created.
+    onCreatedLike(
+        id: Int
+        authorUuid_postId: AuthorUuidPostIdFieldsInput
+    ): Like! @aws_subscribe(mutations: ["createLike"])
+
+    # Event triggered when an existing Like record is updated.
+    onUpdatedLike(
+        id: Int
+        authorUuid_postId: AuthorUuidPostIdFieldsInput
+    ): Like! @aws_subscribe(mutations: ["updateLike"])
+
+    # Event triggered when a Like record is either created or updated.
+    onUpsertedLike(
+        id: Int
+        authorUuid_postId: AuthorUuidPostIdFieldsInput
+    ): Like! @aws_subscribe(mutations: ["upsertLike"])
+
+    # Event triggered when an existing Like record is deleted.
+    onDeletedLike(
+        id: Int
+        authorUuid_postId: AuthorUuidPostIdFieldsInput
+    ): Like! @aws_subscribe(mutations: ["deleteLike"])
+
+    # Event triggered when a Like record is either created, updated, or deleted.
+    onMutatedLike(
+        id: Int
+        authorUuid_postId: AuthorUuidPostIdFieldsInput
+    ): Like!
+        @aws_subscribe(
+            mutations: [
+                "createLike"
+                "updateLike"
+                "upsertLike"
+                "deleteLike"
+            ]
+        )
+
+    # Event triggered when multiple new Likes records are created.
+    onCreatedManyLikes: BatchPayload!
+        @aws_subscribe(mutations: ["createManyLikes"])
+
+    # Event triggered when multiple existing Likes records are updated.
+    onUpdatedManyLikes: BatchPayload!
+        @aws_subscribe(mutations: ["updateManyLikes"])
+
+    # Event triggered when multiple existing Likes records are deleted.
+    onDeletedManyLikes: BatchPayload!
+        @aws_subscribe(mutations: ["deleteManyLikes"])
+
+    # Event triggered when multiple Likes records are either created, updated, or deleted.
+    onMutatedManyLikes: BatchPayload!
+        @aws_subscribe(
+            mutations: [
+                "createManyLikes"
+                "updateManyLikes"
+                "deleteManyLikes"
+            ]
+        )
+
+    # Triggered from `notify` mutation.
+    onNotification: PublishNotification
+        @aws_subscribe(mutations: ["notify"])
+}
+
+type PublishNotification {
+    message: String!
+}

@@ -6,13 +6,12 @@ import EasyGraphQLTester from 'easygraphql-tester'
 
 const appsyncDirectives = readFileSync(join(__dirname, './mock/appsync-directives.gql'), 'utf8')
 const appsyncScalars = readFileSync(join(__dirname, './mock/appsync-scalars.gql'), 'utf8')
-const gqlSchema = readFileSync(join(__dirname, '../prisma/generated/prisma-appsync/schema.gql'), 'utf8')
+const generatedSchema = readFileSync(join(__dirname, './schemas/generated/crud/schema.gql'), 'utf8')
+const appsyncSchema = [appsyncDirectives, appsyncScalars, generatedSchema].join('\n\n').replace(/\"\"\"(.|\n)*?\"\"\"\n/gim, '')
+const tester = new EasyGraphQLTester(appsyncSchema)
 
-const schema = String([appsyncDirectives, appsyncScalars, gqlSchema].join('\n\n').replace(/\"\"\"(.|\n)*?\"\"\"\n/gim, ''))
-const tester = new EasyGraphQLTester(schema)
-
-describe('GENERATOR #gql', () => {
-    describe('.basicOperations?', () => {
+describe('GENERATOR CRUD', () => {
+    describe('queries', () => {
         test('expect "get<Model>" query to be valid', async () => {
             const query = `
                 query ($id: Int!) {
@@ -49,6 +48,9 @@ describe('GENERATOR #gql', () => {
             `
             tester.test(true, query)
         })
+    })
+
+    describe('mutations', () => {
         test('expect "create<Model>" query to be valid', async () => {
             const query = `
                 mutation {
@@ -141,7 +143,8 @@ describe('GENERATOR #gql', () => {
             tester.test(true, query)
         })
     })
-    describe('.advancedOperations?', () => {
+
+    describe('relation queries', () => {
         test('expect "deeply nested read" query to be valid', async () => {
             const query = `
                 query {
@@ -336,6 +339,9 @@ describe('GENERATOR #gql', () => {
             `
             tester.test(true, query)
         })
+    })
+
+    describe('custom resolvers', () => {
         test('expect "custom resolver" query to be valid', async () => {
             const query = `
                 mutation ($message: String!) {

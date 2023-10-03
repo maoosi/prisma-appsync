@@ -1,0 +1,700 @@
+type BatchPayload {
+    count: Int!
+}
+
+type User {
+    id: Int!
+    email: AWSEmail!
+    posts: [Post!]!
+    createdAt: AWSDateTime
+}
+
+type Post {
+    id: Int!
+    title: String!
+    source: AWSURL
+    author: User
+    authorId: Int
+    views: Int
+    status: Status
+    createdAt: AWSDateTime
+}
+
+type Badge {
+    level: Int!
+    rank: Int!
+}
+
+enum OrderByArg {
+    ASC
+    DESC
+}
+
+enum NullArg {
+    NULL
+}
+
+enum Status {
+    DRAFT
+    PUBLISHED
+    DELETED
+}
+
+input IntOperation {
+    set: Int
+    increment: Int
+    decrement: Int
+    multiply: Int
+    divide: Int
+}
+
+input FloatOperation {
+    set: Float
+    increment: Float
+    decrement: Float
+    multiply: Float
+    divide: Float
+}
+
+input AWSDateTimeFilter {
+    equals: AWSDateTime
+    gt: AWSDateTime
+    gte: AWSDateTime
+    in: [AWSDateTime!]
+    lt: AWSDateTime
+    lte: AWSDateTime
+    not: AWSDateTimeFilter
+    notIn: [AWSDateTime!]
+}
+
+input AWSDateTimeNullableFilter {
+    equals: AWSDateTime
+    gt: AWSDateTime
+    gte: AWSDateTime
+    in: [AWSDateTime!]
+    lt: AWSDateTime
+    lte: AWSDateTime
+    not: AWSDateTimeFilter
+    notIn: [AWSDateTime!]
+    isNull: Boolean
+}
+
+input AWSDateTimeListFilter {
+    equals: [AWSDateTime!]
+    has: AWSDateTime
+    hasEvery: [AWSDateTime!]
+    hasSome: [AWSDateTime!]
+    isEmpty: Boolean
+}
+
+input AWSDateFilter {
+    equals: AWSDate
+    gt: AWSDate
+    gte: AWSDate
+    in: [AWSDate!]
+    lt: AWSDate
+    lte: AWSDate
+    not: AWSDateFilter
+    notIn: [AWSDate!]
+}
+
+input AWSDateNullableFilter {
+    equals: AWSDate
+    gt: AWSDate
+    gte: AWSDate
+    in: [AWSDate!]
+    lt: AWSDate
+    lte: AWSDate
+    not: AWSDateFilter
+    notIn: [AWSDate!]
+    isNull: Boolean
+}
+
+input AWSDateListFilter {
+    equals: [AWSDate!]
+    has: AWSDate
+    hasEvery: [AWSDate!]
+    hasSome: [AWSDate!]
+    isEmpty: Boolean
+}
+
+input FloatFilter {
+    equals: Float
+    gt: Float
+    gte: Float
+    in: [Float!]
+    lt: Float
+    lte: Float
+    not: FloatFilter
+    notIn: [Float!]
+    isNull: Boolean
+}
+
+input FloatNullableFilter {
+    equals: Float
+    gt: Float
+    gte: Float
+    in: [Float!]
+    lt: Float
+    lte: Float
+    not: FloatFilter
+    notIn: [Float!]
+    isNull: Boolean
+}
+
+input FloatListFilter {
+    equals: [Float!]
+    has: Float
+    hasEvery: [Float!]
+    hasSome: [Float!]
+    isEmpty: Boolean
+}
+
+input IntFilter {
+    equals: Int
+    gt: Int
+    gte: Int
+    in: [Int!]
+    lt: Int
+    lte: Int
+    not: IntFilter
+    notIn: [Int!]
+}
+
+input IntNullableFilter {
+    equals: Int
+    gt: Int
+    gte: Int
+    in: [Int!]
+    lt: Int
+    lte: Int
+    not: IntFilter
+    notIn: [Int!]
+    isNull: Boolean
+}
+
+input IntListFilter {
+    equals: [Int!]
+    has: Int
+    hasEvery: [Int!]
+    hasSome: [Int!]
+    isEmpty: Boolean
+}
+
+input AWSJSONFilter {
+    contains: String
+    endsWith: String
+    equals: AWSJSON
+    in: [AWSJSON!]
+    not: AWSJSONFilter
+    notIn: [AWSJSON!]
+    startsWith: String
+}
+
+input AWSJSONNullableFilter {
+    contains: String
+    endsWith: String
+    equals: AWSJSON
+    in: [AWSJSON!]
+    not: AWSJSONFilter
+    notIn: [AWSJSON!]
+    startsWith: String
+    isNull: Boolean
+}
+
+input AWSJSONListFilter {
+    equals: [AWSJSON!]
+    has: AWSJSON
+    hasEvery: [AWSJSON!]
+    hasSome: [AWSJSON!]
+    isEmpty: Boolean
+}
+
+input AWSEmailFilter {
+    contains: String
+    endsWith: String
+    equals: AWSEmail
+    in: [AWSEmail!]
+    not: AWSEmailFilter
+    notIn: [AWSEmail!]
+    startsWith: String
+}
+
+input AWSEmailNullableFilter {
+    contains: String
+    endsWith: String
+    equals: AWSEmail
+    in: [AWSEmail!]
+    not: AWSEmailFilter
+    notIn: [AWSEmail!]
+    startsWith: String
+    isNull: Boolean
+}
+
+input AWSEmailListFilter {
+    equals: [AWSEmail!]
+    has: AWSEmail
+    hasEvery: [AWSEmail!]
+    hasSome: [AWSEmail!]
+    isEmpty: Boolean
+}
+
+input AWSURLFilter {
+    contains: String
+    endsWith: String
+    equals: AWSURL
+    in: [AWSURL!]
+    not: AWSURLFilter
+    notIn: [AWSURL!]
+    startsWith: String
+}
+
+input AWSURLNullableFilter {
+    contains: String
+    endsWith: String
+    equals: AWSURL
+    in: [AWSURL!]
+    not: AWSURLFilter
+    notIn: [AWSURL!]
+    startsWith: String
+    isNull: Boolean
+}
+
+input AWSURLListFilter {
+    equals: [AWSURL!]
+    has: AWSURL
+    hasEvery: [AWSURL!]
+    hasSome: [AWSURL!]
+    isEmpty: Boolean
+}
+
+input StringFilter {
+    contains: String
+    endsWith: String
+    equals: String
+    in: [String!]
+    not: StringFilter
+    notIn: [String!]
+    startsWith: String
+    mode: String
+}
+
+input StringNullableFilter {
+    contains: String
+    endsWith: String
+    equals: String
+    in: [String!]
+    not: StringFilter
+    notIn: [String!]
+    startsWith: String
+    mode: String
+    isNull: Boolean
+}
+
+input StringListFilter {
+    equals: [String!]
+    has: String
+    hasEvery: [String!]
+    hasSome: [String!]
+    isEmpty: Boolean
+}
+
+input BooleanFilter {
+    equals: Boolean
+    not: BooleanFilter
+}
+
+input BooleanNullableFilter {
+    equals: Boolean
+    not: BooleanFilter
+    isNull: Boolean
+}
+
+input BooleanListFilter {
+    equals: [Boolean!]
+    has: Boolean
+    hasEvery: [Boolean!]
+    hasSome: [Boolean!]
+}
+
+input StatusEnumFilter {
+    equals: Status
+    in: [Status!]
+    not: StatusEnumFilter
+    notIn: [Status!]
+}
+
+input StatusEnumListFilter {
+    equals: [Status!]
+    has: Status
+    hasEvery: [Status!]
+    hasSome: [Status!]
+    isEmpty: Boolean
+}
+
+input UserFilter {
+    some: UserWhereInputWithoutNullables
+    every: UserWhereInputWithoutNullables
+    none: UserWhereInputWithoutNullables
+}
+
+input UserWhereInputWithoutNullables {
+    OR: [UserWhereInput!]
+    NOT: [UserWhereInput!]
+    AND: [UserWhereInput!]
+    id: IntFilter
+    email: AWSEmailFilter
+    posts: PostFilter
+    createdAt: AWSDateTimeNullableFilter
+}
+
+input UserWhereInput {
+    is: NullArg
+    isNot: NullArg
+    OR: [UserWhereInput!]
+    NOT: [UserWhereInput!]
+    AND: [UserWhereInput!]
+    id: IntFilter
+    email: AWSEmailFilter
+    posts: PostFilter
+    createdAt: AWSDateTimeNullableFilter
+}
+
+input UserScalarWhereInput {
+    OR: [UserScalarWhereInput!]
+    NOT: [UserScalarWhereInput!]
+    AND: [UserScalarWhereInput!]
+    id: IntFilter
+    email: AWSEmailFilter
+    createdAt: AWSDateTimeNullableFilter
+}
+
+input UserWhereUniqueInput {
+    id: Int
+    email: AWSEmail
+}
+
+input UserExtendedWhereUniqueInput {
+    OR: [UserWhereInput!]
+    NOT: [UserWhereInput!]
+    AND: [UserWhereInput!]
+    id: Int
+    email: AWSEmail
+    posts: PostFilter
+    createdAt: AWSDateTimeNullableFilter
+}
+
+input UserOrderByInput {
+    id: OrderByArg
+    email: OrderByArg
+    posts: PostOrderByInput
+    createdAt: OrderByArg
+}
+
+input UserPostsCreateNestedInput {
+    connect: [PostWhereUniqueInput!]
+    create: [PostCreateWithoutUserInput!]
+    connectOrCreate: [PostConnectOrCreateWithoutUserInput!]
+}
+
+input UserPostsUpdateNestedInput {
+    connect: [PostWhereUniqueInput!]
+    disconnect: [PostExtendedWhereUniqueInput!]
+    set: [PostWhereUniqueInput!]
+    create: [PostCreateWithoutUserInput!]
+    connectOrCreate: [PostConnectOrCreateWithoutUserInput!]
+    update: [PostUpdateWithWhereUniqueWithoutUserInput!]
+    upsert: [PostUpsertWithWhereUniqueWithoutUserInput!]
+    updateMany: [PostUpdateManyInput!]
+}
+
+input PostFilter {
+    some: PostWhereInputWithoutNullables
+    every: PostWhereInputWithoutNullables
+    none: PostWhereInputWithoutNullables
+}
+
+input PostWhereInputWithoutNullables {
+    OR: [PostWhereInput!]
+    NOT: [PostWhereInput!]
+    AND: [PostWhereInput!]
+    id: IntFilter
+    title: StringFilter
+    source: AWSURLNullableFilter
+    author: UserWhereInput
+    authorId: IntNullableFilter
+    views: IntNullableFilter
+    status: StatusEnumFilter
+    createdAt: AWSDateTimeNullableFilter
+}
+
+input PostWhereInput {
+    is: NullArg
+    isNot: NullArg
+    OR: [PostWhereInput!]
+    NOT: [PostWhereInput!]
+    AND: [PostWhereInput!]
+    id: IntFilter
+    title: StringFilter
+    source: AWSURLNullableFilter
+    author: UserWhereInput
+    authorId: IntNullableFilter
+    views: IntNullableFilter
+    status: StatusEnumFilter
+    createdAt: AWSDateTimeNullableFilter
+}
+
+input PostScalarWhereInput {
+    OR: [PostScalarWhereInput!]
+    NOT: [PostScalarWhereInput!]
+    AND: [PostScalarWhereInput!]
+    id: IntFilter
+    title: StringFilter
+    source: AWSURLNullableFilter
+    authorId: IntNullableFilter
+    views: IntNullableFilter
+    status: StatusEnumFilter
+    createdAt: AWSDateTimeNullableFilter
+}
+
+input PostWhereUniqueInput {
+    id: Int
+}
+
+input PostExtendedWhereUniqueInput {
+    OR: [PostWhereInput!]
+    NOT: [PostWhereInput!]
+    AND: [PostWhereInput!]
+    id: Int
+    title: StringFilter
+    source: AWSURLNullableFilter
+    author: UserWhereInput
+    authorId: IntNullableFilter
+    views: IntNullableFilter
+    status: StatusEnumFilter
+    createdAt: AWSDateTimeNullableFilter
+}
+
+input PostOrderByInput {
+    id: OrderByArg
+    title: OrderByArg
+    source: OrderByArg
+    author: UserOrderByInput
+    authorId: OrderByArg
+    views: OrderByArg
+    status: OrderByArg
+    createdAt: OrderByArg
+}
+
+input PostAuthorCreateNestedInput {
+    connect: UserWhereUniqueInput
+}
+
+input PostAuthorUpdateNestedInput {
+    connect: UserWhereUniqueInput
+    disconnect: Boolean
+}
+
+input PostCreateInput {
+    id: Int
+    title: String!
+    source: AWSURL
+    author: PostAuthorCreateNestedInput
+    views: Int = 1
+    status: Status = DRAFT
+    createdAt: AWSDateTime
+}
+
+input PostCreateWithoutUserInput {
+    id: Int
+    title: String!
+    source: AWSURL
+    views: Int = 1
+    status: Status = DRAFT
+    createdAt: AWSDateTime
+}
+
+input PostConnectOrCreateWithoutUserInput {
+    where: PostWhereUniqueInput!
+    create: PostCreateWithoutUserInput!
+}
+
+input PostCreateManyInput {
+    id: Int
+    title: String!
+    source: AWSURL
+    views: Int = 1
+    status: Status = DRAFT
+    createdAt: AWSDateTime
+}
+
+input PostUpdateInput {
+    id: Int
+    title: String
+    source: AWSURL
+    author: PostAuthorUpdateNestedInput
+    views: Int
+    status: Status
+    createdAt: AWSDateTime
+}
+
+input PostUpdateWithoutUserInput {
+    id: Int
+    title: String
+    source: AWSURL
+    views: Int
+    status: Status
+    createdAt: AWSDateTime
+}
+
+input PostUpdateWithWhereUniqueWithoutUserInput {
+    data: PostUpdateWithoutUserInput!
+    where: PostExtendedWhereUniqueInput!
+}
+
+input PostOperationInput {
+    views: IntOperation
+}
+
+input PostUpdateManyInput {
+    where: PostScalarWhereInput!
+    data: PostUpdateInput!
+}
+
+input PostUpsertWithoutUserInput {
+    create: PostCreateWithoutUserInput!
+    update: PostUpdateWithoutUserInput!
+}
+
+input PostUpsertWithWhereUniqueWithoutUserInput {
+    where: PostExtendedWhereUniqueInput!
+    create: PostCreateWithoutUserInput!
+    update: PostUpdateWithoutUserInput!
+}
+
+input LevelRankFieldsInput {
+    level: Int!
+    rank: Int!
+}
+
+input BadgeFilter {
+    some: BadgeWhereInputWithoutNullables
+    every: BadgeWhereInputWithoutNullables
+    none: BadgeWhereInputWithoutNullables
+}
+
+input BadgeWhereInputWithoutNullables {
+    OR: [BadgeWhereInput!]
+    NOT: [BadgeWhereInput!]
+    AND: [BadgeWhereInput!]
+    level: IntFilter
+    rank: IntFilter
+}
+
+input BadgeWhereInput {
+    is: NullArg
+    isNot: NullArg
+    OR: [BadgeWhereInput!]
+    NOT: [BadgeWhereInput!]
+    AND: [BadgeWhereInput!]
+    level: IntFilter
+    rank: IntFilter
+}
+
+input BadgeScalarWhereInput {
+    OR: [BadgeScalarWhereInput!]
+    NOT: [BadgeScalarWhereInput!]
+    AND: [BadgeScalarWhereInput!]
+    level: IntFilter
+    rank: IntFilter
+}
+
+input BadgeWhereUniqueInput {
+    level_rank: LevelRankFieldsInput
+}
+
+input BadgeExtendedWhereUniqueInput {
+    OR: [BadgeWhereInput!]
+    NOT: [BadgeWhereInput!]
+    AND: [BadgeWhereInput!]
+    level_rank: LevelRankFieldsInput
+    level: IntFilter
+    rank: IntFilter
+}
+
+input BadgeOrderByInput {
+    level: OrderByArg
+    rank: OrderByArg
+}
+
+type Query {
+    # Retrieve a single User record by unique identifier.
+    getUser(where: UserExtendedWhereUniqueInput!): User
+
+    # Retrieve a list of Users records.
+    listUsers(
+        where: UserWhereInput
+        orderBy: [UserOrderByInput!]
+        skip: Int
+        take: Int
+    ): [User!]
+
+    # Count the number of Users records.
+    countUsers(
+        where: UserWhereInput
+        orderBy: [UserOrderByInput!]
+        skip: Int
+        take: Int
+    ): Int!
+
+    # Retrieve a single Post record by unique identifier.
+    getPost(where: PostExtendedWhereUniqueInput!): Post
+
+    # Retrieve a list of Posts records.
+    listPosts(
+        where: PostWhereInput
+        orderBy: [PostOrderByInput!]
+        skip: Int
+        take: Int
+    ): [Post!]
+
+    # Count the number of Posts records.
+    countPosts(
+        where: PostWhereInput
+        orderBy: [PostOrderByInput!]
+        skip: Int
+        take: Int
+    ): Int!
+}
+
+type Mutation {
+    # Create a new Post record.
+    createPost(data: PostCreateInput!): Post!
+
+    # Create multiple new Posts records.
+    createManyPosts(
+        data: [PostCreateManyInput!]
+        skipDuplicates: Boolean
+    ): BatchPayload!
+
+    # Update a single existing Post record.
+    updatePost(
+        where: PostExtendedWhereUniqueInput!
+        data: PostUpdateInput
+        operation: PostOperationInput
+    ): Post!
+
+    # Update multiple existing Posts records.
+    updateManyPosts(
+        where: PostWhereInput!
+        data: PostUpdateInput
+        operation: PostOperationInput
+    ): BatchPayload!
+
+    # Create a new Post record if it does not exist, or updates it if it does.
+    upsertPost(
+        create: PostCreateInput!
+        update: PostUpdateInput!
+        where: PostExtendedWhereUniqueInput!
+    ): Post!
+}
