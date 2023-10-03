@@ -14,6 +14,7 @@ import { CustomError } from './inspector'
 // https:// github.com/blackflux/lambda-rate-limiter
 const limiter = lambdaRateLimiter({
     interval: 60 * 1000, // 60 seconds = 1 minute
+    uniqueTokenPerInterval: 1000,
 })
 
 /**
