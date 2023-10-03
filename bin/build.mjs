@@ -1,4 +1,5 @@
 #!/usr/bin/env zx
+/* eslint-disable no-console */
 /* eslint-disable n/prefer-global/process */
 import './env.mjs'
 
@@ -11,7 +12,7 @@ try {
         console.log(chalk.blue('\nBuild :: Generator\n'))
 
         // build Prisma-AppSync Generator
-        await $`esbuild packages/generator/src/index.ts --bundle --format=cjs --keep-names --platform=node --target=node16 --external:fsevents --external:_http_common --outfile=dist/generator.js`
+        await $`esbuild packages/generator/src/index.ts --bundle --format=cjs --keep-names --platform=node --target=node16 --external:fsevents --external:_http_common --define:import.meta.url='_importMetaUrl' --banner:js="const _importMetaUrl=require('url').pathToFileURL(__filename)" --outfile=dist/generator.js`
     }
 
     if (!argv?.ignoreClient) {

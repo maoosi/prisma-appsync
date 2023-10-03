@@ -62,14 +62,14 @@ export default class SchemaBuilder {
             includeDirectives: true,
         })
 
-        return this.perttyGraphQL(mergedSchema)
+        return await this.perttyGraphQL(mergedSchema)
     }
 
-    private perttyGraphQL(schema: string) {
+    private async perttyGraphQL(schema: string) {
         let perttyGraphQL = schema
 
         try {
-            perttyGraphQL = prettier.format(schema, {
+            perttyGraphQL = await prettier.format(schema, {
                 semi: false,
                 parser: 'graphql',
                 tabWidth: 4,
@@ -1346,7 +1346,7 @@ export default class SchemaBuilder {
             this.buildSubscriptions(),
         ].join('\n\n')
 
-        return this.perttyGraphQL(doc)
+        return await this.perttyGraphQL(doc)
     }
 
     private buildTypes() {

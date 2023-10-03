@@ -24,14 +24,14 @@ export default class ResolversBuilder {
     }
 
     public async mergeResolvers(baseResolvers: string, mergeResolvers: string): Promise<string> {
-        return this.prettyYaml(`${baseResolvers}\n${mergeResolvers}`)
+        return await this.prettyYaml(`${baseResolvers}\n${mergeResolvers}`)
     }
 
-    private prettyYaml(yaml: string) {
+    private async prettyYaml(yaml: string) {
         let prettyYaml = yaml
 
         try {
-            prettyYaml = prettier.format(yaml, {
+            prettyYaml = await prettier.format(yaml, {
                 parser: 'yaml',
             })
         }
@@ -65,7 +65,7 @@ export default class ResolversBuilder {
             ].join('\n')
         }).join('\n')
 
-        return this.prettyYaml(yaml)
+        return await this.prettyYaml(yaml)
     }
 
     private createQueryResolvers(model: ParsedModel) {

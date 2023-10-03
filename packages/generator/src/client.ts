@@ -40,14 +40,14 @@ export default class ClientConfigBuilder {
     }
 
     public async mergeResolvers(baseResolvers: string, mergeResolvers: string): Promise<string> {
-        return this.prettyYaml(`${baseResolvers}\n${mergeResolvers}`)
+        return await this.prettyYaml(`${baseResolvers}\n${mergeResolvers}`)
     }
 
-    private prettyYaml(yaml: string) {
+    private async prettyYaml(yaml: string) {
         let prettyYaml = yaml
 
         try {
-            prettyYaml = prettier.format(yaml, {
+            prettyYaml = await prettier.format(yaml, {
                 parser: 'yaml',
             })
         }
