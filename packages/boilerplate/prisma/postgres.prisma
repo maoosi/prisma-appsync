@@ -12,7 +12,7 @@ generator appsync {
     provider = "prisma-appsync"
 }
 
-/// @gql(fields: { passwordHash: null }, mutations: null, subscriptions: null)
+/// @gql(fields: { passwordHash: null }, subscriptions: null)
 model User {
     id           Int       @id @default(autoincrement())
     email        String    @unique
