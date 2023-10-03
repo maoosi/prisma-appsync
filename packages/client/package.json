@@ -5,14 +5,14 @@
     "author": "maoosi <hello@sylvainsimao.fr>",
     "license": "BSD-2-Clause",
     "devDependencies": {
-        "@types/aws-lambda": "^8.10.108",
-        "@types/micromatch": "^4.0.2",
-        "deepmerge": "^4.2.2",
-        "html-entities": "^2.3.3",
-        "lambda-rate-limiter": "^3.0.1",
+        "@types/aws-lambda": "^8.10.122",
+        "@types/micromatch": "^4.0.3",
+        "deepmerge": "^4.3.1",
+        "html-entities": "^2.4.0",
+        "lambda-rate-limiter": "^4.0.0",
         "micromatch": "^4.0.5",
-        "wild-wild-path": "^3.6.0",
-        "wild-wild-utils": "^4.9.0",
+        "wild-wild-path": "^4.0.0",
+        "wild-wild-utils": "^5.0.0",
         "xss": "^1.0.14"
     }
 }
