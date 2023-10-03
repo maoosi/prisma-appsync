@@ -12,14 +12,15 @@ generator appsync {
     provider = "prisma-appsync"
 }
 
+/// @gql(fields: { passwordHash: null }, mutations: null, subscriptions: null)
 model User {
-    id        Int       @id @default(autoincrement())
-    createdAt DateTime  @default(now())
-    email     String    @unique
-    username  String?
-    role      Role?     @default(USER)
-    posts     Post[]
-    comments  Comment[]
+    id           Int       @id @default(autoincrement())
+    email        String    @unique
+    passwordHash String
+    role         Role?     @default(USER)
+    posts        Post[]
+    comments     Comment[]
+    createdAt    DateTime? @default(now())
 }
 
 enum Role {
@@ -27,33 +28,36 @@ enum Role {
     ADMIN
 }
 
+/// @gql(mutations: { delete: null, deleteMany: null })
+/// @gql(scalars: { source: "AWSURL" })
 model Post {
-    id         Int        @id @default(autoincrement())
-    author     User       @relation(fields: [authorId], references: [id])
-    authorId   Int
-    title      String     @db.VarChar(255)
-    views      Int?       @default(1)
-    categories Category[]
-    comments   Comment[]
-    tags       String[]
-    published  Boolean?   @default(false)
-    createdAt  DateTime   @default(now())
-    updatedAt  DateTime   @updatedAt
+    id        Int       @id @default(autoincrement())
+    title     String    @db.VarChar(255)
+    source    String?   @db.VarChar(155)
+    author    User?     @relation(fields: [authorId], references: [id])
+    authorId  Int?
+    comments  Comment[]
+    views     Int?      @default(1)
+    status    Status?   @default(DRAFT)
+    updatedAt DateTime  @updatedAt
+    createdAt DateTime? @default(now())
 }
 
-enum Category {
-    A
-    B
-    C
+enum Status {
+    DRAFT
+    PUBLISHED
+    DELETED
 }
 
 model Comment {
-    id        Int      @id @default(autoincrement())
     message   String
     author    User     @relation(fields: [authorId], references: [id])
     authorId  Int
     post      Post     @relation(fields: [postId], references: [id])
     postId    Int
-    createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+    createdAt DateTime @default(now())
+
+    @@id([authorId, postId])
+    @@index([authorId, postId])
 }

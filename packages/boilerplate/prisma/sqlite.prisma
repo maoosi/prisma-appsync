@@ -12,21 +12,22 @@ generator appsync {
     provider = "prisma-appsync"
 }
 
+/// @gql(fields: { passwordHash: null }, mutations: null)
 model User {
-    id        Int      @id @default(autoincrement())
-    email     String   @unique
-    fullname  String?
-    posts     Post[]
-    createdAt DateTime @default(now())
+    id           Int      @id @default(autoincrement())
+    email        String   @unique
+    passwordHash String
+    posts        Post[]
+    createdAt    DateTime @default(now())
 }
 
+/// @gql(scalars: { source: "AWSURL" })
 model Post {
     id        Int      @id @default(autoincrement())
+    title     String
+    source    String?
     author    User?    @relation(fields: [authorId], references: [id])
     authorId  Int?
-    title     String
-    views     Int?     @default(1)
-    published Boolean? @default(false)
-    createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+    createdAt DateTime @default(now())
 }
