@@ -23,12 +23,12 @@
     },
     "scripts": {
         "preinstall": "npx only-allow pnpm",
-        "postinstall": "zx scripts/postinstall.mjs",
-        "build": "zx scripts/build.mjs",
-        "test": "zx scripts/test.mjs",
-        "dev": "zx scripts/dev.mjs",
-        "cleans": "zx scripts/cleans.mjs",
-        "publish": "zx scripts/publish.mjs",
+        "postinstall": "zx bin/postinstall.mjs",
+        "build": "zx bin/build.mjs",
+        "test": "zx bin/test.mjs",
+        "dev": "zx bin/dev.mjs",
+        "cleans": "zx bin/cleans.mjs",
+        "publish": "zx bin/publish.mjs",
         "docs:dev": "vitepress dev docs",
         "docs:build": "vitepress build docs",
         "docs:serve": "vitepress serve docs"
@@ -36,6 +36,7 @@
     "devDependencies": {
         "@antfu/eslint-config": "^0.40.0",
         "@graphql-inspector/core": "^5.0.1",
+        "@graphql-tools/schema": "^10.0.0",
         "@prisma/client": "^5.1.1",
         "@types/lodash": "^4.14.196",
         "@types/node": "^20.4.8",

@@ -4,7 +4,7 @@
 import Listr from 'listr'
 import prompts from 'prompts'
 
-await $`zx scripts/env.mjs`
+await $`zx bin/env.mjs`
 
 $.verbose = false
 
@@ -70,7 +70,7 @@ async function publishCore({ tag }) {
         {
             title: 'Cleansing package.json',
             task: async () => {
-                await $`node scripts/publish/_pkg.core.cleanse`
+                await $`node bin/publish/_pkg.core.cleanse`
             },
         },
         {
@@ -79,7 +79,7 @@ async function publishCore({ tag }) {
         },
         {
             title: 'Restoring package.json',
-            task: async () => await $`node scripts/publish/_pkg.core.restore`,
+            task: async () => await $`node bin/publish/_pkg.core.restore`,
         },
     ]).run().catch((err) => {
         console.error(err)
@@ -92,7 +92,7 @@ async function publishInstaller({ tag }) {
     await new Listr([
         {
             title: 'Copy + Cleanse package.json',
-            task: async () => await $`node scripts/publish/_pkg.installer.cleanse`,
+            task: async () => await $`node bin/publish/_pkg.installer.cleanse`,
         },
         {
             title: 'Publishing on NPM',
@@ -124,7 +124,7 @@ if (publishConfig.versionOk) {
 
     // build + test
     console.log('Building + Testing...')
-    await $`zx scripts/test.mjs`
+    await $`zx bin/test.mjs`
 
     // publish packages
     await publishCore(publishConfig)

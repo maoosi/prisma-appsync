@@ -11,7 +11,7 @@ if (argv?.reset) {
 }
 
 // build project
-await $`zx scripts/build.mjs`
+await $`zx bin/build.mjs`
 
 // install
 const playgroundExists = await fs.pathExists(playgroundPath)
