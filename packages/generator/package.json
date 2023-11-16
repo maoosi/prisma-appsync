@@ -5,15 +5,15 @@
     "author": "maoosi <hello@sylvainsimao.fr>",
     "license": "BSD-2-Clause",
     "devDependencies": {
-        "@prisma/generator-helper": "^5.3.1",
-        "@types/fs-extra": "^11.0.2",
-        "@types/pluralize": "^0.0.31",
+        "@prisma/generator-helper": "^5.6.0",
+        "@types/fs-extra": "^11.0.4",
+        "@types/pluralize": "^0.0.33",
         "@types/prettier": "^3.0.0",
         "appsync-schema-converter": "^2.1.4",
         "fs-extra": "^11.1.1",
         "graphql": "^16.8.1",
         "lodash": "^4.17.21",
         "pluralize": "^8.0.0",
-        "prettier": "^3.0.3"
+        "prettier": "^3.1.0"
     }
 }

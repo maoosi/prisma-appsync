@@ -4,20 +4,15 @@
 
 # Prisma-AppSync &middot; [![TypeScript](https://img.shields.io/badge/-TypeScript-2D3748?logo=typescript&colorA=0096ff&logoColor=fff)](/packages/client/src/) [![AWS AppSync](https://img.shields.io/badge/-AWS%20AppSync-2D3748?logo=amazon-aws&colorA=EB5F05&logoColor=fff)](https://aws.amazon.com/appsync/) [![Prisma](https://img.shields.io/badge/-Prisma%20Generator-2D3748?logo=prisma&colorA=5B67D8&logoColor=fff)](https://www.prisma.io)
 
-**Prisma-AppSync** is a [Prisma](https://www.prisma.io) Generator, that instantly converts your Schema into a full-blown GraphQL&#160;API for [AWS AppSync](https://aws.amazon.com/appsync/).
-
-## ⚡ Automatically generated
-
-- **GraphQL Schema:** Designed to work with AWS AppSync.
-- **TypeScript Client:** Prisma Client on steroids, built for AWS Lambda Resolvers.
+**Prisma-AppSync** seamlessly transforms your [Prisma Schema](https://www.prisma.io) into a comprehensive GraphQL API, tailored for [AWS AppSync](https://aws.amazon.com/appsync/).
 
 ## ✔️ Features
 
-- 💎 **Utilize ◭ Prisma Schema** to define data structure and quickly spin up a GraphQL API.
-- ⚡️ **Auto-generated CRUD operations**, fully customisable and using Prisma syntax.
-- ⛑ **Built-in, zero-config** XSS data sanitization, query depth control and rate limiting.
-- 🔐 **Fine-grained access control and authorization** modes (API key, IAM, Cognito, etc).
-- 🔌 **Fully extensible** GQL schema and TS Client API to add custom hooks and resolvers.
+- 💎 **Use your ◭ Prisma Schema** to quickly define your data model and deploy a GraphQL API tailored for AWS AppSync.
+- ⚡️ **Auto-generated CRUD operations** using Prisma syntax, along with a robust TS Client designed for AWS Lambda Resolvers.
+- ⛑ **Pre-configured security** comes with built-in XSS protection, query depth limitation, and in-memory rate limiting.
+- 🔐 **Fine-grained ACL and authorization** with flexible security options like API keys, IAM, Cognito, and more.
+- 🔌 **Fully extendable features** to tailor the GraphQL schema, API resolvers, and data flow to meet your specific needs.
 
 ## 🚀 Getting started
 
@@ -31,9 +26,7 @@ npx create-prisma-appsync-app@latest
 
 [Read the documentation](https://prisma-appsync.vercel.app) to learn how to use Prisma-AppSync.
 
-## ✨ Contributors
-
-This project follows the [all-contributors](https://allcontributors.org/) specification. Contributions of any kind are welcome!
+## 🙏 Contributors
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
@@ -62,19 +55,12 @@ This project follows the [all-contributors](https://allcontributors.org/) specif
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
-Wanting to contribute? Please make sure to read through our [contribution guide](https://prisma-appsync.vercel.app/contributing.html).
+Wanting to help? Get started with our [contribution guide](https://prisma-appsync.vercel.app/contributing.html) or consider [💛 Github sponsors](https://github.com/sponsors/maoosi).
 
-## 🤟 Sponsors
+## 🌟 Sponsors
 
-Thanks go to these wonderful sponsors!
+**Thanks go to these wonderful sponsors!**
 
-<table>
-      <tr>
-        <td align="center" style="width:300px;">
-            <a href="https://kuizto.co" rel="noopener" target="_blank">
-                <img src="https://prisma-appsync.vercel.app/sponsors/kuizto-logo.jpg" width="120px;" alt="Go to kuizto.co"/>
-                <br /><sub><b>Reconnect with home cooking</b></sub>
-            </a>
-        </td>
-    </tr>
-</table>
+[![Kuizto — The Everyday Cooking App](https://prisma-appsync.vercel.app/sponsors/kuizto-banner.png "Kuizto — The Everyday Cooking App")](https://kuizto.co/?utm_source=prisma_appsync&utm_medium=github)
+
+[Kuizto.co](https://kuizto.co/?utm_source=prisma_appsync&utm_medium=github) is a cooking app that adds a unique twist to everyday cooking. Netflix-like feed to explore tailored recipes. Get inspired by others, save to cooklists, plan instantly!

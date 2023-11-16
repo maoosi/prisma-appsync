@@ -328,7 +328,7 @@ export function getModel(
     const model = options?.modelsMapping?.[actionModel]
 
     if (!model) {
-        throw new CustomError('Issue parsing auto-injected models mapping config.', {
+        throw new CustomError(`Resolver "${actionModel}" not found. If it's a custom resolver, please ensure it's available within your Lambda function.`, {
             type: 'INTERNAL_SERVER_ERROR',
         })
     }

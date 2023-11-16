@@ -1,6 +1,6 @@
 # Getting started
 
-**Prisma-AppSync** is a [Prisma](https://www.prisma.io) Generator, that instantly converts your Schema into a full-blown GraphQL&#160;API for [AWS AppSync](https://aws.amazon.com/appsync/).
+**Prisma-AppSync** seamlessly transforms your [Prisma Schema](https://www.prisma.io) into a comprehensive GraphQL&#160;API, tailored for [AWS AppSync](https://aws.amazon.com/appsync/).
 
 <table><tr><td width="500px" valign="top">
 
@@ -30,11 +30,11 @@ query list {
 
 ## 👉 Features
 
-- 💎 **Utilize ◭ Prisma Schema** to define data structure and quickly spin up a GraphQL API.
-- ⚡️ **Auto-generated CRUD operations**, fully customisable and using Prisma syntax.
-- ⛑ **Built-in, zero-config** XSS data sanitization, query depth control and rate limiting.
-- 🔐 **Fine-grained access control and authorization** modes (API key, IAM, Cognito, etc).
-- 🔌 **Fully extensible** GQL schema and TS Client API to add custom hooks and resolvers.
+- 💎 **Use your ◭ Prisma Schema** to quickly define your data model and deploy a GraphQL API tailored for AWS AppSync.
+- ⚡️ **Auto-generated CRUD operations** using Prisma syntax, along with a robust TS Client designed for AWS Lambda Resolvers.
+- ⛑ **Pre-configured security** comes with built-in XSS protection, query depth limitation, and in-memory rate limiting.
+- 🔐 **Fine-grained ACL and authorization** with flexible security options like API keys, IAM, Cognito, and more.
+- 🔌 **Fully extendable features** to tailor the GraphQL schema, API resolvers, and data flow to meet your specific needs.
 
 ## 👉 Built around 4 packages
 
@@ -44,7 +44,7 @@ query list {
 
 **`packages/generator`**
 
-Generator for [Prisma ORM](https://www.prisma.io/), whose role is to parse `schema.prisma` and generate a fully typed Client (written in TypeScript for AWS Lambda), plus all the files required to run and deploy a GraphQL API on AWS AppSync (Schema + Resolver mapping).
+Generator for [Prisma ORM](https://www.prisma.io/), whose role is to parse your Prisma Schema and generate all the necessary components to run and deploy a GraphQL API tailored for AWS AppSync.
 
 </td>
 </tr>
@@ -53,7 +53,7 @@ Generator for [Prisma ORM](https://www.prisma.io/), whose role is to parse `sche
 
 **`packages/client`**
 
-Think of it as [Prisma Client](https://www.prisma.io/client) on steroids 💪. Fully typed, written in TypeScript for AWS Lambda AppSync resolvers, and capable to handle CRUD operations with a single line of code. It also allows extending and customising the GraphQL API.
+Think of it as [Prisma Client](https://www.prisma.io/client) for GraphQL. Fully typed and designed for AWS Lambda AppSync Resolvers. It can handle CRUD operations with just a single line of code, or be fully extended.
 
 </td>
 </tr>
@@ -62,7 +62,7 @@ Think of it as [Prisma Client](https://www.prisma.io/client) on steroids 💪. F
 
 **`packages/installer`**
 
-Interactive scaffolding CLI to quickly start new Prisma-AppSync projects, accessible from a single `npx create-prisma-appsync-app@latest` command. It can also plug into existing projects already using Prisma.
+Interactive CLI tool that streamlines the setup of new Prisma-AppSync projects, making it as simple as running `npx create-prisma-appsync-app@latest`.
 
 </td>
 </tr>
@@ -71,7 +71,7 @@ Interactive scaffolding CLI to quickly start new Prisma-AppSync projects, access
 
 **`packages/server`**
 
-Local development environment built for Prisma-AppSync (local database, auto-reload, TS support, GraphQL IDE). Simulate a GraphQL API running on AWS AppSync + AWS Lambda Resolver + Prisma ORM + Database.
+Local dev environment that mimics running Prisma-AppSync in production. It includes an AppSync simulator, local Lambda resolvers execution, a GraphQL IDE, hot-reloading, and authorizations.
 
 </td>
 </tr>

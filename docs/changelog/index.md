@@ -1,6 +1,7 @@
 # Changelog
 
-- [(latest) 1.0.0-rc.7](/changelog/1.0.0-rc.7.html)
+- [(latest) v1.0.0](/changelog/1.0.0.html)
+- [1.0.0-rc.7](/changelog/1.0.0-rc.7.html)
 - [1.0.0-rc.6](/changelog/1.0.0-rc.6.html)
 - [1.0.0-rc.5](/changelog/1.0.0-rc.5.html)
 - [1.0.0-rc.4](/changelog/1.0.0-rc.4.html)

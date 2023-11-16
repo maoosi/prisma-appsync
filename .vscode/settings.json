@@ -54,9 +54,9 @@
     "editor.tabSize": 4,
     "editor.unicodeHighlight.invisibleCharacters": false,
     "editor.codeActionsOnSave": {
-        "source.fixAll": false,
-        "source.fixAll.eslint": true, // this allows ESLint to auto fix on save
-        "source.organizeImports": false
+        "source.fixAll": "never",
+        "source.fixAll.eslint": "explicit",
+        "source.organizeImports": "never"
     },
     "[markdown]": {
         "editor.formatOnSave": false

@@ -1,8 +1,5 @@
-/* eslint-disable n/prefer-global/process */
-/* eslint-disable no-console */
-
 import path from 'node:path'
-import fs from 'fs-extra'
+import * as jetpack from 'fs-jetpack'
 import prompts from 'prompts'
 import degit from 'degit'
 import { execa } from 'execa'
@@ -19,7 +16,7 @@ export class Installer {
         projectName: string
         rootPath: string
         prismaSchemaPath: string | null
-        packageManager: 'npm' | 'yarn' | 'pnpm'
+        packageManager: 'npm' | 'yarn' | 'pnpm' | 'bun'
         tmpDirPath: string
     }
 
@@ -98,7 +95,8 @@ export class Installer {
 
         if (!this.isContributorMode) {
             try {
-                const detectedVersion = (await fs.readJson(path.join(__dirname, '../package.json')))?.version
+                const pkg = jetpack.read(path.join(__dirname, '../package.json'), 'json')
+                const detectedVersion = pkg?.version
                 version = `v${detectedVersion}`
             }
             catch { }
@@ -149,7 +147,9 @@ export class Installer {
         this.detected.projectName = String(path.join(this.cwd, this.userChoices.projectDirectory).split(/\/|\\/).pop())
         this.detected.rootPath = path.join(this.cwd, this.userChoices.projectDirectory)
         this.detected.packageManager = await detectPackageManager({ cwd: this.cwd })
-        this.detected.prismaSchemaPath = this.findFilesInDir(this.detected.rootPath, /(\w+)\.prisma/)?.[0] || null
+        this.detected.prismaSchemaPath = jetpack.find(
+            this.detected.rootPath, { matching: '*.prisma', ignoreCase: true }
+        )?.[0] || null
         this.detected.tmpDirPath = path.join(this.detected.rootPath, '.prisma-appsync')
 
         // prisma schema
@@ -265,7 +265,7 @@ export class Installer {
         // prisma schema
         if (!this.isContributorMode && this.userChoices.prismaSchemaPath) {
             if (this.userChoices.useExistingSchema) {
-                const schemaContent = fs.readFileSync(this.userChoices.prismaSchemaPath, 'utf-8')
+                const schemaContent = await jetpack.readAsync(this.userChoices.prismaSchemaPath, 'utf8') || ''
 
                 if (!schemaContent.match(/generator\s+appsync\s+{/g)) {
                     this.installConfig.injects.push({
@@ -297,7 +297,7 @@ export class Installer {
         }
         else if (this.userChoices.prismaSchemaPath) {
             this.installConfig.clones.push({
-                from: path.join(this.detected.rootPath, '../', 'packages/boilerplate/prisma/postgres.prisma'),
+                from: path.join(this.detected.rootPath, '../', 'packages/boilerplate/prisma/sqlite.prisma'),
                 to: this.userChoices.prismaSchemaPath,
             })
             this.installConfig.injects.push({
@@ -328,6 +328,35 @@ export class Installer {
                     to: path.join(this.detected.rootPath, 'server.ts'),
                 })
 
+                const databaseUrl = 'file:local.sqlite'
+
+                const gqlSchemaPath = path.relative(
+                    path.join(this.detected.rootPath),
+                    path.join(path.dirname(this.userChoices.prismaSchemaPath), 'generated/prisma-appsync/schema.gql'),
+                )
+
+                const yamlResolversPath = path.relative(
+                    path.join(this.detected.rootPath),
+                    path.join(path.dirname(this.userChoices.prismaSchemaPath), 'generated/prisma-appsync/resolvers.yaml'),
+                )
+
+                const devCmd = [
+                    'npx prisma generate',
+                    `DATABASE_URL='${databaseUrl}' npx prisma db push --accept-data-loss`,
+                    `DATABASE_URL='${databaseUrl}' npx vite-node ./server.ts --watch -- --schema ${gqlSchemaPath} --resolvers ${yamlResolversPath} --watchers '[{"watch":["**/*.prisma","*.prisma"],"exec":"npx prisma generate && DATABASE_URL='${databaseUrl}' npx prisma db push --accept-data-loss && touch ./server.ts"},{"watch":["handler.ts"],"exec":"manual-restart"}]'`,
+                ]
+
+                this.installConfig.scripts.push({
+                    name: 'dev',
+                    cmd: devCmd.join(' && '),
+                })
+            }
+            else {
+                this.installConfig.clones.push({
+                    from: path.join(this.detected.rootPath, '../', 'packages/boilerplate/server/server.ts'),
+                    to: path.join(this.detected.rootPath, 'server.ts'),
+                })
+
                 const databaseUrl = 'file:dev.sqlite'
 
                 const gqlSchemaPath = path.relative(
@@ -343,42 +372,7 @@ export class Installer {
                 const devCmd = [
                     'npx prisma generate',
                     `DATABASE_URL='${databaseUrl}' npx prisma db push --accept-data-loss`,
-                    `DATABASE_URL='${databaseUrl}' npx vite-node ./server.ts --watch -- --schema ${gqlSchemaPath} --resolvers ${yamlResolversPath} --watchers '[{"watch":["**/*.prisma","*.prisma"],"exec":"npx prisma generate && DATABASE_URL='${databaseUrl}' npx prisma db push --accept-data-loss && touch ./server.ts"}]'`,
-                ]
-
-                this.installConfig.scripts.push({
-                    name: 'dev',
-                    cmd: devCmd.join(' && '),
-                })
-            }
-            else {
-                this.installConfig.clones.push({
-                    from: path.join(this.detected.rootPath, '../', 'packages/boilerplate/server/server.ts'),
-                    to: path.join(this.detected.rootPath, 'server.ts'),
-                })
-
-                this.installConfig.clones.push({
-                    from: path.join(this.detected.rootPath, '../', 'packages/boilerplate/server/docker-compose.yml'),
-                    to: path.join(this.detected.rootPath, 'docker-compose.yml'),
-                })
-
-                const databaseUrl = 'postgresql://prisma:prisma@localhost:5433/dev'
-
-                const gqlSchemaPath = path.relative(
-                    path.join(this.detected.rootPath),
-                    path.join(path.dirname(this.userChoices.prismaSchemaPath), 'generated/prisma-appsync/schema.gql'),
-                )
-
-                const yamlResolversPath = path.relative(
-                    path.join(this.detected.rootPath),
-                    path.join(path.dirname(this.userChoices.prismaSchemaPath), 'generated/prisma-appsync/resolvers.yaml'),
-                )
-
-                const devCmd = [
-                    'docker-compose up -d',
-                    'npx prisma generate',
-                    `DATABASE_URL='${databaseUrl}' npx prisma db push --accept-data-loss`,
-                    `DATABASE_URL='${databaseUrl}' npx vite-node ./server.ts --watch -- --schema ${gqlSchemaPath} --resolvers ${yamlResolversPath} --watchers '[{"watch":"../packages/(client|generator)/**","exec":"cd ../ && pnpm run build --ignoreServer && cd playground && npx prisma generate && touch ./server.ts"},{"watch":["**/*.prisma","*.prisma"],"exec":"npx prisma generate && DATABASE_URL='${databaseUrl}' npx prisma db push --accept-data-loss && touch ./server.ts"}]'`,
+                    `DATABASE_URL='${databaseUrl}' npx vite-node ./server.ts --watch -- --schema ${gqlSchemaPath} --resolvers ${yamlResolversPath} --watchers '[{"watch":"../packages/(client|generator)/**","exec":"cd ../ && pnpm run build --ignoreServer && cd playground && npx prisma generate && touch ./server.ts"},{"watch":["**/*.prisma","*.prisma"],"exec":"npx prisma generate && DATABASE_URL='${databaseUrl}' npx prisma db push --accept-data-loss && touch ./server.ts"},{"watch":["handler.ts"],"exec":"manual-restart"}]'`,
                 ]
 
                 this.installConfig.scripts.push({
@@ -395,7 +389,7 @@ export class Installer {
         }
 
         // package
-        if (!this.fileExists(path.join(this.detected.rootPath, 'package.json'))) {
+        if (!jetpack.exists(path.join(this.detected.rootPath, 'package.json'))) {
             this.installConfig.shells.push({
                 cmd: `${this.detected.packageManager === 'pnpm' ? 'pnpm init' : `${this.detected.packageManager} init -y`}`,
                 dir: this.detected.rootPath,
@@ -500,9 +494,9 @@ export class Installer {
         for (let j = 0; j < this.installConfig.clones.length; j++) {
             const clone = this.installConfig.clones[j]
 
-            if (fs.existsSync(clone.to)) {
+            if (jetpack.exists(clone.to)) {
                 const parts = clone.to.split('/')
-                this.rename(
+                jetpack.rename(
                     clone.to,
                     [
                         ...parts.splice(0, parts.length > 1 ? parts.length - 1 : 0),
@@ -511,10 +505,10 @@ export class Installer {
                 )
             }
 
-            this.copy(clone.from, clone.to)
+            jetpack.copy(clone.from, clone.to)
 
             if (typeof clone.deleteSource === 'boolean' && clone.deleteSource === true)
-                this.remove(clone.from)
+                jetpack.remove(clone.from)
         }
 
         // injects
@@ -553,7 +547,8 @@ export class Installer {
         }
 
         // scripts
-        const pkg = this.readJson(path.join(this.detected.rootPath, 'package.json'))
+        const pkg = jetpack.read(path.join(this.detected.rootPath, 'package.json'), 'json')
+
         if (typeof pkg?.scripts === 'undefined')
             pkg.scripts = {}
 
@@ -566,7 +561,7 @@ export class Installer {
             pkg.scripts[script.name] = script.cmd
         }
 
-        this.writeJson(path.join(this.detected.rootPath, 'package.json'), pkg)
+        jetpack.write(path.join(this.detected.rootPath, 'package.json'), pkg)
 
         // shells: after
         const shellsAfter = this.installConfig.shells.filter(s => s.when === 'after')
@@ -587,100 +582,12 @@ export class Installer {
         }
 
         // delete tmp dir
-        this.removeDir(this.detected.tmpDirPath)
-    }
-
-    private writeJson(path: string, json: any): any {
-        return fs.outputJsonSync(path, json, { spaces: 2 })
-    }
-
-    private readJson(path: string): any {
-        return fs.readJsonSync(path, { throws: false })
-    }
-
-    private rename(before: string, after: string): void {
-        fs.renameSync(before, after)
-    }
-
-    private copy(src: string, dest: string): void {
-        const stat = fs.statSync(src)
-        if (stat.isDirectory()) {
-            this.copyDir(src, dest)
-        }
-        else {
-            const parentDir = path.dirname(dest)
-            fs.ensureDirSync(parentDir)
-            fs.copyFileSync(src, dest)
-        }
-    }
-
-    private copyDir(srcDir: string, destDir: string): void {
-        fs.ensureDirSync(destDir)
-        for (const file of fs.readdirSync(srcDir)) {
-            if (!file.match(/(.+\.lock|node_modules)/)) {
-                const srcFile = path.resolve(srcDir, file)
-                const destFile = path.resolve(destDir, file)
-                this.copy(srcFile, destFile)
-            }
-        }
-    }
-
-    private emptyDir(dir: string) {
-        if (!fs.existsSync(dir))
-            return
-
-        for (const file of fs.readdirSync(dir)) {
-            const abs = path.resolve(dir, file)
-            // baseline is Node 12 so can't use rmSync :(
-            if (fs.lstatSync(abs).isDirectory()) {
-                this.emptyDir(abs)
-                fs.rmdirSync(abs)
-            }
-            else {
-                fs.unlinkSync(abs)
-            }
-        }
-    }
-
-    private remove(src: string) {
-        const stat = fs.lstatSync(src)
-        if (stat.isDirectory())
-            this.removeDir(src)
-
-        else
-            fs.rmSync(src)
-    }
-
-    private removeDir(dir: string) {
-        this.emptyDir(dir)
-        fs.rmdirSync(dir)
-    }
-
-    private fileExists(file: string): boolean {
-        return Boolean(fs.existsSync(file))
+        jetpack.remove(this.detected.tmpDirPath)
     }
 
     private replaceInFile(file: string, findRegex: RegExp, replace: string): void {
-        const content = fs.readFileSync(file, 'utf-8')
-        fs.writeFileSync(file, content.replace(findRegex, replace), 'utf-8')
-    }
-
-    private findFilesInDir(dir: string, findRegex: RegExp): string[] {
-        let results: string[] = []
-        const files = fs.readdirSync(dir)
-
-        for (let i = 0; i < files.length; i++) {
-            const filename = path.join(dir, files[i])
-            const stat = fs.lstatSync(filename)
-
-            if (stat.isDirectory() && !filename.includes('node_modules'))
-                results = [...results, ...this.findFilesInDir(filename, findRegex)]
-
-            else if (filename.match(findRegex))
-                results.push(filename)
-        }
-
-        return results
+        const content = jetpack.read(file, 'utf8') || ''
+        jetpack.write(file, content.replace(findRegex, replace))
     }
 }
 

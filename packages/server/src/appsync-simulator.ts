@@ -56,8 +56,7 @@ export function useAppSyncSimulator({
         })),
     }
 
-    if (globalThis?.__prismaAppSyncServer?.serverInstance)
-        globalThis?.__prismaAppSyncServer?.serverInstance?.stop()
+    globalThis?.__prismaAppSyncServer?.serverInstance?.stop()
 
     const serverInstance = new AmplifyAppSyncSimulator({ port, wsPort })
     const watcherInstances: any[] = globalThis?.__prismaAppSyncServer?.watcherInstances || []
@@ -86,9 +85,10 @@ export function useAppSyncSimulator({
             })
 
             chok.on('change', async (path) => {
-                console.log(`Change detected on ${path}`)
-
-                if (exec) {
+                if (exec === 'manual-restart') {
+                    console.log(`🚨 You need to manually restart the server to apply changes to ${path}`)
+                } else {
+                    console.log(`Change detected on ${path}`)
                     console.log(`Executing ${exec}`)
                     await shell(exec)
                 }

@@ -3,8 +3,8 @@ layout: home
 
 hero:
   name: Prisma-AppSync
-  text: GraphQL API Generator for Prisma
-  tagline: Instantly generated a GraphQL API using Prisma, deploy on AWS AppSync.
+  text: GQL API Generator for Prisma ORM
+  tagline: Turn your Prisma Schema into a full-featured GraphQL API, tailored for AWS AppSync.
   image:
     src: /logo.svg
     alt: Prisma-AppSync
@@ -19,11 +19,11 @@ hero:
 features:
   - icon: ◭
     title: Prisma Schema to CRUD API
-    details: Instantly generated a full-blown GraphQL API from your Prisma Schema.
-  - icon: ☁️
+    details: Deploy a GraphQL API from your Prisma Schema with auto-generated CRUD.
+  - icon: ⚡️
     title: GraphQL on AWS AppSync 
-    details: Serverless GraphQL, real-time subscriptions, authorizations and more.
+    details: Serverless GraphQL with real-time updates and built-in security on AppSync.
   - icon: 🧑‍💻
-    title: Lightning Fast Development
-    details: Build and deploy a fully working and secure GraphQL API in under 10 minutes.
+    title: Fast and Flexible DX
+    details: Build and deploy a working API in minutes, easily customise to your needs.
 ---

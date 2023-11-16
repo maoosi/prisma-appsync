@@ -1,10 +1,55 @@
 # Contributions guide
 
-Thanks for your interest in contributing! Please make sure to take a moment and read through [Prisma-AppSync concept](quick-start/getting-started), as well as the following guide:
+Thanks for your interest in contributing!
+
+## 👉 Discuss first
+
+Before starting to work on a pull request, it's always better to open an issue first to confirm its desirability and discuss the approach with the maintainers.
+
+## 👉 Project packages
+
+<table>
+<tr>
+<td width="800px">
+
+**`packages/generator`**
+
+Generator for [Prisma ORM](https://www.prisma.io/), whose role is to parse your Prisma Schema and generate all the necessary components to run and deploy a GraphQL API tailored for AWS AppSync.
+
+</td>
+</tr>
+<tr>
+<td>
+
+**`packages/client`**
+
+Think of it as [Prisma Client](https://www.prisma.io/client) for GraphQL. Fully typed and designed for AWS Lambda AppSync Resolvers. It can handle CRUD operations with just a single line of code, or be fully extended.
+
+</td>
+</tr>
+<tr>
+<td>
+
+**`packages/installer`**
+
+Interactive CLI tool that streamlines the setup of new Prisma-AppSync projects, making it as simple as running `npx create-prisma-appsync-app@latest`.
+
+</td>
+</tr>
+<tr>
+<td>
+
+**`packages/server`**
+
+Local dev environment that mimics running Prisma-AppSync in production. It includes an AppSync simulator, local Lambda resolvers execution, a GraphQL IDE, hot-reloading, and authorizations.
+
+</td>
+</tr>
+</table>
 
 ## 👉 Repository setup
 
-We use `pnpm` as the core package manager, `yarn` and `docker` for creating the AWS CDK bundle before deployment, `zx` for running scripts, `aws` and `cdk` CLIs for deployment.
+We use `pnpm` as the core package manager, `yarn` + `docker` for creating the AWS CDK bundle before deployment, `zx` for running scripts, `aws` + `cdk` CLIs for deployment.
 
 **Start with cloning the repo on your local machine:**
 
@@ -59,15 +104,9 @@ pnpm dev
 | `pnpm build` | Build the entire prisma-appsync library. |
 | `pnpm dev` | Creates local dev setup, useful for contributing [1]. |
 
-> [1] Automatically generates a playground folder (unless already existing), plus run a local GraphQL + AWS AppSync server pointing to the playground folder. This creates an ideal local dev environment that emulates Prisma-AppSync running on AWS locally. Everything inside playground is pointing local source packages.
+> [1] Auto-generates a 'playground' folder (if not there already) and launches a local GraphQL + AWS AppSync server. This simulates the Prisma-AppSync AWS environment for local development, with 'playground' contents pointing to local source packages.
 
-## 👉 Sending Pull Request
-
-### Discuss first
-
-Before you start to work on a feature pull request, it's always better to open a feature request issue first to discuss with the maintainers whether the feature is desired and the design of those features.
-
-### Commit convention
+## 👉 Commit convention
 
 We use [Conventional Commits ↗](https://www.conventionalcommits.org/) for commit messages such as:
 
@@ -121,6 +160,6 @@ VS Code's `settings.json`
 
 Since ESLint is already configured to format the code, there is no need to duplicate the functionality with Prettier. If you have Prettier installed in your editor, we recommend you disable it when working on the project to avoid conflict.
 
-## 👉 Legal
+## 👉 License
 
-By submitting your code to the Prisma-AppSync project, you are granting the project maintainers a right to use that code and provide it to others under the BSD 2-Clause License attached to the project. You are also certifying that you wrote it and that you are allowed to license it to us.
+When you contribute code to the Prisma-AppSync project, you grant the maintainers permission to use and share your code under the project's BSD 2-Clause License. You also affirm that you are the original author of the code and have the authority to license it.
