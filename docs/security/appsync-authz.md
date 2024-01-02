@@ -100,19 +100,19 @@ It is also possible to set a `defaultDirective`, that will apply to all generate
 ```prisma{3}
 generator appsync {
   provider = "prisma-appsync"
-  defaultDirective = "@auth(model: [{ allow: apiKey }])"
+  defaultDirective = "@auth(model: [{ allow: iam }])"
 }
 ```
 
-Prisma-AppSync will automatically merge the `defaultDirective` with model directives:
+When provided, `defaultDirective` seamlessly integrates with model-specific directives:
 
 ```prisma
-// defaultDirective
+// specified 'defaultDirective' for all models:
 @auth(model: [{ allow: iam }])
 
-// model directive
+// additional 'model directive' for enhanced control:
 @auth(model: [{ allow: apiKey }])
 
-// merge applied to model
+// resulting merged directive for the model:
 @auth(model: [{ allow: iam }, { allow: apiKey }])
 ```
