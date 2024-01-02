@@ -95,8 +95,7 @@ describe('CLIENT #core', () => {
         })
         test('expect Sanitizer to sanitize array inputs', async () => {
             const prismaAppSync = new PrismaAppSync({
-                connectionString: 'postgresql://USER:PASSWORD@HOST:PORT/DATABASE',
-                maxDepth: 4,
+                connectionString: 'postgresql://USER:PASSWORD@HOST:PORT/DATABASE'
             })
             const event = mockAppSyncEvent(
                 'updatePosts',
@@ -192,11 +191,11 @@ describe('CLIENT #core', () => {
     })
 
     describe('.maxDepth?', () => {
-        test('expect Max Query Depth to equal 3 by default', () => {
+        test('expect Max Query Depth to equal 4 by default', () => {
             const prismaAppSync = new PrismaAppSync({
                 connectionString: 'postgresql://USER:PASSWORD@HOST:PORT/DATABASE',
             })
-            expect(prismaAppSync.options.maxDepth).toEqual(3)
+            expect(prismaAppSync.options.maxDepth).toEqual(4)
         })
         test('expect Max Query Depth to be configurable via Class options', () => {
             const prismaAppSync = new PrismaAppSync({

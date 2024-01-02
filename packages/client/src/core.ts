@@ -82,7 +82,7 @@ export class PrismaAppSync {
    *   sanitize: true,
    *   logLevel: 'INFO',
    *   defaultPagination: 50,
-   *   maxDepth: 3,
+   *   maxDepth: 4,
    *   maxReqPerUserMinute: 200
    * }
    * ```
@@ -115,7 +115,7 @@ export class PrismaAppSync {
             maxDepth:
                 typeof options?.maxDepth !== 'undefined'
                     ? options.maxDepth
-                    : 3,
+                    : 4,
             maxReqPerUserMinute:
                 typeof options?.maxReqPerUserMinute !== 'undefined'
                     ? options.maxReqPerUserMinute

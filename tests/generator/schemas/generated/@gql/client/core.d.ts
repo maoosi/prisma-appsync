@@ -44,7 +44,7 @@ export declare class PrismaAppSync {
    *   sanitize: true,
    *   logLevel: 'INFO',
    *   defaultPagination: 50,
-   *   maxDepth: 3,
+   *   maxDepth: 4,
    *   maxReqPerUserMinute: 200
    * }
    * ```

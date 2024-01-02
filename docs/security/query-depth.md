@@ -26,8 +26,8 @@ query IAmEvil {
 }
 ```
 
-Default value for the maximum query depth is set to `3`. It is possible to change the default max depth value via the `maxDepth` option:
+Default value for the maximum query depth is set to `4`. It is possible to change the default max depth value via the `maxDepth` option:
 
 ```ts
-const prismaAppSync = new PrismaAppSync({ maxDepth: 4 })
+const prismaAppSync = new PrismaAppSync({ maxDepth: 3 })
 ```
