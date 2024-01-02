@@ -37,15 +37,8 @@ describe('GENERATOR @gql', () => {
             const query = 'query { listUsers { email } }'
             tester.test(true, query)
         })
-        test('expect User mutations to be disabled', async () => {
-            const invalidQuery = `
-                mutation {
-                    createUser(
-                        data: { email: "test@test.com", password: "123456" }
-                    ) {
-                        email
-                    }
-                }`
+        test('expect User subscriptions to be disabled', async () => {
+            const invalidQuery = `subscription { onMutatedUser {  id } }`
             tester.test(false, invalidQuery)
         })
     })
@@ -82,6 +75,19 @@ describe('GENERATOR @gql', () => {
         })
         test('expect querying other fields on User to succeed', async () => {
             const query = 'query { listUsers { email } }'
+            tester.test(true, query)
+        })
+        test('expect password field to still be writable', async () => {
+            const query = `mutation {
+                createUser (
+                    data: {
+                        email: "user@email.com"
+                        password: "123456"
+                    }
+                ) {
+                    email
+                }
+            }`
             tester.test(true, query)
         })
     })

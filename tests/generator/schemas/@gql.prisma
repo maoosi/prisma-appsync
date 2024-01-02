@@ -13,7 +13,7 @@ generator appsync {
     output   = "./generated/@gql"
 }
 
-/// @gql(fields: { password: null }, mutations: null)
+/// @gql(fields: { password: null }, subscriptions: null)
 model User {
     id        Int       @id @default(autoincrement())
     email     String    @unique

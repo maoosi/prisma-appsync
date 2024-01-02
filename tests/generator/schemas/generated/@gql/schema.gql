@@ -408,6 +408,69 @@ input UserPostsUpdateNestedInput {
     updateMany: [PostUpdateManyInput!]
 }
 
+input UserCreateInput {
+    id: Int
+    email: AWSEmail!
+    password: String!
+    posts: UserPostsCreateNestedInput
+    createdAt: AWSDateTime
+}
+
+input UserCreateWithoutPostInput {
+    id: Int
+    email: AWSEmail!
+    password: String!
+    createdAt: AWSDateTime
+}
+
+input UserConnectOrCreateWithoutPostInput {
+    where: UserWhereUniqueInput!
+    create: UserCreateWithoutPostInput!
+}
+
+input UserCreateManyInput {
+    id: Int
+    email: AWSEmail!
+    password: String!
+    createdAt: AWSDateTime
+}
+
+input UserUpdateInput {
+    id: Int
+    email: AWSEmail
+    password: String
+    posts: UserPostsUpdateNestedInput
+    createdAt: AWSDateTime
+}
+
+input UserUpdateWithoutPostInput {
+    id: Int
+    email: AWSEmail
+    password: String
+    createdAt: AWSDateTime
+}
+
+input UserUpdateWithWhereUniqueWithoutPostInput {
+    data: UserUpdateWithoutPostInput!
+    where: UserExtendedWhereUniqueInput!
+}
+
+input UserUpdateManyInput {
+    where: UserScalarWhereInput!
+    data: UserUpdateInput!
+}
+
+input UserUpsertWithoutPostInput {
+    create: UserCreateWithoutPostInput!
+    update: UserUpdateWithoutPostInput!
+}
+
+input UserUpsertWithWhereUniqueWithoutPostInput {
+    where: UserExtendedWhereUniqueInput!
+    create: UserCreateWithoutPostInput!
+    update: UserUpdateWithoutPostInput!
+}
+
 input PostFilter {
     some: PostWhereInputWithoutNullables
     every: PostWhereInputWithoutNullables
@@ -488,11 +551,18 @@ input PostOrderByInput {
 
 input PostAuthorCreateNestedInput {
     connect: UserWhereUniqueInput
+    create: UserCreateWithoutPostInput
+    connectOrCreate: UserConnectOrCreateWithoutPostInput
 }
 
 input PostAuthorUpdateNestedInput {
     connect: UserWhereUniqueInput
     disconnect: Boolean
+    create: UserCreateWithoutPostInput
+    connectOrCreate: UserConnectOrCreateWithoutPostInput
+    update: UserUpdateWithoutPostInput
+    upsert: UserUpsertWithoutPostInput
+    delete: Boolean
 }
 
 input PostCreateInput {
@@ -668,6 +738,40 @@ type Query {
 }
 
 type Mutation {
+    # Create a new User record.
+    createUser(data: UserCreateInput!): User!
+
+    # Create multiple new Users records.
+    createManyUsers(
+        data: [UserCreateManyInput!]
+        skipDuplicates: Boolean
+    ): BatchPayload!
+
+    # Update a single existing User record.
+    updateUser(
+        where: UserExtendedWhereUniqueInput!
+        data: UserUpdateInput
+    ): User!
+
+    # Update multiple existing Users records.
+    updateManyUsers(
+        where: UserWhereInput!
+        data: UserUpdateInput
+    ): BatchPayload!
+
+    # Create a new User record if it does not exist, or updates it if it does.
+    upsertUser(
+        create: UserCreateInput!
+        update: UserUpdateInput!
+        where: UserExtendedWhereUniqueInput!
+    ): User!
+
+    # Delete a single existing User record.
+    deleteUser(where: UserExtendedWhereUniqueInput!): User!
+
+    # Delete multiple existing Users records.
+    deleteManyUsers(where: UserWhereInput!): BatchPayload!
+
     # Create a new Post record.
     createPost(data: PostCreateInput!): Post!
 

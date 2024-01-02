@@ -70,6 +70,8 @@ model User {
 @gql(fields: { password: null })
 ```
 
+> **Note:** To maintain Prisma Client integrity, hidden fields remain writable in mutation operations.
+
 ### Custom scalars on fields
 
 ```prisma

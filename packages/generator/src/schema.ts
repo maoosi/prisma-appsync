@@ -92,7 +92,10 @@ export default class SchemaBuilder {
             schemaAuthzModes: options?.schemaAuthzModes || [],
         })
 
-        const fields = modelDMMF.fields.filter(field => !(directives?.gql?.fields?.[field.name] === null))
+        const fields = modelDMMF.fields.map(field => ({
+            ...field,
+            isWriteOnly: directives?.gql?.fields?.[field.name] === null
+        }))
 
         const getScalar = (field: DMMF.Field, inject?: FieldScalarOptions) => {
             return this.getFieldScalar(field, { scalar: directives?.gql?.scalars?.[field.name], ...inject })
@@ -136,36 +139,40 @@ export default class SchemaBuilder {
             })
 
         const operationsFields = fields
-            ?.filter(field => !field?.relationName && !field?.isReadOnly && !field.isId && ['Int', 'Float'].includes(getScalar(field)))
+            ?.filter(field => !field?.isWriteOnly && !field?.relationName && !field?.isReadOnly && !field.isId && ['Int', 'Float'].includes(getScalar(field)))
             ?.map(field => ({ name: field.name, scalar: getScalar(field, { after: 'Operation' }) })) || []
 
-        const whereInputFields = fields.map((field) => {
-            let scalar
+        const whereInputFields = fields
+            .filter(field => !field?.isWriteOnly)
+            .map((field) => {
+                let scalar
 
-            if (field?.relationName) {
-                if (field.isList)
-                    scalar = getScalar(field, { after: 'Filter', required: false, list: false })
-                else
-                    scalar = getScalar(field, { after: 'WhereInput', required: false })
-            }
-            else if (field.isList) {
-                if (field.kind === 'enum')
-                    scalar = getScalar(field, { after: 'EnumListFilter', required: false, list: false })
-                else
-                    scalar = getScalar(field, { after: 'ListFilter', required: false, list: false })
-            }
-            else {
-                if (field.kind === 'enum')
-                    scalar = getScalar(field, { after: 'EnumFilter', required: false })
-                else
-                    scalar = getScalar(field, { after: `${!field.isRequired ? 'Nullable' : ''}Filter`, required: false })
-            }
+                if (field?.relationName) {
+                    if (field.isList)
+                        scalar = getScalar(field, { after: 'Filter', required: false, list: false })
+                    else
+                        scalar = getScalar(field, { after: 'WhereInput', required: false })
+                }
+                else if (field.isList) {
+                    if (field.kind === 'enum')
+                        scalar = getScalar(field, { after: 'EnumListFilter', required: false, list: false })
+                    else
+                        scalar = getScalar(field, { after: 'ListFilter', required: false, list: false })
+                }
+                else {
+                    if (field.kind === 'enum')
+                        scalar = getScalar(field, { after: 'EnumFilter', required: false })
+                    else
+                        scalar = getScalar(field, { after: `${!field.isRequired ? 'Nullable' : ''}Filter`, required: false })
+                }
 
-            return { name: field.name, scalar }
-        }).filter(field => field.scalar)
+                return { name: field.name, scalar }
+            })
+            .filter(field => field.scalar)
 
         const whereUniqueInputFields = [
             ...fields
+                ?.filter(field => !field?.isWriteOnly)
                 ?.filter(field => field?.isUnique || field?.isId)
                 ?.map(field => ({ name: field.name, scalar: getScalar(field, { required: false }) })) || [],
             ...uniqueComposites?.map(field => ({ name: field.name, scalar: field.scalar })),
@@ -177,6 +184,7 @@ export default class SchemaBuilder {
         ], 'name')
 
         const scalarWhereInputFields = fields
+            ?.filter(field => !field?.isWriteOnly)
             ?.map((field) => {
                 let scalar
 
@@ -642,13 +650,15 @@ export default class SchemaBuilder {
     private createModelTypes(model: ParsedModel) {
         this.types.push({
             name: model.singular,
-            fields: model.fields.map((field) => {
-                return {
-                    name: field.name,
-                    scalar: model.getScalar(field, { required: field.isRequired }),
-                    directives: model?.directives?.getGQLDirectivesForField(field.name),
-                }
-            }),
+            fields: model.fields
+                ?.filter(field => !field?.isWriteOnly)
+                ?.map((field) => {
+                    return {
+                        name: field.name,
+                        scalar: model.getScalar(field, { required: field.isRequired }),
+                        directives: model?.directives?.getGQLDirectivesForField(field.name),
+                    }
+                }),
             directives: model?.directives?.getGQLDirectivesForModel(),
         })
     }
@@ -724,6 +734,7 @@ export default class SchemaBuilder {
         this.inputs.push({
             name: `${model.singular}OrderByInput`,
             fields: model.fields
+                ?.filter(field => !field?.isWriteOnly)
                 ?.map((field) => {
                     if (field?.relationName)
                         return { name: field.name, scalar: model.getScalar(field, { after: 'OrderByInput', required: false, list: false }) }
@@ -1399,16 +1410,6 @@ export default class SchemaBuilder {
         return this.buildOperations(this.subscriptions, 'Subscription')
     }
 
-    private getFormattedObject(objects, keyword) {
-        return objects.map((object) => {
-            return [
-                `${keyword} ${object.name}${object.directives?.length ? ` ${object.directives.join(' ')}` : ''} {`,
-                object.fields?.map(field => `${field.name}: ${field.scalar}${field.directives ? ` ${field.directives.join(' ')}` : ''}`).join('\n'),
-                '}',
-            ].join('\n')
-        }).join('\n\n')
-    }
-
     private buildOperations(operations, keyword) {
         return operations?.length
             ? [
@@ -1437,7 +1438,7 @@ export default class SchemaBuilder {
 type ParsedModel = {
     singular: string
     plural: string
-    fields: DMMF.Field[]
+    fields: (DMMF.Field & { isWriteOnly: boolean })[]
     gqlFields: {
         operations: GqlField[]
         whereInput: GqlField[]

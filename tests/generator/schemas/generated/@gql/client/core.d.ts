@@ -84,5 +84,5 @@ export declare class PrismaAppSync {
    *
    * Read more in our [docs](https://prisma-appsync.vercel.app).
    */
-    resolve<CustomResolvers = void>(resolveParams: ResolveParams<"countPosts" | "countUsers" | "createManyPosts" | "createPost" | "getPost" | "getUser" | "listPosts" | "listUsers" | "updateManyPosts" | "updatePost" | "upsertPost", Extract<CustomResolvers, string>>): Promise<any>;
+    resolve<CustomResolvers = void>(resolveParams: ResolveParams<"countPosts" | "countUsers" | "createManyPosts" | "createManyUsers" | "createPost" | "createUser" | "deleteManyUsers" | "deleteUser" | "getPost" | "getUser" | "listPosts" | "listUsers" | "updateManyPosts" | "updateManyUsers" | "updatePost" | "updateUser" | "upsertPost" | "upsertUser", Extract<CustomResolvers, string>>): Promise<any>;
 }

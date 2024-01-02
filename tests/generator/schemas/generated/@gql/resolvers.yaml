@@ -7,6 +7,27 @@
 - typeName: Query
   fieldName: countUsers
   dataSource: prisma-appsync
+- typeName: Mutation
+  fieldName: createUser
+  dataSource: prisma-appsync
+- typeName: Mutation
+  fieldName: createManyUsers
+  dataSource: prisma-appsync
+- typeName: Mutation
+  fieldName: updateUser
+  dataSource: prisma-appsync
+- typeName: Mutation
+  fieldName: updateManyUsers
+  dataSource: prisma-appsync
+- typeName: Mutation
+  fieldName: upsertUser
+  dataSource: prisma-appsync
+- typeName: Mutation
+  fieldName: deleteUser
+  dataSource: prisma-appsync
+- typeName: Mutation
+  fieldName: deleteManyUsers
+  dataSource: prisma-appsync
 - typeName: Query
   fieldName: getPost
   dataSource: prisma-appsync
