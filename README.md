@@ -8,20 +8,15 @@
 
 ## ✔️ Features
 
-💎 **Use your ◭ Prisma Schema**
-Quickly define your data model and deploy a GraphQL API tailored for AWS AppSync.
+💎 **Use your ◭ Prisma Schema**<br/>Quickly define your data model and deploy a GraphQL API tailored for AWS AppSync.
 
-⚡️ **Auto-generated CRUD operations**
-Using Prisma syntax, with a robust TS Client designed for AWS Lambda Resolvers.
+⚡️ **Auto-generated CRUD operations**<br/>Using Prisma syntax, with a robust TS Client designed for AWS Lambda Resolvers.
 
-⛑ **Pre-configured security**
-Built-in XSS protection, query depth limitation, and in-memory rate limiting.
+⛑ **Pre-configured security**<br/>Built-in XSS protection, query depth limitation, and in-memory rate limiting.
 
-🔐 **Fine-grained ACL and authorization**
-Flexible security options such as API keys, IAM, Cognito, and more.
+🔐 **Fine-grained ACL and authorization**<br/>Flexible security options such as API keys, IAM, Cognito, and more.
 
-🔌 **Fully extendable features**
-Customize your GraphQL schema, API resolvers, and data flow as needed.
+🔌 **Fully extendable features**<br/>Customize your GraphQL schema, API resolvers, and data flow as needed.
 
 ## 🚀 Getting started
 
