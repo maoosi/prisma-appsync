@@ -4,7 +4,7 @@ layout: home
 hero:
   name: Prisma-AppSync
   text: GQL API Generator for Prisma ORM
-  tagline: Turn your Prisma Schema into a full-featured GraphQL API, tailored for AWS AppSync.
+  tagline: Turns your Prisma Schema into a fully-featured GraphQL API, tailored for AWS AppSync.
   image:
     src: /logo.svg
     alt: Prisma-AppSync

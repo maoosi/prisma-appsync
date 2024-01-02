@@ -4,7 +4,7 @@
 
 # Prisma-AppSync &middot; [![TypeScript](https://img.shields.io/badge/-TypeScript-2D3748?logo=typescript&colorA=0096ff&logoColor=fff)](/packages/client/src/) [![AWS AppSync](https://img.shields.io/badge/-AWS%20AppSync-2D3748?logo=amazon-aws&colorA=EB5F05&logoColor=fff)](https://aws.amazon.com/appsync/) [![Prisma](https://img.shields.io/badge/-Prisma%20Generator-2D3748?logo=prisma&colorA=5B67D8&logoColor=fff)](https://www.prisma.io)
 
-**Prisma-AppSync** seamlessly transforms your [Prisma Schema](https://www.prisma.io) into a comprehensive GraphQL API, tailored for [AWS AppSync](https://aws.amazon.com/appsync/).
+**Prisma-AppSync** turns your [Prisma&#160;Schema](https://www.prisma.io) into a fully-featured GraphQL&#160;API, tailored for [AWS&#160;AppSync](https://aws.amazon.com/appsync/).
 
 ## ✔️ Features
 
