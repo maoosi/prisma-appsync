@@ -1,6 +1,6 @@
 {
     "name": "prisma-appsync",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "⚡ AppSync GraphQL API Generator for ◭ Prisma ORM.",
     "author": "maoosi <hello@sylvainsimao.fr>",
     "license": "BSD-2-Clause",
