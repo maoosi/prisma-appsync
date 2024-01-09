@@ -7,8 +7,8 @@ await $`zx bin/build.mjs`
 
 // prisma client for tests
 console.log(chalk.blue('\n🧪 [test] run prisma generate'))
-await $`npx prisma generate --schema tests/generator/schemas/crud.prisma`.quiet()
-await $`npx prisma generate --schema tests/generator/schemas/@gql.prisma`.quiet()
+await $`npx prisma generate --schema tests/generator/schemas/crud.prisma`
+await $`npx prisma generate --schema tests/generator/schemas/@gql.prisma`
 
 // unit tests
 console.log(chalk.blue('🧪 [test] run unit tests\n'))
