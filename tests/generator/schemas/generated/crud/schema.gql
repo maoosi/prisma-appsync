@@ -1130,7 +1130,7 @@ input CommentCreateInput {
 input CommentCreateWithoutUserInput {
     id: Int
     post: CommentPostCreateNestedInput
-    postId: Int!
+    postId: Int
     message: String!
     lastSavedAt: AWSDateTime
 }
