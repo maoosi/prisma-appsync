@@ -869,13 +869,26 @@ export default class SchemaBuilder {
             model.fields
                 ?.filter(field => field?.relationName)
                 ?.forEach((fieldWithRelation) => {
+                    const fieldsForCreateWithout = model.fields
+                        ?.filter((field) => {
+                            return field.name !== fieldWithRelation.name
+                                && !fieldWithRelation.relationFromFields?.includes(field.name)
+                        })
+
+                    const enforcedOptionalFields: string[] = []
+
+                    fieldsForCreateWithout
+                        ?.forEach(field => {
+                            if (field?.relationName) {
+                                field?.relationFromFields?.forEach(fieldName => {
+                                    enforcedOptionalFields.push(fieldName)
+                                })
+                            }
+                        })
+
                     this.inputs.push({
                         name: `${model.singular}CreateWithout${upperFirst(fieldWithRelation.type)}Input`,
-                        fields: model.fields
-                            ?.filter((field) => {
-                                return field.name !== fieldWithRelation.name
-                                    && !fieldWithRelation.relationFromFields?.includes(field.name)
-                            })
+                        fields: fieldsForCreateWithout
                             ?.map((field) => {
                                 if (field?.relationName) {
                                     const scalar = `${model.singular}${upperFirst(field.name)}CreateNestedInput`
@@ -886,9 +899,11 @@ export default class SchemaBuilder {
                                     }
                                 }
                                 else {
+                                    const required = enforcedOptionalFields.includes(field.name) ? false : undefined
+
                                     return {
                                         name: field.name,
-                                        scalar: model.getScalar(field),
+                                        scalar: model.getScalar(field, {required }),
                                         default: { value: field.default, kind: field.kind },
                                     }
                                 }
