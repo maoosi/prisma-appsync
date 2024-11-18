@@ -168,7 +168,7 @@ export default class ResolversBuilder {
             this.resolvers.push({
                 typeName: 'Subscription',
                 fieldName: `onCreated${model.singular}`,
-                dataSource: 'prisma-appsync',
+                dataSource: 'none',
             })
         }
 
@@ -177,7 +177,7 @@ export default class ResolversBuilder {
             this.resolvers.push({
                 typeName: 'Subscription',
                 fieldName: `onUpdated${model.singular}`,
-                dataSource: 'prisma-appsync',
+                dataSource: 'none',
             })
         }
 
@@ -186,7 +186,7 @@ export default class ResolversBuilder {
             this.resolvers.push({
                 typeName: 'Subscription',
                 fieldName: `onUpserted${model.singular}`,
-                dataSource: 'prisma-appsync',
+                dataSource: 'none',
             })
         }
 
@@ -195,7 +195,7 @@ export default class ResolversBuilder {
             this.resolvers.push({
                 typeName: 'Subscription',
                 fieldName: `onDeleted${model.singular}`,
-                dataSource: 'prisma-appsync',
+                dataSource: 'none',
             })
         }
 
@@ -204,7 +204,7 @@ export default class ResolversBuilder {
             this.resolvers.push({
                 typeName: 'Subscription',
                 fieldName: `onMutated${model.singular}`,
-                dataSource: 'prisma-appsync',
+                dataSource: 'none',
             })
         }
 
@@ -213,7 +213,7 @@ export default class ResolversBuilder {
             this.resolvers.push({
                 typeName: 'Subscription',
                 fieldName: `onCreatedMany${model.plural}`,
-                dataSource: 'prisma-appsync',
+                dataSource: 'none',
             })
         }
 
@@ -222,7 +222,7 @@ export default class ResolversBuilder {
             this.resolvers.push({
                 typeName: 'Subscription',
                 fieldName: `onUpdatedMany${model.plural}`,
-                dataSource: 'prisma-appsync',
+                dataSource: 'none',
             })
         }
 
@@ -231,7 +231,7 @@ export default class ResolversBuilder {
             this.resolvers.push({
                 typeName: 'Subscription',
                 fieldName: `onDeletedMany${model.plural}`,
-                dataSource: 'prisma-appsync',
+                dataSource: 'none',
             })
         }
 
@@ -240,7 +240,7 @@ export default class ResolversBuilder {
             this.resolvers.push({
                 typeName: 'Subscription',
                 fieldName: `onMutatedMany${model.plural}`,
-                dataSource: 'prisma-appsync',
+                dataSource: 'none',
             })
         }
     }
