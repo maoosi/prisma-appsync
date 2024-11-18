@@ -46,6 +46,9 @@ export function useAppSyncSimulator({
             type: 'AWS_LAMBDA',
             name: 'prisma-appsync',
             invoke: lambdaHandler.main,
+        }, {
+            type: 'NONE',
+            name: 'none',
         }],
         resolvers: resolvers.map(resolver => ({
             ...resolver,
